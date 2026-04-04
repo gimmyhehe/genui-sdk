@@ -2,12 +2,17 @@ import { defineConfig } from 'vitepress';
 import { vitepressDemoPlugin } from 'vitepress-demo-plugin';
 import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs';
 
+function docsBase() {
+  const b = process.env.VITEPRESS_BASE || '/docs/';
+  return b.endsWith('/') ? b : `${b}/`;
+}
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'GenUI SDK',
   description: 'GenUI SDK Documentation',
   srcDir: 'src',
-  base: '/genui-sdk-docs/',
+  base: docsBase(),
   ignoreDeadLinks: true,
   markdown: {
     config(md) {
