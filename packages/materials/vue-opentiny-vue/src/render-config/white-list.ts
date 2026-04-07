@@ -57,7 +57,6 @@ export const whiteListRenderEntries: WhiteListRenderEntry[] = [
   { name: 'Slot' },
   { name: 'Text' },
   { name: 'Icon' },
-  { name: 'Img' },
   { name: 'TinyCarouselItem', component: TinyCarouselItem },
   { name: 'TinyCarousel', component: TinyCarousel },
   { name: 'TinyRow', component: TinyRow },
