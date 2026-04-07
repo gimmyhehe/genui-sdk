@@ -11,7 +11,7 @@ import type { IRendererProps } from './renderer.types';
 import { cardIdSymbol } from '../chat/useChat';
 import { useI18n } from '../chat/i18n';
 import { iconDownload } from '@opentiny/vue-icon';
-import { generateCode as generateVueCode } from './code-generator';
+import { generateCode as generateVueCode } from '../code-generator';
 
 onErrorCaptured((error) => {
   console.error('GenuiRenderer error:', error);
