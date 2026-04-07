@@ -3,6 +3,8 @@ import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
 import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER } from '@opentiny/genui-sdk-vue';
 import { ref, watch, onMounted, reactive, computed, onUnmounted, provide, defineAsyncComponent, h, shallowRef } from 'vue';
+import { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue'
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
@@ -39,6 +41,10 @@ if (location.search.includes('framework=angular')) {
   provide(GENUI_RENDERER, SchemaRendererNgAdapter);
   framework = 'Angular';
 }
+
+provide(RENDERER_SETTINGS_KEY, {
+  materials: rendererConfig.components,
+});
 
 const STORAGE_KEY = 'GENUI_SDK_VUE_PLAYGROUND_CONFIG';
 const {
@@ -185,7 +191,7 @@ watch(chat, (instance) => {
       getContinueGeneratingHandler(conversation.value.messageManager),
       locationPartialSchemaJson(),
     ];
-    
+
     insertHandlersAfterName(newResponseHandlers, [
       movePartialSchemaJsonToLastMessage(),
       getOverlapEliminatorHandler(contentHandler),
@@ -380,12 +386,15 @@ onUnmounted(() => {
   .genui-playground {
     --ti-gen-chat-avatar-and-gap-width: 0px;
   }
+
   :deep(.action-buttons__button) {
     padding-right: 10px;
+
     svg[alt="录音"] {
       display: none;
     }
   }
+
   .empty {
     font-size: 24px;
 
