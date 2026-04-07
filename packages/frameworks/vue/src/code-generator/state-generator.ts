@@ -12,11 +12,12 @@
 
 import { UNWRAP_QUOTES, JS_EXPRESSION, JS_FUNCTION, JS_I18N, JS_RESOURCE, JS_SLOT } from './constants';
 import { generateJSXTemplate } from './template-generator';
+import type { ICodegenDescription } from './types';
 
 const { start, end } = UNWRAP_QUOTES;
 
 /** 解析函数字符串，提取 async/参数/函数体信息。 */
-const getFunctionInfo = (fnStr) => {
+const getFunctionInfo = (fnStr: string) => {
   const fnRegexp = /(async)?.*?(\w+) *\(([\s\S]*?)\) *\{([\s\S]*)\}/;
   const result = fnRegexp.exec(fnStr);
   if (result) {
@@ -34,13 +35,13 @@ const getFunctionInfo = (fnStr) => {
 };
 
 /** 反序列化表达式占位符，恢复原始表达式内容。 */
-export const unwrapExpression = (slotsValue) =>
+export const unwrapExpression = (slotsValue: string): string =>
   slotsValue.replace(new RegExp(`"${start}(.*?)${end}"`, 'g'), (match, p1) =>
     p1.replace(/\\"/g, '"').replace(/\\r\\n|\\r|\\n/g, ''),
   );
 
 export const strategy = {
-  [JS_EXPRESSION]: ({ value, computed }) => {
+  [JS_EXPRESSION]: ({ value, computed }: { value: string; computed?: boolean }) => {
     if (computed) {
       return `${start}vue.computed(${value.replace(/this\./g, '')})${end}`;
     }
@@ -48,7 +49,7 @@ export const strategy = {
     return `${start}${value.replace(/this\./g, '')}${end}`;
   },
 
-  [JS_FUNCTION]: ({ value }) => {
+  [JS_FUNCTION]: ({ value }: { value: string }) => {
     const info = getFunctionInfo(value);
     if (!info) {
       // 函数字符串不符合预期格式时，避免空值解构抛 TypeError。
@@ -63,9 +64,9 @@ export const strategy = {
     return `${start}${inlineFunc}${end}`;
   },
 
-  [JS_I18N]: ({ key }) => `${start}t("${key}")${end}`,
+  [JS_I18N]: ({ key }: { key: string }) => `${start}t("${key}")${end}`,
 
-  [JS_RESOURCE]: ({ value }, description) => {
+  [JS_RESOURCE]: ({ value }: { value: string }, description: ICodegenDescription) => {
     const resourceType = value.split('.')[1];
 
     if (Object.prototype.hasOwnProperty.call(description.jsResource, resourceType)) {
@@ -75,7 +76,7 @@ export const strategy = {
     return `${start}${value.replace(/this\./g, '')}${end}`;
   },
 
-  [JS_SLOT]: ({ value = [], params = ['row'] }, description, rootState) => {
+  [JS_SLOT]: ({ value = [], params = ['row'] }: { value?: any[]; params?: string[] }, description: ICodegenDescription, rootState: Record<string, any>) => {
     description.hasJSX = true;
 
     const slotValues = value.map((item) => generateJSXTemplate(item, description, rootState)).join('');
@@ -92,7 +93,12 @@ export const strategy = {
  * @param {*} description 记录使用到的外部资源
  */
 /** 将协议内置类型转换为可执行表达式字符串。 */
-export const transformType = (current, prop, description, rootState) => {
+export const transformType = (
+  current: Record<string, any>,
+  prop: string,
+  description: ICodegenDescription,
+  rootState: Record<string, any>,
+) => {
   const builtInTypes = [JS_EXPRESSION, JS_FUNCTION, JS_I18N, JS_RESOURCE, JS_SLOT];
   const { type } = current[prop] || {};
 
@@ -103,7 +109,11 @@ export const transformType = (current, prop, description, rootState) => {
 };
 
 /** 深度遍历 state，处理内置类型节点。 */
-export const traverseState = (current, description, rootState = current) => {
+export const traverseState = (
+  current: any,
+  description: ICodegenDescription,
+  rootState: Record<string, any> = current,
+) => {
   if (typeof current !== 'object') return;
 
   if (Array.isArray(current)) {

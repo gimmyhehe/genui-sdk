@@ -22,7 +22,7 @@ const randomString = () => Math.random().toString(36).slice(2, 10);
  * @param {string} code 源码
  * @returns {Error[]} 校验出的错误信息
  */
-export const validateByCompile = (filename, code) => {
+export const validateByCompile = (filename: string, code: string): { message: string }[] => {
   // validate via parse
   const { errors, descriptor } = parseSFC(code, {
     filename,
@@ -93,7 +93,7 @@ export const validateByCompile = (filename, code) => {
  * @param {(string | Error)} error 原始错误信息
  * @returns {Error} 统一格式后的错误信息
  */
-const unify = (error) => {
+const unify = (error: string | Error): Error | { message: string; loc?: any } => {
   if (typeof error === 'string') {
     return { message: error };
   }
@@ -107,7 +107,7 @@ const unify = (error) => {
  * @param {(Error | CompilerError)} error 错误信息
  * @returns {{message: string}} 可能包含报错位置的错误信息
  */
-const locateErrorMessage = (originalSource, error) => {
+const locateErrorMessage = (originalSource: string, error: { loc?: any; message: string }) => {
   let { loc, message } = error;
 
   if (loc?.start) {

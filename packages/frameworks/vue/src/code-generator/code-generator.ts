@@ -10,20 +10,19 @@
  *
  */
 
-import { capitalize } from '@vue/shared';
 import { toEventKey } from './event-binding';
 import { traverseState, unwrapExpression } from './state-generator';
 import { generateTemplate } from './template-generator';
-import { validateByCompile } from './vue-sfc-validator';
-import type { ICodeGeneratorParams } from './types';
+import type { ICodeGeneratorParams, ICodegenDescription, IComponentMapItem, ICodePanel } from './types';
+import { capitalize } from './utils';
 
 /** 移除表达式中的 this 前缀。 */
 const replaceThis = (value: string) => value.replace(/this\./g, '');
 
 /** 根据组件依赖生成 import 语句。 */
-const generateImports = (description, componentsMap) => {
+const generateImports = (description: ICodegenDescription, componentsMap: IComponentMapItem[]) => {
   const { componentSet } = description;
-  const imports = [];
+  const imports: string[] = [];
 
   const importsFromVue = ['import * as vue from "vue"'];
 
@@ -32,7 +31,7 @@ const generateImports = (description, componentsMap) => {
   // import components, support alias import, import from multi packages
   const componentsInSFC = [...componentSet];
   const componentDeps = componentsMap.filter((item) => componentsInSFC.includes(item.componentName));
-  const componentPacks: Record<string, any[]> = {};
+  const componentPacks: Record<string, IComponentMapItem[]> = {};
 
   componentDeps.forEach((item) => {
     const { package: pkg } = item;
@@ -45,7 +44,7 @@ const generateImports = (description, componentsMap) => {
   });
 
   Object.entries(componentPacks).forEach(([pkgName, deps]) => {
-    const items = deps.map((dep) => {
+    const items = deps.map((dep: IComponentMapItem) => {
       const { componentName, exportName } = dep;
 
       return exportName && exportName !== componentName ? `${exportName} as ${componentName}` : `${componentName}`;
@@ -58,9 +57,9 @@ const generateImports = (description, componentsMap) => {
 };
 
 /** 将页面 schema 转换为单文件组件源码。 */
-const generateVueCode = ({ schema, name, componentsMap }) => {
+const generateVueCode = ({ schema, name, componentsMap }: { schema: any; name?: string; componentsMap: IComponentMapItem[] }) => {
   const { css = '', schema: { properties = [], events = {} } = {}, state = {}, lifeCycles = {}, methods = {} } = schema;
-  const description = {
+  const description: ICodegenDescription = {
     componentSet: new Set(),
     iconComponents: { componentNames: [], exportNames: [] },
     stateAccessor: [],
@@ -70,7 +69,7 @@ const generateVueCode = ({ schema, name, componentsMap }) => {
 
   const template = generateTemplate(schema, state, description, true);
 
-  const propsArr = [];
+  const propsArr: string[] = [];
   properties.forEach(({ content = [] }) => {
     content.forEach(({ property, type, defaultValue, accessor }) => {
       let propType = capitalize(type);
@@ -96,7 +95,7 @@ const generateVueCode = ({ schema, name, componentsMap }) => {
 
   const reactiveStatement = `const state = vue.reactive(${unwrapExpression(JSON.stringify(state, null, 2))})`;
 
-  const methodsArr = Object.entries(methods as Record<string, any>).map(
+  const methodsArr = Object.entries(methods as Record<string, { value: string }>).map(
     ([key, item]) => `const ${key} = ${replaceThis(item.value)}`,
   );
 
@@ -139,7 +138,7 @@ const getFilePath = (type = 'page', name = '') => {
 };
 
 /** 生成页面级代码面板信息。 */
-const generatePageCode = ({ pageInfo, componentsMap }) => {
+const generatePageCode = ({ pageInfo, componentsMap }: { pageInfo: ICodeGeneratorParams['pageInfo']; componentsMap: IComponentMapItem[] }) => {
   const { schema: originSchema, name = 'SchemaCard' } = pageInfo;
 
   // 深拷贝，避免副作用改变传入的 schema 值
@@ -156,7 +155,7 @@ const generatePageCode = ({ pageInfo, componentsMap }) => {
     parser: 'vue',
     htmlWhitespaceSensitivity: 'ignore',
   };
-  const panel = {
+  const panel: ICodePanel = {
     panelName: `${name}.vue`,
     panelValue: vueCode,
     panelType: 'vue',
@@ -165,7 +164,9 @@ const generatePageCode = ({ pageInfo, componentsMap }) => {
     filePath: getFilePath(type, name),
   };
 
-  const errors = validateByCompile(panel.panelName, panel.panelValue);
+  // 运行在浏览器端时不引入 @vue/compiler-sfc（node/构建期依赖），避免 dev server 解析失败。
+  // 如需编译级校验，建议在服务端或构建阶段调用 vue-sfc-validator。
+  const errors: { message: string }[] = [];
 
   return { ...panel, errors };
 };
@@ -176,7 +177,7 @@ const generateCode = ({ pageInfo, componentsMap = [] }: ICodeGeneratorParams) =>
   const validComponents = componentsMap.filter(({ componentName, package: pkg }) => componentName && pkg);
 
   // 对象数组，去重
-  const allComponentsMap = new Map();
+  const allComponentsMap = new Map<string, IComponentMapItem>();
   validComponents.forEach(
     (item) => !allComponentsMap.has(item.componentName) && allComponentsMap.set(item.componentName, item),
   );

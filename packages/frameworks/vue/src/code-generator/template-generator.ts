@@ -1,24 +1,23 @@
-import { capitalize, hyphenate } from '@vue/shared';
 import { isOn, toEventKey } from './event-binding';
 import { traverseState, unwrapExpression } from './state-generator';
 import { JS_FUNCTION, JS_RESOURCE, JS_SLOT } from './constants';
+import type { ICodegenDescription } from './types';
+import type { CardSchema, NodeSchema } from '@opentiny/genui-sdk-core';
+import { hyphenate } from './utils';
 
 /**
  * 递归处理子节点，生成模板片段。
  */
-const recurseChildren = (children, state, description, result) => {
+const recurseChildren = (
+  children: NodeSchema[],
+  state: Record<string, any>,
+  description: ICodegenDescription,
+  result: string[],
+) => {
   if (Array.isArray(children)) {
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const subTemplate = children.map((child) => generateTemplate(child, state, description)).join('');
+    const subTemplate = children.map((child: NodeSchema) => generateTemplate(child, state, description)).join('');
     result.push(subTemplate);
-  } else if (children?.type === 'JSExpression') {
-    result.push(`{{ ${children.value.replace(/this\.(props\.)?/g, '')} }}`);
-
-    Object.keys(description.jsResource).forEach((key) => {
-      description.jsResource[key] = description.jsResource[key] || children.value.includes(`.${key}.`);
-    });
-  } else if (children?.type === 'i18n') {
-    result.push(`{{ t('${children.key}') }}`);
   } else {
     result.push(children || '');
   }
@@ -29,7 +28,12 @@ const recurseChildren = (children, state, description, result) => {
 /**
  * 处理节点 props，转换为模板属性字符串数组。
  */
-export const handleBinding = (props, attrsArr, description, state) => {
+export const handleBinding = (
+  props: Record<string, any>,
+  attrsArr: string[],
+  description: ICodegenDescription,
+  state: Record<string, any>,
+) => {
   Object.entries(props as Record<string, any>).forEach(([key, item]) => {
     // 处理 className
     if (key === 'className') {
@@ -77,7 +81,7 @@ export const handleBinding = (props, attrsArr, description, state) => {
 /**
  * 处理 slot 协议，转换为 Vue 插槽绑定语法。
  */
-export const handleSlotBinding = (item) => {
+export const handleSlotBinding = (item: any): string => {
   const { name, params } = item;
   let slot = `#${name || item}`;
 
@@ -89,7 +93,7 @@ export const handleSlotBinding = (item) => {
   return slot;
 };
 
-export const handleEventBinding = (key, item) => {
+export const handleEventBinding = (key: string, item: any): string => {
   const eventKey = toEventKey(key);
   let eventBinding = '';
 
@@ -112,7 +116,7 @@ export const handleEventBinding = (key, item) => {
 /**
  * 生成不重复的临时变量名。
  */
-const avoidDuplicateString = (existings, str) => {
+const avoidDuplicateString = (existings: string[], str: string): string => {
   let result = str;
   let suffix = 1;
 
@@ -127,7 +131,19 @@ const avoidDuplicateString = (existings, str) => {
 /**
  * 处理字面量/对象表达式并生成绑定语法。
  */
-const handleLiteralBinding = ({ key, item, attrsArr, description, state }) => {
+const handleLiteralBinding = ({
+  key,
+  item,
+  attrsArr,
+  description,
+  state,
+}: {
+  key: string;
+  item: any;
+  attrsArr: string[];
+  description: ICodegenDescription;
+  state: Record<string, any>;
+}) => {
   // 字面量
   // string 直接静态绑定
   if (typeof item === 'string') return attrsArr.push(`${key}="${item.replace(/"/g, '&quot;')}"`);
@@ -142,9 +158,7 @@ const handleLiteralBinding = ({ key, item, attrsArr, description, state }) => {
     // traverseState 过程中遇到 JS_SLOT 时，需要把根 state 传下去，避免生成的 state.xxx 引用丢失。
     traverseState(item, description, state);
     const canotBind =
-      localInternalTypes.has(JS_FUNCTION) ||
-      localInternalTypes.has(JS_RESOURCE) ||
-      localInternalTypes.has(JS_SLOT);
+      localInternalTypes.has(JS_FUNCTION) || localInternalTypes.has(JS_RESOURCE) || localInternalTypes.has(JS_SLOT);
 
     // 不能直接绑定的，新建临时变量，以 state 变量的形式绑定
     if (canotBind) {
@@ -171,13 +185,19 @@ const handleLiteralBinding = ({ key, item, attrsArr, description, state }) => {
 /**
  * 判断是否为空 template 插槽节点。
  */
-const isEmptySlot = (componentName, children) => componentName === 'template' && !(children?.length || children?.type);
+const isEmptySlot = (componentName: string, children: any) =>
+  componentName === 'template' && !(children?.length || children?.type);
 
 /**
  * 根据 schema 递归生成 Vue template 字符串。
  */
-export const generateTemplate = (schema, state, description, isRootNode = false) => {
-  const result = [];
+export const generateTemplate = (
+  schema: CardSchema,
+  state: Record<string, any>,
+  description: ICodegenDescription,
+  isRootNode = false,
+): string => {
+  const result: string[] = [];
   const { componentName, fileName, loop, loopArgs = ['item'], condition, props = {}, children } = schema;
 
   // 不生成空插槽，否则会影响插槽的默认内容
@@ -208,8 +228,10 @@ export const generateTemplate = (schema, state, description, isRootNode = false)
 
   // 处理 condition, 条件渲染
   if (typeof condition === 'object' || typeof condition === 'boolean') {
-    const conditionValue = condition?.type ? condition.value.replace(/this\.(props\.)?/g, '') : condition;
-    const directive = condition?.kind || 'if';
+    const isObjectCondition = typeof condition === 'object' && condition !== null;
+    const conditionValue =
+      isObjectCondition && condition.type ? condition.value.replace(/this\.(props\.)?/g, '') : condition;
+    const directive = isObjectCondition ? condition.kind || 'if' : 'if';
     const conditionStr = directive === 'else' ? 'v-else' : `v-${directive}="${conditionValue}"`;
 
     attrsArr.push(conditionStr);
@@ -234,8 +256,12 @@ export const generateTemplate = (schema, state, description, isRootNode = false)
   return result.join('');
 };
 
-export const generateJSXTemplate = (item, description, state = {}) => {
-  const result = [];
+export const generateJSXTemplate = (
+  item: any,
+  description: ICodegenDescription,
+  state: Record<string, any> = {},
+): string => {
+  const result: string[] = [];
   const { componentName, fileName, props = {}, children, condition } = item;
 
   let component = '';
