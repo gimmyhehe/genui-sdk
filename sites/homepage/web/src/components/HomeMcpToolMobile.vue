@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import genuiAbility3 from '@/assets/genui_ability_3.webp';
+import genuiAbility3 from '@/assets/create-github.webp';
 import { TinyTag } from '@opentiny/vue';
 
 const wrapperClass = 'home-mcp-tool-mobile';

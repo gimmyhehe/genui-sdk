@@ -122,10 +122,10 @@ const features = [
     border: 3px solid #fff;
     border-radius: 12px;
     cursor: pointer;
-    box-shadow: 0px 4px 30px 0px rgba(234, 233, 237, 0.3);
+    box-shadow: 0px 4px 12px 0px rgba(234, 233, 237, 0.3);
 
     &:hover {
-      box-shadow: 0px 4px 30px 0px rgba(234, 233, 237, 0.9);
+      box-shadow: 0px 4px 12px 0px rgba(234, 233, 237, 0.9);
     }
 
     &-icon {
@@ -139,6 +139,9 @@ const features = [
         width: 48px;
         height: 48px;
         margin-bottom: 16px;
+      }
+      .home-feature-card-description {
+        font-size: 14px;
       }
     }
 

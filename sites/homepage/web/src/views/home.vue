@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { TinyButton, TinyTag } from '@opentiny/vue';
 import genuiAbility1 from '@/assets/genui_ability_1.svg';
 import genuiAbility2 from '@/assets/genui_ability_2.webp';
-import genuiAbility3 from '@/assets/genui_ability_3.webp';
-import genuiActionVedioCover from '@/assets/genui_action_vedio_cover.webp';
+import genuiAbility3 from '@/assets/create-github.webp';
+import genuiActionVedioCover from '@/assets/order-milk-tea.webp';
 import genuiFlowVedioCover from '@/assets/genui_flow_vedio_cover.webp';
 import { LinkKey, linkMap } from '@/utils/link';
 import { useMobile } from '@/composables/useMobile';
@@ -46,12 +46,10 @@ const abilityThreePartContent = ref({
     },
   ],
 });
-const actionVideoSource =
-  'https://tinyengine-assets.obs.cn-north-4.myhuaweicloud.com/files/videos/genui/genui_action_vedio.mov';
-const flowVideoSource =
-  'https://tinyengine-assets.obs.cn-north-4.myhuaweicloud.com/files/videos/genui/genui_flow_vedio.mov';
-
 const { isMobile } = useMobile();
+const buttonSize = computed(() => {
+  return isMobile.value ? 'default' : 'medium';
+});
 </script>
 
 <template>
@@ -64,10 +62,13 @@ const { isMobile } = useMobile();
         <div class="home-core-decsription">为用户打造极致顺滑的智能体验，给开发者提供强大的定制能力与生态兼容性</div>
         <div class="operation-button-group">
           <a :href="linkMap[LinkKey.DevDoc]" target="_blank" class="btn-link">
-            <tiny-button round type="primary" size="medium">开发文档</tiny-button>
+            <tiny-button :reset-time="0" round type="primary" :size="buttonSize">开发文档</tiny-button>
           </a>
           <a :href="linkMap[LinkKey.Playground]" target="_blank" class="btn-link">
-            <tiny-button round ghost size="medium">演练场</tiny-button>
+            <tiny-button :reset-time="0" round ghost :size="buttonSize">演练场</tiny-button>
+          </a>
+          <a href="https://github.com/opentiny/genui-sdk" target="_blank" class="btn-link">
+            <tiny-button :reset-time="0" round ghost :size="buttonSize">GitHub</tiny-button>
           </a>
         </div>
       </div>
@@ -96,8 +97,8 @@ const { isMobile } = useMobile();
         preload="none"
         :poster="genuiActionVedioCover"
       >
-        <source :src="actionVideoSource" type="video/mp4" />
-      </video>
+        <source src="/order-milk-tea.mov" type="video/mp4" />
+    </video>
     </home-ability>
 
 
@@ -149,7 +150,7 @@ const { isMobile } = useMobile();
         preload="none"
         :poster="genuiFlowVedioCover"
       >
-        <source :src="flowVideoSource" type="video/mp4" />
+        <source src="/search-ticket.mov" type="video/mp4" />
       </video>
     </home-ability>
 
@@ -166,6 +167,9 @@ const { isMobile } = useMobile();
 </style>
 
 <style lang="less" scoped>
+:deep(.tiny-button.tiny-button--default.is-ghost) {
+  color: var(--tv-color-text);
+}
 .genui-sdk-container {
   display: flex;
   flex-direction: column;
@@ -249,7 +253,7 @@ const { isMobile } = useMobile();
     }
 
     &-decsription {
-      font-size: var(--font-size-body-sm);
+      font-size: var(--font-size-title-sm);
       font-weight: 400;
       line-height: var(--line-height-description);
       text-align: left;
@@ -257,7 +261,7 @@ const { isMobile } = useMobile();
       margin-bottom: 76px;
       animation: slideUpFromBottom 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
       opacity: 0;
-      white-space: nowrap;
+      line-height: 1.5;
 
       @media (max-width: 1280px) {
         margin-bottom: 42px;
@@ -285,10 +289,6 @@ const { isMobile } = useMobile();
 
       &-subtitle {
         font-size: var(--font-size-title-lg-sm-md);
-      }
-
-      &-decsription {
-        font-size: var(--font-size-body-sm-sm);
       }
 
       &-right {
@@ -320,6 +320,7 @@ const { isMobile } = useMobile();
     padding: 16px;
     border-radius: 24px;
     background-image: url('@/assets/genui_ability_bg_2.jpg');
+    background-size: cover;
 
     img {
       border-radius: 16px;
@@ -548,7 +549,7 @@ const { isMobile } = useMobile();
   &-parameters {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 24px;
   }
 
   @media (max-width: 1280px) {
@@ -557,7 +558,7 @@ const { isMobile } = useMobile();
     }
 
     &-parameters {
-      gap: 5px;
+      gap: 12px;
     }
   }
 
@@ -647,3 +648,14 @@ const { isMobile } = useMobile();
   }
 }
 </style>
+
+<style lang="less">
+/* 修复视频 controls 底部阴影/遮罩过重（Chromium/WebKit生效） */
+
+video#genui-action-vedio::-webkit-media-controls-panel,
+video#genui-flow-vedio::-webkit-media-controls-panel {
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6) 80%, rgba(0, 0, 0, 0.8));
+  background-size: auto max(75px, 10%);
+}
+</style>
+

@@ -82,12 +82,6 @@ const handleGuideCardClick = (index: number) => {
           :active="activeCard === 2"
           @click="handleGuideCardClick(2)"
         />
-        <a :href="linkMap[LinkKey.ChatDoc]" target="_blank" class="btn-link">
-          <tiny-button
-            class="home-guide-content-left-button"
-            round
-            >开发文档</tiny-button>
-        </a>
       </div>
       <div class="home-guide-content-right">
         <div class="home-guide-content-right-framework">
@@ -104,6 +98,13 @@ const handleGuideCardClick = (index: number) => {
         </div>
       </div>
     </div>
+    <a :href="linkMap[LinkKey.ChatDoc]" target="_blank" class="btn-link">
+        <tiny-button
+          class="home-guide-content-left-button"
+          size="medium"
+          round
+          >开发文档</tiny-button>
+      </a>
   </section>
 </template>
 
@@ -156,15 +157,15 @@ const handleGuideCardClick = (index: number) => {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-
+      gap: 0;
       &-button {
-        max-width: 110px;
+        margin-top: 24px;
       }
 
-      @media (max-width: 1280px) {
+      @media (min-width: 1280px) {
         &-button {
-          max-width: 120px;
+          height: 44px;
+          font-size: 16px;
         }
       }
     }
@@ -213,8 +214,8 @@ const handleGuideCardClick = (index: number) => {
             gap: 10px;
 
             div {
-              width: 16px;
-              height: 16px;
+              width: 14px;
+              height: 14px;
               border-radius: 50%;
             }
 
@@ -248,9 +249,31 @@ const handleGuideCardClick = (index: number) => {
   border-radius: 0 0 12px 12px;
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   color: #e5e7eb;
+
+  &::-webkit-scrollbar {
+    width: 10px; /* 纵向滚动条宽度 */
+    height: 10px; /* 横向滚动条高度 */
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #0b1020;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #9ca3af;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #0b1020;
+  }
 
   // TODO: 临时解决部署后代码阴影问题，后续更换更优雅方案
   code[class*=language-] {
