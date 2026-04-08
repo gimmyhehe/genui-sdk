@@ -1,15 +1,3 @@
-/**
- * Copyright (c) 2023 - present TinyEngine Authors.
- * Copyright (c) 2023 - present Huawei Cloud Computing Technologies Co., Ltd.
- *
- * Use of this source code is governed by an MIT-style license.
- *
- * THE OPEN SOURCE SOFTWARE IN THIS PRODUCT IS DISTRIBUTED IN THE HOPE THAT IT WILL BE USEFUL,
- * BUT WITHOUT ANY WARRANTY, WITHOUT EVEN THE IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS FOR
- * A PARTICULAR PURPOSE. SEE THE APPLICABLE LICENSES FOR MORE DETAILS.
- *
- */
-
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import { parse as parseSFC, compileScript, compileStyle, compileTemplate } from '@vue/compiler-sfc';
 import { generateCodeFrame } from '@vue/shared';
@@ -43,12 +31,14 @@ export const validateByCompile = (filename: string, code: string): { message: st
   } catch (error) {
     // error 可能的类型 string | ParseError (@babel/parser) | CompilerError (compileScript 使用 inlineTemplate 模式时)
     const scriptError = unify(error);
+    const loc =
+      scriptError && typeof scriptError === 'object' && 'loc' in scriptError ? (scriptError as { loc?: { start?: unknown; line?: number; column?: number } }).loc : undefined;
 
     // 如果是 ParseError 类型，转换为 locateErrorMessage 可接受的 CompilerError 类型传入
-    if (!scriptError?.loc?.start && scriptError?.loc?.line) {
+    if (loc && !loc.start && loc.line != null) {
       // 只截取原 message 的第一行，后面行数可能已经包含错误的定位信息，避免拼接重复
       const message = scriptError.message.match(/.*/)[0];
-      const { line, column } = scriptError.loc;
+      const { line, column } = loc;
 
       // compileScript 内部抛错误时，可能已定位编译报错信息，但报错所在的行可能有大量字符，此处精简一下
       return [locateErrorMessage(code, { message, loc: { start: { line, column } } })];
