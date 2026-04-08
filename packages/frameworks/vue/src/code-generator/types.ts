@@ -30,4 +30,6 @@ export interface ICodeGeneratorParams {
     name?: string;
   };
   componentsMap?: IComponentMapItem[];
+  /** 是否在最终阶段使用 Prettier 格式化（浏览器端动态加载）。默认 false。 */
+  formatWithPrettier?: boolean;
 }

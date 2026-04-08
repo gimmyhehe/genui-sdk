@@ -130,9 +130,10 @@ const downloadTextFile = (filename, text) => {
 };
 
 const generateCode = async () => {
-  const { panelValue: code, panelName: fileName, errors, prettierOpts } = generateVueCode({
+  const { panelValue: code, panelName: fileName, errors, prettierOpts } = await generateVueCode({
     pageInfo: { schema: displaySchema.value },
     componentsMap,
+    formatWithPrettier: true,
   });
 
   // 优先支持下载：即使校验有错误，也尽量导出原始结果。

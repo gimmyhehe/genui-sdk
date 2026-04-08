@@ -137,8 +137,42 @@ const getFilePath = (type = 'page', name = '') => {
   return defaultPathMap[type] || name;
 };
 
+/** 生成尾阶段做基础格式整理：去行尾空白、压缩过多空行、统一结尾换行。 */
+const formatGeneratedVueCode = (code: string): string =>
+  `${code
+    .split('\n')
+    .map((line) => line.replace(/[ \t]+$/g, ''))
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()}\n`;
+
+/** 浏览器端按需加载 Prettier 做最终格式化；失败时回退轻量整理结果。 */
+const formatWithPrettierCode = async (code: string, prettierOpts: Record<string, unknown>): Promise<string> => {
+  try {
+    const [{ format }, { default: htmlPlugin }, { default: babelPlugin }, { default: estreePlugin }] = await Promise.all([
+      import('prettier/standalone'),
+      import('prettier/plugins/html'),
+      import('prettier/plugins/babel'),
+      import('prettier/plugins/estree'),
+    ]);
+
+    return format(code, {
+      ...prettierOpts,
+      plugins: [htmlPlugin, babelPlugin, estreePlugin],
+    });
+  } catch {
+    return code;
+  }
+};
+
 /** 生成页面级代码面板信息。 */
-const generatePageCode = ({ pageInfo, componentsMap }: { pageInfo: ICodeGeneratorParams['pageInfo']; componentsMap: IComponentMapItem[] }) => {
+const generatePageCode = ({
+  pageInfo,
+  componentsMap,
+}: {
+  pageInfo: ICodeGeneratorParams['pageInfo'];
+  componentsMap: IComponentMapItem[];
+}) => {
   const { schema: originSchema, name = 'SchemaCard' } = pageInfo;
 
   // 深拷贝，避免副作用改变传入的 schema 值
@@ -155,9 +189,11 @@ const generatePageCode = ({ pageInfo, componentsMap }: { pageInfo: ICodeGenerato
     parser: 'vue',
     htmlWhitespaceSensitivity: 'ignore',
   };
+  const panelValue = formatGeneratedVueCode(vueCode);
+
   const panel: ICodePanel = {
     panelName: `${name}.vue`,
-    panelValue: vueCode,
+    panelValue,
     panelType: 'vue',
     prettierOpts,
     type,
@@ -172,7 +208,7 @@ const generatePageCode = ({ pageInfo, componentsMap }: { pageInfo: ICodeGenerato
 };
 
 /** 生成代码入口：过滤依赖并返回页面代码。 */
-const generateCode = ({ pageInfo, componentsMap = [] }: ICodeGeneratorParams) => {
+const generateCode = async ({ pageInfo, componentsMap = [], formatWithPrettier = false }: ICodeGeneratorParams) => {
   // 过滤外部传入的无效 componentMap，比如：可能传入 HTML 原生标签 package: ''
   const validComponents = componentsMap.filter(({ componentName, package: pkg }) => componentName && pkg);
 
@@ -184,6 +220,9 @@ const generateCode = ({ pageInfo, componentsMap = [] }: ICodeGeneratorParams) =>
   const componentDepsPath = [...allComponentsMap.values()];
 
   const pagesCode = generatePageCode({ pageInfo, componentsMap: componentDepsPath });
+  if (formatWithPrettier) {
+    pagesCode.panelValue = await formatWithPrettierCode(pagesCode.panelValue, pagesCode.prettierOpts);
+  }
 
   return pagesCode;
 };

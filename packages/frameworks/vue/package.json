@@ -36,15 +36,11 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@opentiny/tiny-engine-builtin-component": "^2.6.0",
     "@opentiny/tiny-robot": "0.3.3",
     "@opentiny/tiny-robot-kit": "0.3.3",
     "@opentiny/tiny-robot-svgs": "0.3.3",
     "@opentiny/vue": "^3.28.0",
-    "@opentiny/vue-renderless": "^3.28.2",
-    "@opentiny/vue-icon": "^3.28.0",
-    "@opentiny/vue-theme": "^3.28.0",
-    "uuid": "^11.1.0",
-    "vue": "^3.5.13",
     "@opentiny/vue-button": "^3.28.0",
     "@opentiny/vue-chart-bar": "~3.14.0",
     "@opentiny/vue-chart-histogram": "~3.14.0",
@@ -52,24 +48,29 @@
     "@opentiny/vue-chart-pie": "~3.14.0",
     "@opentiny/vue-chart-radar": "~3.14.0",
     "@opentiny/vue-chart-ring": "3.14.0",
+    "@opentiny/vue-icon": "^3.28.0",
+    "@opentiny/vue-renderless": "^3.28.2",
     "@opentiny/vue-select": "^3.28.0",
     "@opentiny/vue-tabs": "^3.28.0",
-    "@opentiny/tiny-engine-builtin-component": "^2.6.0"
+    "@opentiny/vue-theme": "^3.28.0",
+    "prettier": "^3.8.1",
+    "uuid": "^11.1.0",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.0",
     "@opentiny/genui-sdk-core": "workspace:*",
     "@opentiny/genui-sdk-materials-vue-opentiny-vue": "workspace:*",
     "@opentiny/tiny-schema-renderer": "workspace:*",
+    "@vitejs/plugin-vue": "^5.0.0",
     "@vue/compiler-sfc": "^3.5.18",
     "@vue/shared": "^3.5.18",
+    "escape-string-regexp": "^1.0.5",
     "rollup-plugin-visualizer": "^6.0.5",
+    "tsx": "^4.8.1",
+    "typescript": "^5.9.3",
+    "vite": "^6.0.0",
     "vite-plugin-css-injected-by-js": "^3.5.2",
     "vite-plugin-dts": "^4.0.0",
-    "typescript": "^5.9.3",
-    "tsx": "^4.8.1",
-    "escape-string-regexp": "^1.0.5",
-    "vite": "^6.0.0",
     "vitest": "^3.0.0"
   }
 }
