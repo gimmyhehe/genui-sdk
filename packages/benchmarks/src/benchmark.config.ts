@@ -11,7 +11,7 @@ export const benchmarkConfig: LlmBenchmarkRunOptions = {
   // Prompt 生成使用的前端框架物料（影响系统提示词的配置）
   framework: 'Vue',
   // 单场景过滤（兼容项）；为空时不过滤
-  scenario: 'context-user-table',
+  scenario: undefined,
   // 多场景过滤（优先级高于 scenario）；为空时跑全部内置场景
   scenarios: undefined,
   // 每个“模型 × 场景”重复执行次数（最小为 1）
