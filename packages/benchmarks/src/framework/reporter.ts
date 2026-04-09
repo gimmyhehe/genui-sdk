@@ -14,8 +14,6 @@ export function printBenchmarkTable(results: LlmBenchmarkResultItem[]) {
       ttftMs: formatNumber(item.ttftMs, 2),
       totalMs: formatNumber(item.totalMs, 2),
       tpotMsPerTok: item.tpotMs == null ? '' : formatNumber(item.tpotMs, 2),
-      schemaBlock: item.isSchemaJsonBlockFound,
-      validJson: item.isSchemaJsonValidJson,
       validSchema: item.isSchemaJsonValidAgainstProtocol,
       schemaError: item.schemaValidationError ?? '',
       promptTokens: item.promptTokens,

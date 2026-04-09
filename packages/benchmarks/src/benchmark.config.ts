@@ -11,13 +11,13 @@ export const benchmarkConfig: LlmBenchmarkRunOptions = {
   // Prompt 生成使用的前端框架物料（影响系统提示词的配置）
   framework: 'Vue',
   // 单场景过滤（兼容项）；为空时不过滤
-  scenario: undefined,
+  scenario: 'context-user-table',
   // 多场景过滤（优先级高于 scenario）；为空时跑全部内置场景
   scenarios: undefined,
   // 每个“模型 × 场景”重复执行次数（最小为 1）
   repeat: 1,
   // 生成阶段并发度（最小为 1）；值越大请求并发越高
-  concurrency: 2,
+  concurrency: 5,
   // 生成样本时的 prompt 组合配置（genPrompt + specificPrompt + userAppendPrompt）
   promptConfig: {
     // genPrompt 的自定义配置（对应 metadata.tinygenui 形态）

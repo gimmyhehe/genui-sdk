@@ -6,6 +6,7 @@ import { ngRendererConfig } from '@opentiny/genui-sdk-materials-angular-opentiny
 import type { LlmBenchmarkRunOptions, LlmBenchmarkSample, LlmBenchmarkSampleCase } from './framework/index';
 import { coreLlmBenchmarkSampleCases } from './samples';
 import { formatBeijingRunDirName, getSampleFilePath, resolveModelsForBench, resolveSamplesDir, slugifyModelForFilename } from './utils';
+import { computeTpotMs } from './utils';
 import { streamText } from 'ai';
 import { createDeepSeek } from '@ai-sdk/deepseek';
 
@@ -67,12 +68,7 @@ async function generateSingleSample(
       model: modelInstance,
       temperature: 0,
       system,
-      messages: [
-        {
-          role: 'user',
-          content: sampleCase.prompt,
-        },
-      ],
+      messages: sampleCase.messages,
     });
 
     for await (const chunk of stream.fullStream) {
@@ -105,16 +101,20 @@ async function generateSingleSample(
     errorMessage = error instanceof Error ? error.message : String(error);
   }
 
+  const totalMs = Date.now() - start;
+  const tpotMs = computeTpotMs(firstTokenAt ? firstTokenAt - start : 0, totalMs, completionTokens);
+
   return {
     scenario: sampleCase.id,
     runIndex,
     model,
-    prompt: sampleCase.prompt,
+    messages: sampleCase.messages,
     output,
     generatedAt: new Date().toISOString(),
     metrics: {
       ttftMs: firstTokenAt ? firstTokenAt - start : 0,
-      totalMs: Date.now() - start,
+      totalMs,
+      ...(tpotMs !== undefined ? { tpotMs } : {}),
       promptTokens,
       completionTokens,
       totalTokens,
@@ -134,7 +134,6 @@ export async function generateSamples(options: LlmBenchmarkRunOptions) {
   if (!apiKey) {
     throw new Error('DEEPSEEK_API_KEY (or OPENAI_API_KEY as fallback) is required');
   }
-  // 生成阶段通常需要你持续观察进度；避免 SDK warning 淹没关键输出。
   (globalThis as any).AI_SDK_LOG_WARNINGS = false;
   const deepseek = createDeepSeek({
     apiKey,

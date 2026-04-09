@@ -1,9 +1,41 @@
 import type { IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
 
-// 内置基准任务定义（id + user prompt），与落盘后的 {@link LlmBenchmarkSample} 区分
+// 内置基准任务定义（id + messages），与落盘后的 {@link LlmBenchmarkSample} 区分
 export interface LlmBenchmarkSampleCase {
   id: string;
-  prompt: string;
+  messages: LlmBenchmarkMessage[];
+}
+
+export interface LlmBenchmarkMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  messages?: LlmBenchmarkMessagePayload[];
+  finishInfo?: LlmBenchmarkMessageFinishInfo;
+}
+
+export interface LlmBenchmarkMessagePayload {
+  type: string;
+  content: string;
+  id?: string;
+  name?: string;
+  formatPretty?: boolean;
+  status?: string;
+}
+
+export interface LlmBenchmarkMessageFinishInfo {
+  object?: string;
+  model?: string;
+  created?: number;
+  choices?: Array<{
+    index?: number;
+    delta?: Record<string, unknown>;
+    finish_reason?: string;
+  }>;
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
 }
 
 /**
@@ -59,8 +91,6 @@ export interface LlmBenchmarkResultItem {
   totalMs: number;
   /** TPOT（Time Per Output Token），ms/token；completionTokens≤1 时无意义，省略 */
   tpotMs?: number;
-  isSchemaJsonBlockFound: boolean;
-  isSchemaJsonValidJson: boolean;
   isSchemaJsonValidAgainstProtocol: boolean;
   // schema 协议校验失败原因（如缺失字段路径）
   schemaValidationError?: string;
@@ -81,12 +111,14 @@ export interface LlmBenchmarkSample {
   scenario: string;
   runIndex?: number;
   model: string;
-  prompt: string;
+  messages: LlmBenchmarkMessage[];
   output: string;
   generatedAt: string;
   metrics: {
     ttftMs: number;
     totalMs: number;
+    /** TPOT（Time Per Output Token），ms/token；completionTokens≤1 时省略 */
+    tpotMs?: number;
     promptTokens: number;
     completionTokens: number;
     totalTokens: number;

@@ -101,7 +101,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 20px; background: #0b1020; color: #e6ecff; }
     .card { background: #141a2f; border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid #253053; }
-    .grid { display: grid; grid-template-columns: repeat(2, minmax(300px, 1fr)); gap: 16px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
     th, td { border-bottom: 1px solid #253053; padding: 8px; text-align: left; }
     .ok { color: #3ddc97; }
@@ -289,8 +289,6 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
       data: {
         labels: labels,
         datasets: [
-          { label: 'Block', data: results.map(function (r) { return r.isSchemaJsonBlockFound ? 1 : 0; }) },
-          { label: 'JSON', data: results.map(function (r) { return r.isSchemaJsonValidJson ? 1 : 0; }) },
           { label: 'Schema', data: results.map(function (r) { return r.isSchemaJsonValidAgainstProtocol ? 1 : 0; }) },
         ],
       },

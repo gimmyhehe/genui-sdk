@@ -7,45 +7,27 @@ import { printLlmBenchmarkResults } from './framework/index';
 import { computeTpotMs, extractSchemaJsonBlock, parseJudgeJson, resolveSamplesDir } from './utils';
 
 /**
- * 校验 schemaJson 内容，判断是否存在代码块、JSON 合法、协议合法。
+ * 校验 schemaJson 内容，只产出“整体通过/失败”结果。
  * @param schemaJsonText 从输出中提取的 `schemaJson` 字符串（可能为 null）
- * @returns 协议/JSON 校验结果三元组
+ * @returns 整体 schema 校验结果（成功或失败）
  */
 function validateSchemaJson(schemaJsonText: string | null) {
   if (!schemaJsonText) {
-    return {
-      isSchemaJsonBlockFound: false,
-      isSchemaJsonValidJson: false,
-      isSchemaJsonValidAgainstProtocol: false,
-      schemaValidationError: 'schemaJson code block not found',
-    };
+    return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: 'schemaJson code block not found' };
   }
+
   try {
     const parsed = JSON.parse(schemaJsonText);
-    const validation = genRootSchema().safeParse(parsed);
-    if (validation.success) {
-      return {
-        isSchemaJsonBlockFound: true,
-        isSchemaJsonValidJson: true,
-        isSchemaJsonValidAgainstProtocol: true,
-      };
+    const result = genRootSchema().safeParse(parsed);
+    if (result.success) {
+      return { isSchemaJsonValidAgainstProtocol: true };
     }
-    const firstIssue = validation.error.issues[0];
+    const firstIssue = result.error.issues[0];
     const path = firstIssue?.path?.length ? firstIssue.path.join('.') : '(root)';
-    const message = firstIssue?.message ?? 'schema validation failed';
-    return {
-      isSchemaJsonBlockFound: true,
-      isSchemaJsonValidJson: true,
-      isSchemaJsonValidAgainstProtocol: false,
-      schemaValidationError: `${path}: ${message}`,
-    };
+    const message = firstIssue?.message ?? 'schema safeParse failed';
+    return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: `${path}: ${message}` };
   } catch {
-    return {
-      isSchemaJsonBlockFound: true,
-      isSchemaJsonValidJson: false,
-      isSchemaJsonValidAgainstProtocol: false,
-      schemaValidationError: 'schemaJson is not valid JSON',
-    };
+    return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: 'schema safeParse failed' };
   }
 }
 
@@ -62,13 +44,20 @@ type LlmJudgeResult = {
  * @param apiKey DeepSeek API Key
  * @returns Judge 结果（分数与原因）
  */
-async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkRunOptions, apiKey: string): Promise<LlmJudgeResult> {
+async function judgeOneSample(
+  sample: LlmBenchmarkSample,
+  options: LlmBenchmarkRunOptions,
+  apiKey: string,
+): Promise<LlmJudgeResult> {
   const judgeCfg = options.llmJudge;
   const modelId = judgeCfg?.model || options.model;
   const system =
     judgeCfg?.systemPrompt ??
-    '你是严格的前端代码评测员。请基于用户需求与模型输出评估“可用性、完整性、准确性”。只返回 JSON：{"score":1-10之间数字,"reason":"一句话原因"}。不要输出其它内容。';
+    '你是严格的前端代码评测员。请依据 schemaJson 格式规范，基于用户需求与模型输出评估“可用性、完整性、准确性”。只返回 JSON：{"score":1-10之间数字,"reason":"一句话原因"}。不要输出其它内容。';
   try {
+    const requirementText = sample.messages?.length
+      ? sample.messages.map((msg) => `[${msg.role}] ${msg.content}`).join('\n')
+      : ((sample as LlmBenchmarkSample & { prompt?: string }).prompt ?? '');
     const deepseek = createDeepSeek({
       apiKey,
       baseURL: process.env.DEEPSEEK_BASE_URL,
@@ -83,7 +72,7 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
           content:
             `请评估以下样本。\n` +
             `【场景】${sample.scenario}\n` +
-            `【用户需求】\n${sample.prompt}\n\n` +
+            `【用户需求】\n${requirementText}\n\n` +
             `【模型输出】\n${sample.output}\n`,
         },
       ],
@@ -117,7 +106,10 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
 function toReportItem(sample: LlmBenchmarkSample, judge?: LlmJudgeResult): LlmBenchmarkResultItem {
   const schemaJsonText = extractSchemaJsonBlock(sample.output);
   const validation = validateSchemaJson(schemaJsonText);
-  const tpotMs = computeTpotMs(sample.metrics.ttftMs, sample.metrics.totalMs, sample.metrics.completionTokens);
+  const tpotMs =
+    typeof sample.metrics.tpotMs === 'number'
+      ? sample.metrics.tpotMs
+      : computeTpotMs(sample.metrics.ttftMs, sample.metrics.totalMs, sample.metrics.completionTokens);
   return {
     scenario: sample.scenario,
     runIndex: sample.runIndex,
@@ -190,13 +182,17 @@ export async function runReport(options: LlmBenchmarkRunOptions) {
         const judged = await judgeOneSample(sample, options, apiKey);
         judgeResults[index] = judged;
         const score = judged.score == null ? '-' : judged.score.toFixed(2);
-        console.log(`[bench][judge] ${index + 1}/${parsedSamples.length} ${sample.scenario} score=${score}${judged.error ? ' error' : ''}`);
+        console.log(
+          `[bench][judge] ${index + 1}/${parsedSamples.length} ${sample.scenario} score=${score}${judged.error ? ' error' : ''}`,
+        );
       }
     }
     await Promise.all(Array.from({ length: Math.min(concurrency, parsedSamples.length) }, () => worker()));
   }
 
-  const results: LlmBenchmarkResultItem[] = parsedSamples.map((sample, index) => toReportItem(sample, judgeResults[index]));
+  const results: LlmBenchmarkResultItem[] = parsedSamples.map((sample, index) =>
+    toReportItem(sample, judgeResults[index]),
+  );
 
   if (results.length === 0) {
     throw new Error('No samples matched the current filter');

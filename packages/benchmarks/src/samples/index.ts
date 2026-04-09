@@ -2,11 +2,13 @@ import { basicLlmBenchmarkSampleCases } from './basic';
 import { complexLlmBenchmarkSampleCases } from './complex';
 import { edgeLlmBenchmarkSampleCases } from './edge';
 import { constraintLlmBenchmarkSampleCases } from './constraints';
+import { contextualLlmBenchmarkSampleCases } from './contextual';
 
 export * from './basic';
 export * from './complex';
 export * from './edge';
 export * from './constraints';
+export * from './contextual';
 
 /**
  * 内置基准场景注册表（用于样本生成/对比）。
@@ -17,4 +19,5 @@ export const coreLlmBenchmarkSampleCases = [
   ...complexLlmBenchmarkSampleCases,
   ...edgeLlmBenchmarkSampleCases,
   ...constraintLlmBenchmarkSampleCases,
+  ...contextualLlmBenchmarkSampleCases,
 ];
