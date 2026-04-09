@@ -236,6 +236,9 @@ importers:
       rollup-plugin-visualizer:
         specifier: ^6.0.5
         version: 6.0.5(rollup@4.54.0)
+      tsx:
+        specifier: ^4.18.0
+        version: 4.21.0
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
@@ -668,8 +671,8 @@ importers:
   sites/homepage/web:
     dependencies:
       '@opentiny/genui-sdk-vue':
-        specifier: 1.0.0
-        version: 1.0.0(@opentiny/vue-renderless@3.28.2)(typescript@5.9.3)(vite@7.3.0(@types/node@17.0.45)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0))
+        specifier: 1.1.0
+        version: 1.1.0(typescript@5.9.3)(vite@7.3.0(@types/node@17.0.45)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0))
       '@opentiny/vue':
         specifier: ~3.28.0
         version: 3.28.0
@@ -2527,8 +2530,8 @@ packages:
   '@opentiny/fluent-editor@3.25.6':
     resolution: {integrity: sha512-RHXb7JKKWntia7HM/yJAQQYFWZz+3Ieq65FHhJNhrkLy3Quv/SQb46YbpHhVmJGlDkUHBxLZe3/GrwCpn/0XVw==}
 
-  '@opentiny/genui-sdk-vue@1.0.0':
-    resolution: {integrity: sha512-8yYf4pg5Z2wDUqA5ig32jgX3van73BOi8p/cZ/eIkuik8BrLIj+NMCn0NRUTi9YZuaiDU6LtZ7NaNUNzbdsQUA==}
+  '@opentiny/genui-sdk-vue@1.1.0':
+    resolution: {integrity: sha512-08H0fc274qlW6LmrzdNyBhjv92vjGiKlOahrwBOCM54wWPSD2dDJhX6aBxyz4nrWE3vZ/ifYwW6USDWZTW6f2g==}
 
   '@opentiny/ng-accordion@1.0.3':
     resolution: {integrity: sha512-45v5Is3bF+SVjQhCu7StEfHAvAR5oZLjQXoYds1KRzLZk7u6EyOikW5m4XKmi8/8vplU+NlCQZZ5/5jh2HZBPQ==}
@@ -11195,7 +11198,7 @@ snapshots:
       lodash-es: 4.17.22
       quill: 2.0.3
 
-  '@opentiny/genui-sdk-vue@1.0.0(@opentiny/vue-renderless@3.28.2)(typescript@5.9.3)(vite@7.3.0(@types/node@17.0.45)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0))':
+  '@opentiny/genui-sdk-vue@1.1.0(typescript@5.9.3)(vite@7.3.0(@types/node@17.0.45)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0))':
     dependencies:
       '@opentiny/tiny-engine-builtin-component': 2.9.0(@opentiny/vue-icon@3.28.3)(@opentiny/vue-renderless@3.28.2)(@opentiny/vue@3.28.0)(vite@7.3.0(@types/node@17.0.45)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0))(vue@3.5.26(typescript@5.9.3))
       '@opentiny/tiny-robot': 0.3.3(vue@3.5.26(typescript@5.9.3))
@@ -11210,13 +11213,13 @@ snapshots:
       '@opentiny/vue-chart-radar': 3.14.0
       '@opentiny/vue-chart-ring': 3.14.0
       '@opentiny/vue-icon': 3.28.3
+      '@opentiny/vue-renderless': 3.28.2
       '@opentiny/vue-select': 3.28.0
       '@opentiny/vue-tabs': 3.28.0
       '@opentiny/vue-theme': 3.28.0
       uuid: 11.1.0
       vue: 3.5.26(typescript@5.9.3)
     transitivePeerDependencies:
-      - '@opentiny/vue-renderless'
       - debug
       - typescript
       - vite
