@@ -62,26 +62,8 @@ export interface IScriptSetupSectionExtension {
 
 export type CodegenFramework = 'vue' | 'react' | 'angular' | (string & {});
 
-export interface ICodegenFileArtifact {
-  fileName: string;
-  fileType: string;
-  content: string;
-}
-
-export interface ICodegenDiagnostic {
-  level: 'error' | 'warn' | 'info';
-  message: string;
-}
-
-export interface ICodegenResult<TMeta extends Record<string, unknown> = Record<string, unknown>> {
-  framework: CodegenFramework;
-  files: ICodegenFileArtifact[];
-  diagnostics: ICodegenDiagnostic[];
-  meta?: TMeta;
-}
-
 // 统一生成器接口：不同框架共享同一调用形态。
-export interface IFrameworkCodeGenerator<TParams, TResult = ICodegenResult> {
+export interface IFrameworkCodeGenerator<TParams, TResult> {
   generate(params: TParams): Promise<TResult>;
 }
 
