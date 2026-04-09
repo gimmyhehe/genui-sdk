@@ -8,14 +8,33 @@ import type {
   IScriptSetupBuildContext,
   IScriptSetupSectionDefinition,
   IFrameworkCodeGenerator,
-  IVueCodeGeneratorSectionOptions,
+  IVueCodeGeneratorOptions,
 } from './types';
 import { capitalize, hyphenate, toEventKey, unwrapExpression } from './utils';
+import { validateByCompile } from './vue-sfc-validator';
 
 export type ICodeGeneratorResult = ICodePanel & { errors: { message: string }[] };
 
+const DEFAULT_PRETTIER_OPTS: Record<string, unknown> = {
+  semi: false,
+  singleQuote: true,
+  printWidth: 120,
+  trailingComma: 'none',
+  endOfLine: 'auto',
+  tabWidth: 2,
+  parser: 'vue',
+  htmlWhitespaceSensitivity: 'ignore',
+};
+
 export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorParams, ICodeGeneratorResult> {
-  constructor(private readonly sectionOptions: IVueCodeGeneratorSectionOptions = {}) {}
+  private readonly prettierOpts: Record<string, unknown>;
+  private readonly enableCompileValidation: boolean;
+
+  constructor(private readonly generatorOptions: IVueCodeGeneratorOptions = {}) {
+    this.prettierOpts =
+      generatorOptions.prettierOpts !== undefined ? { ...generatorOptions.prettierOpts } : { ...DEFAULT_PRETTIER_OPTS };
+    this.enableCompileValidation = generatorOptions.enableCompileValidation !== false;
+  }
 
   /**
    * 移除表达式中的 `this.` 前缀。
@@ -278,8 +297,8 @@ ${scriptSetup}
    * @returns script setup 块表
    */
   protected getScriptSetupSections(): readonly IScriptSetupSectionDefinition[] {
-    const baseSections = this.sectionOptions.scriptSetupSections ?? this.getDefaultScriptSetupSections();
-    return this.composeSections(baseSections, this.sectionOptions.scriptSetupSectionExtensions);
+    const baseSections = this.generatorOptions.scriptSetupSections ?? this.getDefaultScriptSetupSections();
+    return this.composeSections(baseSections, this.generatorOptions.scriptSetupSectionExtensions);
   }
 
   /**
@@ -759,27 +778,19 @@ ${scriptSetup}
 
     const schema = JSON.parse(JSON.stringify(originSchema)) as CardSchema;
     const vueCode = this.buildVueSfcSource({ schema, name, componentsMap });
+    const panelName = `${name}.vue`;
+    const compileErrors = this.enableCompileValidation ? validateByCompile(panelName, vueCode) : [];
     const type = 'page';
-    const prettierOpts: Record<string, unknown> = {
-      semi: false,
-      singleQuote: true,
-      printWidth: 120,
-      trailingComma: 'none',
-      endOfLine: 'auto',
-      tabWidth: 2,
-      parser: 'vue',
-      htmlWhitespaceSensitivity: 'ignore',
-    };
     const panelValue = vueCode;
 
     const panel: ICodePanel = {
-      panelName: `${name}.vue`,
+      panelName,
       panelValue,
       panelType: 'vue',
-      prettierOpts,
+      prettierOpts: { ...this.prettierOpts },
       type,
     };
-    const result: ICodeGeneratorResult = { ...panel, errors: [] };
+    const result: ICodeGeneratorResult = { ...panel, errors: compileErrors };
     if (formatWithPrettier) {
       result.panelValue = await this.formatWithPrettier(result.panelValue, result.prettierOpts);
     }
