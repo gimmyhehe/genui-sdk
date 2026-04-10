@@ -54,6 +54,28 @@ export type LLMConfig = {
   mcpServers?: McpServersConfig;
 };
 
+const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
+
+function extractStatusCode(error: any): number | undefined {
+  if (!error) {
+    return undefined;
+  }
+  if (typeof error.statusCode === 'number') {
+    return error.statusCode;
+  }
+  if (typeof error?.lastError?.statusCode === 'number') {
+    return error.lastError.statusCode;
+  }
+  if (Array.isArray(error.errors)) {
+    for (const item of error.errors) {
+      if (typeof item?.statusCode === 'number') {
+        return item.statusCode;
+      }
+    }
+  }
+  return undefined;
+}
+
 const initClients = async (
   serverName: string,
   serverConfig: McpServer,
@@ -280,10 +302,11 @@ export function createChatGenui() {
 
         console.error('Error in chat-genui onError:', error);
         const actualError = error?.error?.cause ?? error?.error ?? error;
-        const statusCode = actualError?.statusCode ?? 500;
+        const statusCode = extractStatusCode(actualError) ?? 500;
         const responseBody = actualError?.responseBody || null;
-        const message =
-          actualError?.message + (responseBody ? `; error details: ${responseBody}` : '') || 'Unknown Error Type';
+        const message = statusCode === 429
+          ? BUSY_ERROR_MESSAGE
+          : actualError?.message + (responseBody ? `; error details: ${responseBody}` : '') || 'Unknown Error Type';
         const type = actualError?.name || actualError?.type || 'Unknown Error Type';
         const param = actualError?.param || null;
         const code = statusCode;
