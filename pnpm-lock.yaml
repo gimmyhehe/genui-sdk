@@ -548,9 +548,6 @@ importers:
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
-      '@opentiny/vue-renderless':
-        specifier: ^3.28.2
-        version: 3.29.0
       '@opentiny/vue-theme':
         specifier: ^3.28.0
         version: 3.28.0
