@@ -82,6 +82,14 @@ const handleGuideCardClick = (index: number) => {
           :active="activeCard === 2"
           @click="handleGuideCardClick(2)"
         />
+        <a :href="linkMap[LinkKey.ChatDoc]" target="_blank" class="btn-link">
+          <tiny-button
+            class="home-guide-content-left-button"
+            size="medium"
+            round
+            >开发文档</tiny-button
+          >
+        </a>
       </div>
       <div class="home-guide-content-right">
         <div class="home-guide-content-right-framework">
@@ -98,13 +106,6 @@ const handleGuideCardClick = (index: number) => {
         </div>
       </div>
     </div>
-    <a :href="linkMap[LinkKey.ChatDoc]" target="_blank" class="btn-link">
-        <tiny-button
-          class="home-guide-content-left-button"
-          size="medium"
-          round
-          >开发文档</tiny-button>
-      </a>
   </section>
 </template>
 
@@ -137,7 +138,7 @@ const handleGuideCardClick = (index: number) => {
   &-content {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
 
     &-mobile {
       display: flex;
@@ -179,15 +180,16 @@ const handleGuideCardClick = (index: number) => {
     &-right {
       flex: 1;
       width: 1px;
-      max-height: 400px;
       background: rgba(242, 242, 242, 1);
       border-radius: 24px;
-      padding: 24px;
+      padding: 20px;
       margin-left: 10%;
-      height: -webkit-fill-available;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
 
       &-framework {
-        height: 100%;
+        height: 360px;
         display: flex;
         flex-direction: column;
         background: linear-gradient(
@@ -196,6 +198,7 @@ const handleGuideCardClick = (index: number) => {
           rgba(19, 19, 19, 1) 100%
         );
         border-radius: 12px;
+        overflow: hidden;
 
         .guide-code {
           flex: 1;
@@ -233,11 +236,42 @@ const handleGuideCardClick = (index: number) => {
           }
         }
       }
+
+      @media (min-width: 1280px) {
+        &-framework {
+          height: 380px;
+        }
+      }
+
+      @media (min-width: 1600px) {
+        &-framework {
+          height: 392px;
+        }
+      }
+
+      @media (min-width: 1920px) {
+        &-framework {
+          height: 400px;
+        }
+      }
+
+      @media (min-width: 2000px) {
+        &-framework {
+          height: 430px;
+        }
+      }
+
     }
   }
 
   @media (min-width: 1920px) {
     padding: 110px 240px 0px 240px;
+  }
+}
+
+@media (max-width: 768px) {
+  :deep(.guide-code) {
+    font-size: 14px;
   }
 }
 
@@ -249,7 +283,7 @@ const handleGuideCardClick = (index: number) => {
   border-radius: 0 0 12px 12px;
   font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.6;
   color: #e5e7eb;
 
@@ -273,6 +307,7 @@ const handleGuideCardClick = (index: number) => {
 
   &::-webkit-scrollbar-corner {
     background: #0b1020;
+    border-bottom-right-radius: 12px;
   }
 
   // TODO: 临时解决部署后代码阴影问题，后续更换更优雅方案

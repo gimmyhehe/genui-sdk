@@ -433,7 +433,7 @@ onUnmounted(() => {
         gap: 8px;
         color: rgba(20, 118, 255, 1);
         cursor: pointer;
-        font-size: 18px;
+        font-size: 16px;
         &.is-link {
           text-decoration: none;
         }
@@ -465,6 +465,7 @@ onUnmounted(() => {
       overflow-y: auto;
       box-sizing: border-box;
       scrollbar-gutter: stable;
+      border-bottom-right-radius: 12px;
     }
 
     &-content-inner {
@@ -472,6 +473,9 @@ onUnmounted(() => {
       box-sizing: border-box;
       position: relative;
       width: 100%;
+      @media (max-width: 768px) {
+        padding: 20px;
+      }
     }
 
     @media (min-width: 1280px) {
@@ -503,7 +507,7 @@ onUnmounted(() => {
 .home-extend-chat-mock {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   width: 100%;
 }
 
@@ -512,7 +516,7 @@ onUnmounted(() => {
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 16px;
   width: 100%;
 }
 
@@ -543,6 +547,8 @@ onUnmounted(() => {
   color: rgba(25, 25, 25, 1);
   word-break: break-word;
   white-space: pre-wrap;
+  border-top-right-radius: 0;
+  margin-top: 8px;
 }
 
 .home-extend-ai-row {
@@ -550,7 +556,7 @@ onUnmounted(() => {
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 16px;
   width: 100%;
 }
 
@@ -575,9 +581,13 @@ onUnmounted(() => {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
+  border-bottom-right-radius: 12px;
+  overflow: hidden;
 
   :deep(div.schema-render-container) {
     max-width: 100%;
+    border-bottom-right-radius: 12px;
+    overflow: hidden;
   }
 }
 
@@ -612,6 +622,7 @@ onUnmounted(() => {
     border-radius: 0;
     border: none;
     background-color: rgba(232, 238, 254, 1);
+    font-size: 16px;
 
     &-element-1 {
       border-radius: 382px;
@@ -628,14 +639,17 @@ onUnmounted(() => {
   }
 
   @media (max-width: 768px) {
-    .extend-button {
-      width: 98px;
-      font-size: 18px;
-    }
+    display: none;
+  }
+}
 
-    &.extend-button-group--mobile .extend-button-element-1 {
-      width: min(200px, 86vw);
-    }
+@media (max-width: 768px) {
+  .home-extend-avatar-user,
+  .home-extend-avatar-ai {
+    display: none;
+  }
+  .home-extend-schema-content {
+    border-radius: 6px;
   }
 }
 </style>

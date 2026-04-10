@@ -224,6 +224,11 @@ const buttonSize = computed(() => {
         object-fit: contain;
         filter: drop-shadow(0 0 40px rgba(232, 220, 244, 0.7));
       }
+      @media (max-width: 768px) {
+        img {
+          filter: drop-shadow(0 0 18px rgba(232, 220, 244, 0.3));
+        }
+      }
     }
 
     &-title {
@@ -467,9 +472,6 @@ const buttonSize = computed(() => {
     }
 
     &-card {
-      flex-direction: row;
-      box-shadow: 0px 4px 30px 0px rgba(234, 233, 237, 0.9);
-
       &-content {
         margin-left: 16px;
       }
@@ -647,13 +649,4 @@ const buttonSize = computed(() => {
 }
 </style>
 
-<style lang="less">
-/* 修复视频 controls 底部阴影/遮罩过重（Chromium/WebKit生效） */
-
-video#genui-action-vedio::-webkit-media-controls-panel,
-video#genui-flow-vedio::-webkit-media-controls-panel {
-  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6) 80%, rgba(0, 0, 0, 0.8));
-  background-size: auto max(75px, 10%);
-}
-</style>
 
