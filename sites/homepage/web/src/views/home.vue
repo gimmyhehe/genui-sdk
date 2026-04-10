@@ -222,6 +222,7 @@ const buttonSize = computed(() => {
         width: 100%;
         height: 100%;
         object-fit: contain;
+        filter: drop-shadow(0 0 40px rgba(232, 220, 244, 0.7));
       }
     }
 
@@ -253,7 +254,7 @@ const buttonSize = computed(() => {
     }
 
     &-decsription {
-      font-size: var(--font-size-title-sm);
+      font-size: 20px;
       font-weight: 400;
       line-height: var(--line-height-description);
       text-align: left;
@@ -262,6 +263,7 @@ const buttonSize = computed(() => {
       animation: slideUpFromBottom 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
       opacity: 0;
       line-height: 1.5;
+      max-width: calc(var(--font-size-title-lg) * 12);
 
       @media (max-width: 1280px) {
         margin-bottom: 42px;
@@ -269,12 +271,8 @@ const buttonSize = computed(() => {
     }
 
     @media (max-width: 768px) {
-      &-title {
-        white-space: normal;
-      }
-
-      &-subtitle {
-        white-space: normal;
+      &-left {
+        margin-right: 0;
       }
     }
 
@@ -345,7 +343,7 @@ const buttonSize = computed(() => {
     }
 
     &-decsription {
-      font-size: var(--font-size-body-md);
+      font-size: 14px;
       white-space: normal;
       margin-bottom: 28px;
     }
