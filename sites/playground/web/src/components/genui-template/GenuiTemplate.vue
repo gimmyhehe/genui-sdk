@@ -3,6 +3,7 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { CodeEditor } from 'monaco-editor-vue3';
 import { GenuiConfigProvider, GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
+import { iconClose } from '@opentiny/vue-icon';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import type { ISchemaCardMessageItem, IJsonPatchMessageItem } from './chat.types';
@@ -13,11 +14,15 @@ import viewSchemaIcon from '../../assets/images/view-schema.svg';
 
 const { isMobile } = useIsMobile();
 
+const TinyCloseIcon = iconClose();
+
 const { currentSchema, setCurrentSchema, templateConversationState, conversation, currentCardId } = useTemplate();
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
 
+// 桌面：右侧预览列是否展开（关闭后仅占聊天列；切换会话或点击版本卡片会重新展开）
+const rendererPanelVisible = ref(true);
 // schema 编辑器是否可见（移动端：底部抽屉；抽屉内先预览再可打开 JSON）
 const schemaEditorVisible = ref(false);
 const mobileSchemaJsonEditorOpen = ref(false);
@@ -81,6 +86,11 @@ const closeSchemaEditorView = () => {
   mobileSchemaJsonEditorOpen.value = false;
 };
 
+const closeRendererPanel = () => {
+  rendererPanelVisible.value = false;
+  closeSchemaEditorView();
+};
+
 const onMobileSheetMaskClick = () => {
   if (mobileSchemaJsonEditorOpen.value) {
     mobileSchemaJsonEditorOpen.value = false;
@@ -90,6 +100,7 @@ const onMobileSheetMaskClick = () => {
 };
 
 const toggleSchemaVersion = (schema: Record<string, unknown>, cardId: string) => {
+  rendererPanelVisible.value = true;
   currentCardId.value = cardId;
   schemaEditor.value = JSON.stringify(schema, null, 2);
   // 移动端：先打开底部抽屉仅展示渲染预览；JSON 编辑器由抽屉内「查看 Schema」再打开
@@ -142,6 +153,7 @@ watch(currentConversationId, () => {
   schemaEditorVisible.value = false;
   mobileSchemaJsonEditorOpen.value = false;
   currentCardId.value = '';
+  rendererPanelVisible.value = true;
 });
 
 onMounted(() => {
@@ -215,9 +227,13 @@ onUnmounted(() => {
                 >
                   返回最新版本
                 </tiny-button>
-                <button type="button" class="schema-mobile-sheet__close" aria-label="关闭" @click="closeSchemaEditorView">
-                  ×
-                </button>
+                <tiny-button
+                  type="text"
+                  class="schema-mobile-sheet__close-btn"
+                  :icon="TinyCloseIcon"
+                  aria-label="关闭"
+                  @click="closeSchemaEditorView"
+                />
               </div>
             </div>
             <div class="schema-mobile-sheet__body">
@@ -238,7 +254,7 @@ onUnmounted(() => {
       </Transition>
     </Teleport>
     <template v-if="!isMobile">
-      <div class="genui-schema-template-item renderer-container" v-if="currentSchema">
+      <div class="genui-schema-template-item renderer-container" v-if="currentSchema && rendererPanelVisible">
         <div class="renderer-container-wrapper">
           <div class="top-button-group">
             <span class="schema-toggle-text" @click="toggleSchemaEditor">
@@ -248,6 +264,13 @@ onUnmounted(() => {
             <div class="top-button-group-right">
               <tiny-button v-if="showReturnLatestButton" type="primary" round
                 @click="resetToLatestVersion">返回最新版本</tiny-button>
+              <tiny-button
+                type="text"
+                class="renderer-toolbar-close-btn"
+                :icon="TinyCloseIcon"
+                aria-label="关闭预览区"
+                @click="closeRendererPanel"
+              />
             </div>
           </div>
           <schema-renderer class="schema-renderer" :content="currentSchema" :generating="false" />
@@ -324,6 +347,28 @@ onUnmounted(() => {
 
           &:hover {
             color: #1890ff;
+          }
+        }
+
+        .top-button-group-right {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .renderer-toolbar-close-btn {
+          flex-shrink: 0;
+
+          &:deep(.tiny-button) {
+            min-width: auto;
+            padding: 4px 6px;
+            color: #666;
+            border-radius: 8px;
+
+            &:hover {
+              color: #191919;
+              background: rgba(0, 0, 0, 0.06);
+            }
           }
         }
       }
@@ -539,19 +584,23 @@ onUnmounted(() => {
     white-space: nowrap;
   }
 
-  &__close {
-    margin: 0;
-    padding: 4px 12px;
-    border: none;
-    background: transparent;
-    font-size: 22px;
-    line-height: 1;
-    color: #666;
-    cursor: pointer;
-    border-radius: 8px;
+  &__close-btn {
+    flex-shrink: 0;
 
-    &:active {
-      background: rgba(0, 0, 0, 0.06);
+    &:deep(.tiny-button) {
+      min-width: auto;
+      padding: 4px 8px;
+      color: #666;
+      border-radius: 8px;
+
+      &:hover {
+        color: #191919;
+        background: rgba(0, 0, 0, 0.06);
+      }
+
+      &:active {
+        background: rgba(0, 0, 0, 0.08);
+      }
     }
   }
 
