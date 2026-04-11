@@ -176,9 +176,13 @@ onUnmounted(() => {
       <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
         <div class="schema-version-container__header">
           <span class="schema-version-container__title">查看 Schema</span>
-          <button type="button" class="schema-version-container__close" aria-label="关闭" @click="closeSchemaEditorView">
-            ×
-          </button>
+          <tiny-button
+            type="text"
+            class="genui-schema-toolbar-close-btn"
+            :icon="TinyCloseIcon"
+            aria-label="关闭"
+            @click="closeSchemaEditorView"
+          />
         </div>
         <div class="schema-version-container__editor">
           <code-editor v-model:value="schemaEditor" language="json" theme="vs" :options="editorOptions" />
@@ -229,7 +233,7 @@ onUnmounted(() => {
                 </tiny-button>
                 <tiny-button
                   type="text"
-                  class="schema-mobile-sheet__close-btn"
+                  class="genui-schema-toolbar-close-btn"
                   :icon="TinyCloseIcon"
                   aria-label="关闭"
                   @click="closeSchemaEditorView"
@@ -253,7 +257,7 @@ onUnmounted(() => {
         </div>
       </Transition>
     </Teleport>
-    <template v-if="!isMobile">
+    <template v-else>
       <div class="genui-schema-template-item renderer-container" v-if="currentSchema && rendererPanelVisible">
         <div class="renderer-container-wrapper">
           <div class="top-button-group">
@@ -266,7 +270,7 @@ onUnmounted(() => {
                 @click="resetToLatestVersion">返回最新版本</tiny-button>
               <tiny-button
                 type="text"
-                class="renderer-toolbar-close-btn"
+                class="genui-schema-toolbar-close-btn"
                 :icon="TinyCloseIcon"
                 aria-label="关闭预览区"
                 @click="closeRendererPanel"
@@ -355,22 +359,6 @@ onUnmounted(() => {
           align-items: center;
           gap: 12px;
         }
-
-        .renderer-toolbar-close-btn {
-          flex-shrink: 0;
-
-          &:deep(.tiny-button) {
-            min-width: auto;
-            padding: 4px 6px;
-            color: #666;
-            border-radius: 8px;
-
-            &:hover {
-              color: #191919;
-              background: rgba(0, 0, 0, 0.06);
-            }
-          }
-        }
       }
 
       .schema-renderer {
@@ -398,6 +386,33 @@ onUnmounted(() => {
 .genui-template-chat {
   width: 100%;
   min-height: 0;
+}
+
+/* 左侧 Schema 顶栏、右侧预览顶栏、移动端抽屉：统一 Tiny 纯图标关闭尺寸与交互 */
+.genui-schema-toolbar-close-btn {
+  flex-shrink: 0;
+
+  &:deep(.tiny-button) {
+    box-sizing: border-box;
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: #666;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: #191919;
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.08);
+    }
+  }
 }
 
 .schema-version-container {
@@ -432,23 +447,6 @@ onUnmounted(() => {
     font-weight: 600;
     color: rgb(25, 25, 25);
     line-height: 22px;
-  }
-
-  &__close {
-    margin: 0;
-    padding: 4px 10px;
-    border: none;
-    background: transparent;
-    font-size: 22px;
-    line-height: 1;
-    color: #666;
-    cursor: pointer;
-    border-radius: 8px;
-
-    &:hover {
-      color: #191919;
-      background: rgba(0, 0, 0, 0.06);
-    }
   }
 
   &__editor {
@@ -582,26 +580,6 @@ onUnmounted(() => {
     font-weight: 600;
     color: #191919;
     white-space: nowrap;
-  }
-
-  &__close-btn {
-    flex-shrink: 0;
-
-    &:deep(.tiny-button) {
-      min-width: auto;
-      padding: 4px 8px;
-      color: #666;
-      border-radius: 8px;
-
-      &:hover {
-        color: #191919;
-        background: rgba(0, 0, 0, 0.06);
-      }
-
-      &:active {
-        background: rgba(0, 0, 0, 0.08);
-      }
-    }
   }
 
   &__body {
