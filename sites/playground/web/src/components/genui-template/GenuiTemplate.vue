@@ -3,20 +3,17 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { CodeEditor } from 'monaco-editor-vue3';
 import { GenuiConfigProvider, GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
-import { IconRichTextCodeBlock } from '@opentiny/vue-icon';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import type { ISchemaCardMessageItem, IJsonPatchMessageItem } from './chat.types';
 import GenuiTemplateChat from './GenuiTemplateChat.vue';
 import useTemplate from './useTemplate';
 import { useIsMobile } from '../../use-mobile';
+import viewSchemaIcon from '../../assets/images/view-schema.svg';
 
 const { isMobile } = useIsMobile();
 
 const { currentSchema, setCurrentSchema, templateConversationState, conversation, currentCardId } = useTemplate();
-
-const TinyIconRichTextCodeBlock = IconRichTextCodeBlock();
-
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
@@ -139,11 +136,15 @@ onUnmounted(() => {
     </div>
     <div class="genui-schema-template-item renderer-container" v-if="currentSchema">
       <div class="renderer-container-wrapper">
-        <tiny-button class="schema-editor-toggle-button" :icon="TinyIconRichTextCodeBlock" round
-          @click="toggleSchemaEditor"></tiny-button>
         <div class="top-button-group">
-          <tiny-button v-if="showReturnLatestButton" type="info" round
-            @click="resetToLatestVersion">返回最新版本</tiny-button>
+          <span class="schema-toggle-text" @click="toggleSchemaEditor">
+            <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
+            查看 Schema
+          </span>
+          <div class="top-button-group-right">
+            <tiny-button v-if="showReturnLatestButton" type="info" round
+              @click="resetToLatestVersion">返回最新版本</tiny-button>
+          </div>
         </div>
         <schema-renderer class="schema-renderer" :content="currentSchema" :generating="false" />
       </div>
@@ -174,7 +175,6 @@ onUnmounted(() => {
 
   & .renderer-container {
     overflow: auto;
-    padding: 20px;
     min-height: 0;
     box-sizing: border-box;
 
@@ -189,16 +189,36 @@ onUnmounted(() => {
       position: relative;
 
       .top-button-group {
+        border-bottom: 1px solid rgb(232, 232, 232);
+        padding: 16px 24px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        height: 60px;
+        justify-content: space-between;
+
+        .button-svg-icon {
+          width: 16px;
+          height: 16px;
+          margin-right: 6px;
+          vertical-align: middle;
+        }
+
+        .schema-toggle-text {
+          display: inline-flex;
+          align-items: center;
+          color: #191919;
+          cursor: pointer;
+          user-select: none;
+
+          &:hover {
+            color: #1890ff;
+          }
+        }
       }
 
-      .schema-editor-toggle-button {
-        position: absolute;
-        left: 0;
-        top: 0;
+      .schema-renderer {
+        flex: 1;
+        padding: 20px;
+        overflow: auto;
       }
     }
   }
