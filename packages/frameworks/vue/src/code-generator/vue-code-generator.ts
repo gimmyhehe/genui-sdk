@@ -765,6 +765,27 @@ ${scriptSetup}
    * @param formatWithPrettier 是否使用 Prettier 格式化
    * @returns 页面级代码面板信息
    */
+  /**
+   * 将 pageInfo.schema 规范为对象。流式场景下 content 常为 JSON 字符串，若不解构前解析会得到空 state/空模板。
+   */
+  protected normalizeIncomingSchema(origin: CardSchema | string | null | undefined): CardSchema {
+    if (origin == null) {
+      return { componentName: 'Page', children: [] } as CardSchema;
+    }
+    if (typeof origin === 'string') {
+      const trimmed = origin.trim();
+      if (!trimmed) {
+        return { componentName: 'Page', children: [] } as CardSchema;
+      }
+      try {
+        return JSON.parse(trimmed) as CardSchema;
+      } catch {
+        return { componentName: 'Page', children: [] } as CardSchema;
+      }
+    }
+    return origin as CardSchema;
+  }
+
   protected async generatePageCode({
     pageInfo,
     componentsMap,
@@ -776,7 +797,7 @@ ${scriptSetup}
   }): Promise<ICodeGeneratorResult> {
     const { schema: originSchema, name = 'SchemaCard' } = pageInfo;
 
-    const schema = JSON.parse(JSON.stringify(originSchema)) as CardSchema;
+    const schema = JSON.parse(JSON.stringify(this.normalizeIncomingSchema(originSchema))) as CardSchema;
     const vueCode = this.buildVueSfcSource({ schema, name, componentsMap });
     const panelName = `${name}.vue`;
     const compileErrors = this.enableCompileValidation ? validateByCompile(panelName, vueCode) : [];

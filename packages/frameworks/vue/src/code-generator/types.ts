@@ -25,7 +25,8 @@ export interface ICodePanel {
 
 export interface ICodeGeneratorParams {
   pageInfo: {
-    schema: CardSchema;
+    /** 运行时常与 schema-card 的 content 一致，可能为流式 JSON 字符串 */
+    schema: CardSchema | string;
     name?: string;
   };
   componentsMap?: IComponentMapItem[];
