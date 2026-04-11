@@ -16,7 +16,7 @@ import { GeneratingStatus, STATUS } from '@opentiny/tiny-robot-kit';
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import { IconAi, IconUser, IconArrowDown } from '@opentiny/tiny-robot-svgs';
 import type { BubbleRoleConfig } from '@opentiny/tiny-robot';
-import { requiredCompleteFieldSelectors, scrollEnd, throttle } from '@opentiny/genui-sdk-vue';
+import { requiredCompleteFieldSelectors, scrollEnd, throttle, GenuiRenderer } from '@opentiny/genui-sdk-vue';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import copy from 'clipboard-copy';
 import type { INotificationPayload, IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
@@ -278,29 +278,45 @@ const markdownRenderer = new BubbleMarkdownContentRenderer({
   mdConfig: { html: true },
 });
 
+const templateRenderer = (props: any, type: 'json-patch' | 'schema-card') => {
+  const generating = !props.generatedTime;
+  if (generating) {
+    return h(
+      'div',
+      {},
+      h(
+        GenuiRenderer,
+        {
+          ...props,
+          requiredCompleteFieldSelectors: props.requiredCompleteFieldSelectors || [],
+          generating: generating,
+          key: props.cardId,
+        }
+      ),
+    );
+  }
+
+  return h(SchemaVersionCard, {
+    key: props.cardId,
+    prevSchema: prevSchema.value,
+    errorMessagesMap: errorMessagesMap.value,
+    type,
+    ...props,
+    onClick: handleSchemaVersionCardClick,
+  });
+}
+
 const messageRenderers = {
   markdown: markdownRenderer,
   'json-patch': (props) => {
     jsonPatchRenderer(props);
-    return h(SchemaVersionCard, {
-      key: props.cardId,
-      prevSchema: prevSchema.value,
-      errorMessagesMap: errorMessagesMap.value,
-      ...props,
-      type: 'json-patch',
-      onClick: handleSchemaVersionCardClick,
-    });
+    const type = 'json-patch';
+    return templateRenderer(props, type);
   },
   'schema-card': (props) => {
     schemaCardRenderer(props);
-    return h(SchemaVersionCard, {
-      key: props.cardId,
-      prevSchema: prevSchema.value,
-      errorMessagesMap: errorMessagesMap.value,
-      ...props,
-      type: 'schema-card',
-      onClick: handleSchemaVersionCardClick,
-    });
+    const type = 'schema-card';
+    return templateRenderer(props, type);
   },
 };
 
@@ -534,6 +550,7 @@ onUnmounted(() => {
   flex-shrink: 0;
   padding: 16px 0;
   background: var(--sender-bg);
+
   .attachments-container {
     padding: 0 20px;
   }
@@ -554,7 +571,8 @@ onUnmounted(() => {
   cursor: pointer;
   border: 1px solid var(--sender-border-color);
   z-index: 1000;
-  & > svg {
+
+  &>svg {
     width: 20px;
     height: 20px;
   }
@@ -594,7 +612,7 @@ onUnmounted(() => {
       z-index: 1;
     }
 
-    & > svg {
+    &>svg {
       z-index: 2;
     }
   }

@@ -18,8 +18,9 @@ const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
 
-// schema 编辑器是否可见
+// schema 编辑器是否可见（移动端：底部抽屉；抽屉内先预览再可打开 JSON）
 const schemaEditorVisible = ref(false);
+const mobileSchemaJsonEditorOpen = ref(false);
 const latestSchemaCardId = computed(() => {
   const conversationState = templateConversationState.value;
   const currentConversation = conversationState?.conversations?.find(
@@ -70,11 +71,32 @@ const editorOptions = {
 
 const toggleSchemaEditor = () => {
   schemaEditorVisible.value = !schemaEditorVisible.value;
+  if (isMobile.value) {
+    mobileSchemaJsonEditorOpen.value = false;
+  }
+};
+
+const closeSchemaEditorView = () => {
+  schemaEditorVisible.value = false;
+  mobileSchemaJsonEditorOpen.value = false;
+};
+
+const onMobileSheetMaskClick = () => {
+  if (mobileSchemaJsonEditorOpen.value) {
+    mobileSchemaJsonEditorOpen.value = false;
+    return;
+  }
+  closeSchemaEditorView();
 };
 
 const toggleSchemaVersion = (schema: Record<string, unknown>, cardId: string) => {
   currentCardId.value = cardId;
   schemaEditor.value = JSON.stringify(schema, null, 2);
+  // 移动端：先打开底部抽屉仅展示渲染预览；JSON 编辑器由抽屉内「查看 Schema」再打开
+  if (isMobile.value) {
+    mobileSchemaJsonEditorOpen.value = false;
+    schemaEditorVisible.value = true;
+  }
 };
 
 const resetToLatestVersion = () => {
@@ -96,13 +118,20 @@ const resetToLatestVersion = () => {
   if (latestSchema) {
     schemaEditor.value = JSON.stringify(JSON.parse(latestSchema), null, 2);
   }
+  if (isMobile.value) {
+    mobileSchemaJsonEditorOpen.value = false;
+  }
 };
 
-// 按 Esc 关闭 schema 编辑/对比视图
+// 按 Esc：移动端先关 JSON 第二层，再关整个抽屉
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
+    if (isMobile.value && schemaEditorVisible.value && mobileSchemaJsonEditorOpen.value) {
+      mobileSchemaJsonEditorOpen.value = false;
+      return;
+    }
     if (schemaEditorVisible.value) {
-      schemaEditorVisible.value = false;
+      closeSchemaEditorView();
     }
   }
 };
@@ -111,6 +140,7 @@ const currentConversationId = computed(() => conversation?.state.currentId);
 
 watch(currentConversationId, () => {
   schemaEditorVisible.value = false;
+  mobileSchemaJsonEditorOpen.value = false;
   currentCardId.value = '';
 });
 
@@ -127,32 +157,109 @@ onUnmounted(() => {
 <template>
   <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">
     <div class="genui-schema-template-item chat-container">
-      <GenuiConfigProvider v-show="!schemaEditorVisible" :theme="theme" style="width: 100%; height: 100%">
+      <!-- 桌面：打开内联编辑器时隐藏聊天；移动端：底部抽屉叠在聊天上，聊天保持挂载以便背后仍可见 -->
+      <GenuiConfigProvider v-show="!schemaEditorVisible || isMobile" :theme="theme" style="width: 100%; height: 100%">
         <genui-template-chat class="genui-template-chat" @schema-version-toggle="toggleSchemaVersion" />
       </GenuiConfigProvider>
-      <div class="schema-version-container" v-show="schemaEditorVisible">
-        <code-editor v-model:value="schemaEditor" language="json" theme="vs" :options="editorOptions" />
+      <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
+        <div class="schema-version-container__header">
+          <span class="schema-version-container__title">查看 Schema</span>
+          <button type="button" class="schema-version-container__close" aria-label="关闭" @click="closeSchemaEditorView">
+            ×
+          </button>
+        </div>
+        <div class="schema-version-container__editor">
+          <code-editor v-model:value="schemaEditor" language="json" theme="vs" :options="editorOptions" />
+        </div>
       </div>
     </div>
-    <div class="genui-schema-template-item renderer-container" v-if="currentSchema">
-      <div class="renderer-container-wrapper">
-        <div class="top-button-group">
-          <span class="schema-toggle-text" @click="toggleSchemaEditor">
-            <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
-            查看 Schema
-          </span>
-          <div class="top-button-group-right">
-            <tiny-button v-if="showReturnLatestButton" type="info" round
-              @click="resetToLatestVersion">返回最新版本</tiny-button>
+    <Teleport v-if="isMobile" to="body">
+      <Transition name="schema-mobile-sheet">
+        <div
+          v-show="isMobile && schemaEditorVisible"
+          class="schema-mobile-sheet"
+          role="dialog"
+          aria-modal="true"
+          :aria-label="mobileSchemaJsonEditorOpen ? 'Schema JSON 编辑器' : 'Schema 预览'"
+        >
+          <div class="schema-mobile-sheet__mask" @click="onMobileSheetMaskClick" />
+          <div class="schema-mobile-sheet__panel">
+            <div class="schema-mobile-sheet__grab" />
+            <div class="schema-mobile-sheet__header">
+              <div class="schema-mobile-sheet__header-start">
+                <span
+                  v-if="!mobileSchemaJsonEditorOpen"
+                  class="schema-mobile-sheet__entry"
+                  @click="mobileSchemaJsonEditorOpen = true"
+                >
+                  <img class="schema-mobile-sheet__entry-icon" :src="viewSchemaIcon" alt="" />
+                  查看 Schema
+                </span>
+                <button
+                  v-else
+                  type="button"
+                  class="schema-mobile-sheet__back"
+                  @click="mobileSchemaJsonEditorOpen = false"
+                >
+                  返回预览
+                </button>
+              </div>
+              <span class="schema-mobile-sheet__title">{{ mobileSchemaJsonEditorOpen ? 'JSON' : '预览' }}</span>
+              <div class="schema-mobile-sheet__header-end">
+                <tiny-button
+                  v-if="showReturnLatestButton"
+                  type="primary"
+                  round
+                  class="schema-mobile-sheet__latest-btn"
+                  @click="resetToLatestVersion"
+                >
+                  返回最新版本
+                </tiny-button>
+                <button type="button" class="schema-mobile-sheet__close" aria-label="关闭" @click="closeSchemaEditorView">
+                  ×
+                </button>
+              </div>
+            </div>
+            <div class="schema-mobile-sheet__body">
+              <div v-if="currentSchema" v-show="!mobileSchemaJsonEditorOpen" class="schema-mobile-sheet__preview schema-mobile-sheet__preview--solo">
+                <schema-renderer class="schema-mobile-sheet-renderer" :content="currentSchema" :generating="false" />
+              </div>
+              <Transition name="schema-mobile-json">
+                <div
+                  v-show="mobileSchemaJsonEditorOpen"
+                  class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer"
+                >
+                  <code-editor v-model:value="schemaEditor" language="json" theme="vs" :options="editorOptions" />
+                </div>
+              </Transition>
+            </div>
           </div>
         </div>
-        <schema-renderer class="schema-renderer" :content="currentSchema" :generating="false" />
+      </Transition>
+    </Teleport>
+    <template v-if="!isMobile">
+      <div class="genui-schema-template-item renderer-container" v-if="currentSchema">
+        <div class="renderer-container-wrapper">
+          <div class="top-button-group">
+            <span class="schema-toggle-text" @click="toggleSchemaEditor">
+              <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
+              查看 Schema
+            </span>
+            <div class="top-button-group-right">
+              <tiny-button v-if="showReturnLatestButton" type="primary" round
+                @click="resetToLatestVersion">返回最新版本</tiny-button>
+            </div>
+          </div>
+          <schema-renderer class="schema-renderer" :content="currentSchema" :generating="false" />
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <style scoped lang="less">
+@schema-toolbar-height: 64px;
+
 .genui-schema-template {
   display: flex;
   margin-bottom: 20px;
@@ -170,7 +277,7 @@ onUnmounted(() => {
     display: flex;
     height: 100%;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden;
   }
 
   & .renderer-container {
@@ -189,8 +296,14 @@ onUnmounted(() => {
       position: relative;
 
       .top-button-group {
+        flex-shrink: 0;
+        box-sizing: border-box;
+        height: @schema-toolbar-height;
+        min-height: @schema-toolbar-height;
+        max-height: @schema-toolbar-height;
         border-bottom: 1px solid rgb(232, 232, 232);
-        padding: 16px 24px;
+        border-left: 1px solid rgb(232, 232, 232);
+        padding: 0 24px;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -219,6 +332,8 @@ onUnmounted(() => {
         flex: 1;
         padding: 20px;
         overflow: auto;
+        border-left: 1px solid rgb(232, 232, 232);
+        box-sizing: border-box;
       }
     }
   }
@@ -241,12 +356,277 @@ onUnmounted(() => {
 }
 
 .schema-version-container {
+  flex: 1;
   width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   box-sizing: border-box;
   min-height: 0;
+  overflow: hidden;
+  background: #fff;
+
+  &__header {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    height: @schema-toolbar-height;
+    min-height: @schema-toolbar-height;
+    max-height: @schema-toolbar-height;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 14px;
+    border-bottom: 1px solid rgb(232, 232, 232);
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgb(25, 25, 25);
+    line-height: 22px;
+  }
+
+  &__close {
+    margin: 0;
+    padding: 4px 10px;
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    line-height: 1;
+    color: #666;
+    cursor: pointer;
+    border-radius: 8px;
+
+    &:hover {
+      color: #191919;
+      background: rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__editor {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &__editor :deep(.monaco-code-editor) {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.schema-mobile-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: auto;
+
+  &__mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  &__panel {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-height: 48vh;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    transform: translateY(0);
+  }
+
+  &__grab {
+    flex-shrink: 0;
+    width: 36px;
+    height: 4px;
+    margin: 10px auto 6px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.12);
+  }
+
+  &__header {
+    flex-shrink: 0;
+    flex-grow: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    max-height: 64px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgb(232, 232, 232);
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  &__header-start {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  &__header-end {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  &__latest-btn {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 50%;
+  }
+
+  &__entry {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    color: #191919;
+    font-size: 14px;
+    line-height: 22px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__entry-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  &__back {
+    margin: 0;
+    padding: 6px 4px;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    line-height: 22px;
+    color: #1890ff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  &__title {
+    flex: 0 0 auto;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #191919;
+    white-space: nowrap;
+  }
+
+  &__close {
+    margin: 0;
+    padding: 4px 12px;
+    border: none;
+    background: transparent;
+    font-size: 22px;
+    line-height: 1;
+    color: #666;
+    cursor: pointer;
+    border-radius: 8px;
+
+    &:active {
+      background: rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  &__body {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    box-sizing: border-box;
+  }
+
+  &__preview {
+    &--solo {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      background: #fafafa;
+    }
+  }
+
+  &__editor {
+    &--layer {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: #fff;
+      box-sizing: border-box;
+    }
+  }
+
+  &-renderer {
+    min-height: 120px;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+
+  &__editor--layer :deep(.monaco-code-editor) {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.schema-mobile-json-enter-active,
+.schema-mobile-json-leave-active {
+  transition: opacity 0.2s ease, transform 0.22s ease;
+}
+
+.schema-mobile-json-enter-from,
+.schema-mobile-json-leave-to {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.schema-mobile-sheet-enter-active,
+.schema-mobile-sheet-leave-active {
+  transition: opacity 0.22s ease;
+
+  .schema-mobile-sheet__panel {
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+}
+
+.schema-mobile-sheet-enter-from,
+.schema-mobile-sheet-leave-to {
+  opacity: 0;
+
+  .schema-mobile-sheet__panel {
+    transform: translateY(100%);
+  }
 }
 </style>
