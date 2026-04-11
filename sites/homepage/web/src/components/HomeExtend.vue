@@ -55,6 +55,14 @@ const inputMessage = computed(
   () => `?input-message=${messageContentMap[extendSelect.value as keyof typeof messageContentMap]}`,
 );
 
+/** 已开始回放流程（生成中 / 准备中 / 暂停待续）时固定在右下角；仅待播放或重播待命时居中 */
+const streamControlsDocked = computed(
+  () =>
+    generating.value ||
+    preparingPlayback.value ||
+    !streamCompleted.value,
+);
+
 const userBubbleContent = computed(
   () => bubbleContentMap[extendSelect.value as keyof typeof messageContentMap],
 );
@@ -322,45 +330,54 @@ onUnmounted(() => {
             </div>
           </div>
         </div>
-        <div class="home-extend-stream-controls" aria-label="回放控制">
-          <tiny-tooltip v-if="generating" content="暂停" placement="top" effect="light">
-            <tiny-button
-              class="home-extend-control-btn"
-              circle
-              size="medium"
-              :icon="TinyIconPause"
-              @click="handleCornerPause"
-            />
-          </tiny-tooltip>
-          <tiny-tooltip
-            v-else-if="!streamCompleted"
-            content="继续"
-            placement="top"
-            effect="light"
-          >
-            <tiny-button
-              class="home-extend-control-btn"
-              circle
-              size="medium"
-              :icon="TinyIconStartCircle"
-              @click="handleCornerResume"
-            />
-          </tiny-tooltip>
-          <tiny-tooltip
-            v-else
-            :content="preparingPlayback ? '准备播放中' : hasPlayedOnce ? '重播' : '播放'"
-            placement="top"
-            effect="light"
-          >
-            <tiny-button
-              class="home-extend-control-btn"
-              circle
-              size="medium"
-              :icon="hasPlayedOnce ? TinyIconRefresh : TinyIconStartCircle"
-              :disabled="preparingPlayback"
-              @click="handleCornerReplay"
-            />
-          </tiny-tooltip>
+        <div
+          class="home-extend-stream-controls"
+          :class="{ 'home-extend-stream-controls--docked': streamControlsDocked }"
+          aria-label="回放控制"
+        >
+          <div class="home-extend-stream-controls-surface">
+            <tiny-tooltip v-if="generating" content="暂停" placement="top" effect="light">
+              <tiny-button
+                class="home-extend-control-btn"
+                circle
+                :reset-time="0"
+                :size="streamControlsDocked ? 'medium' : 'large'"
+                :icon="TinyIconPause"
+                @click="handleCornerPause"
+              />
+            </tiny-tooltip>
+            <tiny-tooltip
+              v-else-if="!streamCompleted"
+              content="继续"
+              placement="top"
+              effect="light"
+            >
+              <tiny-button
+                class="home-extend-control-btn"
+                circle
+                :reset-time="0"
+                :size="streamControlsDocked ? 'medium' : 'large'"
+                :icon="TinyIconStartCircle"
+                @click="handleCornerResume"
+              />
+            </tiny-tooltip>
+            <tiny-tooltip
+              v-else
+              :content="preparingPlayback ? '准备播放中' : hasPlayedOnce ? '重播' : '播放'"
+              placement="top"
+              effect="light"
+            >
+              <tiny-button
+                class="home-extend-control-btn"
+                circle
+                :reset-time="0"
+                :size="streamControlsDocked ? 'medium' : 'large'"
+                :icon="hasPlayedOnce ? TinyIconRefresh : TinyIconStartCircle"
+                :disabled="preparingPlayback"
+                @click="handleCornerReplay"
+              />
+            </tiny-tooltip>
+          </div>
         </div>
       </div>
     </div>
@@ -455,6 +472,8 @@ onUnmounted(() => {
       border-radius: 12px;
       overflow: hidden;
       box-sizing: border-box;
+      container-type: size;
+      container-name: extend-stream;
     }
 
     &-content-scroll {
@@ -486,7 +505,6 @@ onUnmounted(() => {
     }
 
   }
-
   @media (max-width: 768px) {
     &-schema {
       padding: 5%;
@@ -593,12 +611,33 @@ onUnmounted(() => {
 
 .home-extend-stream-controls {
   position: absolute;
-  right: 24px;
-  bottom: 16px;
+  inset: 0;
   z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  pointer-events: none;
+
+  &-surface {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max-content;
+    pointer-events: auto;
+    will-change: transform;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translate(-50%, -50%);
+  }
+
+  &--docked &-surface {
+    transform: translate(
+      calc(50cqw - 24px - 100%),
+      calc(50cqh - 16px - 100%)
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &-surface {
+      transition-duration: 0.01ms;
+    }
+  }
 }
 
 .home-extend-control-btn {
