@@ -39,8 +39,11 @@ const latestSchemaCardId = computed(() => {
 
   return schemaMessage?.cardId ?? '';
 });
-// 仅当正在查看历史版本时显示“返回最新版本”
+// 仅当正在查看历史版本时显示“返回最新版本/应用此版本”
 const showReturnLatestButton = computed(() => Boolean(currentCardId.value && latestSchemaCardId.value && currentCardId.value !== latestSchemaCardId.value));
+// 历史版本在未“应用此版本”前禁止编辑
+const isHistoryVersionApplied = ref(true);
+const isSchemaEditorReadonly = computed(() => showReturnLatestButton.value && !isHistoryVersionApplied.value);
 // 编辑器中显示的代码
 const schemaEditor = computed({
   get() {
@@ -64,7 +67,7 @@ const schemaEditor = computed({
   },
 });
 
-const editorOptions = {
+const editorOptions = computed(() => ({
   fontSize: 14,
   minimap: { enabled: false },
   automaticLayout: true,
@@ -72,7 +75,8 @@ const editorOptions = {
   foldingHighlight: true,
   foldingStrategy: 'indentation',
   formatOnPaste: true,
-};
+  readOnly: isSchemaEditorReadonly.value,
+}));
 
 const toggleSchemaEditor = () => {
   schemaEditorVisible.value = !schemaEditorVisible.value;
@@ -102,12 +106,17 @@ const onMobileSheetMaskClick = () => {
 const toggleSchemaVersion = (schema: Record<string, unknown>, cardId: string) => {
   rendererPanelVisible.value = true;
   currentCardId.value = cardId;
+  isHistoryVersionApplied.value = cardId === latestSchemaCardId.value;
   schemaEditor.value = JSON.stringify(schema, null, 2);
   // 移动端：先打开底部抽屉仅展示渲染预览；JSON 编辑器由抽屉内「查看 Schema」再打开
   if (isMobile.value) {
     mobileSchemaJsonEditorOpen.value = false;
     schemaEditorVisible.value = true;
   }
+};
+
+const applyCurrentVersion = () => {
+  isHistoryVersionApplied.value = true;
 };
 
 const resetToLatestVersion = () => {
@@ -126,6 +135,7 @@ const resetToLatestVersion = () => {
   );
   const latestSchema = schemaMessage?.schema;
   currentCardId.value = schemaMessage?.cardId ?? '';
+  isHistoryVersionApplied.value = true;
   if (latestSchema) {
     schemaEditor.value = JSON.stringify(JSON.parse(latestSchema), null, 2);
   }
@@ -153,6 +163,7 @@ watch(currentConversationId, () => {
   schemaEditorVisible.value = false;
   mobileSchemaJsonEditorOpen.value = false;
   currentCardId.value = '';
+  isHistoryVersionApplied.value = true;
   rendererPanelVisible.value = true;
 });
 
@@ -196,21 +207,22 @@ onUnmounted(() => {
           class="schema-mobile-sheet"
           role="dialog"
           aria-modal="true"
-          :aria-label="mobileSchemaJsonEditorOpen ? 'Schema JSON 编辑器' : 'Schema 预览'"
+          :aria-label="mobileSchemaJsonEditorOpen ? 'Schema JSON 编辑器' : 'Schema JSON 预览'"
         >
           <div class="schema-mobile-sheet__mask" @click="onMobileSheetMaskClick" />
           <div class="schema-mobile-sheet__panel">
             <div class="schema-mobile-sheet__grab" />
             <div class="schema-mobile-sheet__header">
               <div class="schema-mobile-sheet__header-start">
-                <span
+                <button
                   v-if="!mobileSchemaJsonEditorOpen"
+                  type="button"
                   class="schema-mobile-sheet__entry"
                   @click="mobileSchemaJsonEditorOpen = true"
                 >
                   <img class="schema-mobile-sheet__entry-icon" :src="viewSchemaIcon" alt="" />
-                  查看 Schema
-                </span>
+                  查看 JSON
+                </button>
                 <button
                   v-else
                   type="button"
@@ -220,17 +232,7 @@ onUnmounted(() => {
                   返回预览
                 </button>
               </div>
-              <span class="schema-mobile-sheet__title">{{ mobileSchemaJsonEditorOpen ? 'JSON' : '预览' }}</span>
               <div class="schema-mobile-sheet__header-end">
-                <tiny-button
-                  v-if="showReturnLatestButton"
-                  type="primary"
-                  round
-                  class="schema-mobile-sheet__latest-btn"
-                  @click="resetToLatestVersion"
-                >
-                  返回最新版本
-                </tiny-button>
                 <tiny-button
                   type="text"
                   class="genui-schema-toolbar-close-btn"
@@ -240,7 +242,7 @@ onUnmounted(() => {
                 />
               </div>
             </div>
-            <div class="schema-mobile-sheet__body">
+            <div :class="['schema-mobile-sheet__body', { 'schema-mobile-sheet__body--with-footer': showReturnLatestButton }]">
               <div v-if="currentSchema" v-show="!mobileSchemaJsonEditorOpen" class="schema-mobile-sheet__preview schema-mobile-sheet__preview--solo">
                 <schema-renderer class="schema-mobile-sheet-renderer" :content="currentSchema" :generating="false" />
               </div>
@@ -253,6 +255,12 @@ onUnmounted(() => {
                 </div>
               </Transition>
             </div>
+            <div v-if="showReturnLatestButton" class="schema-mobile-sheet__footer">
+              <tiny-button type="primary" round class="schema-mobile-sheet__latest-btn" @click="applyCurrentVersion">
+                应用此版本
+              </tiny-button>
+              <tiny-button round class="schema-mobile-sheet__latest-btn" @click="resetToLatestVersion">返回最新版本</tiny-button>
+            </div>
           </div>
         </div>
       </Transition>
@@ -261,13 +269,13 @@ onUnmounted(() => {
       <div class="genui-schema-template-item renderer-container" v-if="currentSchema && rendererPanelVisible">
         <div class="renderer-container-wrapper">
           <div class="top-button-group">
-            <span class="schema-toggle-text" @click="toggleSchemaEditor">
+            <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
               <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
-              查看 Schema
-            </span>
+              查看 JSON
+            </button>
             <div class="top-button-group-right">
-              <tiny-button v-if="showReturnLatestButton" type="primary" round
-                @click="resetToLatestVersion">返回最新版本</tiny-button>
+              <tiny-button v-if="showReturnLatestButton" round @click="resetToLatestVersion">返回最新版本</tiny-button>
+              <tiny-button v-if="showReturnLatestButton" type="primary" round @click="applyCurrentVersion">应用此版本</tiny-button>
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
@@ -345,12 +353,24 @@ onUnmounted(() => {
         .schema-toggle-text {
           display: inline-flex;
           align-items: center;
+          margin: 0;
+          padding: 0;
+          border: none;
+          background: transparent;
+          font: inherit;
+          text-align: inherit;
           color: #191919;
           cursor: pointer;
           user-select: none;
 
           &:hover {
             color: #1890ff;
+          }
+
+          &:focus-visible {
+            outline: 2px solid #1890ff;
+            outline-offset: 2px;
+            border-radius: 4px;
           }
         }
 
@@ -388,11 +408,10 @@ onUnmounted(() => {
   min-height: 0;
 }
 
-/* 左侧 Schema 顶栏、右侧预览顶栏、移动端抽屉：统一 Tiny 纯图标关闭尺寸与交互 */
 .genui-schema-toolbar-close-btn {
   flex-shrink: 0;
 
-  &:deep(.tiny-button) {
+  &.tiny-button {
     box-sizing: border-box;
     min-width: 32px;
     width: 32px;
@@ -540,11 +559,31 @@ onUnmounted(() => {
     max-width: 50%;
   }
 
+  &__footer {
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fff;
+
+    .schema-mobile-sheet__latest-btn {
+      max-width: none;
+    }
+  }
+
   &__entry {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    text-align: inherit;
     color: #191919;
     font-size: 14px;
     line-height: 22px;
@@ -553,6 +592,12 @@ onUnmounted(() => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &:focus-visible {
+      outline: 2px solid #1890ff;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
   }
 
   &__entry-icon {
@@ -589,7 +634,6 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
     box-sizing: border-box;
   }
 
