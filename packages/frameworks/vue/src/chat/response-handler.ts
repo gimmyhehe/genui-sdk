@@ -193,7 +193,7 @@ export const defaultResponseHandlers: IResponseHandler<IStreamData>[] = [
     name: 'reasoning',
     match: (data: IStreamData, context: any) => {
       const delta = getStreamDelta(data);
-      return delta.reasoning_content !== undefined;
+      return Boolean(delta.reasoning_content);
     },
     handler: (data: IStreamData, context: any) => {
       const delta = getStreamDelta(data);
@@ -247,7 +247,7 @@ export const defaultResponseHandlers: IResponseHandler<IStreamData>[] = [
     name: 'content',
     match: (data: IStreamData, context: any) => {
       const delta = getStreamDelta(data);
-      return delta.content !== undefined;
+      return Boolean(delta.content);
     },
     handler: (data: IStreamData, context: any) => {
       const delta = getStreamDelta(data);
