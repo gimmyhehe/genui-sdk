@@ -16,7 +16,7 @@ import { GeneratingStatus, STATUS } from '@opentiny/tiny-robot-kit';
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import { IconAi, IconUser, IconArrowDown } from '@opentiny/tiny-robot-svgs';
 import type { BubbleRoleConfig } from '@opentiny/tiny-robot';
-import { requiredCompleteFieldSelectors, scrollEnd, throttle, GenuiRenderer } from '@opentiny/genui-sdk-vue';
+import { requiredCompleteFieldSelectors, scrollEnd, throttle } from '@opentiny/genui-sdk-vue';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import copy from 'clipboard-copy';
 import type { INotificationPayload, IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
@@ -30,9 +30,9 @@ import {
   generateId,
 } from './template-chat-utils';
 import { jsonPatchDeduplicator } from './json-patch-deduplicator';
-import SchemaVersionCard from './SchemaVersionCard.vue';
 import useTemplate from './useTemplate';
 import AssistantFooter from './TemplateAssistantFooter.vue';
+import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
 import { emitter } from './template-chat-event-emitter';
 import useIcon from '../../use-icon';
 
@@ -284,45 +284,29 @@ const markdownRenderer = new BubbleMarkdownContentRenderer({
   mdConfig: { html: true },
 });
 
-const templateRenderer = (props: any, type: 'json-patch' | 'schema-card') => {
-  const generating = !props.generatedTime;
-  if (generating) {
-    return h(
-      'div',
-      {},
-      h(
-        GenuiRenderer,
-        {
-          ...props,
-          requiredCompleteFieldSelectors: props.requiredCompleteFieldSelectors || [],
-          generating: generating,
-          key: props.cardId,
-        }
-      ),
-    );
-  }
-
-  return h(SchemaVersionCard, {
-    key: props.cardId,
-    prevSchema: prevSchema.value,
-    errorMessagesMap: errorMessagesMap.value,
-    type,
-    ...props,
-    onClick: handleSchemaVersionCardClick,
-  });
-}
-
 const messageRenderers = {
   markdown: markdownRenderer,
   'json-patch': (props) => {
     jsonPatchRenderer(props);
-    const type = 'json-patch';
-    return templateRenderer(props, type);
+
+    return h(TemplateSchemaMessageRenderer, {
+      itemProps: props,
+      type: 'json-patch',
+      prevSchema: prevSchema.value,
+      errorMessagesMap: errorMessagesMap.value,
+      onSchemaVersionCardClick: handleSchemaVersionCardClick,
+    });
   },
   'schema-card': (props) => {
     schemaCardRenderer(props);
-    const type = 'schema-card';
-    return templateRenderer(props, type);
+
+    return h(TemplateSchemaMessageRenderer, {
+      itemProps: props,
+      type: 'schema-card',
+      prevSchema: prevSchema.value,
+      errorMessagesMap: errorMessagesMap.value,
+      onSchemaVersionCardClick: handleSchemaVersionCardClick,
+    });
   },
 };
 
