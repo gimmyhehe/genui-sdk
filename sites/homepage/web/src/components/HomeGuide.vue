@@ -5,6 +5,7 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import { TinyButton } from '@opentiny/vue';
 import genuiChatIcon from '@/assets/genui_chat_icon.svg';
 import genuiInusecon from '@/assets/genui_inuse_icon.svg';
+import arrowRightIcon from '@/assets/arrow.svg';
 import gneuiSettingsIcon from '@/assets/genui_settings_icon.svg';
 import { guideCodeMap } from '@/config';
 import { LinkKey, linkMap } from '@/utils/link';
@@ -29,7 +30,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateIsMobile);
 });
 
-hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('javascript', javascript);  
 
 function hightlight() {
   nextTick(() => {
@@ -87,7 +88,7 @@ const handleGuideCardClick = (index: number) => {
             class="home-guide-content-left-button"
             size="medium"
             round
-            >开发文档</tiny-button
+            >开发文档 <img :src="arrowRightIcon" alt="arrow-right" /> </tiny-button
           >
         </a>
       </div>
@@ -161,6 +162,9 @@ const handleGuideCardClick = (index: number) => {
       gap: 0;
       &-button {
         margin-top: 24px;
+        img {
+          margin-left: 8px;
+        }
       }
 
       @media (min-width: 1280px) {
@@ -270,8 +274,21 @@ const handleGuideCardClick = (index: number) => {
 }
 
 @media (max-width: 768px) {
+  .home-guide-content-right-framework {
+    border-radius: 6px;
+
+    &-header {
+      border-radius: 6px 6px 0 0;
+    }
+  }
+
   :deep(.guide-code) {
     font-size: 14px;
+    border-radius: 0 0 6px 6px;
+
+    &::-webkit-scrollbar-corner {
+      border-bottom-right-radius: 6px;
+    }
   }
 }
 

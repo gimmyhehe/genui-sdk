@@ -5,7 +5,7 @@ import genuiAbility1 from '@/assets/genui_ability_1.svg';
 import genuiAbility2 from '@/assets/genui_ability_2.webp';
 import genuiAbility3 from '@/assets/create-github.webp';
 import genuiActionVedioCover from '@/assets/order-milk-tea.webp';
-import genuiFlowVedioCover from '@/assets/genui_flow_vedio_cover.webp';
+import genuiFlowVedioCover from '@/assets/search-ticket.webp';
 import { LinkKey, linkMap } from '@/utils/link';
 import { useMobile } from '@/composables/useMobile';
 import HomeAbility from '@/components/HomeAbility.vue';
@@ -322,7 +322,7 @@ const buttonSize = computed(() => {
     display: flex;
     padding: 16px;
     border-radius: 24px;
-    background-image: url('@/assets/genui_ability_bg_2.jpg');
+    background-image: url('@/assets/genui_ability_bg_2.svg');
     background-size: cover;
 
     img {

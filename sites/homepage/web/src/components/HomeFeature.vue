@@ -121,7 +121,7 @@ const features = [
     justify-content: center;
     padding: 48px;
     border: 3px solid #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     cursor: pointer;
     box-shadow: 0px 4px 30px 0px rgba(230, 230, 230, 0.6);
 
@@ -130,6 +130,7 @@ const features = [
     }
     @media (max-width: 768px) {
       flex-direction: row;
+      border-radius: 6px;
       box-shadow: 0px 2px 12px 0px rgba(230, 230, 230, 0.6);
       div&-title {
         margin-bottom: 0;
