@@ -122,12 +122,16 @@ const handleDev = () => {
     justify-content: space-between;
     margin-left: 8px;
     height: 40px;
+    min-width: 0;
 
     &-title {
       font-size: 14px;
       font-weight: 600;
       line-height: 22px;
       color: rgb(25, 25, 25);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     &-time {
