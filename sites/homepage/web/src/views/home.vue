@@ -97,7 +97,7 @@ const buttonSize = computed(() => {
         preload="none"
         :poster="genuiActionVedioCover"
       >
-        <source src="/order-milk-tea.mov" type="video/mp4" />
+        <source src="/order-milk-tea.mp4" type="video/mp4" />
     </video>
     </home-ability>
 
@@ -150,7 +150,7 @@ const buttonSize = computed(() => {
         preload="none"
         :poster="genuiFlowVedioCover"
       >
-        <source src="/search-ticket.mov" type="video/mp4" />
+        <source src="/search-ticket.mp4" type="video/mp4" />
       </video>
     </home-ability>
 
