@@ -26,6 +26,13 @@ const rendererPanelVisible = ref(true);
 // schema 编辑器是否可见（移动端：底部抽屉；抽屉内先预览再可打开 JSON）
 const schemaEditorVisible = ref(false);
 const mobileSchemaJsonEditorOpen = ref(false);
+const MOBILE_SHEET_DEFAULT_HEIGHT_VH = 64;
+const MOBILE_SHEET_MIN_HEIGHT_VH = 42;
+const MOBILE_SHEET_MAX_HEIGHT_VH = 92;
+const mobileSheetHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
+const mobileSheetDragStartY = ref(0);
+const mobileSheetDragStartHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
+const mobileSheetDragging = ref(false);
 const latestSchemaCardId = computed(() => {
   const conversationState = templateConversationState.value;
   const currentConversation = conversationState?.conversations?.find(
@@ -88,6 +95,8 @@ const toggleSchemaEditor = () => {
 const closeSchemaEditorView = () => {
   schemaEditorVisible.value = false;
   mobileSchemaJsonEditorOpen.value = false;
+  mobileSheetDragging.value = false;
+  mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
 };
 
 const closeRendererPanel = () => {
@@ -98,9 +107,56 @@ const closeRendererPanel = () => {
 const onMobileSheetMaskClick = () => {
   if (mobileSchemaJsonEditorOpen.value) {
     mobileSchemaJsonEditorOpen.value = false;
+  }
+};
+
+const mobileSheetPanelStyle = computed(() => ({
+  height: `${mobileSheetHeightVh.value}vh`,
+}));
+
+const clampMobileSheetHeight = (heightVh: number) =>
+  Math.min(MOBILE_SHEET_MAX_HEIGHT_VH, Math.max(MOBILE_SHEET_MIN_HEIGHT_VH, heightVh));
+
+const handleMobileSheetDragMove = (event: TouchEvent) => {
+  if (!mobileSheetDragging.value) {
     return;
   }
-  closeSchemaEditorView();
+  const touch = event.touches[0];
+  if (!touch) {
+    return;
+  }
+  const deltaY = touch.clientY - mobileSheetDragStartY.value;
+  const deltaVh = (deltaY / window.innerHeight) * 100;
+  mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetDragStartHeightVh.value - deltaVh);
+  event.preventDefault();
+};
+
+const removeMobileSheetDragListeners = () => {
+  window.removeEventListener('touchmove', handleMobileSheetDragMove);
+  window.removeEventListener('touchend', handleMobileSheetDragEnd);
+  window.removeEventListener('touchcancel', handleMobileSheetDragEnd);
+};
+
+function handleMobileSheetDragEnd() {
+  if (!mobileSheetDragging.value) {
+    return;
+  }
+  mobileSheetDragging.value = false;
+  removeMobileSheetDragListeners();
+  mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetHeightVh.value);
+}
+
+const onMobileSheetGrabTouchStart = (event: TouchEvent) => {
+  const touch = event.touches[0];
+  if (!touch) {
+    return;
+  }
+  mobileSheetDragging.value = true;
+  mobileSheetDragStartY.value = touch.clientY;
+  mobileSheetDragStartHeightVh.value = mobileSheetHeightVh.value;
+  window.addEventListener('touchmove', handleMobileSheetDragMove, { passive: false });
+  window.addEventListener('touchend', handleMobileSheetDragEnd);
+  window.addEventListener('touchcancel', handleMobileSheetDragEnd);
 };
 
 const toggleSchemaVersion = (schema: Record<string, unknown>, cardId: string) => {
@@ -116,6 +172,7 @@ const toggleSchemaVersion = (schema: Record<string, unknown>, cardId: string) =>
   if (isMobile.value) {
     mobileSchemaJsonEditorOpen.value = false;
     schemaEditorVisible.value = true;
+    mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
   }
 };
 
@@ -143,6 +200,7 @@ const resetToLatestVersion = () => {
   isHistoryVersionApplied.value = true;
   if (latestSchema) {
     setCurrentSchema(JSON.parse(latestSchema));
+    setCurrentPreviewSchema(JSON.parse(latestSchema));
   }
   if (isMobile.value) {
     mobileSchemaJsonEditorOpen.value = false;
@@ -154,6 +212,9 @@ const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     if (isMobile.value && schemaEditorVisible.value && mobileSchemaJsonEditorOpen.value) {
       mobileSchemaJsonEditorOpen.value = false;
+      return;
+    }
+    if (isMobile.value) {
       return;
     }
     if (schemaEditorVisible.value) {
@@ -179,6 +240,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
+  removeMobileSheetDragListeners();
 });
 </script>
 
@@ -205,8 +267,8 @@ onUnmounted(() => {
         <div v-show="isMobile && schemaEditorVisible" class="schema-mobile-sheet" role="dialog" aria-modal="true"
           :aria-label="mobileSchemaJsonEditorOpen ? 'Schema JSON 编辑器' : 'Schema JSON 预览'">
           <div class="schema-mobile-sheet__mask" @click="onMobileSheetMaskClick" />
-          <div class="schema-mobile-sheet__panel">
-            <div class="schema-mobile-sheet__grab" />
+          <div class="schema-mobile-sheet__panel" :style="mobileSheetPanelStyle">
+            <div class="schema-mobile-sheet__grab" @touchstart="onMobileSheetGrabTouchStart" />
             <div class="schema-mobile-sheet__header">
               <div class="schema-mobile-sheet__header-start">
                 <button v-if="!mobileSchemaJsonEditorOpen" type="button" class="schema-mobile-sheet__entry"
@@ -226,9 +288,9 @@ onUnmounted(() => {
             </div>
             <div
               :class="['schema-mobile-sheet__body', { 'schema-mobile-sheet__body--with-footer': showReturnLatestButton }]">
-              <div v-if="currentSchema" v-show="!mobileSchemaJsonEditorOpen"
+              <div v-if="currentPreviewSchema" v-show="!mobileSchemaJsonEditorOpen"
                 class="schema-mobile-sheet__preview schema-mobile-sheet__preview--solo">
-                <schema-renderer class="schema-mobile-sheet-renderer" :content="currentSchema" :generating="false" />
+                <schema-renderer class="schema-mobile-sheet-renderer" :content="currentPreviewSchema" :generating="false" />
               </div>
               <Transition name="schema-mobile-json">
                 <div v-show="mobileSchemaJsonEditorOpen"
@@ -496,8 +558,20 @@ onUnmounted(() => {
     width: 36px;
     height: 4px;
     margin: 10px auto 6px;
+    position: relative;
     border-radius: 999px;
     background: rgba(0, 0, 0, 0.12);
+    touch-action: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 96px;
+      height: 32px;
+      transform: translate(-50%, -50%);
+    }
   }
 
   &__header {
