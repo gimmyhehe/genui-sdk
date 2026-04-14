@@ -53,8 +53,10 @@ const {
   conversation,
   templateConversationState,
   currentSchema,
+  currentPreviewSchema,
   currentCardId,
   setCurrentSchema,
+  setCurrentPreviewSchema,
   updateTemplateTitle,
   setCurrentCardId,
 } = useTemplate();
@@ -138,7 +140,8 @@ const schemaCardRenderer = async (props: any) => {
     deltaPatcher.patchWithDelta(target, json, isCompleted);
     // 给每个组件添加 id
     const schemaWithId = generateIdForComponents(target);
-    setCurrentSchema(schemaWithId);
+    setCurrentPreviewSchema(schemaWithId);
+
   } catch (error) {
     console.error('schemaCardRenderer error ===>', error);
     errorMessagesMap.value.set(props.cardId, error.message);
@@ -192,7 +195,7 @@ const jsonPatchRenderer = async (props: any) => {
 
     const targetSchema = JSON.parse(JSON.stringify(currentSchema.value));
     jsonPatchFormatter.patch(targetSchema, standardOperations);
-    setCurrentSchema(generateIdForComponents(targetSchema));
+    setCurrentPreviewSchema(generateIdForComponents(targetSchema));
     // 标记所有操作（包括已过滤的）为已执行，避免重复执行
     jsonPatchDeduplicator.markAllOperationsExecuted(operationKey, formattedValue);
   } catch (error) {
@@ -257,6 +260,7 @@ const handleRefresh = ({ index }: { index: number }) => {
   }
   if (currentSchema) {
     setCurrentSchema(currentSchema);
+    setCurrentPreviewSchema(currentSchema);
   }
   messages.value = messages.value.slice(0, index);
   setCurrentCardId(messages.value[messages.value.length - 1].messageId as string);
@@ -409,6 +413,7 @@ const handleSendMessage = async () => {
 
 const handleNotification = (event: INotificationPayload) => {
   if (event.type === 'done') {
+    setCurrentSchema(currentPreviewSchema.value);
     // 将 schema 缓存到卡片中
     const lastMessage = messages.value[messages.value.length - 1];
     const lastMessageCard = (lastMessage as any).messages.find(
