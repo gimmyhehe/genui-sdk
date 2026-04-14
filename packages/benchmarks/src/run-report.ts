@@ -53,7 +53,8 @@ async function judgeOneSample(
   const modelId = judgeCfg?.model || options.model;
   const system =
     judgeCfg?.systemPrompt ??
-    '你是严格的前端代码评测员。请依据 schemaJson 格式规范，基于用户需求与模型输出评估“可用性、完整性、准确性”。只返回 JSON：{"score":1-10之间数字,"reason":"一句话原因"}。不要输出其它内容。';
+    `你是严格的前端代码评测员。请依据 schemaJson 格式规范，基于用户需求与模型输出评估从完整性、功能性、信息充分性的角度评估生成的UI代码是否具备完成目标任务的实际能力。
+    只返回 JSON：{"score":1-10之间数字,"reason":"一句话原因"}。不要输出其它内容。`;
   try {
     const requirementText = sample.messages?.length
       ? sample.messages.map((msg) => `[${msg.role}] ${msg.content}`).join('\n')
