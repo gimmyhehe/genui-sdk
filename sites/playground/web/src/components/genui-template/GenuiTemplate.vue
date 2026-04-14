@@ -68,7 +68,10 @@ const schemaEditor = computed({
     try {
       const schema = JSON.parse(value || '{}');
       setCurrentPreviewSchema(schema);
-      setCurrentSchema(schema);
+      // 防御式保护：历史版本未应用时，不允许通过编辑器回写当前生效 schema。
+      if (!isSchemaEditorReadonly.value) {
+        setCurrentSchema(schema);
+      }
     } catch (error) {
       console.error('schemaEditor set error ===>', error);
     }

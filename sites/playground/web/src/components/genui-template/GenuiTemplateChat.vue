@@ -206,40 +206,6 @@ const jsonPatchRenderer = async (props: any) => {
   }
 };
 
-const handleSchemaVersionCardClick = (cardId: string) => {
-  // 从 messages 中找到对应的卡片。
-  let targetStr = '';
-
-  messages.value.some((msg) => {
-    const card = (msg.messages as IMessageItem[])?.find(
-      (message): message is IJsonPatchMessageItem | ISchemaCardMessageItem =>
-        (message.type === 'schema-card' || message.type === 'json-patch') && message.cardId === cardId,
-    );
-
-    if (card) {
-      targetStr = card.schema;
-
-      return true;
-    }
-
-    return false;
-  });
-
-  if (!targetStr) {
-    return;
-  }
-
-  try {
-    const targetSchema = JSON.parse(targetStr);
-    // 当切换 schema 版本时，清理该卡片已执行的 patch 操作记录
-    // 因为新的 schema 版本可能需要重新执行操作
-    jsonPatchDeduplicator.clearCardOperations(cardId);
-    emit('schema-version-toggle', targetSchema, cardId);
-  } catch (error) {
-    console.error('Failed to parse schema for version toggle:', error);
-  }
-};
-
 const getCardMessageByIndex = (index: number) => {
   return (
     (messages.value[index]?.messages as IMessageItem[] | undefined)?.find(
@@ -294,7 +260,8 @@ const messageRenderers = {
       type: 'json-patch',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      onSchemaVersionCardClick: handleSchemaVersionCardClick,
+      messages: messages.value,
+      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) => emit('schema-version-toggle', schema, cardId),
     });
   },
   'schema-card': (props) => {
@@ -305,7 +272,8 @@ const messageRenderers = {
       type: 'schema-card',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      onSchemaVersionCardClick: handleSchemaVersionCardClick,
+      messages: messages.value,
+      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) => emit('schema-version-toggle', schema, cardId),
     });
   },
 };

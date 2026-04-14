@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
+import type { IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
+import { jsonPatchDeduplicator } from './json-patch-deduplicator';
 import SchemaVersionCard from './SchemaVersionCard.vue';
 
 const props = defineProps<{
@@ -8,10 +10,11 @@ const props = defineProps<{
   type: 'json-patch' | 'schema-card';
   prevSchema: string;
   errorMessagesMap: Map<string, string>;
+  messages: any[];
 }>();
 
 const emit = defineEmits<{
-  (event: 'schema-version-card-click', cardId: string): void;
+  (event: 'schema-version-toggle', schema: Record<string, unknown>, cardId: string): void;
 }>();
 
 const generating = computed(() => !props.itemProps?.generatedTime);
@@ -24,7 +27,33 @@ const genuiRendererProps = computed(() => ({
 }));
 
 const handleSchemaVersionCardClick = (cardId: string) => {
-  emit('schema-version-card-click', cardId);
+  let targetStr = '';
+
+  props.messages.some((msg) => {
+    const card = (msg.messages as IMessageItem[])?.find(
+      (message): message is IJsonPatchMessageItem | ISchemaCardMessageItem =>
+        (message.type === 'schema-card' || message.type === 'json-patch') && message.cardId === cardId,
+    );
+
+    if (card) {
+      targetStr = card.schema;
+      return true;
+    }
+
+    return false;
+  });
+
+  if (!targetStr) {
+    return;
+  }
+
+  try {
+    const targetSchema = JSON.parse(targetStr);
+    jsonPatchDeduplicator.clearCardOperations(cardId);
+    emit('schema-version-toggle', targetSchema, cardId);
+  } catch (error) {
+    console.error('Failed to parse schema for version toggle:', error);
+  }
 };
 </script>
 
