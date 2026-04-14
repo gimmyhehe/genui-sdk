@@ -1,7 +1,9 @@
 <script setup>
 import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
+import { IconDownload } from '@opentiny/vue-icon';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
-import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER, generateCode as generateVueCode } from '@opentiny/genui-sdk-vue';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { ref, watch, onMounted, reactive, computed, onUnmounted, provide, defineAsyncComponent, h, shallowRef } from 'vue';
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
@@ -16,6 +18,7 @@ import useIcon from './use-icon';
 
 const { topRenderer, addIcons } = useIcon();
 const TopIconsRenderer = topRenderer();
+const TinyIconDownload = IconDownload();
 
 addIcons(IconAi);
 
@@ -176,6 +179,7 @@ const insertHandlersAfterName = (handlers, insertHandlers, name) => {
 
 const chat = ref(null);
 const conversation = computed(() => chat.value?.getConversation());
+
 watch(chat, (instance) => {
   if (instance) {
     const defaultResponseHandlers = instance.getResponseHandlers();
@@ -185,7 +189,7 @@ watch(chat, (instance) => {
       getContinueGeneratingHandler(conversation.value.messageManager),
       locationPartialSchemaJson(),
     ];
-    
+
     insertHandlersAfterName(newResponseHandlers, [
       movePartialSchemaJsonToLastMessage(),
       getOverlapEliminatorHandler(contentHandler),
@@ -281,6 +285,87 @@ const updateCustomExamples = (list) => {
   customExamples.value = normalizeCustomExamples(list);
 };
 
+const generateComponentsMap = (materialsList) => {
+  if (!Array.isArray(materialsList)) {
+    return [];
+  }
+
+  const deduped = new Map();
+  materialsList.forEach((material) => {
+    const components = material?.data?.materials?.components;
+    if (!Array.isArray(components)) {
+      return;
+    }
+    components.forEach((item) => {
+      const componentName = item?.component || item?.npm?.exportName;
+      const pkg = item?.npm?.package;
+      if (!componentName || !pkg) {
+        return;
+      }
+      deduped.set(componentName, {
+        componentName,
+        pkg,
+        package: pkg,
+        exportName: item?.npm?.exportName || componentName,
+      });
+    });
+  });
+
+  return [...deduped.values()];
+};
+
+const componentsMap = generateComponentsMap(rendererConfig?.materialsList);
+
+const downloadTextFile = (filename, text) => {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = /\.vue$/i.test(filename) ? filename : `${filename}.vue`;
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
+const exportVueCode = async (schema) => {
+  const { panelValue: code, panelName: fileName, errors } = await generateVueCode({
+    pageInfo: { schema },
+    componentsMap,
+    formatWithPrettier: true,
+  });
+
+  if (errors?.length) {
+    console.error('生成代码校验出错：', errors);
+  }
+
+  downloadTextFile(fileName, code);
+};
+
+const rendererSlots = {
+  header: (props) => {
+    console.log(props)
+    return h(
+      'div',
+      { class: 'renderer-header' },
+      !props.isFinished || props.isError
+        ? null
+        : h(
+          'div',
+          {
+            class: 'schema-export-button',
+            onClick: () => exportVueCode(props.schema),
+          },
+          [
+            h(TinyIconDownload, { class: 'schema-export-icon' }),
+            h('span', { class: 'schema-export-label' }, '导出源码'),
+          ],
+        ),
+    )
+  }
+};
+
 watch(() => templateSchemaList.value, (newVal) => {
   if (!newVal) {
     return;
@@ -330,7 +415,7 @@ onUnmounted(() => {
         <GenuiConfigProvider :theme="theme" style="height: 100%">
           <GenuiChat :url="url" ref="chat" :messages="messages" :chat-config="chatConfig" :roles="roles"
             :model="llmConfig.model" :temperature="llmConfig.temperature" :features="modelFeatures"
-            :custom-fetch="customFetch" :custom-examples="customExamples">
+            :custom-fetch="customFetch" :custom-examples="customExamples" :renderer-slots="rendererSlots">
             <template #empty>
               <div class="empty">
                 <IconAi />
@@ -361,6 +446,64 @@ onUnmounted(() => {
   min-width: 0;
 }
 
+:deep(.renderer-header) {
+  position: relative;
+
+  .schema-export-button {
+    position: absolute;
+    bottom: -48px;
+    right: 12px;
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    padding: 10px;
+    border: 0;
+    border-radius: 38px;
+    background: rgba(25, 25, 25, 0.08);
+    color: var(--tv-color-text, #191919);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-4px);
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+  }
+
+  .schema-export-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .schema-export-label {
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition: opacity 0.15s ease, max-width 0.2s ease;
+  }
+
+  .schema-export-button:hover {
+    gap: 6px;
+  }
+
+  .schema-export-button:hover .schema-export-label {
+    opacity: 1;
+    max-width: 80px;
+  }
+
+  .schema-export-button:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+:deep(.schema-render-container:hover .schema-export-button) {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 .empty {
   display: flex;
   align-items: center;
@@ -380,12 +523,15 @@ onUnmounted(() => {
   .genui-playground {
     --ti-gen-chat-avatar-and-gap-width: 0px;
   }
+
   :deep(.action-buttons__button) {
     padding-right: 10px;
+
     svg[alt="录音"] {
       display: none;
     }
   }
+
   .empty {
     font-size: 24px;
 

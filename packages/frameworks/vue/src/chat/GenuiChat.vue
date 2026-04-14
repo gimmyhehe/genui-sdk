@@ -17,8 +17,6 @@ import type {
 } from '@opentiny/tiny-robot';
 import { ref, watch, computed, h, inject, provide } from 'vue';
 import type { Ref, Component } from 'vue';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
-import { generateCode as generateVueCode } from '../code-generator';
 import { CustomModelProvider } from './CustomModelProvider';
 import { scrollEnd, throttle, toSlotFunction } from './chat-utils';
 import { useFileUpload } from './useFileUpload';
@@ -41,9 +39,7 @@ import { useConversation } from './tiny-robot-patch/useConversation';
 import { useI18n } from './i18n';
 import { GENUI_CONFIG, CUSTOM_CONTEXT } from './injection-tokens';
 import { IResponseHandler, defaultResponseHandlers } from './response-handler';
-import { IconDownload } from '@opentiny/vue-icon';
 
-const TinyIconDownload = IconDownload();
 const props = defineProps<IChatProps>();
 
 const genuiConfig: any = inject(GENUI_CONFIG, null);
@@ -187,71 +183,6 @@ const lastSchemaCardId = computed(() => {
   return items[items.length - 1].id;
 });
 
-const generateComponentsMap = (materialsList) => {
-  if (!Array.isArray(materialsList)) {
-    return [];
-  }
-
-  const deduped = new Map();
-
-  materialsList.forEach((material) => {
-    const components = material?.data?.materials?.components;
-    if (!Array.isArray(components)) {
-      return;
-    }
-
-    components.forEach((item) => {
-      const componentName = item?.component || item?.npm?.exportName;
-      const pkg = item?.npm?.package;
-      if (!componentName || !pkg) {
-        return;
-      }
-
-      // 兼容现有生成器字段（package）以及外部约定字段（pkg）
-      deduped.set(componentName, {
-        componentName,
-        pkg,
-        package: pkg,
-        exportName: item?.npm?.exportName || componentName,
-      });
-    });
-  });
-
-  return [...deduped.values()];
-};
-
-const { materialsList } = rendererConfig;
-const componentsMap = generateComponentsMap(materialsList);
-
-/** 将文本保存为本地文件并触发浏览器下载 */
-const downloadTextFile = (filename, text) => {
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = /\.vue$/i.test(filename) ? filename : `${filename}.vue`;
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-};
-
-const generateCode = async (schema) => {
-  const { panelValue: code, panelName: fileName, errors, prettierOpts } = await generateVueCode({
-    pageInfo: { schema },
-    componentsMap,
-    formatWithPrettier: true,
-  });
-
-  // 优先支持下载：即使校验有错误，也尽量导出原始结果。
-  if (errors?.length) {
-    console.error('生成代码校验出错：', errors);
-  }
-
-  downloadTextFile(fileName, code);
-};
-
 const messageRenderers = {
   'custom-text': (props: BubbleCommonProps & { content: string }) =>
     h('span', { class: 'tr-bubble__body-text' }, props.content),
@@ -277,42 +208,23 @@ const messageRenderers = {
     const isGenerating = lastSchemaCardId.value === schemaCardProps.id && generating.value;
 
     return h(
-      'div',
-      { class: 'renderer-wrap' },
-      [
-        h(
-          GenuiRenderer,
-          {
-            ...schemaCardProps,
-            requiredCompleteFieldSelectors: props.requiredCompleteFieldSelectors || [],
-            generating: isGenerating,
-            customComponents: customComponentsMap,
-            customActions: {
-              ...customActionsMap,
-              continueChat: continueChatAction,
-              saveState: saveStateAction,
-            },
-            key: schemaCardProps.id,
-          },
-          {
-            header: toSlotFunction(props.rendererSlots?.header),
-            footer: toSlotFunction(props.rendererSlots?.footer),
-          },
-        ),
-        isGenerating
-          ? null
-          : h(
-              'div',
-              {
-                class: 'schema-export-button',
-                onClick: () => generateCode(schemaCardProps.content),
-              },
-              [
-                h(TinyIconDownload, { class: 'schema-export-icon' }),
-                h('span', { class: 'schema-export-label' }, '导出源码'),
-              ],
-            ),
-      ]
+      GenuiRenderer,
+      {
+        ...schemaCardProps,
+        requiredCompleteFieldSelectors: props.requiredCompleteFieldSelectors || [],
+        generating: isGenerating,
+        customComponents: customComponentsMap,
+        customActions: {
+          ...customActionsMap,
+          continueChat: continueChatAction,
+          saveState: saveStateAction,
+        },
+        key: schemaCardProps.id,
+      },
+      {
+        header: toSlotFunction(props.rendererSlots?.header),
+        footer: toSlotFunction(props.rendererSlots?.footer),
+      },
     );
   },
   tool: ToolRenderer,
@@ -789,67 +701,4 @@ defineExpose({
   margin: 0 auto;
 }
 
-.tg-chat-container :deep(.renderer-wrap) {
-  position: relative;
-  isolation: isolate;
-
-  &:hover {
-    .schema-export-button {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-  }
-
-  .schema-export-button {
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    z-index: 20;
-
-    display: inline-flex;
-    align-items: center;
-    gap: 0;
-
-    padding: 10px;
-    border: 0;
-    border-radius: 38px;
-    background: rgba(25, 25, 25, 0.08);
-    color: var(--tv-color-text, #191919);
-    cursor: pointer;
-
-    opacity: 0;
-    transform: translateY(-4px);
-    pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-  }
-
-  .schema-export-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  .schema-export-label {
-    font-size: 12px;
-    line-height: 1;
-    white-space: nowrap;
-    opacity: 0;
-    max-width: 0;
-    overflow: hidden;
-    transition: opacity 0.15s ease, max-width 0.2s ease;
-  }
-
-  .schema-export-button:hover {
-    gap: 6px;
-  }
-
-  .schema-export-button:hover .schema-export-label {
-    opacity: 1;
-    max-width: 80px;
-  }
-
-  .schema-export-button:active {
-    transform: translateY(0) scale(0.98);
-  }
-}
 </style>
