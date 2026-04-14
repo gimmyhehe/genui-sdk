@@ -87,7 +87,8 @@ const handleDev = () => {
 
 <style scoped lang="less">
 .schema-version-card {
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   box-sizing: border-box;
   border-radius: 12px;
   position: relative;
