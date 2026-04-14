@@ -54,7 +54,10 @@
     "@opentiny/vue-chart-ring": "3.14.0",
     "@opentiny/vue-select": "^3.28.0",
     "@opentiny/vue-tabs": "^3.28.0",
-    "@opentiny/tiny-engine-builtin-component": "^2.6.0"
+    "@opentiny/tiny-engine-builtin-component": "^2.6.0",
+    "@vue/compiler-sfc": "^3.5.32",
+    "@vue/shared": "^3.5.32",
+    "prettier": "^3.8.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
