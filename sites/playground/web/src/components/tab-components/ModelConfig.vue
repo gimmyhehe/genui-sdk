@@ -272,7 +272,7 @@ const createNewTemplate = () => {
   &>div {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 24px;
     cursor: pointer;
     padding: 8px 16px;
 

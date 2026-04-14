@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import genuiAbility3 from '@/assets/genui_ability_3.webp';
+import genuiAbility3 from '@/assets/create-github.webp';
 import { TinyTag } from '@opentiny/vue';
 
 const wrapperClass = 'home-mcp-tool-mobile';
@@ -44,16 +44,18 @@ const abilityThreePartContent = {
     <div :class="`${wrapperClass}-subtitle genui-subtitle`">接入MCP工具后，模型在调用工具缺少参数时能自动生成交互式UI来收集所需信息</div>
     <div :class="`${wrapperClass}-content`">
       <img :src="genuiAbility3" alt="genui-ability-3"/>
-      <div :class="`${wrapperClass}-content-title`">{{ abilityThreePartContent.title }}</div>
-      <div :class="`${wrapperClass}-content-subtitle`">{{ abilityThreePartContent.subtitle }}</div>
-      <div :class="`${wrapperClass}-content-parameters`">
-        <div :class="`${wrapperClass}-content-parameters-label`">Parameters</div>
-        <div v-for="parameter in abilityThreePartContent.parameters" :key="parameter.label" :class="`${wrapperClass}-content-parameter`">
-          <div :class="`${wrapperClass}-content-parameter-wrap`">
-            <div :class="`${wrapperClass}-content-parameter-wrap-label`">{{ parameter.label }}</div>
-            <tiny-tag :color="parameter.tagColor" size="small">{{ parameter.tag }}</tiny-tag>
+      <div :class="`${wrapperClass}-content-container`">
+        <div :class="`${wrapperClass}-content-title`">{{ abilityThreePartContent.title }}</div>
+        <div :class="`${wrapperClass}-content-subtitle`">{{ abilityThreePartContent.subtitle }}</div>
+        <div :class="`${wrapperClass}-content-parameters`">
+          <div :class="`${wrapperClass}-content-parameters-label`">Parameters</div>
+          <div v-for="parameter in abilityThreePartContent.parameters" :key="parameter.label" :class="`${wrapperClass}-content-parameter`">
+            <div :class="`${wrapperClass}-content-parameter-wrap`">
+              <div :class="`${wrapperClass}-content-parameter-wrap-label`">{{ parameter.label }}</div>
+              <tiny-tag :color="parameter.tagColor" size="small">{{ parameter.tag }}</tiny-tag>
+            </div>
+            <div :class="`${wrapperClass}-content-parameter-description`">{{ parameter.description }}</div>
           </div>
-          <div :class="`${wrapperClass}-content-parameter-description`">{{ parameter.description }}</div>
         </div>
       </div>
     </div>
@@ -88,6 +90,10 @@ const abilityThreePartContent = {
       border-radius: 6px;
       width: 100%;
       margin-bottom: 20px;
+    }
+
+    &-container {
+      padding: 0 20px;
     }
 
     &-title {
