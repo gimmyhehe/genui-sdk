@@ -203,8 +203,13 @@ const resetToLatestVersion = () => {
   currentCardId.value = schemaMessage?.cardId ?? '';
   isHistoryVersionApplied.value = true;
   if (latestSchema) {
-    setCurrentSchema(JSON.parse(latestSchema));
-    setCurrentPreviewSchema(JSON.parse(latestSchema));
+    try {
+      const parsedLatestSchema = JSON.parse(latestSchema);
+      setCurrentSchema(parsedLatestSchema);
+      setCurrentPreviewSchema(parsedLatestSchema);
+    } catch (error) {
+      console.error('Failed to restore latest schema:', error);
+    }
   }
   if (isMobile.value) {
     mobileSchemaJsonEditorOpen.value = false;
@@ -219,6 +224,9 @@ const handleKeydown = (event: KeyboardEvent) => {
       return;
     }
     if (isMobile.value) {
+      if (schemaEditorVisible.value) {
+        closeSchemaEditorView();
+      }
       return;
     }
     if (schemaEditorVisible.value) {
@@ -266,25 +274,14 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-    <genui-template-mobile-sheet
-      v-if="isMobile"
-      :visible="isMobile && schemaEditorVisible"
-      :json-editor-open="mobileSchemaJsonEditorOpen"
-      :panel-style="mobileSheetPanelStyle"
-      :show-return-latest-button="showReturnLatestButton"
-      :current-preview-schema="currentPreviewSchema"
-      :schema-editor="schemaEditor"
-      :editor-options="editorOptions"
-      :view-schema-icon="viewSchemaIcon"
-      :close-icon="TinyCloseIcon"
-      @update:json-editor-open="mobileSchemaJsonEditorOpen = $event"
-      @update:schema-editor="schemaEditor = $event"
-      @mask-click="onMobileSheetMaskClick"
-      @grab-touch-start="onMobileSheetGrabTouchStart"
-      @close="closeSchemaEditorView"
-      @apply-current-version="applyCurrentVersion"
-      @reset-to-latest-version="resetToLatestVersion"
-    />
+    <genui-template-mobile-sheet v-if="isMobile" :visible="isMobile && schemaEditorVisible"
+      :json-editor-open="mobileSchemaJsonEditorOpen" :panel-style="mobileSheetPanelStyle"
+      :show-return-latest-button="showReturnLatestButton" :current-preview-schema="currentPreviewSchema"
+      :schema-editor="schemaEditor" :editor-options="editorOptions" :view-schema-icon="viewSchemaIcon"
+      :close-icon="TinyCloseIcon" @update:json-editor-open="mobileSchemaJsonEditorOpen = $event"
+      @update:schema-editor="schemaEditor = $event" @mask-click="onMobileSheetMaskClick"
+      @grab-touch-start="onMobileSheetGrabTouchStart" @close="closeSchemaEditorView"
+      @apply-current-version="applyCurrentVersion" @reset-to-latest-version="resetToLatestVersion" />
     <template v-else>
       <div class="genui-schema-template-item renderer-container" v-if="currentSchema && rendererPanelVisible">
         <div class="renderer-container-wrapper">
@@ -497,5 +494,4 @@ onUnmounted(() => {
     min-height: 0;
   }
 }
-
 </style>
