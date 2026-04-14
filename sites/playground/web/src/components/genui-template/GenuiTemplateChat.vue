@@ -193,7 +193,9 @@ const jsonPatchRenderer = async (props: any) => {
       return standardOp as JsonPatchOp;
     });
 
-    const targetSchema = JSON.parse(JSON.stringify(currentSchema.value));
+    // 增量 patch 需要基于“当前预览态”持续叠加，避免每个 chunk 都从已应用态重建导致丢操作。
+    const patchBaseline = currentPreviewSchema.value ?? currentSchema.value;
+    const targetSchema = JSON.parse(JSON.stringify(patchBaseline));
     jsonPatchFormatter.patch(targetSchema, standardOperations);
     setCurrentPreviewSchema(generateIdForComponents(targetSchema));
     // 标记所有操作（包括已过滤的）为已执行，避免重复执行
