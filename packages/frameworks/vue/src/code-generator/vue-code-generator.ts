@@ -90,7 +90,7 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
    */
   protected buildScriptSetupImports(ctx: IScriptSetupBuildContext): string {
     const { componentSet } = ctx.description;
-    const importLines: string[] = ['import * as vue from "vue"'];
+    const importLines: string[] = ['import { reactive, computed } from "vue"'];
     const componentsInSFC = [...componentSet];
     const componentDeps = ctx.componentsMap.filter((item) => componentsInSFC.includes(item.componentName));
     const componentPacks: Record<string, IComponentMapItem[]> = {};
@@ -181,7 +181,7 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
   protected buildScriptSetupReactiveState(ctx: IScriptSetupBuildContext): string {
     const { state = {} } = ctx.schema as CardSchema & { state?: Record<string, unknown> };
     this.traverseState(state as Record<string, any>, ctx.description);
-    return `const state = vue.reactive(${unwrapExpression(JSON.stringify(state, null, 2))})`;
+    return `const state = reactive(${unwrapExpression(JSON.stringify(state, null, 2))})`;
   }
 
   /**
@@ -665,7 +665,7 @@ ${scriptSetup}
     if (type === JS_EXPRESSION) {
       const { value = '', computed = false } = current[prop] || {};
       current[prop] = computed
-        ? `${start}vue.computed(${value.replace(/this\./g, '')})${end}`
+        ? `${start}computed(${value.replace(/this\./g, '')})${end}`
         : `${start}${value.replace(/this\./g, '')}${end}`;
       return;
     }
