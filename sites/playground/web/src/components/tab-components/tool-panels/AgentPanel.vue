@@ -5,7 +5,7 @@ import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
 import AgentDialog from './AgentDialog.vue';
 
 const playgroundContext = inject('playgroundContext');
-const { llmConfig } = playgroundContext;
+const { llmConfig = {} } = playgroundContext || {};
 
 const IconPlus = iconPlus();
 const IconDel = iconDel();
@@ -267,19 +267,11 @@ const updateAgentEnabled = (agent, enabled) => {
         <div class="mcp-server-item-description">{{ agent.description }}</div>
       </div>
     </div>
-    <AgentDialog
-      :visible="showAgentFormDialog"
-      :agent-data="agentData"
-      :agent-card="agentCard"
-      :agent-card-status="agentCardStatus"
-      :agent-card-error="agentCardError"
-      :agent-query-loading="agentQueryLoading"
+    <AgentDialog :visible="showAgentFormDialog" :agent-data="agentData" :agent-card="agentCard"
+      :agent-card-status="agentCardStatus" :agent-card-error="agentCardError" :agent-query-loading="agentQueryLoading"
       :add-agent-loading="addAgentLoading"
       @update:visible="(val) => { if (!val) closeAgentDialog(); else showAgentFormDialog = val; }"
-      @update:agentData="onUpdateAgentData"
-      @queryAgentCard="queryAgentCard"
-      @confirmAgent="confirmAgent"
-    />
+      @update:agentData="onUpdateAgentData" @queryAgentCard="queryAgentCard" @confirmAgent="confirmAgent" />
   </tiny-collapse-item>
 </template>
 
@@ -331,7 +323,7 @@ const updateAgentEnabled = (agent, enabled) => {
 }
 
 .mcp-server-item-actions {
-  & > div {
+  &>div {
     display: flex;
     align-items: center;
     gap: 8px;

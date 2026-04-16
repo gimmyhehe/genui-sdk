@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { TinyCollapse } from '@opentiny/vue';
-import { AgentA2aPanel, McpServerPanel } from './index';
+import { AgentPanel, McpServerPanel } from './tool-panels';
 
 const activePanels = ref(['mcp', 'agent']);
 </script>
@@ -10,7 +10,7 @@ const activePanels = ref(['mcp', 'agent']);
   <div>
     <tiny-collapse v-model="activePanels">
       <McpServerPanel />
-      <AgentA2aPanel />
+      <AgentPanel />
     </tiny-collapse>
   </div>
 </template>
