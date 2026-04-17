@@ -30,9 +30,9 @@ import {
   generateId,
 } from './template-chat-utils';
 import { jsonPatchDeduplicator } from './json-patch-deduplicator';
-import SchemaVersionCard from './SchemaVersionCard.vue';
 import useTemplate from './useTemplate';
 import AssistantFooter from './TemplateAssistantFooter.vue';
+import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
 import { emitter } from './template-chat-event-emitter';
 import useIcon from '../../use-icon';
 
@@ -53,8 +53,10 @@ const {
   conversation,
   templateConversationState,
   currentSchema,
+  currentPreviewSchema,
   currentCardId,
   setCurrentSchema,
+  setCurrentPreviewSchema,
   updateTemplateTitle,
   setCurrentCardId,
 } = useTemplate();
@@ -138,7 +140,8 @@ const schemaCardRenderer = async (props: any) => {
     deltaPatcher.patchWithDelta(target, json, isCompleted);
     // 给每个组件添加 id
     const schemaWithId = generateIdForComponents(target);
-    setCurrentSchema(schemaWithId);
+    setCurrentPreviewSchema(schemaWithId);
+
   } catch (error) {
     console.error('schemaCardRenderer error ===>', error);
     errorMessagesMap.value.set(props.cardId, error.message);
@@ -190,48 +193,16 @@ const jsonPatchRenderer = async (props: any) => {
       return standardOp as JsonPatchOp;
     });
 
-    const targetSchema = JSON.parse(JSON.stringify(currentSchema.value));
+    // 增量 patch 需要基于“当前预览态”持续叠加，避免每个 chunk 都从已应用态重建导致丢操作。
+    const patchBaseline = currentPreviewSchema.value ?? currentSchema.value;
+    const targetSchema = JSON.parse(JSON.stringify(patchBaseline));
     jsonPatchFormatter.patch(targetSchema, standardOperations);
-    setCurrentSchema(generateIdForComponents(targetSchema));
+    setCurrentPreviewSchema(generateIdForComponents(targetSchema));
     // 标记所有操作（包括已过滤的）为已执行，避免重复执行
     jsonPatchDeduplicator.markAllOperationsExecuted(operationKey, formattedValue);
   } catch (error) {
     errorMessagesMap.value.set(props.cardId, error.message);
     console.error('jsonPatch error ===>', error);
-  }
-};
-
-const handleSchemaVersionCardClick = (cardId: string) => {
-  // 从 messages 中找到对应的卡片。
-  let targetStr = '';
-
-  messages.value.some((msg) => {
-    const card = (msg.messages as IMessageItem[])?.find(
-      (message): message is IJsonPatchMessageItem | ISchemaCardMessageItem =>
-        (message.type === 'schema-card' || message.type === 'json-patch') && message.cardId === cardId,
-    );
-
-    if (card) {
-      targetStr = card.schema;
-
-      return true;
-    }
-
-    return false;
-  });
-
-  if (!targetStr) {
-    return;
-  }
-
-  try {
-    const targetSchema = JSON.parse(targetStr);
-    // 当切换 schema 版本时，清理该卡片已执行的 patch 操作记录
-    // 因为新的 schema 版本可能需要重新执行操作
-    jsonPatchDeduplicator.clearCardOperations(cardId);
-    emit('schema-version-toggle', targetSchema, cardId);
-  } catch (error) {
-    console.error('Failed to parse schema for version toggle:', error);
   }
 };
 
@@ -257,6 +228,7 @@ const handleRefresh = ({ index }: { index: number }) => {
   }
   if (currentSchema) {
     setCurrentSchema(currentSchema);
+    setCurrentPreviewSchema(currentSchema);
   }
   messages.value = messages.value.slice(0, index);
   setCurrentCardId(messages.value[messages.value.length - 1].messageId as string);
@@ -282,24 +254,26 @@ const messageRenderers = {
   markdown: markdownRenderer,
   'json-patch': (props) => {
     jsonPatchRenderer(props);
-    return h(SchemaVersionCard, {
-      key: props.cardId,
+
+    return h(TemplateSchemaMessageRenderer, {
+      itemProps: props,
+      type: 'json-patch',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      ...props,
-      type: 'json-patch',
-      onClick: handleSchemaVersionCardClick,
+      messages: messages.value,
+      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) => emit('schema-version-toggle', schema, cardId),
     });
   },
   'schema-card': (props) => {
     schemaCardRenderer(props);
-    return h(SchemaVersionCard, {
-      key: props.cardId,
+
+    return h(TemplateSchemaMessageRenderer, {
+      itemProps: props,
+      type: 'schema-card',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      ...props,
-      type: 'schema-card',
-      onClick: handleSchemaVersionCardClick,
+      messages: messages.value,
+      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) => emit('schema-version-toggle', schema, cardId),
     });
   },
 };
@@ -393,6 +367,7 @@ const handleSendMessage = async () => {
 
 const handleNotification = (event: INotificationPayload) => {
   if (event.type === 'done') {
+    setCurrentSchema(currentPreviewSchema.value);
     // 将 schema 缓存到卡片中
     const lastMessage = messages.value[messages.value.length - 1];
     const lastMessageCard = (lastMessage as any).messages.find(
@@ -534,6 +509,7 @@ onUnmounted(() => {
   flex-shrink: 0;
   padding: 16px 0;
   background: var(--sender-bg);
+
   .attachments-container {
     padding: 0 20px;
   }
@@ -554,7 +530,8 @@ onUnmounted(() => {
   cursor: pointer;
   border: 1px solid var(--sender-border-color);
   z-index: 1000;
-  & > svg {
+
+  &>svg {
     width: 20px;
     height: 20px;
   }
@@ -594,7 +571,7 @@ onUnmounted(() => {
       z-index: 1;
     }
 
-    & > svg {
+    &>svg {
       z-index: 2;
     }
   }
