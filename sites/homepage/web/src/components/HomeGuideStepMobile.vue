@@ -21,6 +21,7 @@ const handleGuideChange = (index: number) => {
         class="home-guide-step-mobile-button"
         :class="{ 'home-guide-step-mobile-button-active': activeGuide === GUIDE_STEP_ONE }"
         :value="GUIDE_STEP_ONE"
+        :reset-time="0"
         @click="handleGuideChange(GUIDE_STEP_ONE)"
       >
         引入组件
@@ -29,6 +30,7 @@ const handleGuideChange = (index: number) => {
         class="home-guide-step-mobile-button"
         :class="{ 'home-guide-step-mobile-button-active': activeGuide === GUIDE_STEP_TWO }"
         :value="GUIDE_STEP_TWO"
+        :reset-time="0"
         @click="handleGuideChange(GUIDE_STEP_TWO)"
       >
         使用chat组件
@@ -37,6 +39,7 @@ const handleGuideChange = (index: number) => {
         class="home-guide-step-mobile-button"
         :class="{ 'home-guide-step-mobile-button-active': activeGuide === GUIDE_STEP_THREE }"
         :value="GUIDE_STEP_THREE"
+        :reset-time="0"
         @click="handleGuideChange(GUIDE_STEP_THREE)"
       >
         自定义配置
@@ -53,7 +56,7 @@ const handleGuideChange = (index: number) => {
   &-button-group {
     border-radius: 382px;
     width: fit-content;
-    height: 28px;
+    height: 32px;
     background-color: rgb(242, 242, 242);
     display: flex;
     align-items: center;
@@ -71,7 +74,7 @@ const handleGuideChange = (index: number) => {
 
   &-button {
     height: 100%;
-    width: 70px;
+    width: 110px;
     margin-left: 0;
     border-radius: 0;
     border: none;

@@ -4,6 +4,9 @@ import { iconRichTextCodeView } from '@opentiny/vue-icon';
 import JsonPatchDev from './JsonPatchDev.vue';
 import { formatJsonPatch } from './template-chat-utils';
 import useTemplate from './useTemplate';
+import { useIsMobile } from '../../use-mobile';
+import docCardIcon from '../../assets/images/card.svg';
+import docEditIcon from '../../assets/images/card-edit.svg';
 
 const TinyIconRichTextCodeView = iconRichTextCodeView();
 
@@ -26,8 +29,11 @@ const { getMessageByCardId } = useTemplate();
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
 
+const docIcon = computed(() => props.type === 'schema-card' ? docCardIcon : docEditIcon);
+
 // 判断当前为开发环境
 const isDev = import.meta.env.MODE === 'development';
+const { isMobile } = useIsMobile();
 
 const visible = ref(false);
 const currentSchema = ref<string>('');
@@ -52,13 +58,22 @@ const handleDev = () => {
 
 <template>
   <div class="schema-version-card" @click="handleClick">
-    <div class="schema-version-card-title">
-      {{ props.input.substring(0, 20) }}{{ props.input.length > 20 ? '...' : '' }}
+    <div class="schema-version-card-main">
+      <div class="schema-version-card-icon">
+        <img :src="docIcon" alt="schema card" class="schema-version-card-icon-image" />
+      </div>
+      <div class="schema-version-card-content">
+        <div class="schema-version-card-content-title">
+          {{ props.input.substring(0, 20) }}{{ props.input.length > 20 ? '...' : '' }}
+        </div>
+        <div class="schema-version-card-content-time">
+          <template v-if="generating">生成中...</template>
+          <template v-else>创建时间：{{ generatedTime }}</template>
+        </div>
+      </div>
     </div>
-    <div v-if="generating" class="schema-version-card-loading">生成中...</div>
-    <div v-else class="schema-version-card-time">创建时间：{{ generatedTime }}</div>
     <div class="schema-version-card-footer">
-      <div v-if="isDev && type === 'json-patch' && !generating" class="icons-wrap">
+      <div v-if="isDev && props.type === 'json-patch' && !generating && !isMobile" class="icons-wrap">
         <div class="icon-item" title="调试 jsonPatch" @click.stop="handleDev">
           <TinyIconRichTextCodeView />
         </div>
@@ -72,18 +87,59 @@ const handleDev = () => {
 
 <style scoped lang="less">
 .schema-version-card {
-  background-color: #fff;
-  align-items: center;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 300px;
+  box-sizing: border-box;
   border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  gap: 8px;
-  max-width: 344px;
-  min-width: 280px;
-  overflow: hidden;
-  padding: 14px;
   position: relative;
+  cursor: pointer;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+
+  &-main {
+    display: flex;
+    align-items: center;
+  }
+
+  &-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+  }
+
+  &-icon-image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: contain;
+  }
+
+  &-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-left: 8px;
+    height: 40px;
+    min-width: 0;
+
+    &-title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 22px;
+      color: rgb(25, 25, 25);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &-time {
+      font-size: 12px;
+      line-height: 18px;
+      color: rgb(128, 128, 128);
+    }
+  }
 
   &-footer {
     display: flex;

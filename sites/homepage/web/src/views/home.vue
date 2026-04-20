@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { TinyButton, TinyTag } from '@opentiny/vue';
 import genuiAbility1 from '@/assets/genui_ability_1.svg';
 import genuiAbility2 from '@/assets/genui_ability_2.webp';
-import genuiAbility3 from '@/assets/genui_ability_3.webp';
-import genuiActionVedioCover from '@/assets/genui_action_vedio_cover.webp';
-import genuiFlowVedioCover from '@/assets/genui_flow_vedio_cover.webp';
+import genuiAbility3 from '@/assets/create-github.webp';
+import genuiActionVedioCover from '@/assets/order-milk-tea.webp';
+import genuiFlowVedioCover from '@/assets/search-ticket.webp';
 import { LinkKey, linkMap } from '@/utils/link';
 import { useMobile } from '@/composables/useMobile';
 import HomeAbility from '@/components/HomeAbility.vue';
@@ -46,12 +46,10 @@ const abilityThreePartContent = ref({
     },
   ],
 });
-const actionVideoSource =
-  'https://tinyengine-assets.obs.cn-north-4.myhuaweicloud.com/files/videos/genui/genui_action_vedio.mov';
-const flowVideoSource =
-  'https://tinyengine-assets.obs.cn-north-4.myhuaweicloud.com/files/videos/genui/genui_flow_vedio.mov';
-
 const { isMobile } = useMobile();
+const buttonSize = computed(() => {
+  return isMobile.value ? 'default' : 'medium';
+});
 </script>
 
 <template>
@@ -64,10 +62,13 @@ const { isMobile } = useMobile();
         <div class="home-core-decsription">为用户打造极致顺滑的智能体验，给开发者提供强大的定制能力与生态兼容性</div>
         <div class="operation-button-group">
           <a :href="linkMap[LinkKey.DevDoc]" target="_blank" class="btn-link">
-            <tiny-button round type="primary" size="medium">开发文档</tiny-button>
+            <tiny-button :reset-time="0" round type="primary" :size="buttonSize">开发文档</tiny-button>
           </a>
           <a :href="linkMap[LinkKey.Playground]" target="_blank" class="btn-link">
-            <tiny-button round ghost size="medium">演练场</tiny-button>
+            <tiny-button :reset-time="0" round ghost :size="buttonSize">演练场</tiny-button>
+          </a>
+          <a href="https://github.com/opentiny/genui-sdk" target="_blank" class="btn-link">
+            <tiny-button :reset-time="0" round ghost :size="buttonSize">GitHub</tiny-button>
           </a>
         </div>
       </div>
@@ -96,8 +97,8 @@ const { isMobile } = useMobile();
         preload="none"
         :poster="genuiActionVedioCover"
       >
-        <source :src="actionVideoSource" type="video/mp4" />
-      </video>
+        <source src="/order-milk-tea.mp4" type="video/mp4" />
+    </video>
     </home-ability>
 
 
@@ -149,7 +150,7 @@ const { isMobile } = useMobile();
         preload="none"
         :poster="genuiFlowVedioCover"
       >
-        <source :src="flowVideoSource" type="video/mp4" />
+        <source src="/search-ticket.mp4" type="video/mp4" />
       </video>
     </home-ability>
 
@@ -166,6 +167,9 @@ const { isMobile } = useMobile();
 </style>
 
 <style lang="less" scoped>
+:deep(.tiny-button.tiny-button--default.is-ghost) {
+  color: var(--tv-color-text);
+}
 .genui-sdk-container {
   display: flex;
   flex-direction: column;
@@ -218,6 +222,12 @@ const { isMobile } = useMobile();
         width: 100%;
         height: 100%;
         object-fit: contain;
+        filter: drop-shadow(0 0 40px rgba(232, 220, 244, 0.7));
+      }
+      @media (max-width: 768px) {
+        img {
+          filter: drop-shadow(0 0 18px rgba(232, 220, 244, 0.3));
+        }
       }
     }
 
@@ -237,19 +247,19 @@ const { isMobile } = useMobile();
       line-height: var(--line-height-title-lg);
       font-weight: 700;
       text-align: left;
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background: linear-gradient(90deg, rgba(188, 67, 203, 1), rgba(14, 112, 255, 1) 92%);
-      background-clip: text;
+      color: rgba(14, 112, 255, 1);
       margin-bottom: 26px;
       white-space: nowrap;
       animation: slideUpFromBottom 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.28s forwards;
       opacity: 0;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-image: linear-gradient(90deg, rgba(188, 67, 203, 1), rgba(14, 112, 255, 1) 92%);
     }
 
     &-decsription {
-      font-size: var(--font-size-body-sm);
+      font-size: 20px;
       font-weight: 400;
       line-height: var(--line-height-description);
       text-align: left;
@@ -257,7 +267,8 @@ const { isMobile } = useMobile();
       margin-bottom: 76px;
       animation: slideUpFromBottom 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
       opacity: 0;
-      white-space: nowrap;
+      line-height: 1.5;
+      max-width: calc(var(--font-size-title-lg) * 12);
 
       @media (max-width: 1280px) {
         margin-bottom: 42px;
@@ -265,12 +276,8 @@ const { isMobile } = useMobile();
     }
 
     @media (max-width: 768px) {
-      &-title {
-        white-space: normal;
-      }
-
-      &-subtitle {
-        white-space: normal;
+      &-left {
+        margin-right: 0;
       }
     }
 
@@ -285,10 +292,6 @@ const { isMobile } = useMobile();
 
       &-subtitle {
         font-size: var(--font-size-title-lg-sm-md);
-      }
-
-      &-decsription {
-        font-size: var(--font-size-body-sm-sm);
       }
 
       &-right {
@@ -319,7 +322,8 @@ const { isMobile } = useMobile();
     display: flex;
     padding: 16px;
     border-radius: 24px;
-    background-image: url('@/assets/genui_ability_bg_2.jpg');
+    background-image: url('@/assets/genui_ability_bg_2.svg');
+    background-size: cover;
 
     img {
       border-radius: 16px;
@@ -337,14 +341,14 @@ const { isMobile } = useMobile();
     justify-content: center;
     text-align: center;
     padding: 50px 20px !important;
-    background: url('@/assets/genui_ability_mobile_bg_1.svg');
+    background: url('@/assets/genui_ability_mobile_bg_1.svg')  center/cover no-repeat;
 
     &-left {
       font-size: var(--font-size-title-md);
     }
 
     &-decsription {
-      font-size: var(--font-size-body-md);
+      font-size: 14px;
       white-space: normal;
       margin-bottom: 28px;
     }
@@ -434,6 +438,7 @@ const { isMobile } = useMobile();
     .extend-button-group {
       height: 32px;
       margin-bottom: 30px;
+      padding: 2px;
 
       button {
         font-size: 14px;
@@ -467,9 +472,6 @@ const { isMobile } = useMobile();
     }
 
     &-card {
-      flex-direction: row;
-      box-shadow: 0px 4px 30px 0px rgba(234, 233, 237, 0.9);
-
       &-content {
         margin-left: 16px;
       }
@@ -547,7 +549,7 @@ const { isMobile } = useMobile();
   &-parameters {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 24px;
   }
 
   @media (max-width: 1280px) {
@@ -556,7 +558,7 @@ const { isMobile } = useMobile();
     }
 
     &-parameters {
-      gap: 5px;
+      gap: 12px;
     }
   }
 
@@ -646,3 +648,5 @@ const { isMobile } = useMobile();
   }
 }
 </style>
+
+

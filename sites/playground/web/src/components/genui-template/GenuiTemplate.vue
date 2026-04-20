@@ -1,50 +1,84 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { CodeEditor } from 'monaco-editor-vue3';
 import { GenuiConfigProvider, GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
-import { IconEditorCode } from '@opentiny/vue-icon';
+import { iconClose } from '@opentiny/vue-icon';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import type { ISchemaCardMessageItem, IJsonPatchMessageItem } from './chat.types';
 import GenuiTemplateChat from './GenuiTemplateChat.vue';
+import GenuiTemplateMobileSheet from './GenuiTemplateMobileSheet.vue';
 import useTemplate from './useTemplate';
+import { useIsMobile } from '../../use-mobile';
+import viewSchemaIcon from '../../assets/images/view-schema.svg';
 
-const { currentSchema, setCurrentSchema, templateConversationState } = useTemplate();
+const { isMobile } = useIsMobile();
 
-const TinyIconEditorCode = IconEditorCode();
+const TinyCloseIcon = iconClose();
 
+const { currentSchema, setCurrentSchema, setCurrentPreviewSchema, currentPreviewSchema, templateConversationState, conversation, currentCardId } = useTemplate();
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
 
+// 桌面：右侧预览列是否展开（关闭后仅占聊天列；切换会话或点击版本卡片会重新展开）
+const rendererPanelVisible = ref(true);
+// schema 编辑器是否可见（移动端：底部抽屉；抽屉内先预览再可打开 JSON）
 const schemaEditorVisible = ref(false);
-const schemaDiffVisible = ref(false);
-const newSchema = ref<string>('');
+const mobileSchemaJsonEditorOpen = ref(false);
+const MOBILE_SHEET_DEFAULT_HEIGHT_VH = 64;
+const MOBILE_SHEET_MIN_HEIGHT_VH = 42;
+const MOBILE_SHEET_MAX_HEIGHT_VH = 92;
+const mobileSheetHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
+const mobileSheetDragStartY = ref(0);
+const mobileSheetDragStartHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
+const mobileSheetDragging = ref(false);
+const latestSchemaCardId = computed(() => {
+  const conversationState = templateConversationState.value;
+  const currentConversation = conversationState?.conversations?.find(
+    (item: Conversation) => item.id === conversationState.currentId,
+  );
+  const lastMessage = currentConversation?.messages?.[currentConversation.messages.length - 1] as IMessage | undefined;
+  const schemaMessage = lastMessage?.messages?.find(
+    (message): message is ISchemaCardMessageItem | IJsonPatchMessageItem =>
+      message.type === 'schema-card' || message.type === 'json-patch',
+  );
+
+  return schemaMessage?.cardId ?? '';
+});
+// 仅当正在查看历史版本时显示“返回最新版本/应用此版本”
+const showReturnLatestButton = computed(() => Boolean(currentCardId.value && latestSchemaCardId.value && currentCardId.value !== latestSchemaCardId.value));
+// 历史版本在未“应用此版本”前禁止编辑
+const isHistoryVersionApplied = ref(true);
+const isSchemaEditorReadonly = computed(() => showReturnLatestButton.value && !isHistoryVersionApplied.value);
 // 编辑器中显示的代码
 const schemaEditor = computed({
   get() {
     // 写入编辑器的代码
-    if (!currentSchema.value) {
+    if (!currentPreviewSchema.value) {
       schemaEditorVisible.value = false;
       return '{}';
     }
 
-    return JSON.stringify(currentSchema.value, null, 2);
+    return JSON.stringify(currentPreviewSchema.value, null, 2);
   },
   set(value: string) {
     // 在编辑器中编辑代码
     try {
       const schema = JSON.parse(value || '{}');
-
-      setCurrentSchema(schema);
+      setCurrentPreviewSchema(schema);
+      // 防御式保护：历史版本未应用时，不允许通过编辑器回写当前生效 schema。
+      if (!isSchemaEditorReadonly.value) {
+        setCurrentSchema(schema);
+      }
     } catch (error) {
       console.error('schemaEditor set error ===>', error);
     }
   },
 });
 
-const editorOptions = {
+const editorOptions = computed(() => ({
   fontSize: 14,
   minimap: { enabled: false },
   automaticLayout: true,
@@ -52,27 +86,113 @@ const editorOptions = {
   foldingHighlight: true,
   foldingStrategy: 'indentation',
   formatOnPaste: true,
-};
+  readOnly: isSchemaEditorReadonly.value,
+}));
 
 const toggleSchemaEditor = () => {
   schemaEditorVisible.value = !schemaEditorVisible.value;
+  if (isMobile.value) {
+    mobileSchemaJsonEditorOpen.value = false;
+  }
 };
 
-const toggleSchemaVersion = (schema: Record<string, unknown>) => {
-  schemaDiffVisible.value = true;
-  newSchema.value = JSON.stringify(schema, null, 2);
-  schemaEditorVisible.value = true;
+const closeSchemaEditorView = () => {
+  schemaEditorVisible.value = false;
+  mobileSchemaJsonEditorOpen.value = false;
+  mobileSheetDragging.value = false;
+  mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
 };
 
-const updateSchemaVersion = () => {
-  schemaEditor.value = newSchema.value;
-  schemaDiffVisible.value = false;
+const closeRendererPanel = () => {
+  rendererPanelVisible.value = false;
+  closeSchemaEditorView();
+};
+
+const onMobileSheetMaskClick = () => {
+  if (mobileSchemaJsonEditorOpen.value) {
+    mobileSchemaJsonEditorOpen.value = false;
+  }
+};
+
+const mobileSheetPanelStyle = computed(() => ({
+  height: `${mobileSheetHeightVh.value}vh`,
+}));
+
+const clampMobileSheetHeight = (heightVh: number) =>
+  Math.min(MOBILE_SHEET_MAX_HEIGHT_VH, Math.max(MOBILE_SHEET_MIN_HEIGHT_VH, heightVh));
+
+const handleMobileSheetDragMove = (event: TouchEvent) => {
+  if (!mobileSheetDragging.value) {
+    return;
+  }
+  const touch = event.touches[0];
+  if (!touch) {
+    return;
+  }
+  const deltaY = touch.clientY - mobileSheetDragStartY.value;
+  const deltaVh = (deltaY / window.innerHeight) * 100;
+  mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetDragStartHeightVh.value - deltaVh);
+  event.preventDefault();
+};
+
+const removeMobileSheetDragListeners = () => {
+  window.removeEventListener('touchmove', handleMobileSheetDragMove);
+  window.removeEventListener('touchend', handleMobileSheetDragEnd);
+  window.removeEventListener('touchcancel', handleMobileSheetDragEnd);
+};
+
+function handleMobileSheetDragEnd() {
+  if (!mobileSheetDragging.value) {
+    return;
+  }
+  mobileSheetDragging.value = false;
+  removeMobileSheetDragListeners();
+  mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetHeightVh.value);
+}
+
+const onMobileSheetGrabTouchStart = (event: TouchEvent) => {
+  const touch = event.touches[0];
+  if (!touch) {
+    return;
+  }
+  mobileSheetDragging.value = true;
+  mobileSheetDragStartY.value = touch.clientY;
+  mobileSheetDragStartHeightVh.value = mobileSheetHeightVh.value;
+  window.addEventListener('touchmove', handleMobileSheetDragMove, { passive: false });
+  window.addEventListener('touchend', handleMobileSheetDragEnd);
+  window.addEventListener('touchcancel', handleMobileSheetDragEnd);
+};
+
+const toggleSchemaVersion = (schema: Record<string, unknown>, cardId: string) => {
+  rendererPanelVisible.value = true;
+  currentCardId.value = cardId;
+  isHistoryVersionApplied.value = false;
+  const isLatestVersion = cardId === latestSchemaCardId.value;
+  setCurrentPreviewSchema(schema);
+  if (isLatestVersion) {
+    setCurrentSchema(schema);
+  }
+  // 移动端：先打开底部抽屉仅展示渲染预览；JSON 编辑器由抽屉内「查看 Schema」再打开
+  if (isMobile.value) {
+    mobileSchemaJsonEditorOpen.value = false;
+    schemaEditorVisible.value = true;
+    mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
+  }
+};
+
+const applyCurrentVersion = () => {
+  isHistoryVersionApplied.value = true;
+  setCurrentSchema(currentPreviewSchema.value);
 };
 
 const resetToLatestVersion = () => {
   // 获取最新版本的 schema
-  const currentConversation = templateConversationState.conversations.find(
-    (conversation: Conversation) => conversation.id === templateConversationState.currentId,
+  const conversationState = templateConversationState.value;
+  if (!conversationState) {
+    return;
+  }
+  const currentConversation = conversationState.conversations.find(
+    (conversation: Conversation) => conversation.id === conversationState.currentId,
   );
   const lastMessage = currentConversation?.messages?.[currentConversation?.messages.length - 1] as IMessage | undefined;
   const schemaMessage = lastMessage?.messages?.find(
@@ -80,93 +200,298 @@ const resetToLatestVersion = () => {
       message.type === 'schema-card' || message.type === 'json-patch',
   );
   const latestSchema = schemaMessage?.schema;
+  currentCardId.value = schemaMessage?.cardId ?? '';
+  isHistoryVersionApplied.value = true;
   if (latestSchema) {
-    schemaEditor.value = JSON.stringify(JSON.parse(latestSchema), null, 2);
+    try {
+      const parsedLatestSchema = JSON.parse(latestSchema);
+      setCurrentSchema(parsedLatestSchema);
+      setCurrentPreviewSchema(parsedLatestSchema);
+    } catch (error) {
+      console.error('Failed to restore latest schema:', error);
+    }
   }
-  schemaDiffVisible.value = false;
+  if (isMobile.value) {
+    mobileSchemaJsonEditorOpen.value = false;
+  }
 };
 
-resetToLatestVersion();
+// 按 Esc：移动端先关 JSON 第二层，再关整个抽屉
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    if (isMobile.value && schemaEditorVisible.value && mobileSchemaJsonEditorOpen.value) {
+      mobileSchemaJsonEditorOpen.value = false;
+      return;
+    }
+    if (isMobile.value) {
+      if (schemaEditorVisible.value) {
+        closeSchemaEditorView();
+      }
+      return;
+    }
+    if (schemaEditorVisible.value) {
+      closeSchemaEditorView();
+    }
+  }
+};
+
+const currentConversationId = computed(() => conversation?.state.currentId);
+
+watch(currentConversationId, () => {
+  schemaEditorVisible.value = false;
+  mobileSchemaJsonEditorOpen.value = false;
+  currentCardId.value = '';
+  isHistoryVersionApplied.value = true;
+  rendererPanelVisible.value = true;
+});
+
+onMounted(() => {
+  resetToLatestVersion();
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
+  removeMobileSheetDragListeners();
+});
 </script>
 
 <template>
-  <div class="genui-schema-template">
-    <div class="genui-schema-template-left">
-      <GenuiConfigProvider v-show="!schemaEditorVisible" :theme="theme" style="width: 100%; height: 100%">
+  <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">
+    <div class="genui-schema-template-item chat-container">
+      <!-- 桌面：打开内联编辑器时隐藏聊天；移动端：底部抽屉叠在聊天上，聊天保持挂载以便背后仍可见 -->
+      <GenuiConfigProvider v-show="!schemaEditorVisible || isMobile" :theme="theme" style="width: 100%; height: 100%">
         <genui-template-chat class="genui-template-chat" @schema-version-toggle="toggleSchemaVersion" />
       </GenuiConfigProvider>
-      <div class="schema-version-container" v-if="schemaEditorVisible">
-        <div class="schema-version-toggle-button-group" v-if="schemaDiffVisible">
-          <tiny-button @click="updateSchemaVersion">还原此版本</tiny-button>
-          <tiny-button type="info" @click="resetToLatestVersion">返回最新版本</tiny-button>
+      <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
+        <div class="schema-version-container__header">
+          <span class="schema-version-container__title">查看 Schema</span>
+          <tiny-button type="text" class="genui-schema-toolbar-close-btn" :icon="TinyCloseIcon" aria-label="关闭"
+            @click="closeSchemaEditorView" />
         </div>
-        <code-editor v-model:value="schemaEditor" language="json" theme="vs" :options="editorOptions" />
+        <div class="schema-version-container__editor">
+          <code-editor v-model:value="schemaEditor" language="json" theme="vs" :options="editorOptions" />
+        </div>
       </div>
     </div>
-    <div class="genui-schema-template-right" v-if="currentSchema">
-      <tiny-button class="schema-editor-toggle-button" :icon="TinyIconEditorCode"
-        @click="toggleSchemaEditor"></tiny-button>
-      <schema-renderer class="schema-renderer" :content="currentSchema" :generating="false" />
-    </div>
+    <genui-template-mobile-sheet v-if="isMobile" :visible="isMobile && schemaEditorVisible"
+      :json-editor-open="mobileSchemaJsonEditorOpen" :panel-style="mobileSheetPanelStyle"
+      :show-return-latest-button="showReturnLatestButton" :current-preview-schema="currentPreviewSchema"
+      :schema-editor="schemaEditor" :editor-options="editorOptions" :view-schema-icon="viewSchemaIcon"
+      :close-icon="TinyCloseIcon" @update:json-editor-open="mobileSchemaJsonEditorOpen = $event"
+      @update:schema-editor="schemaEditor = $event" @mask-click="onMobileSheetMaskClick"
+      @grab-touch-start="onMobileSheetGrabTouchStart" @close="closeSchemaEditorView"
+      @apply-current-version="applyCurrentVersion" @reset-to-latest-version="resetToLatestVersion" />
+    <template v-else>
+      <div class="genui-schema-template-item renderer-container" v-if="currentSchema && rendererPanelVisible">
+        <div class="renderer-container-wrapper">
+          <div class="top-button-group">
+            <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
+              <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
+              查看 JSON
+            </button>
+            <div class="top-button-group-right">
+              <tiny-button v-if="showReturnLatestButton" round @click="resetToLatestVersion">返回最新版本</tiny-button>
+              <tiny-button v-if="showReturnLatestButton" type="primary" round
+                @click="applyCurrentVersion">应用此版本</tiny-button>
+              <tiny-button type="text" class="genui-schema-toolbar-close-btn" :icon="TinyCloseIcon" aria-label="关闭预览区"
+                @click="closeRendererPanel" />
+            </div>
+          </div>
+          <schema-renderer class="schema-renderer" :content="currentPreviewSchema" :generating="false" />
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
+@schema-toolbar-height: 64px;
+
 .genui-schema-template {
   display: flex;
   margin-bottom: 20px;
   width: 100%;
-  min-height: 100%;
-}
-
-.genui-schema-template-left {
-  flex: 1;
-  display: flex;
+  min-height: 0;
   height: 100%;
+  overflow: hidden;
+
+  &-item {
+    flex: 1;
+    min-height: 0;
+  }
+
+  & .chat-container {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  & .renderer-container {
+    overflow: auto;
+    min-height: 0;
+    box-sizing: border-box;
+
+    &-wrapper {
+      background-color: #ffffff;
+      border-radius: 16px;
+      height: 100%;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      text-align: center;
+      position: relative;
+
+      .top-button-group {
+        flex-shrink: 0;
+        box-sizing: border-box;
+        height: @schema-toolbar-height;
+        min-height: @schema-toolbar-height;
+        max-height: @schema-toolbar-height;
+        border-bottom: 1px solid rgb(232, 232, 232);
+        border-left: 1px solid rgb(232, 232, 232);
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .button-svg-icon {
+          width: 16px;
+          height: 16px;
+          margin-right: 6px;
+          vertical-align: middle;
+        }
+
+        .schema-toggle-text {
+          display: inline-flex;
+          align-items: center;
+          margin: 0;
+          padding: 0;
+          border: none;
+          background: transparent;
+          font: inherit;
+          text-align: inherit;
+          color: #191919;
+          cursor: pointer;
+          user-select: none;
+
+          &:hover {
+            color: #1890ff;
+          }
+
+          &:focus-visible {
+            outline: 2px solid #1890ff;
+            outline-offset: 2px;
+            border-radius: 4px;
+          }
+        }
+
+        .top-button-group-right {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+      }
+
+      .schema-renderer {
+        flex: 1;
+        padding: 20px;
+        overflow: auto;
+        border-left: 1px solid rgb(232, 232, 232);
+        box-sizing: border-box;
+      }
+    }
+  }
+
+  &.is-mobile {
+    flex-direction: column-reverse;
+    margin-bottom: 0;
+
+    .genui-schema-template-item {
+      flex: 1 1 50%;
+      min-height: 0;
+    }
+  }
 }
 
-.genui-schema-template-right {
-  width: 50%;
-  overflow: auto;
-}
 
 .genui-template-chat {
   width: 100%;
+  min-height: 0;
 }
 
-.schema-editor-toggle-button {
-  margin: 8px 0px 0px 8px;
-  border: none;
-}
+.genui-schema-toolbar-close-btn {
+  flex-shrink: 0;
 
-.schema-renderer {
-  padding: 0px 20px;
+  &.tiny-button {
+    box-sizing: border-box;
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: #666;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: #191919;
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.08);
+    }
+  }
 }
 
 .schema-version-container {
+  flex: 1;
   width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   box-sizing: border-box;
-}
+  min-height: 0;
+  overflow: hidden;
+  background: #fff;
 
-.schema-version-toggle-button-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 0px;
-  border-bottom: 1px solid #808080;
-  margin-bottom: 20px;
-}
+  &__header {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    height: @schema-toolbar-height;
+    min-height: @schema-toolbar-height;
+    max-height: @schema-toolbar-height;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 14px;
+    border-bottom: 1px solid rgb(232, 232, 232);
+  }
 
-.json-patch-dev-icon {
-  cursor: pointer;
-  position: absolute;
-  top: 0;
-  right: 20px;
-  padding: 12px;
-  text-align: right;
+  &__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgb(25, 25, 25);
+    line-height: 22px;
+  }
+
+  &__editor {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &__editor :deep(.monaco-code-editor) {
+    flex: 1;
+    min-height: 0;
+  }
 }
 </style>

@@ -96,6 +96,7 @@ const features = [
 
 <style lang="less" scoped>
 .home-feature {
+
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -120,12 +121,20 @@ const features = [
     justify-content: center;
     padding: 48px;
     border: 3px solid #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     cursor: pointer;
-    box-shadow: 0px 4px 30px 0px rgba(234, 233, 237, 0.3);
+    box-shadow: 0px 4px 30px 0px rgba(230, 230, 230, 0.6);
 
     &:hover {
-      box-shadow: 0px 4px 30px 0px rgba(234, 233, 237, 0.9);
+      box-shadow: 0px 4px 32px 0px rgba(230, 230, 230, 0.9);
+    }
+    @media (max-width: 768px) {
+      flex-direction: row;
+      border-radius: 6px;
+      box-shadow: 0px 2px 12px 0px rgba(230, 230, 230, 0.6);
+      div&-title {
+        margin-bottom: 0;
+      }
     }
 
     &-icon {
@@ -139,6 +148,9 @@ const features = [
         width: 48px;
         height: 48px;
         margin-bottom: 16px;
+      }
+      .home-feature-card-description {
+        font-size: 14px;
       }
     }
 
@@ -167,6 +179,7 @@ const features = [
   @media (max-width: 1280px) {
     &-card {
       padding: 24px;
+      justify-content: normal;
     }
   }
 
