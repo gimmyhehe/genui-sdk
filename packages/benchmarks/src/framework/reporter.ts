@@ -12,6 +12,7 @@ export function printBenchmarkTable(results: LlmBenchmarkResultItem[]) {
       model: item.model ?? '',
       runIndex: item.runIndex ?? 1,
       ttftMs: formatNumber(item.ttftMs, 2),
+      tinyCardMs: formatNumber(item.firstObservableComponentMs, 2),
       totalMs: formatNumber(item.totalMs, 2),
       tpotMsPerTok: item.tpotMs == null ? '' : formatNumber(item.tpotMs, 2),
       validSchema: item.isSchemaJsonValidAgainstProtocol,
@@ -35,6 +36,7 @@ export function printBenchmarkTable(results: LlmBenchmarkResultItem[]) {
 export function printBenchmarkSummary(results: LlmBenchmarkResultItem[]) {
   const successCount = results.filter((item) => item.isSchemaJsonValidAgainstProtocol).length;
   const avgTtft = results.reduce((sum, item) => sum + item.ttftMs, 0) / results.length;
+  const avgFirstObs = results.reduce((sum, item) => sum + item.firstObservableComponentMs, 0) / results.length;
   const avgTotal = results.reduce((sum, item) => sum + item.totalMs, 0) / results.length;
   const tpotDefined = results.filter((item) => typeof item.tpotMs === 'number');
   const avgTpot =
@@ -52,6 +54,7 @@ export function printBenchmarkSummary(results: LlmBenchmarkResultItem[]) {
       validSchema: `${successCount}/${results.length}`,
       avgJudgeScore: avgJudgeScore == null ? 'N/A' : formatNumber(avgJudgeScore, 2),
       avgTtftMs: formatNumber(avgTtft, 2),
+      avgTinyCardMs: formatNumber(avgFirstObs, 2),
       avgTotalMs: formatNumber(avgTotal, 2),
       avgTpotMsPerTok: avgTpot == null ? 'N/A' : formatNumber(avgTpot, 2),
       totalTokens,

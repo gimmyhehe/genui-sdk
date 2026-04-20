@@ -61,10 +61,12 @@ function resolveRunOptions(): LlmBenchmarkRunOptions {
  * - 再根据 samples 做离线统计并输出报告
  */
 async function main() {
+  const benchmarkStartedAtMs = Date.now();
   const options = resolveRunOptions();
   const gen = await generateSamples(options);
   await runReport({
     ...options,
+    benchmarkStartedAtMs,
     // 让 report 只读取本次 runDir 下的样本
     samplesDir: gen.samplesDir,
   });

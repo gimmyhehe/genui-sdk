@@ -2,9 +2,49 @@ import fs from 'fs';
 import { genRootSchema } from '@opentiny/genui-sdk-core';
 import { streamText } from 'ai';
 import { createDeepSeek } from '@ai-sdk/deepseek';
+import type { ZodIssue } from 'zod';
 import type { LlmBenchmarkResultItem, LlmBenchmarkRunOptions, LlmBenchmarkSample } from './framework/index';
 import { printLlmBenchmarkResults } from './framework/index';
 import { computeTpotMs, extractSchemaJsonBlock, parseJudgeJson, resolveSamplesDir } from './utils';
+
+/**
+ * 递归展开 Zod issue，尽量定位到 union 分支内的最深层错误。
+ */
+function flattenZodIssues(issues: readonly ZodIssue[]): ZodIssue[] {
+  const flattened: ZodIssue[] = [];
+  for (const issue of issues) {
+    if (issue.code === 'invalid_union') {
+      const unionErrors = (issue as ZodIssue & { unionErrors?: Array<{ issues: ZodIssue[] }> }).unionErrors ?? [];
+      if (unionErrors.length > 0) {
+        for (const unionError of unionErrors) {
+          flattened.push(...flattenZodIssues(unionError.issues));
+        }
+        continue;
+      }
+    }
+    flattened.push(issue);
+  }
+  return flattened;
+}
+
+/**
+ * 选择最有定位价值的 issue：优先更深路径，其次非泛化报错文案。
+ */
+function pickMostSpecificIssue(issues: readonly ZodIssue[]): ZodIssue | undefined {
+  const expanded = flattenZodIssues(issues);
+  if (expanded.length === 0) return undefined;
+  return expanded
+    .slice()
+    .sort((a, b) => {
+      const pathScoreA = a.path.length * 100;
+      const pathScoreB = b.path.length * 100;
+      const msgScoreA = a.message === 'Invalid input' ? 0 : 10;
+      const msgScoreB = b.message === 'Invalid input' ? 0 : 10;
+      const codeScoreA = a.code === 'invalid_type' ? 5 : 0;
+      const codeScoreB = b.code === 'invalid_type' ? 5 : 0;
+      return pathScoreB + msgScoreB + codeScoreB - (pathScoreA + msgScoreA + codeScoreA);
+    })[0];
+}
 
 /**
  * 校验 schemaJson 内容，只产出“整体通过/失败”结果。
@@ -22,12 +62,15 @@ function validateSchemaJson(schemaJsonText: string | null) {
     if (result.success) {
       return { isSchemaJsonValidAgainstProtocol: true };
     }
-    const firstIssue = result.error.issues[0];
-    const path = firstIssue?.path?.length ? firstIssue.path.join('.') : '(root)';
-    const message = firstIssue?.message ?? 'schema safeParse failed';
+    const issue = pickMostSpecificIssue(result.error.issues);
+    const path = issue?.path?.length ? issue.path.join('.') : '(root)';
+    const message = issue
+      ? `[${issue.code}] ${issue.message}`
+      : `schema safeParse failed (issues=${result.error.issues.length})`;
     return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: `${path}: ${message}` };
-  } catch {
-    return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: 'schema safeParse failed' };
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: `schema parse failed: ${detail}` };
   }
 }
 
@@ -117,6 +160,7 @@ function toReportItem(sample: LlmBenchmarkSample, judge?: LlmJudgeResult): LlmBe
     model: sample.model,
     ttftMs: sample.metrics.ttftMs,
     totalMs: sample.metrics.totalMs,
+    firstObservableComponentMs: sample.metrics.firstObservableComponentMs ?? 0,
     ...(tpotMs !== undefined ? { tpotMs } : {}),
     ...validation,
     promptTokens: sample.metrics.promptTokens,
@@ -200,9 +244,9 @@ export async function runReport(options: LlmBenchmarkRunOptions) {
   }
   const invalidSchemaRows = results.filter((item) => !item.isSchemaJsonValidAgainstProtocol);
   if (invalidSchemaRows.length > 0) {
-    console.log('\nSchema Validation Errors (top 5)');
+    console.log(`\nSchema Validation Errors (all ${invalidSchemaRows.length})`);
     console.table(
-      invalidSchemaRows.slice(0, 5).map((item) => ({
+      invalidSchemaRows.map((item) => ({
         scenario: item.scenario,
         model: item.model ?? '',
         runIndex: item.runIndex ?? 1,

@@ -5,7 +5,14 @@ import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/r
 import { ngRendererConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
 import type { LlmBenchmarkRunOptions, LlmBenchmarkSample, LlmBenchmarkSampleCase } from './framework/index';
 import { coreLlmBenchmarkSampleCases } from './samples';
-import { formatBeijingRunDirName, getSampleFilePath, resolveModelsForBench, resolveSamplesDir, slugifyModelForFilename } from './utils';
+import {
+  formatBeijingRunDirName,
+  getSampleFilePath,
+  hasTinyCardComponentDeclaration,
+  resolveModelsForBench,
+  resolveSamplesDir,
+  slugifyModelForFilename,
+} from './utils';
 import { computeTpotMs } from './utils';
 import { streamText } from 'ai';
 import { createDeepSeek } from '@ai-sdk/deepseek';
@@ -57,6 +64,7 @@ async function generateSingleSample(
 ): Promise<LlmBenchmarkSample> {
   const start = Date.now();
   let firstTokenAt = 0;
+  let firstTinyCardAt = 0;
   let output = '';
   let promptTokens = 0;
   let completionTokens = 0;
@@ -76,7 +84,16 @@ async function generateSingleSample(
         if (!firstTokenAt) {
           firstTokenAt = Date.now();
         }
+        const before = output;
         output += chunk.text;
+        const now = Date.now();
+        if (
+          !firstTinyCardAt &&
+          hasTinyCardComponentDeclaration(output) &&
+          !hasTinyCardComponentDeclaration(before)
+        ) {
+          firstTinyCardAt = now;
+        }
       }
       if (chunk.type === 'finish') {
         promptTokens = chunk.totalUsage?.inputTokens ?? promptTokens;
@@ -103,6 +120,7 @@ async function generateSingleSample(
 
   const totalMs = Date.now() - start;
   const tpotMs = computeTpotMs(firstTokenAt ? firstTokenAt - start : 0, totalMs, completionTokens);
+  const firstObservableComponentMs = firstTinyCardAt ? firstTinyCardAt - start : 0;
 
   return {
     scenario: sampleCase.id,
@@ -114,6 +132,7 @@ async function generateSingleSample(
     metrics: {
       ttftMs: firstTokenAt ? firstTokenAt - start : 0,
       totalMs,
+      firstObservableComponentMs,
       ...(tpotMs !== undefined ? { tpotMs } : {}),
       promptTokens,
       completionTokens,
@@ -233,7 +252,7 @@ export async function generateSamples(options: LlmBenchmarkRunOptions) {
       const remainMs = Math.round(avgPerJobMs * remainJobs);
 
       console.log(
-        `[bench][w${workerNo}] done (${doneJobs}/${totalJobs}) -> ${sampleFile} | ttftMs=${sample.metrics.ttftMs}, totalMs=${sample.metrics.totalMs} | est remain=${remainMs}ms`,
+        `[bench][w${workerNo}] done (${doneJobs}/${totalJobs}) -> ${sampleFile} | ttftMs=${sample.metrics.ttftMs}, tinyCardMs=${sample.metrics.firstObservableComponentMs}, totalMs=${sample.metrics.totalMs} | est remain=${remainMs}ms`,
       );
     }
   }

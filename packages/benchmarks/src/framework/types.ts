@@ -80,6 +80,11 @@ export interface LlmBenchmarkRunOptions {
   json?: boolean;
   samplesDir?: string;
   outputDir?: string;
+  /**
+   * 本次 benchmark 入口开始时间戳（ms）。
+   * 若提供，报告阶段会计算「从开始执行到报告输出」总耗时。
+   */
+  benchmarkStartedAtMs?: number;
 }
 
 export interface LlmBenchmarkResultItem {
@@ -89,6 +94,10 @@ export interface LlmBenchmarkResultItem {
   model?: string;
   ttftMs: number;
   totalMs: number;
+  /**
+   * 自请求开始到输出中首次出现 `TinyCard` 节点（`"componentName": "TinyCard"`）的毫秒数；未出现则为 0。
+   */
+  firstObservableComponentMs: number;
   /** TPOT（Time Per Output Token），ms/token；completionTokens≤1 时无意义，省略 */
   tpotMs?: number;
   isSchemaJsonValidAgainstProtocol: boolean;
@@ -117,6 +126,11 @@ export interface LlmBenchmarkSample {
   metrics: {
     ttftMs: number;
     totalMs: number;
+    /**
+     * 自请求开始到首次出现 `TinyCard` 的毫秒数（语义同 {@link LlmBenchmarkResultItem} 同名字段）。
+     * 旧版样本可能缺省；报告阶段按 0 处理。
+     */
+    firstObservableComponentMs?: number;
     /** TPOT（Time Per Output Token），ms/token；completionTokens≤1 时省略 */
     tpotMs?: number;
     promptTokens: number;
