@@ -57,17 +57,10 @@ const handleDev = () => {
 </script>
 
 <template>
-  <div
-    class="schema-version-card"
-    @click="handleClick"
-  >
+  <div :class="['schema-version-card', isMobile ? 'is-mobile' : '']" @click="handleClick">
     <div class="schema-version-card-main">
       <div class="schema-version-card-icon">
-        <img
-          :src="docIcon"
-          alt="schema card"
-          class="schema-version-card-icon-image"
-        />
+        <img :src="docIcon" alt="schema card" class="schema-version-card-icon-image" />
       </div>
       <div class="schema-version-card-content">
         <div class="schema-version-card-content-title">
@@ -80,24 +73,12 @@ const handleDev = () => {
       </div>
     </div>
     <div class="schema-version-card-footer">
-      <div
-        v-if="isDev && props.type === 'json-patch' && !generating && !isMobile"
-        class="icons-wrap"
-      >
-        <div
-          class="icon-item"
-          title="调试 jsonPatch"
-          @click.stop="handleDev"
-        >
+      <div v-if="isDev && props.type === 'json-patch' && !generating && !isMobile" class="icons-wrap">
+        <div class="icon-item" title="调试 jsonPatch" @click.stop="handleDev">
           <TinyIconRichTextCodeView />
         </div>
       </div>
-      <div
-        v-if="errorMessage"
-        class="error-message"
-      >
-        解析失败
-      </div>
+      <div v-if="errorMessage" class="error-message">解析失败</div>
     </div>
   </div>
   <JsonPatchDev
@@ -110,8 +91,8 @@ const handleDev = () => {
 
 <style scoped lang="less">
 .schema-version-card {
-  width: 100%;
-  max-width: 300px;
+  width: 330px;
+  max-width: 330px;
   box-sizing: border-box;
   border-radius: 12px;
   position: relative;
@@ -120,6 +101,11 @@ const handleDev = () => {
   display: flex;
   flex-direction: column;
   padding: 16px;
+
+  &.is-mobile {
+    width: 100%;
+    max-width: 300px;
+  }
 
   &-main {
     display: flex;

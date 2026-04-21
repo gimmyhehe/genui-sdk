@@ -309,7 +309,7 @@ onUnmounted(() => {
       @reset-to-latest-version="resetToLatestVersion"
     />
     <template v-else>
-      <div class="genui-schema-template-item renderer-container" v-if="currentSchema && rendererPanelVisible">
+      <div class="genui-schema-template-item renderer-container" v-if="currentPreviewSchema && rendererPanelVisible">
         <div class="renderer-container-wrapper">
           <div class="top-button-group">
             <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
@@ -317,8 +317,8 @@ onUnmounted(() => {
               查看 JSON
             </button>
             <div class="top-button-group-right">
-              <tiny-button v-if="showReturnLatestButton" round @click="resetToLatestVersion">返回最新版本</tiny-button>
-              <tiny-button v-if="showReturnLatestButton" type="primary" round @click="applyCurrentVersion">
+              <tiny-button v-if="showReturnLatestButton" type="primary" round @click="resetToLatestVersion">返回最新版本</tiny-button>
+              <tiny-button v-if="showReturnLatestButton" round @click="applyCurrentVersion">
                 应用此版本
               </tiny-button>
               <tiny-button

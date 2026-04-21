@@ -4,6 +4,7 @@ import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
 import type { IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
 import { jsonPatchDeduplicator } from './json-patch-deduplicator';
 import SchemaVersionCard from './SchemaVersionCard.vue';
+import { useIsMobile } from '../../use-mobile';
 
 const props = defineProps<{
   itemProps: any;
@@ -16,6 +17,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: 'schema-version-toggle', schema: Record<string, unknown>, cardId: string): void;
 }>();
+
+const { isMobile } = useIsMobile();
 
 const generating = computed(() => !props.itemProps?.generatedTime);
 
@@ -58,7 +61,7 @@ const handleSchemaVersionCardClick = (cardId: string) => {
 </script>
 
 <template>
-  <div v-if="generating">
+  <div v-if="generating && isMobile">
     <genui-renderer v-bind="genuiRendererProps" />
   </div>
   <schema-version-card

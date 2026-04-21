@@ -75,10 +75,7 @@ const handleJsonEditorChange = (value: string) => {
             </div>
           </div>
           <div
-            :class="[
-              'schema-mobile-sheet__body',
-              { 'schema-mobile-sheet__body--with-footer': showReturnLatestButton },
-            ]"
+            :class="['schema-mobile-sheet__body', { 'schema-mobile-sheet__body--with-footer': showReturnLatestButton }]"
           >
             <div
               v-if="currentPreviewSchema"
@@ -92,10 +89,7 @@ const handleJsonEditorChange = (value: string) => {
               />
             </div>
             <Transition name="schema-mobile-json">
-              <div
-                v-show="jsonEditorOpen"
-                class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer"
-              >
+              <div v-show="jsonEditorOpen" class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer">
                 <code-editor
                   :value="schemaEditor"
                   language="json"
@@ -107,15 +101,11 @@ const handleJsonEditorChange = (value: string) => {
             </Transition>
           </div>
           <div v-if="showReturnLatestButton" class="schema-mobile-sheet__footer">
-            <tiny-button
-              type="primary"
-              round
-              class="schema-mobile-sheet__latest-btn"
-              @click="emit('apply-current-version')"
-            >
+            <tiny-button round class="schema-mobile-sheet__latest-btn" @click="emit('apply-current-version')">
               应用此版本
             </tiny-button>
             <tiny-button
+              type="primary"
               round
               class="schema-mobile-sheet__latest-btn"
               @click="emit('reset-to-latest-version')"
@@ -351,7 +341,9 @@ const handleJsonEditorChange = (value: string) => {
 
 .schema-mobile-json-enter-active,
 .schema-mobile-json-leave-active {
-  transition: opacity 0.2s ease, transform 0.22s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.22s ease;
 }
 
 .schema-mobile-json-enter-from,
