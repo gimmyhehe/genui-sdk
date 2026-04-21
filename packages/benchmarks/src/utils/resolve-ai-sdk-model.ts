@@ -1,0 +1,53 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  createProviderModelMapperFromFile,
+  loadProviderModelsDataFromFile,
+  type ModelInfo,
+} from '../../../../sites/playground/server/src/provider-models-mapper';
+
+let mapperPromise: Promise<Awaited<ReturnType<typeof createProviderModelMapperFromFile>>> | null = null;
+let providerModelsDataPromise: Promise<Record<string, any> | null> | null = null;
+
+async function getProviderModelMapperForBench() {
+  if (!mapperPromise) {
+    const currentDir = path.dirname(fileURLToPath(import.meta.url));
+    const providerModelsPath = path.resolve(currentDir, '../../../../sites/playground/server/maas-models.json');
+    providerModelsDataPromise = loadProviderModelsDataFromFile(providerModelsPath);
+    mapperPromise = createProviderModelMapperFromFile(providerModelsPath);
+  }
+  return mapperPromise;
+}
+
+function resolveModelInfoById(providerModelsData: Record<string, any> | null, modelId: string): ModelInfo | undefined {
+  if (!providerModelsData) return undefined;
+  for (const providerData of Object.values(providerModelsData)) {
+    const models = Array.isArray((providerData as any)?.models) ? (providerData as any).models : [];
+    const matched = models.find((model: any) => model?.id === modelId);
+    if (matched?.name) {
+      const providerInfo = { ...(providerData as any) };
+      delete providerInfo.models;
+      return {
+        model: { ...matched },
+        provider: { ...providerInfo },
+      };
+    }
+  }
+  return undefined;
+}
+
+/**
+ * 与 playground chat-genui 对齐：通过 ProviderModelMapper 解析模型并生成 AI SDK 模型实例。
+ * @param modelName 业务配置中的模型名称（例如 DeepSeek-V3.2）
+ */
+export async function resolveAiSdkModelForBench(modelName: string) {
+  const mapper = await getProviderModelMapperForBench();
+  const modelInfoByName = mapper.getModelInfo(modelName);
+  const providerModelsData = providerModelsDataPromise ? await providerModelsDataPromise : null;
+  const modelInfo = modelInfoByName ?? resolveModelInfoById(providerModelsData, modelName);
+  if (!modelInfo) {
+    throw new Error(`Model not found in maas-models.json: ${modelName}`);
+  }
+  return mapper.getAiSDKModel(modelInfo);
+}
+

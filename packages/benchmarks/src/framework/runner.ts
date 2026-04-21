@@ -149,6 +149,8 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
     .bad { color: #ff7a7a; }
     h3 { margin-top: 0; }
     .hint { opacity: 0.85; font-size: 13px; }
+    .chart-card-compact { height: 340px; }
+    .chart-card-compact canvas { width: 100% !important; height: 100% !important; }
   </style>
 </head>
 <body>
@@ -162,7 +164,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
   </div>
   <div class="card">
     <h3>按场景 · 模型对比（多次 run 取均值）</h3>
-    <p class="hint">下图每个分组对应一个场景；同色柱为同一模型在该场景下的平均 TTFT（首 Token 延迟）/ 首个 TinyCard 节点出现 / Total（端到端总耗时）/ TPOT（首 token 后每 token 耗时）/ Schema 校验通过率。</p>
+    <p class="hint">下图包含按场景的时延/Token 对比，以及按模型的 Schema 通过率排名（百分比）。</p>
   </div>
   <div class="grid">
     <div class="card"><canvas id="compareTtftChart"></canvas></div>
@@ -183,7 +185,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
   <div class="grid">
     <div class="card"><canvas id="latencyChart"></canvas></div>
     <div class="card"><canvas id="tokenChart"></canvas></div>
-    <div class="card"><canvas id="validChart"></canvas></div>
+    <div class="card chart-card-compact"><canvas id="validChart"></canvas></div>
   </div>
   <div class="card">
     <h3>Details</h3>
@@ -210,6 +212,19 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
     function pickScenarioCell(scenario, model) {
       var row = comparison.find(function (c) { return c.scenario === scenario; });
       return row && row.byModel[model];
+    }
+
+    function buildModelSchemaPassRanking() {
+      var rows = modelList
+        .map(function (m) {
+          var modelRuns = results.filter(function (r) { return r.model === m; });
+          if (modelRuns.length === 0) return null;
+          var passCount = modelRuns.filter(function (r) { return r.isSchemaJsonValidAgainstProtocol; }).length;
+          return { model: m, passRatePct: passCount / modelRuns.length * 100 };
+        })
+        .filter(function (x) { return x != null; })
+        .sort(function (a, b) { return b.passRatePct - a.passRatePct; });
+      return rows;
     }
 
     new Chart(document.getElementById('compareTtftChart'), {
@@ -260,27 +275,36 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
       },
       options: withTitle(barOpts, 'Total（端到端总耗时）平均对比（ms）'),
     });
+    var schemaPassByModel = buildModelSchemaPassRanking();
     new Chart(document.getElementById('compareSchemaChart'), {
       type: 'bar',
       data: {
-        labels: scenarioLabels,
-        datasets: modelList.map(function (m) {
-          return {
-            label: m,
-            data: scenarioLabels.map(function (sc) {
-              var cell = pickScenarioCell(sc, m);
-              return cell ? cell.schemaPassRate : null;
-            }),
-          };
-        }),
+        labels: schemaPassByModel.map(function (x) { return x.model; }),
+        datasets: [
+          {
+            label: 'Schema 通过率',
+            data: schemaPassByModel.map(function (x) { return x.passRatePct; }),
+            backgroundColor: '#5b8ff9',
+          },
+        ],
       },
       options: withTitle(
         {
+          indexAxis: 'y',
           responsive: true,
           plugins: { legend: { position: 'bottom' } },
-          scales: { y: { min: 0, max: 1, ticks: { stepSize: 0.25 } } },
+          scales: {
+            x: {
+              min: 0,
+              max: 100,
+              ticks: {
+                stepSize: 10,
+                callback: function (value) { return value + '%'; },
+              },
+            },
+          },
         },
-        'Schema 通过率（0~1）',
+        'Schema 通过率排名（按模型，%）',
       ),
     });
     new Chart(document.getElementById('compareTokensChart'), {
@@ -351,17 +375,37 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
       },
       options: withTitle(barOpts, '单次运行：Token 消耗'),
     });
+    var schemaPassByModelForValid = buildModelSchemaPassRanking();
     new Chart(document.getElementById('validChart'), {
       type: 'bar',
       data: {
-        labels: labels,
+        labels: schemaPassByModelForValid.map(function (x) { return x.model; }),
         datasets: [
-          { label: 'Schema', data: results.map(function (r) { return r.isSchemaJsonValidAgainstProtocol ? 1 : 0; }) },
+          {
+            label: 'Schema 通过率',
+            data: schemaPassByModelForValid.map(function (x) { return x.passRatePct; }),
+            backgroundColor: '#3ddc97',
+          },
         ],
       },
       options: withTitle(
-        { scales: { y: { min: 0, max: 1, ticks: { stepSize: 1 } } }, plugins: { legend: { position: 'bottom' } }, responsive: true },
-        '单次运行：schemaJson 校验',
+        {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            x: {
+              min: 0,
+              max: 100,
+              ticks: {
+                stepSize: 10,
+                callback: function (value) { return value + '%'; },
+              },
+            },
+          },
+        },
+        '单次运行样本：按模型 Schema 通过率（%）',
       ),
     });
     const headers = ['model', 'scenario', 'runIndex', 'ttftMs', 'tinyCardMs', 'totalMs', 'tpotMs', 'schema', 'schemaError', 'judgeScore', 'judgeReason', 'tokens', 'error'];

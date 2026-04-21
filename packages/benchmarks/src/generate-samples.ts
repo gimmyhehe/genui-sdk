@@ -9,13 +9,13 @@ import {
   formatBeijingRunDirName,
   getSampleFilePath,
   hasTinyCardComponentDeclaration,
+  resolveAiSdkModelForBench,
   resolveModelsForBench,
   resolveSamplesDir,
   slugifyModelForFilename,
 } from './utils';
 import { computeTpotMs } from './utils';
 import { streamText } from 'ai';
-import { createDeepSeek } from '@ai-sdk/deepseek';
 
 /**
  * 与 chat-genui 一致的 system 拼接；framework 来自运行配置（env / benchmark.config），其余来自 llm.config。
@@ -56,7 +56,7 @@ function selectSampleCases(cases: LlmBenchmarkSampleCase[], options: LlmBenchmar
  * @returns 样本对象（包含指标与输出）
  */
 async function generateSingleSample(
-  modelInstance: ReturnType<ReturnType<typeof createDeepSeek>>,
+  modelInstance: Awaited<ReturnType<typeof resolveAiSdkModelForBench>>,
   model: string,
   sampleCase: LlmBenchmarkSampleCase,
   runIndex: number,
@@ -149,15 +149,7 @@ async function generateSingleSample(
  * @returns 本次生成的样本目录与写入的文件路径列表
  */
 export async function generateSamples(options: LlmBenchmarkRunOptions) {
-  const apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    throw new Error('DEEPSEEK_API_KEY (or OPENAI_API_KEY as fallback) is required');
-  }
   (globalThis as any).AI_SDK_LOG_WARNINGS = false;
-  const deepseek = createDeepSeek({
-    apiKey,
-    baseURL: process.env.DEEPSEEK_BASE_URL,
-  });
   const framework = options.framework ?? 'Vue';
   const system = buildSystemPrompt(framework, options.promptConfig);
   const selected = selectSampleCases(coreLlmBenchmarkSampleCases, options);
@@ -192,10 +184,10 @@ export async function generateSamples(options: LlmBenchmarkRunOptions) {
     runIndex: number;
   };
 
-  const modelInstanceByModelId = new Map<string, ReturnType<ReturnType<typeof createDeepSeek>>>();
+  const modelInstanceByModelId = new Map<string, Awaited<ReturnType<typeof resolveAiSdkModelForBench>>>();
   const modelSlugByModelId = new Map<string, string>();
   for (const modelId of modelIds) {
-    modelInstanceByModelId.set(modelId, deepseek(modelId));
+    modelInstanceByModelId.set(modelId, await resolveAiSdkModelForBench(modelId));
     modelSlugByModelId.set(modelId, slugifyModelForFilename(modelId));
   }
 
