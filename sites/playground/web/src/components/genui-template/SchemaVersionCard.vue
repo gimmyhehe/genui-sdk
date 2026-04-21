@@ -29,7 +29,7 @@ const { getMessageByCardId } = useTemplate();
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
 
-const docIcon = computed(() => props.type === 'schema-card' ? docCardIcon : docEditIcon);
+const docIcon = computed(() => (props.type === 'schema-card' ? docCardIcon : docEditIcon));
 
 // 判断当前为开发环境
 const isDev = import.meta.env.MODE === 'development';
@@ -57,10 +57,17 @@ const handleDev = () => {
 </script>
 
 <template>
-  <div class="schema-version-card" @click="handleClick">
+  <div
+    class="schema-version-card"
+    @click="handleClick"
+  >
     <div class="schema-version-card-main">
       <div class="schema-version-card-icon">
-        <img :src="docIcon" alt="schema card" class="schema-version-card-icon-image" />
+        <img
+          :src="docIcon"
+          alt="schema card"
+          class="schema-version-card-icon-image"
+        />
       </div>
       <div class="schema-version-card-content">
         <div class="schema-version-card-content-title">
@@ -73,16 +80,32 @@ const handleDev = () => {
       </div>
     </div>
     <div class="schema-version-card-footer">
-      <div v-if="isDev && props.type === 'json-patch' && !generating && !isMobile" class="icons-wrap">
-        <div class="icon-item" title="调试 jsonPatch" @click.stop="handleDev">
+      <div
+        v-if="isDev && props.type === 'json-patch' && !generating && !isMobile"
+        class="icons-wrap"
+      >
+        <div
+          class="icon-item"
+          title="调试 jsonPatch"
+          @click.stop="handleDev"
+        >
           <TinyIconRichTextCodeView />
         </div>
       </div>
-      <div v-if="errorMessage" class="error-message">解析失败</div>
+      <div
+        v-if="errorMessage"
+        class="error-message"
+      >
+        解析失败
+      </div>
     </div>
   </div>
-  <JsonPatchDev v-model:visible="visible" :currentSchema="currentSchema" :jsonPatch="jsonPatch"
-    :prevSchema="prevSchema" />
+  <JsonPatchDev
+    v-model:visible="visible"
+    :currentSchema="currentSchema"
+    :jsonPatch="jsonPatch"
+    :prevSchema="prevSchema"
+  />
 </template>
 
 <style scoped lang="less">

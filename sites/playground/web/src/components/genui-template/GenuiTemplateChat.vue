@@ -141,7 +141,6 @@ const schemaCardRenderer = async (props: any) => {
     // 给每个组件添加 id
     const schemaWithId = generateIdForComponents(target);
     setCurrentPreviewSchema(schemaWithId);
-
   } catch (error) {
     console.error('schemaCardRenderer error ===>', error);
     errorMessagesMap.value.set(props.cardId, error.message);
@@ -261,7 +260,8 @@ const messageRenderers = {
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
       messages: messages.value,
-      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) => emit('schema-version-toggle', schema, cardId),
+      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
+        emit('schema-version-toggle', schema, cardId),
     });
   },
   'schema-card': (props) => {
@@ -273,7 +273,8 @@ const messageRenderers = {
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
       messages: messages.value,
-      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) => emit('schema-version-toggle', schema, cardId),
+      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
+        emit('schema-version-toggle', schema, cardId),
     });
   },
 };
@@ -399,21 +400,45 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="tg-chat-container" :class="{ 'dark': TinyGenuiConfig?.theme === 'dark' }">
-    <div class="messages-container" ref="messagesContainer">
+  <div
+    class="tg-chat-container"
+    :class="{ 'dark': TinyGenuiConfig?.theme === 'dark' }"
+  >
+    <div
+      class="messages-container"
+      ref="messagesContainer"
+    >
       <tr-bubble-provider :content-renderers="messageRenderers">
-        <tr-bubble-list v-if="showMessages.length" :items="showMessages" :roles="roles" auto-scroll> </tr-bubble-list>
+        <tr-bubble-list
+          v-if="showMessages.length"
+          :items="showMessages"
+          :roles="roles"
+          auto-scroll
+        >
+        </tr-bubble-list>
       </tr-bubble-provider>
     </div>
     <div class="sender-container">
-      <div :class="['scroll-to-bottom-button', { 'is-generating': generating }]" v-show="!isLastMessageInBottom"
-        @click="scrollToBottom">
+      <div
+        :class="['scroll-to-bottom-button', { 'is-generating': generating }]"
+        v-show="!isLastMessageInBottom"
+        @click="scrollToBottom"
+      >
         <IconArrowDown class="icon-arrow-down" />
       </div>
-      <tr-sender v-model="inputMessage"
-        :placeholder="GeneratingStatus.includes(messageManager.messageState.status) ? '正在思考中...' : '请输入您的问题～'"
-        :clearable="true" :loading="GeneratingStatus.includes(messageManager.messageState.status)" :showWordLimit="true"
-        :maxLength="5000" @clear="clearInputMessage" @submit="handleSendMessage" @cancel="messageManager.abortRequest">
+      <tr-sender
+        v-model="inputMessage"
+        :placeholder="
+          GeneratingStatus.includes(messageManager.messageState.status) ? '正在思考中...' : '请输入您的问题～'
+        "
+        :clearable="true"
+        :loading="GeneratingStatus.includes(messageManager.messageState.status)"
+        :showWordLimit="true"
+        :maxLength="5000"
+        @clear="clearInputMessage"
+        @submit="handleSendMessage"
+        @cancel="messageManager.abortRequest"
+      >
       </tr-sender>
     </div>
   </div>
@@ -464,15 +489,14 @@ onUnmounted(() => {
 }
 
 :deep(.tr-bubble[data-role='assistant'] .tr-bubble__content-items) {
-
   // 匹配：type非空 + 排除 schema-card/loading-text 这两个值
-  >[type]:not([type='']):not([type='schema-card']):not([type='loading-text']) {
+  > [type]:not([type='']):not([type='schema-card']):not([type='loading-text']) {
     display: var(--thinking-display, initial);
   }
 }
 
 :deep(.tr-bubble__step-tool) {
-  &+.tr-bubble__step-tool {
+  & + .tr-bubble__step-tool {
     margin-top: 16px;
   }
 }
@@ -531,13 +555,15 @@ onUnmounted(() => {
   border: 1px solid var(--sender-border-color);
   z-index: 1000;
 
-  &>svg {
+  & > svg {
     width: 20px;
     height: 20px;
   }
 
   &:hover {
-    box-shadow: 0px 10px 20px 0px #0000001a, 0px 0px 1px 0px #00000026;
+    box-shadow:
+      0px 10px 20px 0px #0000001a,
+      0px 0px 1px 0px #00000026;
   }
 
   &.is-generating {
@@ -571,7 +597,7 @@ onUnmounted(() => {
       z-index: 1;
     }
 
-    &>svg {
+    & > svg {
       z-index: 2;
     }
   }
