@@ -372,7 +372,6 @@ onUnmounted(() => {
       min-height: 0;
       display: flex;
       flex-direction: column;
-      text-align: center;
       position: relative;
 
       .top-button-group {
