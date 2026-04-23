@@ -114,11 +114,29 @@ export const createChatTemplate = () => {
       ${body.templateSchema ? generateJsonPatchPrompt(body.templateSchema) : ''}
       ${specificPrompt}
       ${customSystemPrompt}`;
+
+      const messages = body.messages;
+      if (body.templateSchema) {
+        const schemaJsonContext = `
+          **当前 schemaJson（这是唯一可信的 ID 来源）：**
+          \`\`\`schemaJson
+          ${JSON.stringify(body.templateSchema, null, 2)}
+          \`\`\`
+          `;
+        if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+          messages[messages.length - 1].content += schemaJsonContext;
+        } else {
+          messages.push({
+            role: 'user',
+            content: schemaJsonContext,
+          });
+        }
+      }
       const options: StreamTextOptions = {
         model,
         temperature,
         system: systemPrompt,
-        messages: body.messages,
+        messages: messages,
         abortSignal: abort.signal,
         tools,
         toolChoice: 'auto',
