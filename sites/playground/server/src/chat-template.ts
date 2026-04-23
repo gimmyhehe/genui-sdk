@@ -124,7 +124,14 @@ export const createChatTemplate = () => {
           \`\`\`
           `;
         if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
-          messages[messages.length - 1].content += schemaJsonContext;
+          if (Array.isArray(messages[messages.length - 1].content)) {
+            messages[messages.length - 1].content.push({
+              type: 'text',
+              text: schemaJsonContext,
+            });
+          } else {
+            messages[messages.length - 1].content += schemaJsonContext;
+          }
         } else {
           messages.push({
             role: 'user',
