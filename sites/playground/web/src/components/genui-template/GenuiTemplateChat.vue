@@ -16,7 +16,7 @@ import { GeneratingStatus, STATUS } from '@opentiny/tiny-robot-kit';
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import { IconAi, IconUser, IconArrowDown } from '@opentiny/tiny-robot-svgs';
 import type { BubbleRoleConfig } from '@opentiny/tiny-robot';
-import { requiredCompleteFieldSelectors, scrollEnd, throttle } from '@opentiny/genui-sdk-vue';
+import { requiredCompleteFieldSelectors, scrollEnd, throttle, GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import copy from 'clipboard-copy';
 import type { INotificationPayload, IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
@@ -45,7 +45,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['schema-version-toggle']);
 
-const TinyGenuiConfig: any = inject('TinyGenuiConfig');
+const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
 const errorMessagesMap = ref<Map<string, string>>(new Map());
