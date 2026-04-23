@@ -210,7 +210,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
   // 解析后立刻过滤掉指向本地/内网等不安全目标的 Agent，降低 SSRF 风险
   const agents = rawAgents.filter((agent) => {
     const url = agent.api?.url;
-    if (!url) return true;
+    if (!url) return false;
     return isAllowedAgentUrl(url);
   });
 
