@@ -17,7 +17,15 @@ const { isMobile } = useIsMobile();
 
 const TinyCloseIcon = iconClose();
 
-const { currentSchema, setCurrentSchema, setCurrentPreviewSchema, currentPreviewSchema, templateConversationState, conversation, currentCardId } = useTemplate();
+const {
+  currentSchema,
+  setCurrentSchema,
+  setCurrentPreviewSchema,
+  currentPreviewSchema,
+  templateConversationState,
+  conversation,
+  currentCardId,
+} = useTemplate();
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
@@ -48,7 +56,9 @@ const latestSchemaCardId = computed(() => {
   return schemaMessage?.cardId ?? '';
 });
 // 仅当正在查看历史版本时显示“返回最新版本/应用此版本”
-const showReturnLatestButton = computed(() => Boolean(currentCardId.value && latestSchemaCardId.value && currentCardId.value !== latestSchemaCardId.value));
+const showReturnLatestButton = computed(() =>
+  Boolean(currentCardId.value && latestSchemaCardId.value && currentCardId.value !== latestSchemaCardId.value),
+);
 // 历史版本在未“应用此版本”前禁止编辑
 const isHistoryVersionApplied = ref(true);
 const isSchemaEditorReadonly = computed(() => showReturnLatestButton.value && !isHistoryVersionApplied.value);
@@ -266,24 +276,40 @@ onUnmounted(() => {
       <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
         <div class="schema-version-container__header">
           <span class="schema-version-container__title">查看 Schema</span>
-          <tiny-button type="text" class="genui-schema-toolbar-close-btn" :icon="TinyCloseIcon" aria-label="关闭"
-            @click="closeSchemaEditorView" />
+          <tiny-button
+            type="text"
+            class="genui-schema-toolbar-close-btn"
+            :icon="TinyCloseIcon"
+            aria-label="关闭"
+            @click="closeSchemaEditorView"
+          />
         </div>
         <div class="schema-version-container__editor">
           <code-editor v-model:value="schemaEditor" language="json" theme="vs" :options="editorOptions" />
         </div>
       </div>
     </div>
-    <genui-template-mobile-sheet v-if="isMobile" :visible="isMobile && schemaEditorVisible"
-      :json-editor-open="mobileSchemaJsonEditorOpen" :panel-style="mobileSheetPanelStyle"
-      :show-return-latest-button="showReturnLatestButton" :current-preview-schema="currentPreviewSchema"
-      :schema-editor="schemaEditor" :editor-options="editorOptions" :view-schema-icon="viewSchemaIcon"
-      :close-icon="TinyCloseIcon" @update:json-editor-open="mobileSchemaJsonEditorOpen = $event"
-      @update:schema-editor="schemaEditor = $event" @mask-click="onMobileSheetMaskClick"
-      @grab-touch-start="onMobileSheetGrabTouchStart" @close="closeSchemaEditorView"
-      @apply-current-version="applyCurrentVersion" @reset-to-latest-version="resetToLatestVersion" />
+    <genui-template-mobile-sheet
+      v-if="isMobile"
+      :visible="isMobile && schemaEditorVisible"
+      :json-editor-open="mobileSchemaJsonEditorOpen"
+      :panel-style="mobileSheetPanelStyle"
+      :show-return-latest-button="showReturnLatestButton"
+      :current-preview-schema="currentPreviewSchema"
+      :schema-editor="schemaEditor"
+      :editor-options="editorOptions"
+      :view-schema-icon="viewSchemaIcon"
+      :close-icon="TinyCloseIcon"
+      @update:json-editor-open="mobileSchemaJsonEditorOpen = $event"
+      @update:schema-editor="schemaEditor = $event"
+      @mask-click="onMobileSheetMaskClick"
+      @grab-touch-start="onMobileSheetGrabTouchStart"
+      @close="closeSchemaEditorView"
+      @apply-current-version="applyCurrentVersion"
+      @reset-to-latest-version="resetToLatestVersion"
+    />
     <template v-else>
-      <div class="genui-schema-template-item renderer-container" v-if="currentSchema && rendererPanelVisible">
+      <div class="genui-schema-template-item renderer-container" v-if="currentPreviewSchema && rendererPanelVisible">
         <div class="renderer-container-wrapper">
           <div class="top-button-group">
             <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
@@ -291,11 +317,17 @@ onUnmounted(() => {
               查看 JSON
             </button>
             <div class="top-button-group-right">
-              <tiny-button v-if="showReturnLatestButton" round @click="resetToLatestVersion">返回最新版本</tiny-button>
-              <tiny-button v-if="showReturnLatestButton" type="primary" round
-                @click="applyCurrentVersion">应用此版本</tiny-button>
-              <tiny-button type="text" class="genui-schema-toolbar-close-btn" :icon="TinyCloseIcon" aria-label="关闭预览区"
-                @click="closeRendererPanel" />
+              <tiny-button v-if="showReturnLatestButton" type="primary" round @click="resetToLatestVersion">返回最新版本</tiny-button>
+              <tiny-button v-if="showReturnLatestButton" round @click="applyCurrentVersion">
+                应用此版本
+              </tiny-button>
+              <tiny-button
+                type="text"
+                class="genui-schema-toolbar-close-btn"
+                :icon="TinyCloseIcon"
+                aria-label="关闭预览区"
+                @click="closeRendererPanel"
+              />
             </div>
           </div>
           <schema-renderer class="schema-renderer" :content="currentPreviewSchema" :generating="false" />
@@ -340,7 +372,6 @@ onUnmounted(() => {
       min-height: 0;
       display: flex;
       flex-direction: column;
-      text-align: center;
       position: relative;
 
       .top-button-group {
@@ -414,7 +445,6 @@ onUnmounted(() => {
     }
   }
 }
-
 
 .genui-template-chat {
   width: 100%;

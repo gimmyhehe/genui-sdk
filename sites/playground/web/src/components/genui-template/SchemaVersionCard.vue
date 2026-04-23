@@ -29,7 +29,7 @@ const { getMessageByCardId } = useTemplate();
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
 
-const docIcon = computed(() => props.type === 'schema-card' ? docCardIcon : docEditIcon);
+const docIcon = computed(() => (props.type === 'schema-card' ? docCardIcon : docEditIcon));
 
 // 判断当前为开发环境
 const isDev = import.meta.env.MODE === 'development';
@@ -57,7 +57,7 @@ const handleDev = () => {
 </script>
 
 <template>
-  <div class="schema-version-card" @click="handleClick">
+  <div :class="['schema-version-card', isMobile ? 'is-mobile' : '']" @click="handleClick">
     <div class="schema-version-card-main">
       <div class="schema-version-card-icon">
         <img :src="docIcon" alt="schema card" class="schema-version-card-icon-image" />
@@ -81,14 +81,18 @@ const handleDev = () => {
       <div v-if="errorMessage" class="error-message">解析失败</div>
     </div>
   </div>
-  <JsonPatchDev v-model:visible="visible" :currentSchema="currentSchema" :jsonPatch="jsonPatch"
-    :prevSchema="prevSchema" />
+  <JsonPatchDev
+    v-model:visible="visible"
+    :currentSchema="currentSchema"
+    :jsonPatch="jsonPatch"
+    :prevSchema="prevSchema"
+  />
 </template>
 
 <style scoped lang="less">
 .schema-version-card {
-  width: 100%;
-  max-width: 300px;
+  width: 330px;
+  max-width: 330px;
   box-sizing: border-box;
   border-radius: 12px;
   position: relative;
@@ -97,6 +101,11 @@ const handleDev = () => {
   display: flex;
   flex-direction: column;
   padding: 16px;
+
+  &.is-mobile {
+    width: 100%;
+    max-width: 300px;
+  }
 
   &-main {
     display: flex;
