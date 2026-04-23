@@ -235,10 +235,8 @@ const handleRefresh = ({ index }: { index: number }) => {
 };
 
 const handleCopy = async ({ index }: { index: number }) => {
-  const cardMessage = getCardMessageByIndex(index);
-
   try {
-    await copy(cardMessage?.content);
+    await copy((messages.value[index]?.content as string) || '');
   } catch (error) {
     console.error('复制失败', error);
   }

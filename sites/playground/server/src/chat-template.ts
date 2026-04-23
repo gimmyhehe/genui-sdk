@@ -111,14 +111,39 @@ export const createChatTemplate = () => {
       );
       const maxSteps = 30;
       const systemPrompt = `${genPrompt(rendererConfig, tgCustomConfig)}
-      ${body.templateSchema ? generateJsonPatchPrompt(body.templateSchema) : ''}
+      ${body.templateSchema ? generateJsonPatchPrompt() : ''}
       ${specificPrompt}
       ${customSystemPrompt}`;
+
+      const messages = body.messages;
+      if (body.templateSchema) {
+        const schemaJsonContext = `
+          **当前 schemaJson（这是唯一可信的 ID 来源）：**
+          \`\`\`schemaJson
+          ${JSON.stringify(body.templateSchema, null, 2)}
+          \`\`\`
+          `;
+        if (messages.length > 0 && messages[messages.length - 1].role === 'user') {
+          if (Array.isArray(messages[messages.length - 1].content)) {
+            messages[messages.length - 1].content.push({
+              type: 'text',
+              text: schemaJsonContext,
+            });
+          } else {
+            messages[messages.length - 1].content += schemaJsonContext;
+          }
+        } else {
+          messages.push({
+            role: 'user',
+            content: schemaJsonContext,
+          });
+        }
+      }
       const options: StreamTextOptions = {
         model,
         temperature,
         system: systemPrompt,
-        messages: body.messages,
+        messages: messages,
         abortSignal: abort.signal,
         tools,
         toolChoice: 'auto',
