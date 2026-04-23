@@ -1,11 +1,10 @@
 import fs from 'fs';
 import { genRootSchema } from '@opentiny/genui-sdk-core';
 import { streamText } from 'ai';
-import { createDeepSeek } from '@ai-sdk/deepseek';
 import type { ZodIssue } from 'zod';
 import type { LlmBenchmarkResultItem, LlmBenchmarkRunOptions, LlmBenchmarkSample } from './framework/index';
 import { printLlmBenchmarkResults } from './framework/index';
-import { computeTpotMs, extractSchemaJsonBlock, parseJudgeJson, resolveSamplesDir } from './utils';
+import { computeTpotMs, extractSchemaJsonBlock, parseJudgeJson, resolveAiSdkModelForBench, resolveSamplesDir } from './utils';
 
 /**
  * 递归展开 Zod issue，尽量定位到 union 分支内的最深层错误。
@@ -84,14 +83,9 @@ type LlmJudgeResult = {
  * 使用 LLM-as-a-Judge 对单条样本做质量评估。
  * @param sample 样本数据
  * @param options 运行配置（读取 Judge 模型）
- * @param apiKey DeepSeek API Key
  * @returns Judge 结果（分数与原因）
  */
-async function judgeOneSample(
-  sample: LlmBenchmarkSample,
-  options: LlmBenchmarkRunOptions,
-  apiKey: string,
-): Promise<LlmJudgeResult> {
+async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkRunOptions): Promise<LlmJudgeResult> {
   const judgeCfg = options.llmJudge;
   const modelId = judgeCfg?.model || options.model;
   const system =
@@ -105,12 +99,9 @@ async function judgeOneSample(
     const requirementText = sample.messages?.length
       ? sample.messages.map((msg) => `[${msg.role}] ${msg.content}`).join('\n')
       : ((sample as LlmBenchmarkSample & { prompt?: string }).prompt ?? '');
-    const deepseek = createDeepSeek({
-      apiKey,
-      baseURL: process.env.DEEPSEEK_BASE_URL,
-    });
+    const modelInstance = await resolveAiSdkModelForBench(modelId);
     const stream = streamText({
-      model: deepseek(modelId),
+      model: modelInstance,
       temperature: 0,
       system,
       messages: [
@@ -213,12 +204,8 @@ export async function runReport(options: LlmBenchmarkRunOptions) {
     });
 
   const judgeEnabled = options.llmJudge?.enabled === true;
-  const apiKey = process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY;
   const judgeResults: LlmJudgeResult[] = [];
   if (judgeEnabled) {
-    if (!apiKey) {
-      throw new Error('LLM-as-a-Judge enabled, but DEEPSEEK_API_KEY (or OPENAI_API_KEY fallback) is missing');
-    }
     console.log(`[bench][judge] enabled, samples=${parsedSamples.length}`);
     const concurrency = Math.max(1, options.concurrency ?? 2);
     let cursor = 0;
@@ -227,7 +214,7 @@ export async function runReport(options: LlmBenchmarkRunOptions) {
         const index = cursor++;
         if (index >= parsedSamples.length) return;
         const sample = parsedSamples[index];
-        const judged = await judgeOneSample(sample, options, apiKey);
+        const judged = await judgeOneSample(sample, options);
         judgeResults[index] = judged;
         const score = judged.score == null ? '-' : judged.score.toFixed(2);
         console.log(
