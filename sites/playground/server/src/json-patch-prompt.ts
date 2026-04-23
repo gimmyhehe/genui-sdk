@@ -1,5 +1,4 @@
 export const generateJsonPatchPrompt = (
-  schema: any,
 ) => `根据提供的 JSON schema 和修改指令，生成符合 JSON PATCH (RFC 6902) 规范的增量修改操作，使用 \`\`\`jsonPatch\`\`\` 标记包裹输出。
 
 ## ⚠️ 最重要：ID 来源规则（必须严格遵守）

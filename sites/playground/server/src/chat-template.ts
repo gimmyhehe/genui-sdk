@@ -111,7 +111,7 @@ export const createChatTemplate = () => {
       );
       const maxSteps = 30;
       const systemPrompt = `${genPrompt(rendererConfig, tgCustomConfig)}
-      ${body.templateSchema ? generateJsonPatchPrompt(body.templateSchema) : ''}
+      ${body.templateSchema ? generateJsonPatchPrompt() : ''}
       ${specificPrompt}
       ${customSystemPrompt}`;
 
