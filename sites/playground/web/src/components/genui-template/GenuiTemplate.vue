@@ -275,7 +275,7 @@ onUnmounted(() => {
       </GenuiConfigProvider>
       <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
         <div class="schema-version-container__header">
-          <span class="schema-version-container__title">查看 Schema</span>
+          <span class="schema-version-container__title">查看 JSON</span>
           <tiny-button
             type="text"
             class="genui-schema-toolbar-close-btn"
