@@ -2,16 +2,14 @@
 import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
 import { IconDownload } from '@opentiny/vue-icon';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
-import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER, generateCode as generateVueCode } from '@opentiny/genui-sdk-vue';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER } from '@opentiny/genui-sdk-vue';
 import { ref, watch, onMounted, reactive, computed, onUnmounted, provide, defineAsyncComponent, h, shallowRef } from 'vue';
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
 import UserFooter from './components/UserFooter.vue';
 import PlaygroundSidebar from './components/PlaygroundSidebar.vue';
-import { useInputMessage } from './hooks/use-input-message';
-import { useIsMobile } from './hooks';
+import { useExportVueCode, useInputMessage, useIsMobile } from './hooks';
 import useTemplate from './components/genui-template/useTemplate';
 import { getOverlapEliminatorHandler, getContinueGeneratingHandler, locationPartialSchemaJson, movePartialSchemaJsonToLastMessage } from './continue-writing';
 import useIcon from './use-icon';
@@ -285,68 +283,10 @@ const updateCustomExamples = (list) => {
   customExamples.value = normalizeCustomExamples(list);
 };
 
-const generateComponentsMap = (materialsList) => {
-  if (!Array.isArray(materialsList)) {
-    return [];
-  }
-
-  const deduped = new Map();
-  materialsList.forEach((material) => {
-    const components = material?.data?.materials?.components;
-    if (!Array.isArray(components)) {
-      return;
-    }
-    components.forEach((item) => {
-      const componentName = item?.component || item?.npm?.exportName;
-      const pkg = item?.npm?.package;
-      if (!componentName || !pkg) {
-        return;
-      }
-      deduped.set(componentName, {
-        componentName,
-        pkg,
-        package: pkg,
-        exportName: item?.npm?.exportName || componentName,
-      });
-    });
-  });
-
-  return [...deduped.values()];
-};
-
-const componentsMap = generateComponentsMap(rendererConfig?.materialsList);
-
-const downloadTextFile = (filename, text) => {
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = /\.vue$/i.test(filename) ? filename : `${filename}.vue`;
-  link.rel = 'noopener';
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-};
-
-const exportVueCode = async (schema) => {
-  const { panelValue: code, panelName: fileName, errors } = await generateVueCode({
-    pageInfo: { schema },
-    componentsMap,
-    formatWithPrettier: true,
-  });
-
-  if (errors?.length) {
-    console.error('生成代码校验出错：', errors);
-  }
-
-  downloadTextFile(fileName, code);
-};
-
+const { exportVueCode } = useExportVueCode();
 const rendererSlots = {
-  header: (props) => {
-    console.log(props)
-    return h(
+  header: (props) =>
+    h(
       'div',
       { class: 'renderer-header' },
       !props.isFinished || props.isError
@@ -362,8 +302,7 @@ const rendererSlots = {
             h('span', { class: 'schema-export-label' }, '导出源码'),
           ],
         ),
-    )
-  }
+    ),
 };
 
 watch(() => templateSchemaList.value, (newVal) => {
