@@ -16,45 +16,10 @@ import { openaiCompatibleTransformChunk, type IOpenaiCompatibleChunk } from '@op
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
-import { buildAgentTools, isAllowedAgentUrl, type PlaygroundAgentConfig } from './a2a-tools/index.js';
-import type { IPlaygroundConfig } from './types/index.js';
+import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
+import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
-
-export type McpServerConfig = {
-  name: string;
-  url: string;
-  description?: string;
-  enabled?: boolean;
-  headers?: Record<string, string>;
-  timeout?: number;
-};
-
-export type McpServer = {
-  url: string;
-  headers?: Record<string, string>;
-  timeout?: number;
-  enabled?: boolean;
-};
-
-export type McpServersConfig = McpServerConfig[];
-
-export type LLMConfigParams = {
-  model?: string;
-  temperature?: number;
-  prompt?: string;
-  mcpServers?: McpServersConfig;
-};
-
-export type LLMConfig = {
-  model?: any; // 支持 AI SDK 模型实例
-  temperature?: number;
-  apiKey?: string;
-  prompt?: string;
-  supportJsonFormat?: boolean;
-  specificPrompt?: string;
-  mcpServers?: McpServersConfig;
-};
 
 const initClients = async (
   serverName: string,

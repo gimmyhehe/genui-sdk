@@ -10,24 +10,9 @@ import { openaiCompatibleTransformChunk } from '@opentiny/genui-sdk-chat-complet
 import type { IOpenaiCompatibleChunk } from '@opentiny/genui-sdk-chat-completions';
 import { generateLlmConfig, generateAiSdkTools } from './chat-genui.js';
 import { generateJsonPatchPrompt } from './json-patch-prompt.js';
-import type { IPlaygroundConfig } from './types/index.js';
+import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
-
-export type McpServerConfig = {
-  name: string;
-  url: string;
-  description?: string;
-  enabled?: boolean;
-  headers?: Record<string, string>;
-  timeout?: number;
-};
-export type LLMConfigParams = {
-  model?: string;
-  temperature?: number;
-  prompt?: string;
-  mcpServers?: McpServerConfig[];
-};
 
 const getPlaygroundConfig = (playgroundStr: string) => {
   let playgroundConfig: IPlaygroundConfig = {
