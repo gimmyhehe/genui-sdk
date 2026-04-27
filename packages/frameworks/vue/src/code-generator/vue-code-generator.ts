@@ -31,8 +31,10 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
   private readonly enableCompileValidation: boolean;
 
   constructor(private readonly generatorOptions: IVueCodeGeneratorOptions = {}) {
-    this.prettierOpts =
-      generatorOptions.prettierOpts !== undefined ? { ...generatorOptions.prettierOpts } : { ...DEFAULT_PRETTIER_OPTS };
+    this.prettierOpts = {
+      ...DEFAULT_PRETTIER_OPTS,
+      ...(generatorOptions.prettierOpts ?? {}),
+    };
     this.enableCompileValidation = generatorOptions.enableCompileValidation !== false;
   }
 
