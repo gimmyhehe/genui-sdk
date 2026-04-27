@@ -17,9 +17,9 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 import { buildAgentTools, isAllowedAgentUrl, type PlaygroundAgentConfig } from './a2a-tools/index.js';
+import type { IPlaygroundConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
-
 
 export type McpServerConfig = {
   name: string;
@@ -198,15 +198,18 @@ export async function generateLlmConfig(llmConfigParams: LLMConfigParams | undef
 }
 
 const getPlaygroundConfig = (playgroundStr: string) => {
-  let playgroundConfig: any = {};
+  let playgroundConfig: Partial<IPlaygroundConfig> = {};
 
   try {
-    playgroundConfig = JSON.parse(playgroundStr);
+    const parsed = JSON.parse(playgroundStr) as IPlaygroundConfig;
+    if (parsed && typeof parsed === 'object') {
+      playgroundConfig = parsed;
+    }
   } catch (error) {
     console.error('Failed to parse playground from metadata:', error);
   }
 
-  const rawAgents = (playgroundConfig.agents || []) as PlaygroundAgentConfig[];
+  const rawAgents = playgroundConfig.agents || [];
   // 解析后立刻过滤掉指向本地/内网等不安全目标的 Agent，降低 SSRF 风险
   const agents = rawAgents.filter((agent) => {
     const url = agent.api?.url;
@@ -261,7 +264,6 @@ export function createChatGenui() {
       temperature: playgroundConfig.temperature,
       mcpServers,
     };
-
 
     const llmConfig = await generateLlmConfig(llmConfigParams);
     const { model, temperature, specificPrompt } = llmConfig;
@@ -385,7 +387,7 @@ export const checkMcpHandler = async (req: Request, res: Response) => {
   res.on('close', () => {
     try {
       abort.abort(new Error('/check-mcp connection closed'));
-    } catch { }
+    } catch {}
   });
 
   try {
