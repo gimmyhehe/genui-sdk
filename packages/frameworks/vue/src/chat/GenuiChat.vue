@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import '@opentiny/tiny-robot/dist/style.css';
-import {
-  TrBubbleList,
-  TrSender,
-  TrBubbleProvider,
-  BubbleMarkdownContentRenderer,
-} from '@opentiny/tiny-robot';
+import { TrBubbleList, TrSender, TrBubbleProvider, BubbleMarkdownContentRenderer } from '@opentiny/tiny-robot';
 import { AIClient, GeneratingStatus, STATUS, type ChatMessage } from '@opentiny/tiny-robot-kit';
 import { IconAi, IconUser, IconArrowDown } from '@opentiny/tiny-robot-svgs';
 import type {
@@ -95,7 +90,12 @@ const wrapSlots = (slots: any) => {
       });
       const slotFn = toSlotFunction(slots[key]);
       if (slotFn) {
-        return slotFn({ ...props, isFinished: isFinished.value, messageManager: messageManager.value, chatMessage: messageManager.value.messages.value[props.index] });
+        return slotFn({
+          ...props,
+          isFinished: isFinished.value,
+          messageManager: messageManager.value,
+          chatMessage: messageManager.value.messages.value[props.index],
+        });
       }
       return null;
     };
@@ -162,7 +162,6 @@ const customContext = computed(() => {
 provide(CUSTOM_CONTEXT, customContext);
 
 const { continueChatAction, saveStateAction } = useChatAction({ chat, saveState }); //TODO: Refactor
-
 
 const generating = computed(() => GeneratingStatus.includes(messageManager.value.messageState.status));
 
@@ -237,7 +236,6 @@ const messageRenderers = {
 
 const responseHandlers: Ref<IResponseHandler<IStreamData>[]> = ref(defaultResponseHandlers);
 
-
 const customModelProvider = new CustomModelProvider({
   url: props.url,
   model: props.model || '',
@@ -301,7 +299,7 @@ const inputMessage = computed({
 
 const setInputMessage = (message: string) => {
   inputMessage.value = message;
-}
+};
 
 if (props.messages?.length) {
   messages.value.splice(0, messages.value.length, ...(props.messages as any));
@@ -484,10 +482,16 @@ defineExpose({
 </script>
 
 <template>
-  <div class="tg-chat-container" :class="{ 'dark': genuiConfig?.theme === 'dark' }"
-    :style="!props.chatConfig?.showThinkingResult ? { '--thinking-display': 'none' } : {}">
-    <div class="messages-container" ref="messagesContainer"
-      :style="{ '--messages-container-width': messagesContainerWidth + 'px' }">
+  <div
+    class="tg-chat-container"
+    :class="{ 'dark': genuiConfig?.theme === 'dark' }"
+    :style="!props.chatConfig?.showThinkingResult ? { '--thinking-display': 'none' } : {}"
+  >
+    <div
+      class="messages-container"
+      ref="messagesContainer"
+      :style="{ '--messages-container-width': messagesContainerWidth + 'px' }"
+    >
       <tr-bubble-provider :content-renderers="messageRenderers" v-if="showMessages.length">
         <tr-bubble-list :items="showMessages" :roles="roles" auto-scroll> </tr-bubble-list>
       </tr-bubble-provider>
@@ -495,18 +499,33 @@ defineExpose({
     </div>
     <div class="sender-container">
       <!-- TODO: 抽离到组件 -->
-      <div :class="['scroll-to-bottom-button', { 'is-generating': generating }]" v-show="!isLastMessageInBottom"
-        @click="scrollToBottom">
+      <div
+        :class="['scroll-to-bottom-button', { 'is-generating': generating }]"
+        v-show="!isLastMessageInBottom"
+        @click="scrollToBottom"
+      >
         <IconArrowDown class="icon-arrow-down" />
       </div>
-      <tr-sender v-model="inputMessage" :placeholder="GeneratingStatus.includes(messageManager.messageState.status)
-        ? t('placeholder.thinking')
-        : t('placeholder.input')
-        " :clearable="true" :allow-files="isAllowFiles" :buttonGroup="buttonGroup"
+      <tr-sender
+        v-model="inputMessage"
+        :placeholder="
+          GeneratingStatus.includes(messageManager.messageState.status)
+            ? t('placeholder.thinking')
+            : t('placeholder.input')
+        "
+        :clearable="true"
+        :allow-files="isAllowFiles"
+        :buttonGroup="buttonGroup"
         :loading="GeneratingStatus.includes(messageManager.messageState.status)"
-        @files-selected="(files) => handleFilesSelected(files, inputMessage)" v-model:template-data="templateData"
-        @update:template-data="handleTemplateDataUpdate" :showWordLimit="true" :maxLength="1000"
-        @clear="clearInputMessage" @submit="handleSendMessage" @cancel="abortRequest">
+        @files-selected="(files) => handleFilesSelected(files, inputMessage)"
+        v-model:template-data="templateData"
+        @update:template-data="handleTemplateDataUpdate"
+        :showWordLimit="true"
+        :maxLength="1000"
+        @clear="clearInputMessage"
+        @submit="handleSendMessage"
+        @cancel="abortRequest"
+      >
         <template #header v-if="attachments.length > 0">
           <div class="attachments-container">
             <AttachmentsRenderer :attachments="attachments" @remove="handleRemoveAttachment" />
@@ -568,15 +587,14 @@ defineExpose({
 }
 
 :deep(.tr-bubble[data-role='assistant'] .tr-bubble__content-items) {
-
   // 匹配：type非空 + 排除 schema-card/loading-text 这两个值
-  >[type]:not([type='']):not([type='schema-card']):not([type='loading-text']) {
+  > [type]:not([type='']):not([type='schema-card']):not([type='loading-text']) {
     display: var(--thinking-display, initial);
   }
 }
 
 :deep(.tr-bubble__step-tool) {
-  &+.tr-bubble__step-tool {
+  & + .tr-bubble__step-tool {
     margin-top: 16px;
   }
 }
@@ -626,13 +644,15 @@ defineExpose({
   border: 1px solid var(--sender-border-color);
   z-index: 1000;
 
-  &>svg {
+  & > svg {
     width: 20px;
     height: 20px;
   }
 
   &:hover {
-    box-shadow: 0px 10px 20px 0px #0000001a, 0px 0px 1px 0px #00000026;
+    box-shadow:
+      0px 10px 20px 0px #0000001a,
+      0px 0px 1px 0px #00000026;
   }
 
   &.is-generating {
@@ -666,7 +686,7 @@ defineExpose({
       z-index: 1;
     }
 
-    &>svg {
+    & > svg {
       z-index: 2;
     }
   }
@@ -700,5 +720,4 @@ defineExpose({
   width: 80%;
   margin: 0 auto;
 }
-
 </style>
