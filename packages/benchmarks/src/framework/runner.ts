@@ -6,8 +6,8 @@ import { formatBeijingDateTime, formatNumber, resolveSamplesDir, sampleStdev } f
 
 /** repeat ≥ 3 且该场景×模型下 n ≥ 3 时写入：与均值同量纲的样本标准差（波动）。 */
 export interface BenchmarkComparisonVolatility {
-  ttftMsStdev: number;
-  firstObservableComponentMsStdev: number;
+  ttftMsStdev?: number;
+  firstObservableComponentMsStdev?: number;
   totalMsStdev: number;
   /** 至少 3 个有效 TPOT 的 run 才有 */
   tpotMsStdev?: number;
@@ -20,9 +20,9 @@ export interface BenchmarkComparisonRow {
     string,
     {
       runs: number;
-      avgTtftMs: number;
+      avgTtftMs?: number;
       /** 首个 TinyCard 节点出现耗时（ms）均值 */
-      avgFirstObservableComponentMs: number;
+      avgFirstObservableComponentMs?: number;
       avgTotalMs: number;
       /** 有 TPOT 的 run 上取均值；全无则为 undefined */
       avgTpotMs?: number;
@@ -32,6 +32,25 @@ export interface BenchmarkComparisonRow {
       volatility?: BenchmarkComparisonVolatility;
     }
   >;
+}
+
+/**
+ * 过滤掉缺省值与非有限数，仅保留可参与统计的数值序列。
+ * @param values 可能包含 undefined / NaN / Infinity 的原始序列
+ * @returns 仅包含有限 number 的新数组
+ */
+function numberSeries(values: Array<number | undefined>) {
+  return values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+}
+
+/**
+ * 计算算术平均值；空数组返回 undefined，表示无有效样本。
+ * @param values 已清洗后的数值数组
+ * @returns 平均值；当样本为空时返回 undefined
+ */
+function average(values: number[]) {
+  if (values.length === 0) return undefined;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 /**
@@ -65,17 +84,19 @@ export function buildComparisonByScenario(
       const n = mr.length;
       if (n === 0) continue;
       const tpotValues = mr.map((r) => r.tpotMs).filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
-      const ttftSeries = mr.map((r) => r.ttftMs);
-      const tinyCardSeries = mr.map((r) => r.firstObservableComponentMs);
+      const ttftSeries = numberSeries(mr.map((r) => r.ttftMs));
+      const tinyCardSeries = numberSeries(mr.map((r) => r.firstObservableComponentMs));
       const totalSeries = mr.map((r) => r.totalMs);
       const tokenSeries = mr.map((r) => r.totalTokens);
 
       const tpotStdev = tpotValues.length >= 3 ? sampleStdev(tpotValues) : undefined;
+      const ttftStdev = ttftSeries.length >= 3 ? sampleStdev(ttftSeries) : undefined;
+      const tinyCardStdev = tinyCardSeries.length >= 3 ? sampleStdev(tinyCardSeries) : undefined;
       const volatility: BenchmarkComparisonVolatility | undefined =
         includeVolatility && n >= 3
           ? {
-              ttftMsStdev: sampleStdev(ttftSeries)!,
-              firstObservableComponentMsStdev: sampleStdev(tinyCardSeries)!,
+              ...(ttftStdev != null ? { ttftMsStdev: ttftStdev } : {}),
+              ...(tinyCardStdev != null ? { firstObservableComponentMsStdev: tinyCardStdev } : {}),
               totalMsStdev: sampleStdev(totalSeries)!,
               totalTokensStdev: sampleStdev(tokenSeries)!,
               ...(tpotStdev != null ? { tpotMsStdev: tpotStdev } : {}),
@@ -84,8 +105,8 @@ export function buildComparisonByScenario(
 
       byModel[m] = {
         runs: n,
-        avgTtftMs: mr.reduce((s, r) => s + r.ttftMs, 0) / n,
-        avgFirstObservableComponentMs: mr.reduce((s, r) => s + r.firstObservableComponentMs, 0) / n,
+        ...(average(ttftSeries) != null ? { avgTtftMs: average(ttftSeries) } : {}),
+        ...(average(tinyCardSeries) != null ? { avgFirstObservableComponentMs: average(tinyCardSeries) } : {}),
         avgTotalMs: mr.reduce((s, r) => s + r.totalMs, 0) / n,
         ...(tpotValues.length ? { avgTpotMs: tpotValues.reduce((s, v) => s + v, 0) / tpotValues.length } : {}),
         avgTotalTokens: mr.reduce((s, r) => s + r.totalTokens, 0) / n,
@@ -236,7 +257,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
             label: m,
             data: scenarioLabels.map(function (sc) {
               var cell = pickScenarioCell(sc, m);
-              return cell ? cell.avgTtftMs : null;
+              return cell && typeof cell.avgTtftMs === 'number' ? cell.avgTtftMs : null;
             }),
           };
         }),
@@ -252,7 +273,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
             label: m,
             data: scenarioLabels.map(function (sc) {
               var cell = pickScenarioCell(sc, m);
-              return cell ? cell.avgFirstObservableComponentMs : null;
+              return cell && typeof cell.avgFirstObservableComponentMs === 'number' ? cell.avgFirstObservableComponentMs : null;
             }),
           };
         }),
@@ -414,8 +435,8 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
         r.model || '',
         r.scenario,
         r.runIndex || 1,
-        r.ttftMs.toFixed(2),
-        r.firstObservableComponentMs.toFixed(2),
+        typeof r.ttftMs === 'number' ? r.ttftMs.toFixed(2) : '',
+        typeof r.firstObservableComponentMs === 'number' ? r.firstObservableComponentMs.toFixed(2) : '',
         r.totalMs.toFixed(2),
         typeof r.tpotMs === 'number' ? r.tpotMs.toFixed(2) : '',
         r.isSchemaJsonValidAgainstProtocol ? '<span class="ok">pass</span>' : '<span class="bad">fail</span>',
@@ -443,10 +464,10 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
             row.scenario,
             mid,
             String(c.runs),
-            c.avgTtftMs.toFixed(2),
-            c.volatility.ttftMsStdev.toFixed(2),
-            c.avgFirstObservableComponentMs.toFixed(2),
-            c.volatility.firstObservableComponentMsStdev.toFixed(2),
+            typeof c.avgTtftMs === 'number' ? c.avgTtftMs.toFixed(2) : '',
+            c.volatility.ttftMsStdev != null ? c.volatility.ttftMsStdev.toFixed(2) : '',
+            typeof c.avgFirstObservableComponentMs === 'number' ? c.avgFirstObservableComponentMs.toFixed(2) : '',
+            c.volatility.firstObservableComponentMsStdev != null ? c.volatility.firstObservableComponentMsStdev.toFixed(2) : '',
             c.avgTotalMs.toFixed(2),
             c.volatility.totalMsStdev.toFixed(2),
             typeof c.avgTpotMs === 'number' ? c.avgTpotMs.toFixed(2) : '',
@@ -492,10 +513,13 @@ function printRepeatVolatilityTables(results: LlmBenchmarkResultItem[], options:
         scenario: row.scenario,
         model: modelId,
         runs: cell.runs,
-        ttft_avg: formatNumber(cell.avgTtftMs, 2),
-        ttft_std: formatNumber(cell.volatility.ttftMsStdev, 2),
-        tiny_avg: formatNumber(cell.avgFirstObservableComponentMs, 2),
-        tiny_std: formatNumber(cell.volatility.firstObservableComponentMsStdev, 2),
+        ttft_avg: cell.avgTtftMs != null ? formatNumber(cell.avgTtftMs, 2) : '',
+        ttft_std: cell.volatility.ttftMsStdev != null ? formatNumber(cell.volatility.ttftMsStdev, 2) : '',
+        tiny_avg: cell.avgFirstObservableComponentMs != null ? formatNumber(cell.avgFirstObservableComponentMs, 2) : '',
+        tiny_std:
+          cell.volatility.firstObservableComponentMsStdev != null
+            ? formatNumber(cell.volatility.firstObservableComponentMsStdev, 2)
+            : '',
         total_avg: formatNumber(cell.avgTotalMs, 2),
         total_std: formatNumber(cell.volatility.totalMsStdev, 2),
         tpot_avg: typeof cell.avgTpotMs === 'number' ? formatNumber(cell.avgTpotMs, 2) : '',

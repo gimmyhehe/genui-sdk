@@ -144,17 +144,22 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
 function toReportItem(sample: LlmBenchmarkSample, judge?: LlmJudgeResult): LlmBenchmarkResultItem {
   const schemaJsonText = extractSchemaJsonBlock(sample.output);
   const validation = validateSchemaJson(schemaJsonText);
+  const ttftMs = typeof sample.metrics.ttftMs === 'number' ? sample.metrics.ttftMs : undefined;
   const tpotMs =
     typeof sample.metrics.tpotMs === 'number'
       ? sample.metrics.tpotMs
-      : computeTpotMs(sample.metrics.ttftMs, sample.metrics.totalMs, sample.metrics.completionTokens);
+      : ttftMs == null
+        ? undefined
+        : computeTpotMs(ttftMs, sample.metrics.totalMs, sample.metrics.completionTokens);
   return {
     scenario: sample.scenario,
     runIndex: sample.runIndex,
     model: sample.model,
-    ttftMs: sample.metrics.ttftMs,
+    ...(ttftMs != null ? { ttftMs } : {}),
     totalMs: sample.metrics.totalMs,
-    firstObservableComponentMs: sample.metrics.firstObservableComponentMs ?? 0,
+    ...(typeof sample.metrics.firstObservableComponentMs === 'number'
+      ? { firstObservableComponentMs: sample.metrics.firstObservableComponentMs }
+      : {}),
     ...(tpotMs !== undefined ? { tpotMs } : {}),
     ...validation,
     promptTokens: sample.metrics.promptTokens,

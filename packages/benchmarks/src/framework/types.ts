@@ -80,10 +80,8 @@ export interface LlmBenchmarkRunOptions {
   json?: boolean;
   samplesDir?: string;
   outputDir?: string;
-  /**
-   * 本次 benchmark 入口开始时间戳（ms）。
-   * 若提供，报告阶段会计算「从开始执行到报告输出」总耗时。
-   */
+  // 本次 benchmark 入口开始时间戳（ms）。
+  // 若提供，报告阶段会计算「从开始执行到报告输出」总耗时。
   benchmarkStartedAtMs?: number;
 }
 
@@ -92,13 +90,12 @@ export interface LlmBenchmarkResultItem {
   runIndex?: number;
   // 样本生成时使用的模型 id（如 deepseek-chat）
   model?: string;
-  ttftMs: number;
+  // 自请求开始到首个可观测输出 token 的毫秒数；未观测到则缺省。
+  ttftMs?: number;
   totalMs: number;
-  /**
-   * 自请求开始到输出中首次出现 `TinyCard` 节点（`"componentName": "TinyCard"`）的毫秒数；未出现则为 0。
-   */
-  firstObservableComponentMs: number;
-  /** TPOT（Time Per Output Token），ms/token；completionTokens≤1 时无意义，省略 */
+  // 自请求开始到输出中首次出现 `TinyCard` 节点（`"componentName": "TinyCard"`）的毫秒数；未出现则缺省。
+  firstObservableComponentMs?: number;
+  // TPOT（Time Per Output Token），ms/token；completionTokens≤1 时无意义，省略
   tpotMs?: number;
   isSchemaJsonValidAgainstProtocol: boolean;
   // schema 协议校验失败原因（如缺失字段路径）
@@ -124,7 +121,8 @@ export interface LlmBenchmarkSample {
   output: string;
   generatedAt: string;
   metrics: {
-    ttftMs: number;
+    /** 自请求开始到首 token 的毫秒数；未观测到则缺省。 */
+    ttftMs?: number;
     totalMs: number;
     /**
      * 自请求开始到首次出现 `TinyCard` 的毫秒数（语义同 {@link LlmBenchmarkResultItem} 同名字段）。

@@ -1,6 +1,16 @@
 import type { LlmBenchmarkResultItem } from './types';
 import { formatNumber } from '../utils';
 
+function toDisplayNumber(value: number | undefined) {
+  return typeof value === 'number' ? formatNumber(value, 2) : '';
+}
+
+function averageDefined(values: Array<number | undefined>) {
+  const defined = values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+  if (defined.length === 0) return null;
+  return defined.reduce((sum, value) => sum + value, 0) / defined.length;
+}
+
 /**
  * 输出每个场景的详细指标表格。
  * @param results 单次运行结果明细
@@ -11,8 +21,8 @@ export function printBenchmarkTable(results: LlmBenchmarkResultItem[]) {
       scenario: item.scenario,
       model: item.model ?? '',
       runIndex: item.runIndex ?? 1,
-      ttftMs: formatNumber(item.ttftMs, 2),
-      tinyCardMs: formatNumber(item.firstObservableComponentMs, 2),
+      ttftMs: toDisplayNumber(item.ttftMs),
+      tinyCardMs: toDisplayNumber(item.firstObservableComponentMs),
       totalMs: formatNumber(item.totalMs, 2),
       tpotMsPerTok: item.tpotMs == null ? '' : formatNumber(item.tpotMs, 2),
       validSchema: item.isSchemaJsonValidAgainstProtocol,
@@ -35,8 +45,8 @@ export function printBenchmarkTable(results: LlmBenchmarkResultItem[]) {
  */
 export function printBenchmarkSummary(results: LlmBenchmarkResultItem[]) {
   const successCount = results.filter((item) => item.isSchemaJsonValidAgainstProtocol).length;
-  const avgTtft = results.reduce((sum, item) => sum + item.ttftMs, 0) / results.length;
-  const avgFirstObs = results.reduce((sum, item) => sum + item.firstObservableComponentMs, 0) / results.length;
+  const avgTtft = averageDefined(results.map((item) => item.ttftMs));
+  const avgFirstObs = averageDefined(results.map((item) => item.firstObservableComponentMs));
   const avgTotal = results.reduce((sum, item) => sum + item.totalMs, 0) / results.length;
   const tpotDefined = results.filter((item) => typeof item.tpotMs === 'number');
   const avgTpot =
@@ -53,8 +63,8 @@ export function printBenchmarkSummary(results: LlmBenchmarkResultItem[]) {
       runs: results.length,
       validSchema: `${successCount}/${results.length}`,
       avgJudgeScore: avgJudgeScore == null ? 'N/A' : formatNumber(avgJudgeScore, 2),
-      avgTtftMs: formatNumber(avgTtft, 2),
-      avgTinyCardMs: formatNumber(avgFirstObs, 2),
+      avgTtftMs: avgTtft == null ? 'N/A' : formatNumber(avgTtft, 2),
+      avgTinyCardMs: avgFirstObs == null ? 'N/A' : formatNumber(avgFirstObs, 2),
       avgTotalMs: formatNumber(avgTotal, 2),
       avgTpotMsPerTok: avgTpot == null ? 'N/A' : formatNumber(avgTpot, 2),
       totalTokens,

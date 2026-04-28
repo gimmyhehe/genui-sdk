@@ -110,17 +110,14 @@ async function generateSingleSample(
         errorMessage = chunk.error instanceof Error ? chunk.error.message : String(chunk.error);
       }
     }
-    if (!firstTokenAt && output) {
-      // 兜底处理：如果流事件类型变更，至少保证 TTFT 可被记录
-        firstTokenAt = Date.now();
-    }
   } catch (error) {
     errorMessage = error instanceof Error ? error.message : String(error);
   }
 
   const totalMs = Date.now() - start;
-  const tpotMs = computeTpotMs(firstTokenAt ? firstTokenAt - start : 0, totalMs, completionTokens);
-  const firstObservableComponentMs = firstTinyCardAt ? firstTinyCardAt - start : 0;
+  const ttftMs = firstTokenAt ? firstTokenAt - start : undefined;
+  const tpotMs = ttftMs == null ? undefined : computeTpotMs(ttftMs, totalMs, completionTokens);
+  const firstObservableComponentMs = firstTinyCardAt ? firstTinyCardAt - start : undefined;
 
   return {
     scenario: sampleCase.id,
@@ -130,9 +127,9 @@ async function generateSingleSample(
     output,
     generatedAt: new Date().toISOString(),
     metrics: {
-      ttftMs: firstTokenAt ? firstTokenAt - start : 0,
+      ...(ttftMs != null ? { ttftMs } : {}),
       totalMs,
-      firstObservableComponentMs,
+      ...(firstObservableComponentMs != null ? { firstObservableComponentMs } : {}),
       ...(tpotMs !== undefined ? { tpotMs } : {}),
       promptTokens,
       completionTokens,
@@ -244,7 +241,7 @@ export async function generateSamples(options: LlmBenchmarkRunOptions) {
       const remainMs = Math.round(avgPerJobMs * remainJobs);
 
       console.log(
-        `[bench][w${workerNo}] done (${doneJobs}/${totalJobs}) -> ${sampleFile} | ttftMs=${sample.metrics.ttftMs}, tinyCardMs=${sample.metrics.firstObservableComponentMs}, totalMs=${sample.metrics.totalMs} | est remain=${remainMs}ms`,
+        `[bench][w${workerNo}] done (${doneJobs}/${totalJobs}) -> ${sampleFile} | ttftMs=${sample.metrics.ttftMs ?? '-'}, tinyCardMs=${sample.metrics.firstObservableComponentMs ?? '-'}, totalMs=${sample.metrics.totalMs} | est remain=${remainMs}ms`,
       );
     }
   }
