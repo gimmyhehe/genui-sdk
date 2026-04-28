@@ -429,7 +429,23 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
         '单次运行样本：按模型 Schema 通过率（%）',
       ),
     });
-    const headers = ['model', 'scenario', 'runIndex', 'ttftMs', 'tinyCardMs', 'totalMs', 'tpotMs', 'schema', 'schemaError', 'judgeScore', 'judgeReason', 'tokens', 'error'];
+    const headers = [
+      'model',
+      'scenario',
+      'runIndex',
+      'ttftMs',
+      'tinyCardMs',
+      'totalMs',
+      'tpotMs',
+      'schema',
+      'schemaError',
+      'judgeScore',
+      'judgeReason',
+      'promptTokens',
+      'completionTokens',
+      'tokens',
+      'error',
+    ];
     const rows = results.map(function (r) {
       return [
         r.model || '',
@@ -443,6 +459,8 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
         r.schemaValidationError || '',
         typeof r.llmJudgeScore === 'number' ? r.llmJudgeScore.toFixed(2) : '',
         r.llmJudgeReason || r.llmJudgeError || '',
+        r.promptTokens,
+        r.completionTokens,
         r.totalTokens,
         r.errorMessage || '',
       ];
