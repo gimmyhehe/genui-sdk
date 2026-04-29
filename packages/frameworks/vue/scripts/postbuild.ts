@@ -21,6 +21,7 @@ const outputPackageJson: any = {
   keywords: packageJson.keywords,
   main: packageJson.main.replace('output/', ''),
   types: packageJson.types.replace('output/', ''),
+  exports: normalizeExports(packageJson.exports),
   type: packageJson.type,
   files: packageJson.files,
   dependencies: { ...packageJson.dependencies },
@@ -42,3 +43,19 @@ writeFileSync(outputPackageJsonPath, JSON.stringify(outputPackageJson, null, 2) 
 const serverReadmePath = join(__dirname, '../README.md');
 const outputReadmePath = join(outputDir, 'README.md');
 copyFileSync(serverReadmePath, outputReadmePath);
+
+function normalizeExports(exportsField: Record<string, any> = {}) {
+  return Object.fromEntries(
+    Object.entries(exportsField).map(([subpath, condition]) => {
+      if (typeof condition === 'string') {
+        return [subpath, condition.replace('output/', '')];
+      }
+
+      const normalizedCondition = Object.fromEntries(
+        Object.entries(condition || {}).map(([conditionName, target]) => [conditionName, String(target).replace('output/', '')]),
+      );
+
+      return [subpath, normalizedCondition];
+    }),
+  );
+}
