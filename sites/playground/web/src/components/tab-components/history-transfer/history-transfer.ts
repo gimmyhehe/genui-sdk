@@ -1,0 +1,81 @@
+import type { Conversation } from '@opentiny/tiny-robot-kit';
+
+const formatTimestamp = (date = new Date()) => {
+  const pad = (value: number) => String(value).padStart(2, '0');
+
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate()),
+    '-',
+    pad(date.getHours()),
+    pad(date.getMinutes()),
+    pad(date.getSeconds()),
+  ].join('');
+};
+
+const generateId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+
+const generateUniqueId = (existingIds: Set<string>) => {
+  let nextId = generateId();
+
+  while (existingIds.has(nextId)) {
+    nextId = generateId();
+  }
+
+  return nextId;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const normalizeConversation = (value: unknown): Conversation | null => {
+  if (!isRecord(value) || typeof value.id !== 'string' || !Array.isArray(value.messages)) {
+    return null;
+  }
+
+  return {
+    id: value.id,
+    title: typeof value.title === 'string' && value.title.trim() ? value.title : '新会话',
+    createdAt: typeof value.createdAt === 'number' ? value.createdAt : Date.now(),
+    updatedAt: typeof value.updatedAt === 'number' ? value.updatedAt : Date.now(),
+    messages: value.messages as Conversation['messages'],
+    metadata: isRecord(value.metadata) ? value.metadata : {},
+  };
+};
+
+export const downloadConversations = (conversations: Conversation[]) => {
+  const blob = new Blob([JSON.stringify(conversations, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = `genui-history-${formatTimestamp()}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
+export const parseConversationFile = async (file: File) => {
+  const rawData = JSON.parse(await file.text());
+
+  if (!Array.isArray(rawData)) {
+    throw new Error('导入文件必须是会话数组');
+  }
+
+  return rawData.map(normalizeConversation).filter(Boolean) as Conversation[];
+};
+
+export const mergeConversations = (currentConversations: Conversation[], importedConversations: Conversation[]) => {
+  const existingIds = new Set(currentConversations.map((conversation) => conversation.id));
+
+  return importedConversations.map((conversation) => {
+    if (!existingIds.has(conversation.id)) {
+      existingIds.add(conversation.id);
+      return conversation;
+    }
+
+    const nextConversation = { ...conversation, id: generateUniqueId(existingIds) };
+    existingIds.add(nextConversation.id);
+    return nextConversation;
+  });
+};
