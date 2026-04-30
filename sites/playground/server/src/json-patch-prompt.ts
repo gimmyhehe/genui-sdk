@@ -196,9 +196,9 @@ ${jsonPatchSchemaText}
 - 如果要移动到一个元素的后面，清使用下一个元素的前面，或者父元素的里面
 - after：移动到目标对象的后面
 **示例：**
-- ✅ 正确：\`{ "op": "move", "id": "targetId", "positionId": "", "position": "before" }\`
-- ✅ 正确：\`{ "op": "move", "id": "targetId", "positionId": "sourceId", "position": "inside" }\`
-- ✅ 正确：\`{ "op": "move", "id": "targetId", "positionId": "sourceId", "position": "after" }\`
+- ✅ 正确：\`{ "op": "move", "id": "targetId", "positionId": "anchorId", "position": "before" }\`
+- ✅ 正确：\`{ "op": "move", "id": "targetId", "positionId": "anchorId", "position": "inside" }\`
+- ✅ 正确：\`{ "op": "move", "id": "targetId", "positionId": "anchorId", "position": "after" }\`
 
 **属性操作：使用目标组件本身的 id + 组件内相对路径**
 - ✅ 正确：修改 children[0].children[0].props.text → 找到该组件本身的 id，使用 \`{ "id": "deep123", "path": "/props/text" }\`
