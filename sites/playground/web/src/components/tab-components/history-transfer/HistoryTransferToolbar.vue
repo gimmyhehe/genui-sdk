@@ -7,7 +7,7 @@
       :disabled="conversations.length === 0"
       @click="exportAll"
     >
-      导出全部
+      导出
     </button>
     <input
       ref="fileInputRef"

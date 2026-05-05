@@ -30,12 +30,17 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
 const normalizeConversation = (value: unknown): Conversation | null => {
-  if (!isRecord(value) || typeof value.id !== 'string' || !Array.isArray(value.messages)) {
+  if (!isRecord(value) || !Array.isArray(value.messages)) {
+    return null;
+  }
+
+  const id = typeof value.id === 'string' ? value.id.trim() : '';
+  if (!id) {
     return null;
   }
 
   return {
-    id: value.id,
+    id,
     title: typeof value.title === 'string' && value.title.trim() ? value.title : '新会话',
     createdAt: typeof value.createdAt === 'number' ? value.createdAt : Date.now(),
     updatedAt: typeof value.updatedAt === 'number' ? value.updatedAt : Date.now(),
