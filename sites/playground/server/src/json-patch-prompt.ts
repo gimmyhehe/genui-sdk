@@ -5,13 +5,36 @@ import { zodToJsonSchema } from 'zod-to-json-schema';
  * RFC 6901 JSON Pointer 校验
  * 精确匹配：必须为空或以 / 开头，且 ~ 后面必须跟着 0 或 1
  */
-const jsonPointerSchema = z
+const jsonPointerBaseSchema = z
   .string()
   .regex(
     /^(?:|(?:\/(?:[^~/]|~[01])*)+)$/,
     'Invalid JSON Pointer format. Must start with "/" and use ~0, ~1 for escaping.',
+  );
+
+/** 是否存在 "-" 引用 token（JSON Patch add 的数组末尾 sentinel；replace/copy/test 不允许） */
+function jsonPointerHasAppendSentinel(pointer: string): boolean {
+  if (pointer === '') return false;
+  return pointer
+    .slice(1)
+    .split('/')
+    .some((segment) => segment.replace(/~1/g, '/').replace(/~0/g, '~') === '-');
+}
+
+/** add 的 path：允许 `/-` 表示插入数组末尾 */
+const jsonPointerSchemaAdd = jsonPointerBaseSchema.describe(
+  "RFC 6901 Pointer (e.g., '/foo/0', '/a~1b'). Use '/-' as the last segment to append to an array.",
+);
+
+/** replace/copy/test 的 path 与 copy 的 from：必须指向已有位置，禁止 `-` 索引 */
+const jsonPointerSchemaExisting = jsonPointerBaseSchema
+  .refine(
+    (s) => !jsonPointerHasAppendSentinel(s),
+    'Invalid JSON Pointer: "-" (array append) is only valid for op "add". Use a numeric index or property name.',
   )
-  .describe("RFC 6901 Pointer (e.g., '/foo/0', '/a~1b'). Use '/-' to refer to the end of an array.");
+  .describe(
+    "RFC 6901 Pointer to an existing value (e.g., '/foo/0', '/a~1b'). Do not use '/-' — that is only for op 'add'.",
+  );
 
 /**
  * 递归 JSON 值定义
@@ -38,7 +61,7 @@ const movePositionSchema = z
 const addOperation = z
   .object({
     op: z.literal('add'),
-    path: jsonPointerSchema,
+    path: jsonPointerSchemaAdd,
     value: jsonPatchValueSchema.describe('The value to add at the specified path.'),
   })
   .extend(baseOperationSchema.shape)
@@ -58,7 +81,7 @@ const removeOperation = z
 const replaceOperation = z
   .object({
     op: z.literal('replace'),
-    path: jsonPointerSchema,
+    path: jsonPointerSchemaExisting,
     value: jsonPatchValueSchema.describe('The new value to replace the current one.'),
   })
   .extend(baseOperationSchema.shape)
@@ -80,8 +103,8 @@ const moveOperation = z
 const copyOperation = z
   .object({
     op: z.literal('copy'),
-    from: jsonPointerSchema.describe('Reference to the location to copy the value from.'),
-    path: jsonPointerSchema.describe('The destination path.'),
+    from: jsonPointerSchemaExisting.describe('Reference to the location to copy the value from.'),
+    path: jsonPointerSchemaExisting.describe('The destination path.'),
   })
   .extend(baseOperationSchema.shape)
   .strict()
@@ -91,7 +114,7 @@ const copyOperation = z
 const testOperation = z
   .object({
     op: z.literal('test'),
-    path: jsonPointerSchema,
+    path: jsonPointerSchemaExisting,
     value: jsonPatchValueSchema.describe('The value to compare against.'),
   })
   .extend(baseOperationSchema.shape)
