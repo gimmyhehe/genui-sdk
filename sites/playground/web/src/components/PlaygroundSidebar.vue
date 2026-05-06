@@ -1,5 +1,5 @@
 <script setup>
-import { TinyTabs, TinyTabItem, TinyButtonGroup } from '@opentiny/vue';
+import { TinyTabs, TinyTabItem, TinyRadioGroup, TinyRadio } from '@opentiny/vue';
 import { iconPlus } from '@opentiny/vue-icon';
 import { ref, watch, computed, inject, defineAsyncComponent, shallowRef } from 'vue';
 import NewSvg from '../assets/images/new.svg?raw';
@@ -11,6 +11,7 @@ import McpTools from './tab-components/mcpTools.vue';
 import GenuiHistory from './tab-components/GenuiHistory.vue';
 import { useIsMobile } from '../hooks';
 import useTemplate from './genui-template/useTemplate';
+import { ThemePreviewCard, THEME_PREVIEW_COLOR_PRESETS } from './theme-preview';
 
 const props = defineProps({
   expanded: { type: Boolean, default: true },
@@ -28,10 +29,25 @@ const GenuiTemplateList = ENABLE_TEMPLATE
   : shallowRef(null);
 // 从上层注入共享的 playground 上下文（这里只需要主题&会话相关）
 const playgroundContext = inject('playgroundContext');
-const { themeData, conversation } = playgroundContext;
+const { conversation } = playgroundContext;
 
 const TinyIconPlus = iconPlus();
 const activeName = ref('model');
+const framework = ref('Vue');
+const componentLib = ref('TinyVue');
+const frameworkOptions = [
+  { name: 'Vue', icon: 'V' },
+  { name: 'Angular', icon: 'A' },
+];
+const componentLibOptions = ['TinyVue', 'ElementUI'];
+const materialThemeOptions = [
+  { text: '清新', value: 'lite' },
+  { text: '暗黑', value: 'dark' },
+];
+const materialThemeColorMap = {
+  lite: THEME_PREVIEW_COLOR_PRESETS.lite,
+  dark: THEME_PREVIEW_COLOR_PRESETS.dark,
+};
 
 const { isMobile } = useIsMobile();
 
@@ -48,6 +64,16 @@ const showNewTaskButton = computed(() => activeName.value !== 'template');
 watch(isMobile, (mobile) => {
   if (mobile) emit('update:expanded', false);
 });
+
+watch(
+  () => props.theme,
+  (currentTheme) => {
+    if (!['lite', 'dark'].includes(currentTheme)) {
+      emit('update:theme', 'lite');
+    }
+  },
+  { immediate: true },
+);
 
 const handleOverlayClick = () => {
   if (isMobile.value) emit('update:expanded', false);
@@ -169,14 +195,52 @@ const updateCustomExamples = (list) => {
         <tiny-tab-item title="工具" name="tools">
           <McpTools />
         </tiny-tab-item>
-        <tiny-tab-item title="主题" name="theme">
-          <div class="config-title">切换主题</div>
-          <tiny-button-group
-            size="small"
-            :data="themeData"
-            :model-value="theme"
-            @update:model-value="emit('update:theme', $event)"
-          />
+        <tiny-tab-item title="物料" name="theme">
+          <div class="config-title">框架</div>
+          <div class="framework-group">
+            <div
+              v-for="item in frameworkOptions"
+              :key="item.name"
+              class="framework-btn"
+              :class="{ 'framework-btn--active': framework === item.name }"
+              @click="framework = item.name"
+              role="button"
+              tabindex="0"
+              @keydown.enter="framework = item.name"
+              @keydown.space.prevent="framework = item.name"
+            >
+              <span class="framework-btn__icon">{{ item.icon }}</span>
+              <span class="framework-btn__name">{{ item.name }}</span>
+            </div>
+          </div>
+
+          <div class="config-title">组件库</div>
+          <div class="library-radio-group" role="radiogroup" aria-label="组件库">
+            <tiny-radio-group v-model="componentLib" class="library-radio-group__inner">
+              <tiny-radio v-for="item in componentLibOptions" :key="item" :label="item">{{ item }}</tiny-radio>
+            </tiny-radio-group>
+          </div>
+
+          <div class="config-title">主题</div>
+          <div class="theme-card-group" role="radiogroup" aria-label="主题">
+            <div
+              v-for="item in materialThemeOptions"
+              :key="item.value"
+              class="theme-card"
+              :class="[ `theme-card--${item.value}`, { 'theme-card--active': theme === item.value } ]"
+              role="radio"
+              :aria-checked="theme === item.value"
+              tabindex="0"
+              @click="emit('update:theme', item.value)"
+              @keydown.enter="emit('update:theme', item.value)"
+              @keydown.space.prevent="emit('update:theme', item.value)"
+            >
+              <ThemePreviewCard
+                :theme-variant="item.value"
+                :theme-colors="materialThemeColorMap[item.value]"
+              />
+            </div>
+          </div>
         </tiny-tab-item>
         <tiny-tab-item title="历史会话" name="history" class="history-tab">
           <GenuiHistory v-if="conversation" :conversation="conversation" />
@@ -279,7 +343,100 @@ const updateCustomExamples = (list) => {
       font-size: 14px;
       color: #595959;
       margin-bottom: 12px;
+      margin-top: 16px;
       line-height: 32px;
+    }
+
+    .framework-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .framework-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 0;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .framework-btn__icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f5f5;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .framework-btn__name {
+      font-size: 12px;
+      line-height: 1;
+      color: #595959;
+    }
+
+    .framework-btn--active {
+      border-color: #191919;
+      background: transparent;
+    }
+
+    .framework-btn--active .framework-btn__icon {
+      background: #1476ff;
+      color: #fff;
+    }
+
+    .framework-btn--active .framework-btn__name {
+      color: #1476ff;
+    }
+
+    .library-radio-group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    :deep(.library-radio-group__inner) {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-card-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .theme-card {
+      flex: 1;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      padding: 8px 8px 0;
+      text-align: center;
+      font-size: 14px;
+      line-height: 20px;
+      color: #595959;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .theme-card--active {
+      border-color: #191919;
+      color: #191919;
+      font-weight: 500;
     }
 
     :deep(.tiny-tabs__header.is-top) {
@@ -289,7 +446,7 @@ const updateCustomExamples = (list) => {
     :deep(.tiny-tabs__content) {
       height: 100%;
       overflow: auto;
-      padding: 0 24px 90px;
+      padding: 0 24px 0;
     }
   }
 
