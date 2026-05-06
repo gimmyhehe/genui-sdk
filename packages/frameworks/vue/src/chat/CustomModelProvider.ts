@@ -57,13 +57,17 @@ export class CustomModelProvider extends BaseModelProvider {
     this.customExamples = customExamples;
     this.customActions = customActions;
     this.chatConfig = chatConfig;
-    this.customFetch = customFetch; 
+    this.customFetch = customFetch;
   }
   validateRequest(_: ChatCompletionRequest) { }
 
   changeLlmConfig(model: string, temperature: number) {
     this.model = model;
     this.temperature = temperature;
+  }
+
+  setCustomExamples(customExamples: IGenPromptExample[]) {
+    this.customExamples = customExamples;
   }
   setResponseHandlers(handlers: IResponseHandler<IStreamData>[]) {
     this.responseHandlers = handlers;
@@ -102,7 +106,7 @@ export class CustomModelProvider extends BaseModelProvider {
     const bodyStream = response.body!;
     // const chunkStream = createAsyncIterableStream(getChunkStringStream(bodyStream));
     const reader = bodyStream.getReader();
-    
+
     const context: any = {};
     context.chatConfig = this.chatConfig;
 
@@ -121,7 +125,7 @@ export class CustomModelProvider extends BaseModelProvider {
       this.handlerChunk(data, context);
     });
     this.handlerEnd(context);
-    
+
   }
 
   handlerChunk(rawData: string, context: any) {

@@ -468,6 +468,14 @@ watch(
   },
 );
 
+watch(
+  () => props.customExamples,
+  (examples) => {
+    customModelProvider.setCustomExamples(examples ?? []);
+  },
+  { deep: true },
+);
+
 defineExpose({
   setInputMessage,
   handleNewConversation,
