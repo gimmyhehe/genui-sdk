@@ -150,7 +150,7 @@ export const generateJsonPatchPrompt =
 
 ## JSON PATCH 格式规范（由 jsonPatchSchema 转换）
 
-请严格按以下 JSON Schema 生成操作对象：
+请严格按以下 JSON Schema 生成操作序列：顶层必须是 JSON 数组（\`[]\`），按顺序包含零条或多条操作对象；不要只输出单条操作对象。
 
 \`\`\`json
 ${jsonPatchSchemaText}
