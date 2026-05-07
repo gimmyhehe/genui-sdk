@@ -1,20 +1,5 @@
 import type { Conversation } from '@opentiny/tiny-robot-kit';
-
-const formatTimestamp = (date = new Date()) => {
-  const pad = (value: number) => String(value).padStart(2, '0');
-
-  return [
-    date.getFullYear(),
-    pad(date.getMonth() + 1),
-    pad(date.getDate()),
-    '-',
-    pad(date.getHours()),
-    pad(date.getMinutes()),
-    pad(date.getSeconds()),
-  ].join('');
-};
-
-const generateId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+import { formatDate, generateId } from '../../../utils';
 
 const generateUniqueId = (existingIds: Set<string>) => {
   let nextId = generateId();
@@ -55,13 +40,18 @@ export const downloadConversations = (conversations: Conversation[]) => {
   const link = document.createElement('a');
 
   link.href = url;
-  link.download = `genui-history-${formatTimestamp()}.json`;
+  link.download = `genui-history-${formatDate(new Date(), 'YYYY-MM-DD-HH-mm-ss')}.json`;
   link.click();
   URL.revokeObjectURL(url);
 };
 
 export const parseConversationFile = async (file: File) => {
-  const rawData = JSON.parse(await file.text());
+  let rawData: unknown;
+  try {
+    rawData = JSON.parse(await file.text());
+  } catch (error) {
+    throw new Error('导入文件不是有效的 JSON');
+  }
 
   if (!Array.isArray(rawData)) {
     throw new Error('导入文件必须是会话数组');
