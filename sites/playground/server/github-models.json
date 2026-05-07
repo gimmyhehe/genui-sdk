@@ -41,7 +41,7 @@
         "name": "longcat/LongCat-Flash-Lite",
         "id": "LongCat-Flash-Lite",
         "supportJsonFormat": false,
-        "specificPrompt": "表单的提交按钮需要生成onClick事件，并在函数中是用this.callAction去调用continueChat"
+        "specificPrompt": "表单的提交按钮需要生成onClick事件，并在函数中使用 this.callAction 去调用 continueChat"
       },
       {
         "name": "longcat/LongCat-Flash-Chat",

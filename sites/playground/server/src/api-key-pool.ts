@@ -11,6 +11,10 @@ export function pickNextApiKeyFromEnv(apiKeyEnvName: string | undefined, envValu
   if (envValue === undefined) {
     return undefined;
   }
+
+  if (!apiKeyEnvName) {
+    return envValue;
+  }
   const trimmed = envValue.trim();
   if (!trimmed) {
     return undefined;

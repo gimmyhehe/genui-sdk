@@ -283,11 +283,25 @@ export function createChatGenui() {
 
         console.error('Error in chat-genui onError:', error);
         const actualError = error?.error?.cause ?? error?.error ?? error;
-        const statusCode = extractStatusCode(actualError) ?? 500;
-        const responseBody = actualError?.responseBody || null;
-        const message = statusCode === 429
-          ? BUSY_ERROR_MESSAGE
-          : actualError?.message + (responseBody ? `; error details: ${responseBody}` : '') || 'Unknown Error Type';
+        const rawStatusCode = extractStatusCode(actualError);
+        const statusCode =
+          typeof rawStatusCode === 'number' &&
+          Number.isInteger(rawStatusCode) &&
+          rawStatusCode >= 100 &&
+          rawStatusCode <= 599
+            ? rawStatusCode
+            : 500;
+        const responseBody = actualError?.responseBody ?? null;
+        const detailsPart = responseBody
+          ? `; error details: ${typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody)}`
+          : '';
+        const built = (actualError?.message ?? '') + detailsPart;
+        const message =
+          statusCode === 429
+            ? BUSY_ERROR_MESSAGE
+            : built.trim() !== ''
+              ? built
+              : 'Unknown Error Type';
         const type = actualError?.name || actualError?.type || 'Unknown Error Type';
         const param = actualError?.param || null;
         const code = statusCode;
