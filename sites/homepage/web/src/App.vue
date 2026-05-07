@@ -4,6 +4,7 @@ import javascript from 'highlight.js/lib/languages/javascript'
 import css from 'highlight.js/lib/languages/css'
 import html from 'highlight.js/lib/languages/xml'
 import json from 'highlight.js/lib/languages/json'
+import './reset.css'
 import Home from './views/home.vue'
 
 hljs.registerLanguage('javascript', javascript)
