@@ -21,6 +21,8 @@ import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServe
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 const initClients = async (
   serverName: string,
   serverConfig: McpServer,
@@ -175,11 +177,11 @@ const getPlaygroundConfig = (playgroundStr: string) => {
   }
 
   const rawAgents = playgroundConfig.agents || [];
-  // 解析后立刻过滤掉指向本地/内网等不安全目标的 Agent，降低 SSRF 风险
   const agents = rawAgents.filter((agent) => {
     const url = agent.api?.url;
     if (!url) return false;
-    return isAllowedAgentUrl(url);
+    // 开发态放开 URL 安全校验，生产态保持 SSRF 防护
+    return isDevelopment || isAllowedAgentUrl(url);
   });
 
   return {
