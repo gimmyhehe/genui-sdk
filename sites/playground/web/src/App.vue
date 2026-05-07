@@ -1,9 +1,8 @@
 <script setup>
 import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
-import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER, RENDERER_SETTINGS_KEY } from '@opentiny/genui-sdk-vue';
 import { ref, watch, onMounted, reactive, computed, onUnmounted, provide, defineAsyncComponent, h, shallowRef } from 'vue';
-import { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue'
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
