@@ -7228,13 +7228,17 @@
                   },
                   {
                     "property": "tooltipConfig",
+                    "type": "object",
                     "defaultValue": { "always": false },
                     "label": {
                       "text": {
                         "zh_CN": "悬浮提示配置，默认不显示"
                       }
                     },
-                    "required": false
+                    "required": false,
+                    "description": {
+                      "zh_CN": "悬浮提示配置，默认不显示"
+                    }
                   },
                   {
                     "property": "multiple",

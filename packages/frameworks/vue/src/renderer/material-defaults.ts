@@ -13,8 +13,6 @@ const materialDefaultValueRegistry = buildMaterialDefaultValueRegistry(rendererC
   includeComponent: componentMatcher,
 });
 
-console.log('materialDefaultValueRegistry', materialDefaultValueRegistry)
-
 export const applyMaterialDefaultsToSchema = (
   schema: Record<string, any>,
   registry: MaterialDefaultValueRegistry = materialDefaultValueRegistry,
