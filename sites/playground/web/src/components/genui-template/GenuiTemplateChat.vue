@@ -28,7 +28,6 @@ import {
   generateIdForComponents,
 } from './template-chat-utils';
 import { formatDate, generateId } from '../../utils';
-import { jsonPatchDeduplicator } from './json-patch-deduplicator';
 import useTemplate from './useTemplate';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
@@ -113,6 +112,22 @@ const roles: Record<string, BubbleRoleConfig> = {
   },
 };
 
+
+const handleSchemaJsonChanged = (event: { type: 'schema-card' | 'json-patch', cardId: string, content: string, delta: any }) => {
+  const { type, cardId, content } = event;
+  if (type === 'schema-card') {
+    schemaCardRenderer({ content, cardId });
+  } else if (type === 'json-patch') {
+    jsonPatchRenderer({ content, cardId });
+  }
+};
+onMounted(() => {
+  emitter.on('schema-json-changed', handleSchemaJsonChanged);
+});
+onUnmounted(() => {
+  emitter.off('schema-json-changed', handleSchemaJsonChanged);
+});
+
 const deltaPatcher = new DeltaPatcher({
   requiredCompleteFieldSelectors,
 });
@@ -159,13 +174,13 @@ const jsonPatchRenderer = async (props: any) => {
       return;
     }
 
-    const valid = validateJsonPatch(content);
+    const { value, state } = await textToJson(content);
+    if (state!== 'successful-parse' 
+      // && state !== 'repaired-parse' // TODO: 需要支持流式
+    ) return;
 
+    const valid = validateJsonPatch(value as any) ;
     if (!valid) return;
-
-    const { value } = await textToJson(content);
-
-    if (!value || !Array.isArray(value)) return;
 
     // Prefer pre-request schema for stable id-to-path resolution.
     let prePatchSchema = currentSchema.value;
@@ -176,11 +191,7 @@ const jsonPatchRenderer = async (props: any) => {
         prePatchSchema = currentSchema.value;
       }
     }
-    const formattedValue = formatJsonPatch(prePatchSchema, value);
-    // 如果没有 cardId，使用默认的 key 来记录（避免重复执行）
-    const operationKey = cardId || '__default__';
-    // 过滤掉已执行的操作
-    const newOperations = jsonPatchDeduplicator.filterExecutedOperations(operationKey, formattedValue);
+    const newOperations = formatJsonPatch(prePatchSchema, value);
 
     if (newOperations.length === 0) {
       return;
@@ -196,8 +207,6 @@ const jsonPatchRenderer = async (props: any) => {
     const targetSchema = JSON.parse(JSON.stringify(patchBaseline));
     jsonPatchFormatter.patch(targetSchema, standardOperations);
     setCurrentPreviewSchema(generateIdForComponents(targetSchema));
-    // 标记所有操作（包括已过滤的）为已执行，避免重复执行
-    jsonPatchDeduplicator.markAllOperationsExecuted(operationKey, formattedValue);
   } catch (error) {
     errorMessagesMap.value.set(props.cardId, error.message);
     console.error('jsonPatch error ===>', error);
@@ -249,8 +258,6 @@ const markdownRenderer = new BubbleMarkdownContentRenderer({
 const messageRenderers = {
   markdown: markdownRenderer,
   'json-patch': (props) => {
-    jsonPatchRenderer(props);
-
     return h(TemplateSchemaMessageRenderer, {
       itemProps: props,
       type: 'json-patch',
@@ -262,8 +269,6 @@ const messageRenderers = {
     });
   },
   'schema-card': (props) => {
-    schemaCardRenderer(props);
-
     return h(TemplateSchemaMessageRenderer, {
       itemProps: props,
       type: 'schema-card',

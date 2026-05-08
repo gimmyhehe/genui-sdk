@@ -39,41 +39,22 @@ function validateOperation(operation: any): boolean {
  * @param jsonPatch 符合 RFC 6902 规范的 json 字符串
  * @returns 是否合法
  */
-export const validateJsonPatch = (jsonPatch: string): boolean => {
-  try {
-    // 基本类型检查：必须是字符串
-    if (typeof jsonPatch !== 'string' || !jsonPatch) {
-      return false;
-    }
-
-    // 尝试解析 JSON 字符串，如果解析失败则直接返回 false
-    let jsonPatchArray: IJsonPatchOperation[];
-    try {
-      const parsed = JSON.parse(jsonPatch);
-      // 必须是数组格式
-      if (!Array.isArray(parsed)) {
-        return false;
-      }
-      jsonPatchArray = parsed;
-    } catch (e) {
-      // JSON 字符串解析失败，直接返回 false
-      return false;
-    }
-
-    // 验证数组不为空
-    if (jsonPatchArray.length === 0) {
-      return false;
-    }
-
-    // 步骤1: 验证每个操作的格式（op、path、value、from 等字段）
-    for (let i = 0; i < jsonPatchArray.length; i++) {
-      if (!validateOperation(jsonPatchArray[i])) {
-        return false;
-      }
-    }
-
-    return true;
-  } catch (error) {
+export const validateJsonPatch = (jsonPatchArray: IJsonPatchOperation[]): boolean => {
+  if (!Array.isArray(jsonPatchArray)) {
     return false;
   }
+
+  // 验证数组不为空
+  if (jsonPatchArray.length === 0) {
+    return false;
+  }
+
+  // 步骤1: 验证每个操作的格式（op、path、value、from 等字段）
+  for (let i = 0; i < jsonPatchArray.length; i++) {
+    if (!validateOperation(jsonPatchArray[i])) {
+      return false;
+    }
+  }
+
+  return true;
 };

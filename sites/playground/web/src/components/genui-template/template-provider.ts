@@ -117,6 +117,12 @@ export class CustomModelProvider extends BaseModelProvider {
           prevSchema: '',
         });
       }
+      emitter.emit('schema-json-changed', {
+        type: currentSchemaType,
+        delta,
+        cardId: messageId,
+        content: chatMessage.messages[chatMessage.messages.length - 1].content
+      });
     };
 
     let currentDelta: IStreamDelta = {};
