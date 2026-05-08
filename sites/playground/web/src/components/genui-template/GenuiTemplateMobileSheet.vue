@@ -10,6 +10,7 @@ const props = defineProps<{
   panelStyle: CSSProperties;
   showReturnLatestButton: boolean;
   currentPreviewSchema: Record<string, unknown> | null;
+  currentPreviewSchemaComplete?: boolean | undefined;
   schemaEditor: string;
   editorOptions: Record<string, unknown>;
   viewSchemaIcon: string;
@@ -86,6 +87,7 @@ const handleJsonEditorChange = (value: string) => {
                 class="schema-mobile-sheet-renderer"
                 :content="currentPreviewSchema"
                 :generating="false"
+                :isJsonComplete="currentPreviewSchemaComplete"
               />
             </div>
             <Transition name="schema-mobile-json">

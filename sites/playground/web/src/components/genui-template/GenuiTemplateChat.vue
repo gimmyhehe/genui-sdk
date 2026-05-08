@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, h, inject, onMounted, onUnmounted } from 'vue';
+import { ref, watch, computed, h, inject, onMounted, onUnmounted, toRaw } from 'vue';
 import type { Ref } from 'vue';
 import '@opentiny/tiny-robot/dist/style.css';
 import * as jsonPatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
@@ -113,12 +113,12 @@ const roles: Record<string, BubbleRoleConfig> = {
 };
 
 
-const handleSchemaJsonChanged = (event: { type: 'schema-card' | 'json-patch', cardId: string, content: string, delta: any }) => {
-  const { type, cardId, content } = event;
+const handleSchemaJsonChanged = (event: { type: 'schema-card' | 'json-patch', cardId: string, content: string, delta: any, newMessage: boolean }) => {
+  const { type, cardId, content, newMessage } = event;
   if (type === 'schema-card') {
-    schemaCardRenderer({ content, cardId });
+    schemaCardRenderer({ content, cardId, newMessage });
   } else if (type === 'json-patch') {
-    jsonPatchRenderer({ content, cardId });
+    jsonPatchRenderer({ content, cardId, newMessage });
   }
 };
 onMounted(() => {
@@ -127,6 +127,9 @@ onMounted(() => {
 onUnmounted(() => {
   emitter.off('schema-json-changed', handleSchemaJsonChanged);
 });
+
+const lastPreviewSchema = ref<any>(null);
+// const lastOperationIndex = ref<number>(-1); // TODO: 追踪已执行的index，减少重复执行
 
 const deltaPatcher = new DeltaPatcher({
   requiredCompleteFieldSelectors,
@@ -161,6 +164,10 @@ const schemaCardRenderer = async (props: any) => {
   }
 };
 
+
+const isStreamOperation = (operation: any) => {
+  return (operation.op === 'add' || operation.op === 'replace') && operation.id && operation.path && operation.value
+};
 /**
  * Applies streamed JSON Patch operations to the current schema.
  * Path resolution is formatted against the immutable pre-request
@@ -168,30 +175,41 @@ const schemaCardRenderer = async (props: any) => {
  */
 const jsonPatchRenderer = async (props: any) => {
   try {
-    const { content, cardId } = props;
+    const { content, cardId, newMessage } = props;
 
     if (cardId !== currentCardId.value) {
       return;
     }
+    if (newMessage) {
+      lastPreviewSchema.value = JSON.parse(JSON.stringify(currentPreviewSchema.value));
+      // lastOperationIndex.value = -1; // TODO: 追踪已执行的index，减少重复执行
+    }
 
     const { value, state } = await textToJson(content);
     if (state!== 'successful-parse' 
-      // && state !== 'repaired-parse' // TODO: 需要支持流式
+      && state !== 'repaired-parse' // 允许流式处理
     ) return;
+    const isComplete = state === 'successful-parse';
+    let lastOperationComplete = true;
 
     const valid = validateJsonPatch(value as any) ;
     if (!valid) return;
 
-    // Prefer pre-request schema for stable id-to-path resolution.
-    let prePatchSchema = currentSchema.value;
-    if (prevSchema.value) {
-      try {
-        prePatchSchema = JSON.parse(prevSchema.value);
-      } catch (error) {
-        prePatchSchema = currentSchema.value;
+    const operations = value as any[];
+    if (!isComplete) {
+      const lastOperation = operations[operations.length - 1];
+      if (!isStreamOperation(lastOperation)) {
+        operations.pop();
+        lastOperationComplete = true;
+      } else {
+        lastOperationComplete = false;
       }
     }
-    const newOperations = formatJsonPatch(prePatchSchema, value);
+    if (operations.length === 0) {
+      return;
+    }
+
+    const newOperations = formatJsonPatch(toRaw(lastPreviewSchema.value), operations);
 
     if (newOperations.length === 0) {
       return;
@@ -203,10 +221,10 @@ const jsonPatchRenderer = async (props: any) => {
     });
 
     // 增量 patch 需要基于“当前预览态”持续叠加，避免每个 chunk 都从已应用态重建导致丢操作。
-    const patchBaseline = currentPreviewSchema.value ?? currentSchema.value;
+    const patchBaseline = lastPreviewSchema.value ?? currentSchema.value;
     const targetSchema = JSON.parse(JSON.stringify(patchBaseline));
     jsonPatchFormatter.patch(targetSchema, standardOperations);
-    setCurrentPreviewSchema(generateIdForComponents(targetSchema));
+    setCurrentPreviewSchema(generateIdForComponents(targetSchema), isComplete || lastOperationComplete);
   } catch (error) {
     errorMessagesMap.value.set(props.cardId, error.message);
     console.error('jsonPatch error ===>', error);
