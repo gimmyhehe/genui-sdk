@@ -92,6 +92,8 @@ watch(
       } else {
         json = {};
       }
+    } else {
+      isCompleted = props.isJsonComplete ?? true;
     }
     deltaPatcher.patchWithDelta(schema.value, json, isCompleted); // TODO： 速率限制
     if (!updateActionTimer) {
