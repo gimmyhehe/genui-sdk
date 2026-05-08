@@ -233,15 +233,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "slots": {
@@ -417,7 +415,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -500,7 +497,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": "",
                     "type": "string",
                     "widget": {
                       "component": "InputConfigurator",
@@ -523,7 +519,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": "",
                     "type": "string",
                     "widget": {
                       "component": "InputConfigurator",
@@ -546,7 +541,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": "",
                     "type": "string",
                     "widget": {
                       "component": "InputConfigurator",
@@ -643,7 +637,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": "",
                     "type": "string",
                     "widget": {
                       "component": "InputConfigurator",
@@ -673,8 +666,7 @@
                 "description": {
                   "zh_CN": "用户确认选定的值时触发"
                 },
-                "type": "event",
-                "defaultValue": ""
+                "type": "event"
               },
               "onBlur": {
                 "label": {
@@ -683,8 +675,7 @@
                 "description": {
                   "zh_CN": "在组件 Input 失去焦点时触发"
                 },
-                "type": "event",
-                "defaultValue": ""
+                "type": "event"
               },
               "onFocus": {
                 "label": {
@@ -693,8 +684,7 @@
                 "description": {
                   "zh_CN": "在组件 Input 获得焦点时触发"
                 },
-                "type": "event",
-                "defaultValue": ""
+                "type": "event"
               },
               "onCalendarChange": {
                 "label": {
@@ -703,8 +693,7 @@
                 "description": {
                   "zh_CN": "在日历所选日期更改时触发"
                 },
-                "type": "event",
-                "defaultValue": ""
+                "type": "event"
               },
               "onPanelChange": {
                 "label": {
@@ -713,8 +702,7 @@
                 "description": {
                   "zh_CN": "当日期面板改变时触发。"
                 },
-                "type": "event",
-                "defaultValue": ""
+                "type": "event"
               },
               "onVisibleChange": {
                 "label": {
@@ -723,8 +711,7 @@
                 "description": {
                   "zh_CN": "当 DatePicker 的下拉列表出现/消失时触发"
                 },
-                "type": "event",
-                "defaultValue": ""
+                "type": "event"
               }
             },
             "slots": {
@@ -1510,8 +1497,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "slots": {}
@@ -2923,7 +2909,6 @@
                     {
                       "name": "selection",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前选中项"
                       }
@@ -2931,7 +2916,6 @@
                     {
                       "name": "row",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前行"
                       }
@@ -2953,7 +2937,6 @@
                     {
                       "name": "selection",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前选中项"
                       }
@@ -2975,7 +2958,6 @@
                     {
                       "name": "selection",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前选中项"
                       }
@@ -2997,7 +2979,6 @@
                     {
                       "name": "row",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前行"
                       }
@@ -3005,7 +2986,6 @@
                     {
                       "name": "column",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前列"
                       }
@@ -3013,7 +2993,6 @@
                     {
                       "name": "cell",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前单元格"
                       }
@@ -3021,7 +3000,6 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生事件 event"
                       }
@@ -3043,7 +3021,6 @@
                     {
                       "name": "row",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前行"
                       }
@@ -3051,7 +3028,6 @@
                     {
                       "name": "column",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前列"
                       }
@@ -3059,7 +3035,6 @@
                     {
                       "name": "cell",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前单元格"
                       }
@@ -3067,7 +3042,6 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生事件 event"
                       }
@@ -3388,7 +3362,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": "",
                     "cols": 12,
                     "bindState": false,
                     "widget": {
@@ -4145,15 +4118,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onFocus": {
                 "label": {
@@ -4168,15 +4139,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onChange": {
                 "label": {
@@ -4191,15 +4160,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -4429,7 +4396,6 @@
                   {
                     "property": "src",
                     "type": "string",
-                    "defaultValue": "",
                     "bindState": true,
                     "label": {
                       "text": {
@@ -4539,8 +4505,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "shortcuts": {
@@ -4653,8 +4618,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "shortcuts": {
@@ -4764,8 +4728,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "shortcuts": {
@@ -4885,8 +4848,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "shortcuts": {
@@ -5631,8 +5593,7 @@
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onInput": {
                 "label": {
@@ -5647,15 +5608,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "输入框输入的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onBlur": {
                 "label": {
@@ -5670,15 +5629,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onFocus": {
                 "label": {
@@ -5693,15 +5650,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onClear": {
                 "label": {
@@ -5714,8 +5669,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -6457,8 +6411,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -6744,15 +6697,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "输入框改变后的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onInput": {
                 "label": {
@@ -6767,15 +6718,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "输入框输入的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -6790,15 +6739,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onBlur": {
                 "label": {
@@ -6813,15 +6760,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onFocus": {
                 "label": {
@@ -6836,15 +6781,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onClear": {
                 "label": {
@@ -6857,8 +6800,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "slots": {
@@ -7097,15 +7039,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -7274,6 +7214,7 @@
                     "readOnly": false,
                     "disabled": false,
                     "cols": 12,
+                    "defaultValue": [],
                     "widget": {
                       "component": "CodeConfigurator",
                       "props": {
@@ -7284,6 +7225,16 @@
                       "zh_CN": "配置 Select 下拉数据项"
                     },
                     "labelPosition": "top"
+                  },
+                  {
+                    "property": "tooltipConfig",
+                    "defaultValue": { "always": false },
+                    "label": {
+                      "text": {
+                        "zh_CN": "悬浮提示配置，默认不显示"
+                      }
+                    },
+                    "required": false
                   },
                   {
                     "property": "multiple",
@@ -7393,15 +7344,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "下拉框选中项的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -7416,15 +7365,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onBlur": {
                 "label": {
@@ -7439,15 +7386,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onFocus": {
                 "label": {
@@ -7462,15 +7407,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onClear": {
                 "label": {
@@ -7483,8 +7426,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onRemoveTag": {
                 "label": {
@@ -7499,15 +7441,13 @@
                     {
                       "name": "value",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "被移除Tag对应数据项的值字段"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "onBeforeMount": "console.log('table on load'); this.options = source.data"
@@ -7681,8 +7621,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -7697,15 +7636,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的开关状态值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -7931,7 +7868,6 @@
                     {
                       "name": "type",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "搜索类型,默认值为 {} "
                       }
@@ -7939,15 +7875,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前input框中值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onSearch": {
                 "label": {
@@ -7962,7 +7896,6 @@
                     {
                       "name": "type",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "搜索类型,默认值为 {} "
                       }
@@ -7970,15 +7903,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前input框中值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -8204,15 +8135,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "选中项的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -8227,15 +8156,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -8390,15 +8317,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "选中项的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -8413,15 +8338,13 @@
                     {
                       "name": "value",
                       "type": "array",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -8599,15 +8522,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "选中项的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -8622,15 +8543,13 @@
                     {
                       "name": "value",
                       "type": "array",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -8864,8 +8783,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:visible": {
                 "label": {
@@ -8880,15 +8798,13 @@
                     {
                       "name": "value",
                       "type": "boolean",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的显示或隐藏的状态值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "slots": {
@@ -8974,7 +8890,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": "",
                     "cols": 12,
                     "bindState": false,
                     "widget": {
@@ -9094,7 +9009,6 @@
                     {
                       "name": "component",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前点击的页签对象"
                       }
@@ -9102,15 +9016,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onEdit": {
                 "label": {
@@ -9125,7 +9037,6 @@
                     {
                       "name": "tab",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前操作的页签对象"
                       }
@@ -9133,15 +9044,13 @@
                     {
                       "name": "type",
                       "type": "String",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前操作的类型（remove || add || edit）"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onClose": {
                 "label": {
@@ -9156,15 +9065,13 @@
                     {
                       "name": "name",
                       "type": "String",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "页签名称"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -9407,8 +9314,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -9590,15 +9496,13 @@
                     {
                       "name": "data",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前激活面板的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -9613,15 +9517,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -9831,7 +9733,6 @@
                           {
                             "property": "title",
                             "type": "string",
-                            "defaultValue": "",
                             "label": {
                               "text": {
                                 "zh_CN": "列标题"
@@ -9845,7 +9746,6 @@
                           {
                             "property": "field",
                             "type": "string",
-                            "defaultValue": "",
                             "label": {
                               "text": {
                                 "zh_CN": "列键值"
@@ -9874,7 +9774,6 @@
                           {
                             "property": "width",
                             "type": "string",
-                            "defaultValue": "",
                             "label": {
                               "text": {
                                 "zh_CN": "列宽"
@@ -9888,7 +9787,6 @@
                           {
                             "property": "formatText",
                             "type": "string",
-                            "defaultValue": "",
                             "label": {
                               "text": {
                                 "zh_CN": "内置渲染器"
@@ -9941,7 +9839,6 @@
                           {
                             "property": "renderer",
                             "type": "object",
-                            "defaultValue": "",
                             "label": {
                               "text": {
                                 "zh_CN": "渲染函数"
@@ -9957,7 +9854,6 @@
                           {
                             "property": "slots",
                             "type": "object",
-                            "defaultValue": "",
                             "label": {
                               "text": {
                                 "zh_CN": "插槽"
@@ -10492,7 +10388,6 @@
                     {
                       "name": "table",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "{$table,filters} 包含 table 实例对象和过滤条件的对象"
                       }
@@ -10515,7 +10410,6 @@
                     {
                       "name": "table",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "{$table,filters} 包含 table 实例对象和过滤条件的对象"
                       }
@@ -10538,7 +10432,6 @@
                     {
                       "name": "table",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": " 包含 table 实例对象"
                       }
@@ -10546,7 +10439,6 @@
                     {
                       "name": "checked",
                       "type": "boolean",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "勾选状态"
                       }
@@ -10554,7 +10446,6 @@
                     {
                       "name": "selction",
                       "type": "Array",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "选中的表格数据数组"
                       }
@@ -10577,7 +10468,6 @@
                     {
                       "name": "table",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": " table 实例对象"
                       }
@@ -10585,7 +10475,6 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": " 原生 Event"
                       }
@@ -10608,7 +10497,6 @@
                     {
                       "name": "table",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "{$table,row,rowIndex} 包含 table 实例对象和当前行数据的对象"
                       }
@@ -10616,7 +10504,6 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": " 原生 Event"
                       }
@@ -10637,8 +10524,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             },
             "shortcuts": {
@@ -10872,15 +10758,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前页的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onPrevClick ": {
                 "label": {
@@ -10895,15 +10779,13 @@
                     {
                       "name": "page",
                       "type": "String",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前页的页码值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onNextClick": {
                 "label": {
@@ -10918,15 +10800,13 @@
                     {
                       "name": "page",
                       "type": "String",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前页的页码值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -11232,7 +11112,6 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前选中项的值"
                       }
@@ -11240,15 +11119,13 @@
                     {
                       "name": "value",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前选中对象"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -11263,15 +11140,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onClose": {
                 "label": {
@@ -11284,8 +11159,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onPageChange": {
                 "label": {
@@ -11300,15 +11174,13 @@
                     {
                       "name": "value",
                       "type": "String",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前页码数"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -11586,7 +11458,6 @@
                     {
                       "name": "data",
                       "type": "object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前选中节点信息"
                       }
@@ -11594,15 +11465,13 @@
                     {
                       "name": "currentNode",
                       "type": "object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "树组件目前的选中状态信息，包含 checkedNodes、checkedKeys、halfCheckedNodes、halfCheckedKeys 四个属性"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onNodeClick": {
                 "label": {
@@ -11617,7 +11486,6 @@
                     {
                       "name": "data",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前选中节点信息"
                       }
@@ -11625,7 +11493,6 @@
                     {
                       "name": "node",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "树组件目前的选中状态信息，包含 checkedNodes、checkedKeys、halfCheckedNodes、halfCheckedKeys 四个属性"
                       }
@@ -11633,15 +11500,13 @@
                     {
                       "name": "vm",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "树组件实例"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -11801,7 +11666,6 @@
                     {
                       "name": "type",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "点击节点的下标"
                       }
@@ -11809,15 +11673,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "当前节点对象：{ name: 节点名称, time: 时间 }"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -12520,15 +12382,13 @@
                     {
                       "name": "value",
                       "type": "boolean",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的可见状态值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -12828,15 +12688,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "输入框改变后的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onInput": {
                 "label": {
@@ -12851,15 +12709,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "输入框输入的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -12874,15 +12730,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onBlur": {
                 "label": {
@@ -12897,15 +12751,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onFocus": {
                 "label": {
@@ -12920,15 +12772,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onClear": {
                 "label": {
@@ -12941,8 +12791,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -13269,15 +13118,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "输入框改变后的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onInput": {
                 "label": {
@@ -13292,15 +13139,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "输入框输入的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onUpdate:modelValue": {
                 "label": {
@@ -13315,15 +13160,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "双向绑定的值"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onBlur": {
                 "label": {
@@ -13338,15 +13181,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onFocus": {
                 "label": {
@@ -13361,15 +13202,13 @@
                     {
                       "name": "event",
                       "type": "Object",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "原生 event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onClear": {
                 "label": {
@@ -13382,8 +13221,7 @@
                 "functionInfo": {
                   "params": [],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },
@@ -13595,15 +13433,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "右侧列表元素变化时触发"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onLeftCheckChange": {
                 "label": {
@@ -13618,15 +13454,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "左侧列表元素被用户选中 / 取消选中时触发;"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               },
               "onRightCheckChange": {
                 "label": {
@@ -13641,15 +13475,13 @@
                     {
                       "name": "value",
                       "type": "string",
-                      "defaultValue": "",
                       "description": {
                         "zh_CN": "右侧列表元素被用户选中 / 取消选中时触发"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": ""
+                }
               }
             }
           },

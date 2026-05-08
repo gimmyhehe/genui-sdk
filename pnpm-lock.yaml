@@ -281,9 +281,42 @@ importers:
       '@opentiny/vue-button':
         specifier: ^3.28.0
         version: 3.28.0
-      '@opentiny/vue-huicharts':
+      '@opentiny/vue-huicharts-bar':
         specifier: ^3.28.0
-        version: 3.29.0(echarts@5.4.1)
+        version: 3.29.0
+      '@opentiny/vue-huicharts-funnel':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-gauge':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-graph':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-histogram':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-line':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-pie':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-process':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-radar':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-ring':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-scatter':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-waterfall':
+        specifier: ^3.28.0
+        version: 3.29.0
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
@@ -363,9 +396,42 @@ importers:
       '@opentiny/vue-button':
         specifier: ^3.28.0
         version: 3.28.0
-      '@opentiny/vue-huicharts':
+      '@opentiny/vue-huicharts-bar':
         specifier: ^3.28.0
-        version: 3.29.0(echarts@5.4.1)
+        version: 3.29.0
+      '@opentiny/vue-huicharts-funnel':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-gauge':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-graph':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-histogram':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-line':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-pie':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-process':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-radar':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-ring':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-scatter':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-waterfall':
+        specifier: ^3.28.0
+        version: 3.29.0
       '@opentiny/vue-select':
         specifier: ^3.28.0
         version: 3.28.0
@@ -486,24 +552,6 @@ importers:
       '@opentiny/vue':
         specifier: ^3.28.0
         version: 3.28.0
-      '@opentiny/vue-chart-bar':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-histogram':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-line':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-pie':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-radar':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-ring':
-        specifier: 3.14.0
-        version: 3.14.0
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
@@ -4052,20 +4100,8 @@ packages:
   '@opentiny/vue-hrapprover@3.28.0':
     resolution: {integrity: sha512-4mP8hOQ5TOxVEZKV82UmUWT+8eRHl+a5DlLCBYJT2CisZ463LQ/DjqieWTJplgxf258w96pc+t0PaNxklLl5QQ==}
 
-  '@opentiny/vue-huicharts-amap@3.29.0':
-    resolution: {integrity: sha512-KPRYXFTHpZfH0W5TdJfm/2uuT2qwgbrsRN6VjSG5N9RlUQDG6/oEUXBIPHX8CZTUUnkeQ0W1TXPaYlILQ0RLtg==}
-
   '@opentiny/vue-huicharts-bar@3.29.0':
     resolution: {integrity: sha512-3IxEwubWur2wd7K7SezH9zS3l89FSlZTU5a0TIRt9xEL6OSN7izgHINXTzblQfmpAXzPJhjFKh0D88ung6hBog==}
-
-  '@opentiny/vue-huicharts-bmap@3.29.0':
-    resolution: {integrity: sha512-XPvryKsBQqBt7Ech/FGONx5MI2nN+naCSEUbkohFsQqFG8Y3JrwMKEy0rjYk0vguDbfUY7oo8OtsAFHWiGJZCQ==}
-
-  '@opentiny/vue-huicharts-boxplot@3.29.0':
-    resolution: {integrity: sha512-3zykxZ9pZd36cjb+Qa4Kqr7gjeQv8XfgqpuxLd3Dzd/pONFis1WHS7BfDU6zqnksF3RByLVcy24wun1ZpYoGxw==}
-
-  '@opentiny/vue-huicharts-candle@3.29.0':
-    resolution: {integrity: sha512-eXv1xV+hSEZB8tI6IxOb3C2zx7K0O+V+XX49Bj0EG9O+sep+SpfG5GjduR/5Wwyc89+i3Ag835UNwwdvXjPDag==}
 
   '@opentiny/vue-huicharts-core@3.29.0':
     resolution: {integrity: sha512-O4SlRgpKMUTewMgzf3I2GyiiC4SzOv8iUXK1A6t81Mdd1MxpajiMbhjUm7WnytjTyu23Jd1q31G7HUfxdKJZOw==}
@@ -4079,20 +4115,11 @@ packages:
   '@opentiny/vue-huicharts-graph@3.29.0':
     resolution: {integrity: sha512-g2XrF5wwaD1fqb/+2K+qeHbovNAjmItURadhv5bBHLtt4wlATAmGIyCeq1b4GTxFybmJuPQA3DGUDGrohfyUgg==}
 
-  '@opentiny/vue-huicharts-heatmap@3.29.0':
-    resolution: {integrity: sha512-PeLXkpQR3ttwiCG574gbWySpisADUtP8JzhjHTk/Wg7OFU4+Z6KxyJELwpShoXb+u1gOssThGEMarzPDEWNHnA==}
-
   '@opentiny/vue-huicharts-histogram@3.29.0':
     resolution: {integrity: sha512-Jxji3WLxSNIuWuFu0gBPHgAjRjF2y2Uy8JlsuX4AOqfUy8mDkBS03kRlrFXEtlTJ6htJsJzqVFBLJmb8zQ1t3Q==}
 
   '@opentiny/vue-huicharts-line@3.29.0':
     resolution: {integrity: sha512-xwbZzOmloN7S/C3G5/mMbsz70KfumqAGuqFs0wdsj4n9eHH+Fn0xXdCvCRmEf357NdX6xf4xFiiXg1DDnf6nLg==}
-
-  '@opentiny/vue-huicharts-liquidfill@3.29.0':
-    resolution: {integrity: sha512-aLeTqjXtZWi7Pjm+z1IbBwiiPR/NtWyVrsArzDSACU9C2a0TcXsb3UA3ZHu9/ZnpTV3Nb87BdTWprSN9/9Mrhw==}
-
-  '@opentiny/vue-huicharts-map@3.29.0':
-    resolution: {integrity: sha512-yau/QZwNvzBiMWfiRgOJSyKH+WOqVumzNe3oUKIGAs2fBnuqYdjDcb/w0dfPWrWeRayExjzH4nUSyzDsxkewrA==}
 
   '@opentiny/vue-huicharts-pie@3.29.0':
     resolution: {integrity: sha512-2tc0fAcPUSG2tTkAOsGKIszbRgUimDaK3yN4sXA6GUNaZNW9PEIkfaZ7asAO4jKBNaEqzqUdUhE8BMDzQFH8aQ==}
@@ -4106,26 +4133,11 @@ packages:
   '@opentiny/vue-huicharts-ring@3.29.0':
     resolution: {integrity: sha512-jmjjrYcZikQHNKMlhgUnL9gNmUfRb8aTPW+1DlhfhDSohYQbhURT9XoeETt/ZlfmNn93YRWyQiWQqWCyINXLLg==}
 
-  '@opentiny/vue-huicharts-sankey@3.29.0':
-    resolution: {integrity: sha512-zckLo8SG9WbrfPna4r7sbz7+bSk/225qd3gS2s98YfnaMo3IHSFYmHpdmaIQUR6oZ8EIjIyy4wzldbGlVZKrNQ==}
-
   '@opentiny/vue-huicharts-scatter@3.29.0':
     resolution: {integrity: sha512-QotSqCj8qZNQuv5v3mDCHl61MtTP3eLbShvJET8agll/PHu1yqY/BcRUQoaQgOfZCrlSjpXKplHnMlDz3ZTB4w==}
 
-  '@opentiny/vue-huicharts-sunburst@3.29.0':
-    resolution: {integrity: sha512-iTW9C2qFY2OZ0/E7DU7JvJ1CGooTNjH/8VDKXEBkLJ1wh5HQAna5LKgzfPwtaqyNmKG+/tJIvLKV81EzSZ+kxQ==}
-
-  '@opentiny/vue-huicharts-tree@3.29.0':
-    resolution: {integrity: sha512-piDq77ekrRPpYsTIVEPgBuFDFqF1kauois1XrSKN62cjVqL/AqHFTZGx7+UvQo3ZCHlGE2Rn1KHd6BsIQa70gw==}
-
   '@opentiny/vue-huicharts-waterfall@3.29.0':
     resolution: {integrity: sha512-fLeZ1COSbbQa9e3Kq2ATYyTa+wv59QKwx6/mnPOp0iXCaB+SpUB8OXSb7Mpx2K9yAG1dACScG173FuRL+qHDwA==}
-
-  '@opentiny/vue-huicharts-wordcloud@3.29.0':
-    resolution: {integrity: sha512-bg/SBzEN4QgZflAjzx45iSKkv58oglh4qFnNqWuEnr1+ZQZduR3Hq4jbRIOIfHkKUEw2HJ6R3zMoLCfVu5oX/A==}
-
-  '@opentiny/vue-huicharts@3.29.0':
-    resolution: {integrity: sha512-lil8wu63GRj19Ud3f6NEAGzU4M0MvIh5geNNj6OjKHPWt37A5TiOM4B6h6IamM8x6icFPs4zZav2R6ZmCa8IUQ==}
 
   '@opentiny/vue-icon@3.28.3':
     resolution: {integrity: sha512-gOmR/2m9aEKH26jvCDBtiUtb1DDvjmFX8tn4gKK+Fd32M9HYMyZaZpNPvYrK33/GLSUWIDXUJOmeypnSyOJWog==}
@@ -6177,16 +6189,6 @@ packages:
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
-
-  echarts-liquidfill@3.1.0:
-    resolution: {integrity: sha512-5Dlqs/jTsdTUAsd+K5LPLLTgrbbNORUSBQyk8PSy1Mg2zgHDWm83FmvA4s0ooNepCJojFYRITTQ4GU1UUSKYLw==}
-    peerDependencies:
-      echarts: ^5.0.1
-
-  echarts-wordcloud@2.0.0:
-    resolution: {integrity: sha512-K7l6pTklqdW7ZWzT/1CS0KhBSINr/cd7c5N1fVMzZMwLQHEwT7x+nivK7g5hkVh7WNcAv4Dn6/ZS5zMKRozC1g==}
-    peerDependencies:
-      echarts: ^5.0.1
 
   echarts@5.4.1:
     resolution: {integrity: sha512-9ltS3M2JB0w2EhcYjCdmtrJ+6haZcW6acBolMGIuf01Hql1yrIV01L1aRj7jsaaIULJslEP9Z3vKlEmnJaWJVQ==}
@@ -13475,31 +13477,10 @@ snapshots:
       '@opentiny/vue-renderless': 3.28.2
       '@opentiny/vue-theme': 3.28.0
 
-  '@opentiny/vue-huicharts-amap@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-
   '@opentiny/vue-huicharts-bar@3.29.0':
     dependencies:
       '@opentiny/vue-common': 3.29.0
       '@opentiny/vue-huicharts-core': 3.29.0
-
-  '@opentiny/vue-huicharts-bmap@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-
-  '@opentiny/vue-huicharts-boxplot@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-
-  '@opentiny/vue-huicharts-candle@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-      '@opentiny/vue-locale': 3.29.0
 
   '@opentiny/vue-huicharts-core@3.29.0':
     dependencies:
@@ -13523,30 +13504,12 @@ snapshots:
       '@opentiny/vue-common': 3.29.0
       '@opentiny/vue-huicharts-core': 3.29.0
 
-  '@opentiny/vue-huicharts-heatmap@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-
   '@opentiny/vue-huicharts-histogram@3.29.0':
     dependencies:
       '@opentiny/vue-common': 3.29.0
       '@opentiny/vue-huicharts-core': 3.29.0
 
   '@opentiny/vue-huicharts-line@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-
-  '@opentiny/vue-huicharts-liquidfill@3.29.0(echarts@5.4.1)':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-      echarts-liquidfill: 3.1.0(echarts@5.4.1)
-    transitivePeerDependencies:
-      - echarts
-
-  '@opentiny/vue-huicharts-map@3.29.0':
     dependencies:
       '@opentiny/vue-common': 3.29.0
       '@opentiny/vue-huicharts-core': 3.29.0
@@ -13573,22 +13536,7 @@ snapshots:
       '@opentiny/vue-huicharts-core': 3.29.0
       '@opentiny/vue-locale': 3.29.0
 
-  '@opentiny/vue-huicharts-sankey@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-
   '@opentiny/vue-huicharts-scatter@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-
-  '@opentiny/vue-huicharts-sunburst@3.29.0':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-
-  '@opentiny/vue-huicharts-tree@3.29.0':
     dependencies:
       '@opentiny/vue-common': 3.29.0
       '@opentiny/vue-huicharts-core': 3.29.0
@@ -13598,48 +13546,6 @@ snapshots:
       '@opentiny/vue-common': 3.29.0
       '@opentiny/vue-huicharts-core': 3.29.0
       '@opentiny/vue-locale': 3.29.0
-
-  '@opentiny/vue-huicharts-wordcloud@3.29.0(echarts@5.4.1)':
-    dependencies:
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-      echarts-wordcloud: 2.0.0(echarts@5.4.1)
-    transitivePeerDependencies:
-      - echarts
-
-  '@opentiny/vue-huicharts@3.29.0(echarts@5.4.1)':
-    dependencies:
-      '@opentiny/huicharts': 1.0.1
-      '@opentiny/utils': 3.29.0
-      '@opentiny/vue-common': 3.29.0
-      '@opentiny/vue-huicharts-amap': 3.29.0
-      '@opentiny/vue-huicharts-bar': 3.29.0
-      '@opentiny/vue-huicharts-bmap': 3.29.0
-      '@opentiny/vue-huicharts-boxplot': 3.29.0
-      '@opentiny/vue-huicharts-candle': 3.29.0
-      '@opentiny/vue-huicharts-core': 3.29.0
-      '@opentiny/vue-huicharts-funnel': 3.29.0
-      '@opentiny/vue-huicharts-gauge': 3.29.0
-      '@opentiny/vue-huicharts-graph': 3.29.0
-      '@opentiny/vue-huicharts-heatmap': 3.29.0
-      '@opentiny/vue-huicharts-histogram': 3.29.0
-      '@opentiny/vue-huicharts-line': 3.29.0
-      '@opentiny/vue-huicharts-liquidfill': 3.29.0(echarts@5.4.1)
-      '@opentiny/vue-huicharts-map': 3.29.0
-      '@opentiny/vue-huicharts-pie': 3.29.0
-      '@opentiny/vue-huicharts-process': 3.29.0
-      '@opentiny/vue-huicharts-radar': 3.29.0
-      '@opentiny/vue-huicharts-ring': 3.29.0
-      '@opentiny/vue-huicharts-sankey': 3.29.0
-      '@opentiny/vue-huicharts-scatter': 3.29.0
-      '@opentiny/vue-huicharts-sunburst': 3.29.0
-      '@opentiny/vue-huicharts-tree': 3.29.0
-      '@opentiny/vue-huicharts-waterfall': 3.29.0
-      '@opentiny/vue-huicharts-wordcloud': 3.29.0(echarts@5.4.1)
-      '@opentiny/vue-locale': 3.29.0
-      '@opentiny/vue-theme': 3.29.0
-    transitivePeerDependencies:
-      - echarts
 
   '@opentiny/vue-icon@3.28.3':
     dependencies:
@@ -16797,14 +16703,6 @@ snapshots:
   duplexer3@0.1.5: {}
 
   eastasianwidth@0.2.0: {}
-
-  echarts-liquidfill@3.1.0(echarts@5.4.1):
-    dependencies:
-      echarts: 5.4.1
-
-  echarts-wordcloud@2.0.0(echarts@5.4.1):
-    dependencies:
-      echarts: 5.4.1
 
   echarts@5.4.1:
     dependencies:

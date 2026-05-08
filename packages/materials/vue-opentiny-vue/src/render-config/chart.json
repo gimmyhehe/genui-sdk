@@ -56,15 +56,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -87,23 +78,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "Month": "Jan",
-                                "Domestic": 33,
-                                "Abroad": 37
-                              },
-                              {
-                                "Month": "Feb",
-                                "Domestic": 27,
-                                "Abroad": 39
-                              },
-                              {
-                                "Month": "Mar",
-                                "Domestic": 31,
-                                "Abroad": 20
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -145,10 +120,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "barWidth": 8,
-                              "barGap": "60%"
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -168,7 +139,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "[50, 20, 50, 20]",
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -188,7 +158,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -259,30 +228,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "data": "Month",
-                              "name": "Utils",
-                              "line": {
-                                "show": true,
-                                "lineStyle": {
-                                  "color": "red",
-                                  "type": "dashed",
-                                  "width": 2
-                                }
-                              },
-                              "interval": 2,
-                              "fullGrid": true,
-                              "labelRotate": 45,
-                              "ellipsis": {
-                                "overflow": "truncate",
-                                "labelWidth": 20
-                              },
-                              "nameLocation": "end",
-                              "nameTextStyle": {
-                                "fontSize": 12,
-                                "color": "#4e4e4e"
-                              }
-                            },
+                            "defaultValue": {},
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -305,16 +251,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "max": 60,
-                              "min": 0,
-                              "interval": 5,
-                              "position": "right",
-                              "name": "Percent(%)",
-                              "unit": "%",
-                              "minInterval": 12,
-                              "maxInterval": 8
-                            },
+                            "defaultValue": {},
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -363,8 +300,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -429,15 +371,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -460,23 +393,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "Month": "Jan",
-                                "Domestic": 33,
-                                "Abroad": 37
-                              },
-                              {
-                                "Month": "Feb",
-                                "Domestic": 27,
-                                "Abroad": 39
-                              },
-                              {
-                                "Month": "Mar",
-                                "Domestic": 31,
-                                "Abroad": 20
-                              }
-                            ],
+                            "defaultValue": [{ "Month": "", "val": "" }],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -499,9 +416,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "display": ["Domestic"]
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -521,16 +435,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "start": 0,
-                              "end": 100,
-                              "show": false,
-                              "position": {
-                                "left": 36,
-                                "bottom": 20
-                              },
-                              "height": 24
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -583,10 +487,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "barWidth": 8,
-                              "barGap": "60%"
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -606,13 +506,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "show": false,
-                                "position": "inside",
-                                "offset": [0, 0]
-                              }
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -635,26 +528,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "show": false,
-                              "position": {
-                                "left": "center",
-                                "bottom": 15
-                              },
-                              "itemGap": 28,
-                              "orient": "horizontal",
-                              "reverseEvent": false,
-                              "selectedMode": true,
-                              "icon": "circle",
-                              "itemHeight": 14,
-                              "itemWeight": 14,
-                              "textStyle": {
-                                "fontSize": 12,
-                                "padding": [4, 0, 0, 0],
-                                "color": "#4e4e4e",
-                                "overflow": "none"
-                              }
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -697,11 +570,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "top": 38,
-                              "bottom": 20,
-                              "color": "red"
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -721,7 +589,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "[50, 20, 50, 20]",
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -812,7 +679,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "bar",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -845,30 +711,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "data": "Month",
-                              "name": "Utils",
-                              "line": {
-                                "show": true,
-                                "lineStyle": {
-                                  "color": "red",
-                                  "type": "dashed",
-                                  "width": 2
-                                }
-                              },
-                              "interval": 2,
-                              "fullGrid": true,
-                              "labelRotate": 45,
-                              "ellipsis": {
-                                "overflow": "truncate",
-                                "labelWidth": 20
-                              },
-                              "nameLocation": "end",
-                              "nameTextStyle": {
-                                "fontSize": 12,
-                                "color": "#4e4e4e"
-                              }
-                            },
+                            "defaultValue": { "data": "" },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -891,33 +734,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "max": 60,
-                                "min": 0,
-                                "interval": 10,
-                                "position": "left",
-                                "dataName": ["Domestic"],
-                                "name": "value",
-                                "unit": "元",
-                                "nameTextStyle": {
-                                  "padding": [0, 0, 0, -45]
-                                }
-                              },
-                              {
-                                "max": 90,
-                                "min": 0,
-                                "interval": 15,
-                                "position": "right",
-                                "dataName": ["Abroad"],
-                                "name": "kal",
-                                "unit": "$",
-                                "offset": 45,
-                                "nameTextStyle": {
-                                  "padding": [0, -45, 0, 0]
-                                }
-                              }
-                            ],
+                            "defaultValue": {},
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -954,7 +771,6 @@
                 "description": {
                   "zh_CN": "图表渲染完成后触发，每次渲染都会触发一次"
                 },
-                "defaultValue": "",
                 "functionInfo": {
                   "params": [],
                   "returns": {}
@@ -968,7 +784,6 @@
                 "description": {
                   "zh_CN": "图表渲染完成后触发，只会在首次渲染完成后触发"
                 },
-                "defaultValue": "",
                 "functionInfo": {
                   "params": [],
                   "returns": {}
@@ -995,8 +810,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -1061,15 +881,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1092,23 +903,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "Month": "Jan",
-                                "Domestic": 33,
-                                "Abroad": 37
-                              },
-                              {
-                                "Month": "Feb",
-                                "Domestic": 27,
-                                "Abroad": 39
-                              },
-                              {
-                                "Month": "Mar",
-                                "Domestic": 31,
-                                "Abroad": 20
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1131,16 +926,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "start": 0,
-                              "end": 100,
-                              "show": false,
-                              "position": {
-                                "left": 36,
-                                "bottom": 20
-                              },
-                              "height": 24
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1160,10 +945,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "barWidth": 8,
-                              "barGap": "60%"
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1183,7 +964,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "[50, 20, 50, 20]",
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1274,30 +1054,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "data": "Month",
-                              "name": "Utils",
-                              "line": {
-                                "show": true,
-                                "lineStyle": {
-                                  "color": "red",
-                                  "type": "dashed",
-                                  "width": 2
-                                }
-                              },
-                              "interval": 2,
-                              "fullGrid": true,
-                              "labelRotate": 45,
-                              "ellipsis": {
-                                "overflow": "truncate",
-                                "labelWidth": 20
-                              },
-                              "nameLocation": "end",
-                              "nameTextStyle": {
-                                "fontSize": 12,
-                                "color": "#4e4e4e"
-                              }
-                            },
+                            "defaultValue": {},
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1320,33 +1077,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "max": 60,
-                                "min": 0,
-                                "interval": 10,
-                                "position": "left",
-                                "dataName": ["Domestic"],
-                                "name": "value",
-                                "unit": "元",
-                                "nameTextStyle": {
-                                  "padding": [0, 0, 0, -45]
-                                }
-                              },
-                              {
-                                "max": 90,
-                                "min": 0,
-                                "interval": 15,
-                                "position": "right",
-                                "dataName": ["Abroad"],
-                                "name": "kal",
-                                "unit": "$",
-                                "offset": 45,
-                                "nameTextStyle": {
-                                  "padding": [0, -45, 0, 0]
-                                }
-                              }
-                            ],
+                            "defaultValue": {},
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1383,7 +1114,6 @@
                 "description": {
                   "zh_CN": "图表渲染完成后触发，每次渲染都会触发一次"
                 },
-                "defaultValue": "",
                 "functionInfo": {
                   "params": [],
                   "returns": {}
@@ -1397,7 +1127,6 @@
                 "description": {
                   "zh_CN": "图表渲染完成后触发，只会在首次渲染完成后触发"
                 },
-                "defaultValue": "",
                 "functionInfo": {
                   "params": [],
                   "returns": {}
@@ -1424,8 +1153,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -1490,15 +1224,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1521,20 +1246,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "value": 100,
-                                "name": "VPC"
-                              },
-                              {
-                                "value": 90,
-                                "name": "IM"
-                              },
-                              {
-                                "value": 49,
-                                "name": "EIP"
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1557,25 +1269,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "text": " ",
-                              "subtext": " ",
-                              "top": "center",
-                              "left": "center",
-                              "itemGap": 8,
-                              "textStyle": {
-                                "color": "#191919",
-                                "fontSize": 28,
-                                "lineHeight": 28,
-                                "fontWeight": "normal"
-                              },
-                              "subtextStyle": {
-                                "color": "#bbbbbb",
-                                "fontSize": 16,
-                                "lineHeight": 24,
-                                "fontWeight": "normal"
-                              }
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1595,11 +1288,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "borderColor": "#ffffff",
-                              "borderWidth": 3,
-                              "borderRadius": 0
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1619,10 +1307,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "center": ["50%", "45%"],
-                              "radius": ["44%", "50%"]
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1742,8 +1426,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -1808,15 +1497,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1839,20 +1519,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "value": 100,
-                                "name": "VPC"
-                              },
-                              {
-                                "value": 90,
-                                "name": "IM"
-                              },
-                              {
-                                "value": 49,
-                                "name": "EIP"
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1876,8 +1543,14 @@
                             "readOnly": false,
                             "disabled": false,
                             "defaultValue": {
-                              "center": ["50%", "45%"],
-                              "radius": ["44%", "50%"]
+                              "center": [
+                                "50%",
+                                "45%"
+                              ],
+                              "radius": [
+                                "44%",
+                                "50%"
+                              ]
                             },
                             "cols": 12,
                             "widget": {
@@ -1898,11 +1571,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "borderColor": "#ffffff",
-                              "borderWidth": 3,
-                              "borderRadius": 0
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1922,25 +1590,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "text": " ",
-                              "subtext": " ",
-                              "top": "center",
-                              "left": "center",
-                              "itemGap": 8,
-                              "textStyle": {
-                                "color": "#191919",
-                                "fontSize": 28,
-                                "lineHeight": 28,
-                                "fontWeight": "normal"
-                              },
-                              "subtextStyle": {
-                                "color": "#bbbbbb",
-                                "fontSize": 16,
-                                "lineHeight": 24,
-                                "fontWeight": "normal"
-                              }
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2048,7 +1697,6 @@
                 "description": {
                   "zh_CN": "图表渲染完成后触发，每次渲染都会触发一次"
                 },
-                "defaultValue": "",
                 "functionInfo": {
                   "params": [],
                   "returns": {}
@@ -2062,7 +1710,6 @@
                 "description": {
                   "zh_CN": "图表渲染完成后触发，只会在首次渲染完成后触发"
                 },
-                "defaultValue": "",
                 "functionInfo": {
                   "params": [],
                   "returns": {}
@@ -2099,8 +1746,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -2165,15 +1817,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2196,22 +1839,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "Domestic": {
-                                "Equipment": 43,
-                                "VM": 90,
-                                "CSP": 80,
-                                "RD": 53,
-                                "Markets": 78
-                              },
-                              "Abroad": {
-                                "Equipment": 75,
-                                "VM": 55,
-                                "CSP": 93,
-                                "RD": 90,
-                                "Markets": 86
-                              }
-                            },
+                            "defaultValue": {},
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2254,8 +1882,7 @@
                             "readOnly": false,
                             "disabled": false,
                             "defaultValue": {
-                              "triggerEvent": true,
-                              "color": "#191919"
+                              "triggerEvent": true
                             },
                             "cols": 12,
                             "widget": {
@@ -2276,10 +1903,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "center": ["50%", "50%"],
-                              "radius": "50%"
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2387,7 +2010,6 @@
                 "description": {
                   "zh_CN": "图表渲染完成后触发，每次渲染都会触发一次"
                 },
-                "defaultValue": "",
                 "functionInfo": {
                   "params": [],
                   "returns": {}
@@ -2401,7 +2023,6 @@
                 "description": {
                   "zh_CN": "图表渲染完成后触发，只会在首次渲染完成后触发"
                 },
-                "defaultValue": "",
                 "functionInfo": {
                   "params": [],
                   "returns": {}
@@ -2438,8 +2059,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -2504,15 +2130,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2535,28 +2152,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "value": 60,
-                                "name": "Visit"
-                              },
-                              {
-                                "value": 40,
-                                "name": "Inquiry"
-                              },
-                              {
-                                "value": 20,
-                                "name": "Order"
-                              },
-                              {
-                                "value": 80,
-                                "name": "Click"
-                              },
-                              {
-                                "value": 100,
-                                "name": "Show"
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2733,8 +2329,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -2799,15 +2400,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2832,19 +2424,73 @@
                             "disabled": false,
                             "defaultValue": {
                               "1990": [
-                                [28604, 77, 17096869, "Australia", 1990],
-                                [31163, 77.4, 27662440, "Canada", 1990],
-                                [60001, 68, 1154605773, "China", 1990]
+                                [
+                                  28604,
+                                  77,
+                                  17096869,
+                                  "Australia",
+                                  1990
+                                ],
+                                [
+                                  31163,
+                                  77.4,
+                                  27662440,
+                                  "Canada",
+                                  1990
+                                ],
+                                [
+                                  60001,
+                                  68,
+                                  1154605773,
+                                  "China",
+                                  1990
+                                ]
                               ],
                               "2000": [
-                                [19349, 69.6, 147568552, "Russia", 2000],
-                                [10670, 67.3, 53994605, "Turkey", 2000],
-                                [26424, 75.7, 57110117, "United Kingdom", 2000]
+                                [
+                                  19349,
+                                  69.6,
+                                  147568552,
+                                  "Russia",
+                                  2000
+                                ],
+                                [
+                                  10670,
+                                  67.3,
+                                  53994605,
+                                  "Turkey",
+                                  2000
+                                ],
+                                [
+                                  26424,
+                                  75.7,
+                                  57110117,
+                                  "United Kingdom",
+                                  2000
+                                ]
                               ],
                               "2015": [
-                                [44056, 81.8, 23968973, "Australia", 2015],
-                                [43294, 81.7, 35939927, "Canada", 2015],
-                                [13334, 76.9, 1376048943, "China", 2015]
+                                [
+                                  44056,
+                                  81.8,
+                                  23968973,
+                                  "Australia",
+                                  2015
+                                ],
+                                [
+                                  43294,
+                                  81.7,
+                                  35939927,
+                                  "Canada",
+                                  2015
+                                ],
+                                [
+                                  13334,
+                                  76.9,
+                                  1376048943,
+                                  "China",
+                                  2015
+                                ]
                               ]
                             },
                             "cols": 12,
@@ -2908,7 +2554,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "[50, 20, 50, 20]",
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3009,7 +2654,8 @@
                             "description": {
                               "zh_CN": "默认值：图表数据data中data[0]对象的第一个key值"
                             },
-                            "labelPosition": "left"
+                            "labelPosition": "left",
+                            "defaultValue": {}
                           },
                           {
                             "property": "yAxis",
@@ -3028,7 +2674,8 @@
                                 "language": "json"
                               }
                             },
-                            "labelPosition": "left"
+                            "labelPosition": "left",
+                            "defaultValue": {}
                           }
                         ]
                       }
@@ -3069,8 +2716,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -3135,15 +2787,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3166,23 +2809,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "Month": "Jan",
-                                "Domestic": [5, 20],
-                                "Abroad": [5, 23]
-                              },
-                              {
-                                "Month": "Feb",
-                                "Domestic": [10, 30],
-                                "Abroad": [8, 25]
-                              },
-                              {
-                                "Month": "Mar",
-                                "Domestic": [8, 25],
-                                "Abroad": [2, 20]
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3205,16 +2832,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "start": 0,
-                              "end": 100,
-                              "show": false,
-                              "position": {
-                                "left": 36,
-                                "bottom": 20
-                              },
-                              "height": 24
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3234,10 +2851,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "barWidth": 8,
-                              "barGap": "60%"
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3257,7 +2870,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "[50, 20, 50, 20]",
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3348,30 +2960,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "data": "Month",
-                              "name": "Utils",
-                              "line": {
-                                "show": true,
-                                "lineStyle": {
-                                  "color": "red",
-                                  "type": "dashed",
-                                  "width": 2
-                                }
-                              },
-                              "interval": 2,
-                              "fullGrid": true,
-                              "labelRotate": 45,
-                              "ellipsis": {
-                                "overflow": "truncate",
-                                "labelWidth": 20
-                              },
-                              "nameLocation": "end",
-                              "nameTextStyle": {
-                                "fontSize": 12,
-                                "color": "#4e4e4e"
-                              }
-                            },
+                            "defaultValue": {},
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3394,33 +2983,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "max": 60,
-                                "min": 0,
-                                "interval": 10,
-                                "position": "left",
-                                "dataName": ["Domestic"],
-                                "name": "value",
-                                "unit": "元",
-                                "nameTextStyle": {
-                                  "padding": [0, 0, 0, -45]
-                                }
-                              },
-                              {
-                                "max": 90,
-                                "min": 0,
-                                "interval": 15,
-                                "position": "right",
-                                "dataName": ["Abroad"],
-                                "name": "kal",
-                                "unit": "$",
-                                "offset": 45,
-                                "nameTextStyle": {
-                                  "padding": [0, -45, 0, 0]
-                                }
-                              }
-                            ],
+                            "defaultValue": {},
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3469,8 +3032,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -3535,15 +3103,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3566,12 +3125,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "value": 90,
-                                "name": "Utilization rate"
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3704,12 +3258,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              [0.25, "#0d9458"],
-                              [0.5, "#eeba18"],
-                              [0.75, "#ec6f1a"],
-                              [1, "#f43146"]
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -3832,8 +3381,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -3897,106 +3451,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "type": "graph",
-                                "layout": "none",
-                                "symbolSize": 48,
-                                "color": "#42A5F5",
-                                "roam": true,
-                                "label": {
-                                  "normal": {
-                                    "show": true
-                                  }
-                                },
-                                "edgeSymbol": ["circle", "arrow"],
-                                "edgeSymbolSize": [3, 10],
-                                "edgeLabel": {
-                                  "normal": {
-                                    "textStyle": {
-                                      "fontSize": 18
-                                    }
-                                  }
-                                },
-                                "data": [
-                                  {
-                                    "name": "节点 1",
-                                    "x": 300,
-                                    "y": 300
-                                  },
-                                  {
-                                    "name": "节点 2",
-                                    "x": 800,
-                                    "y": 300
-                                  },
-                                  {
-                                    "name": "节点 3",
-                                    "x": 550,
-                                    "y": 100
-                                  },
-                                  {
-                                    "name": "节点 4",
-                                    "x": 550,
-                                    "y": 500
-                                  }
-                                ],
-                                "links": [
-                                  {
-                                    "source": 0,
-                                    "target": 1,
-                                    "symbolSize": [5, 20],
-                                    "label": {
-                                      "normal": {
-                                        "show": true
-                                      }
-                                    },
-                                    "lineStyle": {
-                                      "normal": {
-                                        "width": 5,
-                                        "curveness": 0.2
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "source": "节点 2",
-                                    "target": "节点 1",
-                                    "label": {
-                                      "normal": {
-                                        "show": true
-                                      }
-                                    },
-                                    "lineStyle": {
-                                      "normal": {
-                                        "curveness": 0.2
-                                      }
-                                    }
-                                  },
-                                  {
-                                    "source": "节点 1",
-                                    "target": "节点 3"
-                                  },
-                                  {
-                                    "source": "节点 2",
-                                    "target": "节点 3"
-                                  },
-                                  {
-                                    "source": "节点 2",
-                                    "target": "节点 4"
-                                  },
-                                  {
-                                    "source": "节点 1",
-                                    "target": "节点 4"
-                                  }
-                                ],
-                                "lineStyle": {
-                                  "normal": {
-                                    "opacity": 0.9,
-                                    "width": 2,
-                                    "curveness": 0
-                                  }
-                                }
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -4136,8 +3591,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         },
@@ -4202,15 +3662,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              "#6D8FF0",
-                              "#00A874",
-                              "#BD72F0",
-                              "#54BCCE",
-                              "#FDC000",
-                              "#9185F0",
-                              "#00A2B5"
-                            ],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -4233,20 +3684,7 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": [
-                              {
-                                "name": "UniEPMgr",
-                                "value": 80
-                              },
-                              {
-                                "name": "SMLoglic",
-                                "value": 65
-                              },
-                              {
-                                "name": "SSO",
-                                "value": 45
-                              }
-                            ],
+                            "defaultValue": [],
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -4263,13 +3701,14 @@
                             "property": "name",
                             "label": {
                               "text": {
-                                "zh_CN": "图表数据（必填）"
+                                "zh_CN": "图表数据, 已有默认值，禁止设置name"
                               }
                             },
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
                             "cols": 12,
+                            "defaultValue": "ProcessBarChart",
                             "widget": {
                               "component": "CodeConfigurator",
                               "props": {
@@ -4288,12 +3727,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "error": 75,
-                              "warning": 60,
-                              "subwarning": 50,
-                              "success": 20
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -4313,7 +3746,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "[50, 20, 50, 20]",
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -4433,8 +3865,13 @@
               "properties": []
             },
             "contextMenu": {
-              "actions": ["create symbol"],
-              "disable": ["copy", "remove"]
+              "actions": [
+                "create symbol"
+              ],
+              "disable": [
+                "copy",
+                "remove"
+              ]
             }
           }
         }
@@ -4458,7 +3895,12 @@
                 "props": {
                   "options": {
                     "theme": "hdesign-light",
-                    "padding": [50, 30, 50, 20],
+                    "padding": [
+                      50,
+                      30,
+                      50,
+                      20
+                    ],
                     "legend": {
                       "show": true,
                       "icon": "line"
@@ -4547,7 +3989,12 @@
                 "props": {
                   "options": {
                     "theme": "hdesign-light",
-                    "padding": [50, 30, 50, 20],
+                    "padding": [
+                      50,
+                      30,
+                      50,
+                      20
+                    ],
                     "data": [
                       {
                         "Month": "Jan",
@@ -4632,7 +4079,12 @@
                 "props": {
                   "options": {
                     "theme": "hdesign-light",
-                    "padding": [50, 30, 50, 20],
+                    "padding": [
+                      50,
+                      30,
+                      50,
+                      20
+                    ],
                     "data": [
                       {
                         "Month": "Jan",
@@ -4732,11 +4184,21 @@
                           }
                         },
                         "b": {
-                          "padding": [2, 4, 0, 0]
+                          "padding": [
+                            2,
+                            4,
+                            0,
+                            0
+                          ]
                         },
                         "c": {
                           "fontWeight": "bold",
-                          "padding": [2, 0, 0, 0]
+                          "padding": [
+                            2,
+                            0,
+                            0,
+                            0
+                          ]
                         }
                       }
                     },
@@ -4848,7 +4310,12 @@
                 "componentName": "TinyHuichartsWaterfall",
                 "props": {
                   "options": {
-                    "padding": [50, 30, 20, 20],
+                    "padding": [
+                      50,
+                      30,
+                      20,
+                      20
+                    ],
                     "legend": {
                       "show": false
                     },
@@ -4937,7 +4404,12 @@
                 "componentName": "TinyHuichartsScatter",
                 "props": {
                   "options": {
-                    "padding": [50, 30, 50, 20],
+                    "padding": [
+                      50,
+                      30,
+                      50,
+                      20
+                    ],
                     "legend": {
                       "orient": "horizontal",
                       "show": true,
@@ -4946,29 +4418,122 @@
                         "bottom": 15
                       }
                     },
-                    "bubbleSize": [20, 100],
+                    "bubbleSize": [
+                      20,
+                      100
+                    ],
                     "xAxisType": "value",
                     "data": {
                       "1990": [
-                        [28604, 77, 1709866, "Australia", 1990],
-                        [31163, 77.4, 27662440, "Canada", 1990],
-                        [60001, 68, 1154605773, "China", 1990],
-                        [13670, 74.7, 10582082, "Cuba", 1990],
-                        [28599, 75, 4986705, "Finland", 1990]
+                        [
+                          28604,
+                          77,
+                          1709866,
+                          "Australia",
+                          1990
+                        ],
+                        [
+                          31163,
+                          77.4,
+                          27662440,
+                          "Canada",
+                          1990
+                        ],
+                        [
+                          60001,
+                          68,
+                          1154605773,
+                          "China",
+                          1990
+                        ],
+                        [
+                          13670,
+                          74.7,
+                          10582082,
+                          "Cuba",
+                          1990
+                        ],
+                        [
+                          28599,
+                          75,
+                          4986705,
+                          "Finland",
+                          1990
+                        ]
                       ],
                       "2000": [
-                        [19349, 69.6, 147568552, "Russia", 2000],
-                        [10670, 67.3, 53994606, "Turkey", 2000],
-                        [26424, 75.7, 57110117, "United Kingdom", 2000],
-                        [37062, 75.4, 252847810, "United States", 2000],
-                        [23038, 73.13, 143456918, "Russia", 2000]
+                        [
+                          19349,
+                          69.6,
+                          147568552,
+                          "Russia",
+                          2000
+                        ],
+                        [
+                          10670,
+                          67.3,
+                          53994606,
+                          "Turkey",
+                          2000
+                        ],
+                        [
+                          26424,
+                          75.7,
+                          57110117,
+                          "United Kingdom",
+                          2000
+                        ],
+                        [
+                          37062,
+                          75.4,
+                          252847810,
+                          "United States",
+                          2000
+                        ],
+                        [
+                          23038,
+                          73.13,
+                          143456918,
+                          "Russia",
+                          2000
+                        ]
                       ],
                       "2015": [
-                        [44056, 81.8, 23968976, "Australia", 2015],
-                        [43294, 81.7, 35939927, "Canada", 2015],
-                        [13334, 76.9, 1376048943, "Cuba", 2015],
-                        [21291, 78.5, 11389566, "Finland", 2015],
-                        [38923, 80.8, 5503457, "France", 2015]
+                        [
+                          44056,
+                          81.8,
+                          23968976,
+                          "Australia",
+                          2015
+                        ],
+                        [
+                          43294,
+                          81.7,
+                          35939927,
+                          "Canada",
+                          2015
+                        ],
+                        [
+                          13334,
+                          76.9,
+                          1376048943,
+                          "Cuba",
+                          2015
+                        ],
+                        [
+                          21291,
+                          78.5,
+                          11389566,
+                          "Finland",
+                          2015
+                        ],
+                        [
+                          38923,
+                          80.8,
+                          5503457,
+                          "France",
+                          2015
+                        ]
                       ]
                     }
                   }
@@ -4987,10 +4552,22 @@
                 "props": {
                   "options": {
                     "splitColor": [
-                      [0.25, "#0d9458"],
-                      [0.5, "#eeba18"],
-                      [0.75, "#ec6f1a"],
-                      [1, "#f43146"]
+                      [
+                        0.25,
+                        "#0d9458"
+                      ],
+                      [
+                        0.5,
+                        "#eeba18"
+                      ],
+                      [
+                        0.75,
+                        "#ec6f1a"
+                      ],
+                      [
+                        1,
+                        "#f43146"
+                      ]
                     ],
                     "pointer": true,
                     "data": [
@@ -5028,8 +4605,14 @@
                             "show": true
                           }
                         },
-                        "edgeSymbol": ["circle", "arrow"],
-                        "edgeSymbolSize": [3, 10],
+                        "edgeSymbol": [
+                          "circle",
+                          "arrow"
+                        ],
+                        "edgeSymbolSize": [
+                          3,
+                          10
+                        ],
                         "edgeLabel": {
                           "normal": {
                             "textStyle": {
@@ -5063,7 +4646,10 @@
                           {
                             "source": 0,
                             "target": 1,
-                            "symbolSize": [5, 20],
+                            "symbolSize": [
+                              5,
+                              20
+                            ],
                             "label": {
                               "normal": {
                                 "show": true
@@ -5133,8 +4719,19 @@
                   "options": {
                     "name": "ProcessBarChart",
                     "theme": "light",
-                    "padding": [32, 32, 0, 32],
-                    "color": ["#fa2a2d", "#ff7500", "#ffbf00", "#41ba41", "#00aaee"],
+                    "padding": [
+                      32,
+                      32,
+                      0,
+                      32
+                    ],
+                    "color": [
+                      "#fa2a2d",
+                      "#ff7500",
+                      "#ffbf00",
+                      "#41ba41",
+                      "#00aaee"
+                    ],
                     "data": [
                       {
                         "name": "UniEPMgr",
