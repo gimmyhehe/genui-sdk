@@ -2,7 +2,11 @@
 import type { Conversation } from '@opentiny/tiny-robot-kit';
 import useTemplate from './useTemplate';
 import TemplateList from './TemplateList.vue';
-import { HistoryTransferToolbar, downloadConversations } from '../tab-components/history-transfer';
+import {
+  HistoryTransferToolbar,
+  downloadConversations,
+  mergeConversations,
+} from '../tab-components/history-transfer';
 
 const emit = defineEmits(['switch-template']);
 
@@ -14,7 +18,8 @@ const handleImportConversations = (imported: Conversation[]) => {
     return;
   }
 
-  conversation.state.conversations.unshift(...imported);
+  const merged = mergeConversations(conversation.state.conversations, imported);
+  conversation.state.conversations.unshift(...merged);
   conversation.saveConversations();
 };
 
