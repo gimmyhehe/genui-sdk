@@ -156,7 +156,7 @@ const schemaCardRenderer = async (props: any) => {
     }
     deltaPatcher.patchWithDelta(target, json, isCompleted);
     // 给每个组件添加 id
-    const schemaWithId = generateIdForComponents(target);
+    const schemaWithId = generateIdForComponents(target); // TODO: 流式渲染过程中，ID一直在刷新，会影响到渲染diff性能，需要设计稳定的方案
     setCurrentPreviewSchema(schemaWithId);
   } catch (error) {
     console.error('schemaCardRenderer error ===>', error);
@@ -182,7 +182,7 @@ const jsonPatchRenderer = async (props: any) => {
     }
     if (newMessage) {
       lastPreviewSchema.value = JSON.parse(JSON.stringify(currentPreviewSchema.value));
-      // lastOperationIndex.value = -1; // TODO: 追踪已执行的index，减少重复执行
+      // lastOperationIndex.value = -1; // TODO: 追踪已执行的index，减少重复执行，但需要把lastPreviewSchema同步更新到已操作的最新内容
     }
 
     const { value, state } = await textToJson(content);
