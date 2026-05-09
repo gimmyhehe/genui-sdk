@@ -34,13 +34,13 @@ const normalizeConversation = (value: unknown): Conversation | null => {
   };
 };
 
-export const downloadConversations = (conversations: Conversation[]) => {
+export const downloadConversations = (conversations: Conversation[], downloadBasenamePrefix = 'genui-history') => {
   const blob = new Blob([JSON.stringify(conversations, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
 
   link.href = url;
-  link.download = `genui-history-${formatDate(new Date(), 'YYYY-MM-DD-HH-mm-ss')}.json`;
+  link.download = `${downloadBasenamePrefix}-${formatDate(new Date(), 'YYYY-MM-DD-HH-mm-ss')}.json`;
   link.click();
   URL.revokeObjectURL(url);
 };
