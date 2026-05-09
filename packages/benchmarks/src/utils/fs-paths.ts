@@ -74,8 +74,15 @@ export function formatBeijingRunDirName(date = new Date()) {
  * @param modelName 文件安全模型名
  * @param runIndex 运行次数（从 1 开始）
  * @returns 样本文件绝对路径
- * @example `${modelName}_${scenario}_${runIndex}.json`
+ * @example `${modelName}_${scenario}_${runIndex}.json`；`plain` 时为 `..._${runIndex}_plain.json`
  */
-export function getSampleFilePath(runDir: string, scenario: string, modelName: string, runIndex: number) {
-  return path.resolve(runDir, `${modelName}_${scenario}_${runIndex}.json`);
+export function getSampleFilePath(
+  runDir: string,
+  scenario: string,
+  modelName: string,
+  runIndex: number,
+  promptVariant: 'full' | 'plain' = 'full',
+) {
+  const plainSuffix = promptVariant === 'plain' ? '_plain' : '';
+  return path.resolve(runDir, `${modelName}_${scenario}_${runIndex}${plainSuffix}.json`);
 }

@@ -16,6 +16,8 @@
 ```text
 main.ts                      # 入口：串行 generateSamples → runReport（.env 在包根目录）
 package.json                 # 脚本名：benchmarks
+scripts/
+└── append-plain-cost-sheet.mjs   # 可选：在已有 report.xlsx 中生成/更新「纯文本费用计算」工作表
 src/
 ├── benchmark.config.ts      # 默认运行项；可被环境变量 BENCH_* 覆盖
 ├── generate-samples.ts      # 在线生成样本并写入本次 run 目录
@@ -39,6 +41,13 @@ src/
     ├── extract-schema-json.ts
     ├── judge.ts
     ├── resolve-models.ts
+    ├── resolve-ai-sdk-model.ts
+    ├── stream-text-usage.ts # 流结束后解析 usage
+    ├── first-observable-component.ts
+    ├── excel-detail-rows.ts # run 目录下 report_<runDir>.xlsx「明细」行
+    ├── comparison-scenario-label.ts
+    ├── stats.ts
+    ├── maas-manifest-models.ts   # maas-models.json（仅 BENCH_MAAS_MODELS_PATH）
     └── number.ts
 ```
 
@@ -68,10 +77,32 @@ src/
 | `BENCH_LLM_JUDGE` | 是否启用 Judge（覆盖 `benchmark.config` 中 `llmJudge.enabled`） |
 | `BENCH_LLM_JUDGE_MODEL` | Judge 使用的模型 id（空则复用 `BENCH_MODEL` / config `model`） |
 | `BENCH_JSON` | `true` 时控制台输出 JSON；否则表格 + Summary |
-| `BENCH_SAMPLES_DIR` | 样本根目录（默认包内上级 `reports/` 的解析路径，见 `resolveSamplesDir`） |
-| `BENCH_OUTPUT_DIR` | 报告输出目录（默认与本次 run 目录一致，即生成样本所在目录） |
+| `BENCH_WRITE_EXCEL` | 是否生成 `report_<runDir>.xlsx`（`runDir` 为本次样本/报告所在子目录名；默认 `true`） |
+| `BENCH_MODELS_FROM_MAAS` | `true` 时用 `maas-models.json` 的模型名作为多模型列表（可被 `BENCH_MODELS` 覆盖） |
+| `BENCH_MAAS_MODELS_PATH` | `maas-models.json`：**绝对路径**，或相对 **benchmarks 包根目录**（与 `main.ts`、`.env` 同级）。在启用从 maas 拉模型列表时**必填**；未设置或仅空白会报错（见 `.env.example`） |
+| `BENCH_COMPARE_EMPTY_SYSTEM` | 额外生成空 system 对照样本（`*_plain.json`） |
+| `BENCH_PLAIN_ONLY` | 仅生成 plain、不生成 full（常与 `TARGET` 配合向已有 run 补文件） |
+| `BENCH_TARGET_SAMPLE_RUN_DIR` | 样本与报告写入**已有**子目录（相对样本根目录或绝对路径），不再新建北京时间戳目录 |
+| `BENCH_SKIP_EXISTING_SAMPLES` | 目标样本 `.json` 已存在则跳过 API。未设置时：**指定了 `TARGET` 则默认 `true`**（便于续跑），否则 `false` |
+| `BENCH_SAMPLES_DIR` | 样本根目录（默认识别为仓库侧 `reports/`，见 `resolveSamplesDir`） |
+| `BENCH_OUTPUT_DIR` | 报告输出目录（默认与本次 run 目录一致） |
 
 更细的默认值见 `src/benchmark.config.ts`（含 `promptConfig`、`llmJudge` 等）。
+
+## 中断后继续
+
+生成阶段进程**被中断或手动停止**后，可在**相同模型 / 场景 / repeat 配置**下接着补全，无需对已落盘的样本重复请求 API：
+
+1. 设置 **`BENCH_TARGET_SAMPLE_RUN_DIR`** 为**已有样本所在子目录**（相对默认样本根目录 `reports/` 下的目录名，或绝对路径），本次不再新建北京时间戳目录。
+2. **`BENCH_SKIP_EXISTING_SAMPLES`**：未设置时，只要指定了 `TARGET`，**默认为 `true`**——目标路径上已存在的 `*.json` 会跳过生成（日志含 `skip existing`），只补缺失任务。
+3. 若要**整目录覆盖重跑**，设 **`BENCH_SKIP_EXISTING_SAMPLES=false`**。
+4. 入口仍是 **`generateSamples` → `runReport` 串行**：只有本次命令**完整跑完生成并进入报告阶段**，才会写出/更新 `report.json`、`report.html`、`report_<runDir>.xlsx`。若上次在报告前中断，续跑命令结束后会一并补报告。
+
+示例（将目录名换成你的 run）：
+
+```bash
+BENCH_TARGET_SAMPLE_RUN_DIR=2026-05-09_09-52-03 pnpm --filter @opentiny/genui-sdk-benchmarks benchmarks
+```
 
 ### 内置场景
 
@@ -81,7 +112,9 @@ src/
 
 - 配置 **`models` / `BENCH_MODELS`**：只生成并只汇总这些模型的样本。
 - **仅配置单个 `model`**：报告若未限定 `models`，会读取目录下**全部** `.json` 样本（便于对比历史 run）。
-- 每次运行会在 `reports/` 下新建 **`yyyy-MM-dd_hh-mm-ss`（北京时间）** 子目录；样本文件名为 **`${modelSlug}_${scenario}_${runIndex}.json`**（`modelSlug` 由模型 id 安全化）。
+- 默认每次在样本根目录下新建 **`yyyy-MM-dd_hh-mm-ss`（北京时间）** 子目录；若设置 `BENCH_TARGET_SAMPLE_RUN_DIR` 则写入该目录、不新建时间戳。
+- 样本文件名：**`${modelSlug}_${scenario}_${runIndex}.json`**（plain 为后缀 `_plain.json`；`modelSlug` 由模型 id 安全化）。
+- **中断后继续**：见上文「[中断后继续](#中断后继续)」。
 
 ## 运行
 
@@ -103,25 +136,40 @@ pnpm --filter @opentiny/genui-sdk-benchmarks benchmarks
 
 写入选定的输出目录（默认同本次样本目录）：
 
-- **`report.json`**：`model`、`models`、`llmJudge`、`comparisonByScenario`（按场景 × 模型：`avgTtftMs`、`avgTotalMs`、`avgTpotMs?`、`avgTotalTokens`、`schemaPassRate` 等）、`generatedAt`、逐条 **`results`**
+- **`report.json`**：`model`、`models`、`repeat`、`benchmarkTotalMs`（自入口 `main` 起至写出报告的总耗时 ms，未计时时可能缺省）、`llmJudge`、`comparisonByScenario`（按场景 × 模型：`avgTtftMs`、`avgTotalMs`、`avgTpotMs?`、`avgTotalTokens`、`schemaPassRate` 等）、`generatedAt`、逐条 **`results`**
 - **`report.html`**：按场景对比柱状图（含 TTFT、Total、TPOT、Token、Schema 通过率等）与单次运行明细图、明细表
+- **`report_<runDir>.xlsx`**（未关 `BENCH_WRITE_EXCEL` 时）：`runDir` 为输出目录文件夹名。含 **`明细`**：`model`、`scenario`、`runIndex`、`totalMs`、`tpsMs`（列名如此，数值为 **TPOT**，单位 ms/token）、`promptTokens`、`completionTokens`、`totalTokens`、`llmJudgeScore`、`llmJudgeReason`、`llmJudgeError`、`llmJudgeInputTokens`、`llmJudgeOutputTokens`、`errorMessage`、`promptVariant`、`generatedAt`；另含 **`按场景对比`**。「明细」仅指标与短文本列，**不含**模型原始输出 / schemaJson（完整内容见同目录 `report.json` 与样本 `*.json`）。开启 **`BENCH_LLM_JUDGE`** 且提供商在响应中返回 usage 时，`llmJudgeInputTokens` / `llmJudgeOutputTokens` 才有值；`report.json` 的 `results` 中另有 `llmJudgePromptTokens` / `llmJudgeCompletionTokens` / `llmJudgeTotalTokens` 与 `benchTotalTokens` 等供程序使用（与 Excel 列名不完全一一对应时以 JSON 为准）。
 
 控制台：`json: false` 时打印明细表与 **Benchmark Summary**（含平均 Judge 分、平均 TPOT 等）。
+
+### 合并费用报表（可选）
+
+若仓库里另有**手工维护**的汇总工作簿（含 **「费用计算」**、**「纯文本原始样本」** 等工作表），可在包根执行：
+
+```bash
+node scripts/append-plain-cost-sheet.mjs [path/to/report.xlsx]
+```
+
+未传路径时默认 `reports/report.xlsx`。脚本会生成或覆盖 **「纯文本费用计算」**：数据引用纯文本样本，计价公式与主表「费用计算」对齐（含本表 **AF:AH** 规则区合并、主生成 **输入/输出/合计费用** 列等）。详情见脚本文件头注释。
 
 ## `results` 逐条字段说明
 
 | 字段 | 含义 |
 | --- | --- |
 | `scenario` / `runIndex` / `model` | 场景、重复序号、模型 |
+| `promptVariant` | `full` 或 `plain`（空 system 对照） |
 | `ttftMs` | 请求到首个输出/推理 delta 的耗时 |
 | `totalMs` | 请求到流结束的耗时 |
+| `firstObservableComponentMs` | 输出中首次出现 `TinyCard` 的耗时（未出现则缺省） |
 | `tpotMs` | TPOT（ms/token）：`(totalMs - ttftMs) / (completionTokens - 1)`；`completionTokens ≤ 1` 时省略 |
-| `isSchemaJsonBlockFound` | 是否找到 ```schemaJson``` 代码块 |
+| `isSchemaJsonBlockFound` | 是否解析到 ```schemaJson``` 代码块 |
 | `isSchemaJsonValidJson` | 块内是否为合法 JSON |
 | `isSchemaJsonValidAgainstProtocol` | 是否通过 `genRootSchema()` |
 | `schemaValidationError` | 校验失败时的说明 |
-| `promptTokens` / `completionTokens` / `totalTokens` | 模型 usage |
+| `promptTokens` / `completionTokens` / `totalTokens` | 模型 usage（报告不含缓存分项） |
+| `benchTotalTokens` | 生成 + Judge 合计 token（未开 Judge 或未返回 usage 时等于 `totalTokens`） |
 | `rawOutputChars` | 原始文本输出字符数 |
 | `llmJudgeScore` | Judge 分数 **1～10**（启用且解析成功时） |
 | `llmJudgeReason` / `llmJudgeError` | Judge 原因或错误信息 |
+| `llmJudgePromptTokens` / `llmJudgeCompletionTokens` / `llmJudgeTotalTokens` | Judge 调用的 usage（启用报告阶段 Judge 且 API 返回时有效） |
 | `errorMessage` | 生成阶段流错误信息（若有） |

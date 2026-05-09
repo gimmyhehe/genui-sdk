@@ -1,5 +1,5 @@
 import type { LlmBenchmarkResultItem } from './types';
-import { formatNumber } from '../utils';
+import { comparisonScenarioLabel, formatNumber } from '../utils';
 
 function toDisplayNumber(value: number | undefined) {
   return typeof value === 'number' ? formatNumber(value, 2) : '';
@@ -19,6 +19,7 @@ export function printBenchmarkTable(results: LlmBenchmarkResultItem[]) {
   console.table(
     results.map((item) => ({
       scenario: item.scenario,
+      promptVariant: item.promptVariant ?? 'full',
       model: item.model ?? '',
       runIndex: item.runIndex ?? 1,
       ttftMs: toDisplayNumber(item.ttftMs),
@@ -52,7 +53,7 @@ export function printBenchmarkSummary(results: LlmBenchmarkResultItem[]) {
   const avgTpot =
     tpotDefined.length > 0 ? tpotDefined.reduce((sum, item) => sum + (item.tpotMs as number), 0) / tpotDefined.length : null;
   const totalTokens = results.reduce((sum, item) => sum + item.totalTokens, 0);
-  const uniqueScenarioCount = new Set(results.map((item) => item.scenario)).size;
+  const uniqueScenarioCount = new Set(results.map((item) => comparisonScenarioLabel(item))).size;
   const uniqueModelCount = new Set(results.map((item) => item.model).filter(Boolean)).size;
   const judgeScores = results.map((item) => item.llmJudgeScore).filter((score): score is number => typeof score === 'number');
   const avgJudgeScore = judgeScores.length > 0 ? judgeScores.reduce((sum, score) => sum + score, 0) / judgeScores.length : null;

@@ -6,7 +6,14 @@ import type { LlmBenchmarkRunOptions } from './src/framework/index';
 import { benchmarkConfig } from './src/benchmark.config';
 import { generateSamples } from './src/generate-samples';
 import { runReport } from './src/run-report';
-import { envBool, envFramework, envPositiveInt, envString, envStringList } from './src/utils';
+import {
+  envBool,
+  envFramework,
+  envPositiveInt,
+  envString,
+  envStringList,
+  listMaasManifestModelNames,
+} from './src/utils';
 
 const packageDir = path.dirname(fileURLToPath(import.meta.url));
 loadEnv({ path: path.join(packageDir, '.env') });
@@ -18,7 +25,8 @@ loadEnv({ path: path.join(packageDir, '.env') });
 function resolveRunOptions(): LlmBenchmarkRunOptions {
   const {
     model,
-    models: defaultModels,
+    models: configModels,
+    modelsFromMaasManifest,
     framework,
     scenario,
     scenarios: defaultScenarios,
@@ -29,12 +37,27 @@ function resolveRunOptions(): LlmBenchmarkRunOptions {
     json,
     samplesDir,
     outputDir,
+    compareEmptySystem: defaultCompareEmptySystem,
+    compareEmptySystemPlainOnly: defaultPlainOnly,
+    targetSampleRunDir: defaultTargetRunDir,
+    writeExcel: defaultWriteExcel,
   } = benchmarkConfig;
+  const defaultModelsFromManifest =
+    configModels && configModels.length > 0
+      ? configModels
+      : modelsFromMaasManifest || envBool('BENCH_MODELS_FROM_MAAS', false)
+        ? listMaasManifestModelNames()
+        : undefined;
   const scenarios = envStringList('BENCH_SCENARIOS', defaultScenarios);
-  const models = envStringList('BENCH_MODELS', defaultModels);
+  const models = envStringList('BENCH_MODELS', defaultModelsFromManifest);
   const concurrency = envPositiveInt('BENCH_CONCURRENCY', defaultConcurrency ?? 2);
   const judgeEnabled = envBool('BENCH_LLM_JUDGE', llmJudge?.enabled ?? false);
   const judgeModel = envString('BENCH_LLM_JUDGE_MODEL', llmJudge?.model);
+  const compareEmptySystem = envBool('BENCH_COMPARE_EMPTY_SYSTEM', defaultCompareEmptySystem ?? false);
+  const compareEmptySystemPlainOnly = envBool('BENCH_PLAIN_ONLY', defaultPlainOnly ?? false);
+  const targetSampleRunDir = envString('BENCH_TARGET_SAMPLE_RUN_DIR', defaultTargetRunDir);
+  const skipExistingDefault = Boolean(targetSampleRunDir);
+  const skipExistingSampleFiles = envBool('BENCH_SKIP_EXISTING_SAMPLES', skipExistingDefault);
   return {
     model: envString('BENCH_MODEL', model) ?? model,
     models: models && models.length > 0 ? models : undefined,
@@ -44,12 +67,17 @@ function resolveRunOptions(): LlmBenchmarkRunOptions {
     repeat: envPositiveInt('BENCH_REPEAT', repeat ?? 1),
     concurrency,
     promptConfig,
+    compareEmptySystem,
+    compareEmptySystemPlainOnly,
+    ...(targetSampleRunDir ? { targetSampleRunDir } : {}),
+    skipExistingSampleFiles,
     llmJudge: {
       enabled: judgeEnabled,
       model: judgeModel,
       systemPrompt: llmJudge?.systemPrompt,
     },
     json: envBool('BENCH_JSON', json ?? false),
+    writeExcel: envBool('BENCH_WRITE_EXCEL', defaultWriteExcel ?? true),
     samplesDir: envString('BENCH_SAMPLES_DIR', samplesDir),
     outputDir: envString('BENCH_OUTPUT_DIR', outputDir),
   };

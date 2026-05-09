@@ -1,10 +1,17 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import { genRootSchema } from '@opentiny/genui-sdk-core';
 import { streamText } from 'ai';
 import type { ZodIssue } from 'zod';
 import type { LlmBenchmarkResultItem, LlmBenchmarkRunOptions, LlmBenchmarkSample } from './framework/index';
 import { printLlmBenchmarkResults } from './framework/index';
-import { computeTpotMs, extractSchemaJsonBlock, parseJudgeJson, resolveAiSdkModelForBench, resolveSamplesDir } from './utils';
+import {
+  computeTpotMs,
+  extractSchemaJsonBlock,
+  parseJudgeJson,
+  resolveAiSdkModelForBench,
+  resolveSamplesDir,
+  resolveStreamTextUsage,
+} from './utils';
 
 /**
  * 递归展开 Zod issue，尽量定位到 union 分支内的最深层错误。
@@ -32,44 +39,66 @@ function flattenZodIssues(issues: readonly ZodIssue[]): ZodIssue[] {
 function pickMostSpecificIssue(issues: readonly ZodIssue[]): ZodIssue | undefined {
   const expanded = flattenZodIssues(issues);
   if (expanded.length === 0) return undefined;
-  return expanded
-    .slice()
-    .sort((a, b) => {
-      const pathScoreA = a.path.length * 100;
-      const pathScoreB = b.path.length * 100;
-      const msgScoreA = a.message === 'Invalid input' ? 0 : 10;
-      const msgScoreB = b.message === 'Invalid input' ? 0 : 10;
-      const codeScoreA = a.code === 'invalid_type' ? 5 : 0;
-      const codeScoreB = b.code === 'invalid_type' ? 5 : 0;
-      return pathScoreB + msgScoreB + codeScoreB - (pathScoreA + msgScoreA + codeScoreA);
-    })[0];
+  return expanded.slice().sort((a, b) => {
+    const pathScoreA = a.path.length * 100;
+    const pathScoreB = b.path.length * 100;
+    const msgScoreA = a.message === 'Invalid input' ? 0 : 10;
+    const msgScoreB = b.message === 'Invalid input' ? 0 : 10;
+    const codeScoreA = a.code === 'invalid_type' ? 5 : 0;
+    const codeScoreB = b.code === 'invalid_type' ? 5 : 0;
+    return pathScoreB + msgScoreB + codeScoreB - (pathScoreA + msgScoreA + codeScoreA);
+  })[0];
 }
 
+type SchemaJsonValidation = {
+  isSchemaJsonBlockFound: boolean;
+  isSchemaJsonValidJson: boolean;
+  isSchemaJsonValidAgainstProtocol: boolean;
+  schemaValidationError?: string;
+};
+
 /**
- * 校验 schemaJson 内容，只产出“整体通过/失败”结果。
- * @param schemaJsonText 从输出中提取的 `schemaJson` 字符串（可能为 null）
- * @returns 整体 schema 校验结果（成功或失败）
+ * 校验 schemaJson：是否存在代码块、块内是否合法 JSON、是否通过协议。
  */
-function validateSchemaJson(schemaJsonText: string | null) {
+function validateSchemaJson(schemaJsonText: string | null): SchemaJsonValidation {
   if (!schemaJsonText) {
-    return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: 'schemaJson code block not found' };
+    return {
+      isSchemaJsonBlockFound: false,
+      isSchemaJsonValidJson: false,
+      isSchemaJsonValidAgainstProtocol: false,
+      schemaValidationError: 'schemaJson code block not found',
+    };
   }
 
   try {
     const parsed = JSON.parse(schemaJsonText);
     const result = genRootSchema().safeParse(parsed);
     if (result.success) {
-      return { isSchemaJsonValidAgainstProtocol: true };
+      return {
+        isSchemaJsonBlockFound: true,
+        isSchemaJsonValidJson: true,
+        isSchemaJsonValidAgainstProtocol: true,
+      };
     }
     const issue = pickMostSpecificIssue(result.error.issues);
     const path = issue?.path?.length ? issue.path.join('.') : '(root)';
     const message = issue
       ? `[${issue.code}] ${issue.message}`
       : `schema safeParse failed (issues=${result.error.issues.length})`;
-    return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: `${path}: ${message}` };
+    return {
+      isSchemaJsonBlockFound: true,
+      isSchemaJsonValidJson: true,
+      isSchemaJsonValidAgainstProtocol: false,
+      schemaValidationError: `${path}: ${message}`,
+    };
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
-    return { isSchemaJsonValidAgainstProtocol: false, schemaValidationError: `schema parse failed: ${detail}` };
+    return {
+      isSchemaJsonBlockFound: true,
+      isSchemaJsonValidJson: false,
+      isSchemaJsonValidAgainstProtocol: false,
+      schemaValidationError: `schema parse failed: ${detail}`,
+    };
   }
 }
 
@@ -77,6 +106,9 @@ type LlmJudgeResult = {
   score?: number;
   reason?: string;
   error?: string;
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
 };
 
 /**
@@ -100,7 +132,7 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
       ? sample.messages.map((msg) => `[${msg.role}] ${msg.content}`).join('\n')
       : ((sample as LlmBenchmarkSample & { prompt?: string }).prompt ?? '');
     const modelInstance = await resolveAiSdkModelForBench(modelId);
-    const stream = streamText({
+    const streamResult = streamText({
       model: modelInstance,
       temperature: 0,
       system,
@@ -116,19 +148,44 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
       ],
     });
     let output = '';
-    for await (const chunk of stream.fullStream) {
+    let promptTokens = 0;
+    let completionTokens = 0;
+    let totalTokens = 0;
+    for await (const chunk of streamResult.fullStream) {
       if (chunk.type === 'text-delta' && chunk.text) {
         output += chunk.text;
       }
+      if (chunk.type === 'finish') {
+        const u = chunk.totalUsage;
+        promptTokens = u?.inputTokens ?? promptTokens;
+        completionTokens = u?.outputTokens ?? completionTokens;
+        totalTokens = u?.totalTokens ?? totalTokens;
+      }
     }
+    const settled = await resolveStreamTextUsage(streamResult);
+    if (typeof settled.inputTokens === 'number') {
+      promptTokens = settled.inputTokens;
+    }
+    if (typeof settled.outputTokens === 'number') {
+      completionTokens = settled.outputTokens;
+    }
+    if (typeof settled.totalTokens === 'number') {
+      totalTokens = settled.totalTokens;
+    }
+    const usage = {
+      promptTokens,
+      completionTokens,
+      totalTokens,
+    };
     const parsed = parseJudgeJson(output);
     if (!parsed || typeof parsed.score !== 'number') {
-      return { error: 'Judge output JSON parse failed' };
+      return { error: 'Judge output JSON parse failed', ...usage };
     }
     const score = Math.min(10, Math.max(1, parsed.score));
     return {
       score,
       reason: parsed.reason,
+      ...usage,
     };
   } catch (error) {
     return { error: error instanceof Error ? error.message : String(error) };
@@ -151,8 +208,11 @@ function toReportItem(sample: LlmBenchmarkSample, judge?: LlmJudgeResult): LlmBe
       : ttftMs == null
         ? undefined
         : computeTpotMs(ttftMs, sample.metrics.totalMs, sample.metrics.completionTokens);
+  const judgeTotal = judge?.totalTokens ?? 0;
+  const benchTotalTokens = sample.metrics.totalTokens + judgeTotal;
   return {
     scenario: sample.scenario,
+    promptVariant: sample.promptVariant ?? 'full',
     runIndex: sample.runIndex,
     model: sample.model,
     ...(ttftMs != null ? { ttftMs } : {}),
@@ -161,14 +221,21 @@ function toReportItem(sample: LlmBenchmarkSample, judge?: LlmJudgeResult): LlmBe
       ? { firstObservableComponentMs: sample.metrics.firstObservableComponentMs }
       : {}),
     ...(tpotMs !== undefined ? { tpotMs } : {}),
-    ...validation,
+    isSchemaJsonBlockFound: validation.isSchemaJsonBlockFound,
+    isSchemaJsonValidJson: validation.isSchemaJsonValidJson,
+    isSchemaJsonValidAgainstProtocol: validation.isSchemaJsonValidAgainstProtocol,
+    ...(validation.schemaValidationError != null ? { schemaValidationError: validation.schemaValidationError } : {}),
     promptTokens: sample.metrics.promptTokens,
     completionTokens: sample.metrics.completionTokens,
     totalTokens: sample.metrics.totalTokens,
+    benchTotalTokens,
     rawOutputChars: sample.metrics.rawOutputChars,
     llmJudgeScore: judge?.score,
     llmJudgeReason: judge?.reason,
     llmJudgeError: judge?.error,
+    ...(typeof judge?.promptTokens === 'number' ? { llmJudgePromptTokens: judge.promptTokens } : {}),
+    ...(typeof judge?.completionTokens === 'number' ? { llmJudgeCompletionTokens: judge.completionTokens } : {}),
+    ...(typeof judge?.totalTokens === 'number' ? { llmJudgeTotalTokens: judge.totalTokens } : {}),
     errorMessage: sample.metrics.errorMessage,
   };
 }
@@ -205,13 +272,19 @@ export async function runReport(options: LlmBenchmarkRunOptions) {
       if (s !== 0) return s;
       const m = (a.model ?? '').localeCompare(b.model ?? '');
       if (m !== 0) return m;
+      const vA = (a.promptVariant ?? 'full') === 'plain' ? 1 : 0;
+      const vB = (b.promptVariant ?? 'full') === 'plain' ? 1 : 0;
+      if (vA !== vB) return vA - vB;
       return (a.runIndex ?? 1) - (b.runIndex ?? 1);
     });
 
   const judgeEnabled = options.llmJudge?.enabled === true;
-  const judgeResults: LlmJudgeResult[] = [];
+  const judgeResults: Array<LlmJudgeResult | undefined> = [];
   if (judgeEnabled) {
-    console.log(`[bench][judge] enabled, samples=${parsedSamples.length}`);
+    const toJudgeCount = parsedSamples.filter((s) => (s.promptVariant ?? 'full') !== 'plain').length;
+    console.log(
+      `[bench][judge] enabled, samples=${parsedSamples.length}, judgeCalls=${toJudgeCount}（纯文本样本跳过 Judge）`,
+    );
     const concurrency = Math.max(1, options.concurrency ?? 2);
     let cursor = 0;
     async function worker() {
@@ -219,6 +292,11 @@ export async function runReport(options: LlmBenchmarkRunOptions) {
         const index = cursor++;
         if (index >= parsedSamples.length) return;
         const sample = parsedSamples[index];
+        if ((sample.promptVariant ?? 'full') === 'plain') {
+          judgeResults[index] = undefined;
+          console.log(`[bench][judge] ${index + 1}/${parsedSamples.length} ${sample.scenario} plain — skip Judge`);
+          continue;
+        }
         const judged = await judgeOneSample(sample, options);
         judgeResults[index] = judged;
         const score = judged.score == null ? '-' : judged.score.toFixed(2);
@@ -231,7 +309,7 @@ export async function runReport(options: LlmBenchmarkRunOptions) {
   }
 
   const results: LlmBenchmarkResultItem[] = parsedSamples.map((sample, index) =>
-    toReportItem(sample, judgeResults[index]),
+    toReportItem(sample, judgeEnabled ? judgeResults[index] : undefined),
   );
 
   if (results.length === 0) {
@@ -243,11 +321,12 @@ export async function runReport(options: LlmBenchmarkRunOptions) {
     console.table(
       invalidSchemaRows.map((item) => ({
         scenario: item.scenario,
+        variant: item.promptVariant ?? 'full',
         model: item.model ?? '',
         runIndex: item.runIndex ?? 1,
         schemaError: item.schemaValidationError ?? '',
       })),
     );
   }
-  return printLlmBenchmarkResults(results, options);
+  return await printLlmBenchmarkResults(results, options, parsedSamples);
 }

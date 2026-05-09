@@ -1,8 +1,21 @@
 import fs from 'fs';
 import path from 'path';
+import * as XLSX from 'xlsx';
 import { printBenchmarkJson, printBenchmarkSummary, printBenchmarkTable } from './reporter';
-import type { LlmBenchmarkResultItem, LlmBenchmarkRunOptions } from './types';
-import { formatBeijingDateTime, formatNumber, resolveSamplesDir, sampleStdev } from '../utils';
+import type {
+  BenchmarkExcelDetailRow,
+  LlmBenchmarkResultItem,
+  LlmBenchmarkRunOptions,
+  LlmBenchmarkSample,
+} from './types';
+import {
+  buildBenchmarkExcelDetailRows,
+  comparisonScenarioLabel,
+  formatBeijingDateTime,
+  formatNumber,
+  resolveSamplesDir,
+  sampleStdev,
+} from '../utils';
 
 /** repeat ≥ 3 且该场景×模型下 n ≥ 3 时写入：与均值同量纲的样本标准差（波动）。 */
 export interface BenchmarkComparisonVolatility {
@@ -74,9 +87,9 @@ export function buildComparisonByScenario(
 ): BenchmarkComparisonRow[] {
   const repeatCfg = reportOptions?.repeat ?? 1;
   const includeVolatility = repeatCfg >= 3;
-  const scenarios = [...new Set(results.map((r) => r.scenario))].sort();
+  const scenarios = [...new Set(results.map(comparisonScenarioLabel))].sort();
   return scenarios.map((scenario) => {
-    const rows = results.filter((r) => r.scenario === scenario);
+    const rows = results.filter((r) => comparisonScenarioLabel(r) === scenario);
     const models = [...new Set(rows.map((r) => r.model).filter(Boolean))] as string[];
     const byModel: BenchmarkComparisonRow['byModel'] = {};
     for (const m of models) {
@@ -364,7 +377,8 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
     const labels = results.map(function (r) {
       var m = r.model ? r.model + ' | ' : '';
       var run = r.runIndex && r.runIndex > 1 ? '#' + r.runIndex : '';
-      return m + r.scenario + run;
+      var pv = r.promptVariant === 'plain' ? ' [纯文本]' : '';
+      return m + r.scenario + pv + run;
     });
     new Chart(document.getElementById('latencyChart'), {
       type: 'bar',
@@ -432,6 +446,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
     const headers = [
       'model',
       'scenario',
+      'promptVariant',
       'runIndex',
       'ttftMs',
       'tinyCardMs',
@@ -450,6 +465,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
       return [
         r.model || '',
         r.scenario,
+        r.promptVariant || 'full',
         r.runIndex || 1,
         typeof r.ttftMs === 'number' ? r.ttftMs.toFixed(2) : '',
         typeof r.firstObservableComponentMs === 'number' ? r.firstObservableComponentMs.toFixed(2) : '',
@@ -558,9 +574,54 @@ function printRepeatVolatilityTables(results: LlmBenchmarkResultItem[], options:
 }
 
 /**
+ * 写出 `report_<runDir>.xlsx`（`runDir` 为输出目录的文件夹名）：明细表 + 按场景×模型聚合（与 HTML 中 comparison 同源）。
+ */
+function writeReportXlsx(
+  filePath: string,
+  excelDetailRows: BenchmarkExcelDetailRow[],
+  comparisonByScenario: BenchmarkComparisonRow[],
+) {
+  const wb = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(excelDetailRows), '明细');
+
+  const comparisonRows: Array<Record<string, string | number>> = [];
+  for (const row of comparisonByScenario) {
+    for (const [model, c] of Object.entries(row.byModel)) {
+      const base: Record<string, string | number> = {
+        scenario: row.scenario,
+        model,
+        runs: c.runs,
+        avgTtftMs: c.avgTtftMs ?? '',
+        avgFirstObservableComponentMs: c.avgFirstObservableComponentMs ?? '',
+        avgTotalMs: c.avgTotalMs,
+        avgTpotMs: c.avgTpotMs ?? '',
+        avgTotalTokens: c.avgTotalTokens,
+        schemaPassRate: c.schemaPassRate,
+      };
+      if (c.volatility) {
+        base.ttftMsStdev = c.volatility.ttftMsStdev ?? '';
+        base.firstObservableComponentMsStdev = c.volatility.firstObservableComponentMsStdev ?? '';
+        base.totalMsStdev = c.volatility.totalMsStdev;
+        base.tpotMsStdev = c.volatility.tpotMsStdev ?? '';
+        base.totalTokensStdev = c.volatility.totalTokensStdev;
+      }
+      comparisonRows.push(base);
+    }
+  }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(comparisonRows), '按场景对比');
+
+  XLSX.writeFile(wb, filePath);
+}
+
+/**
  * 将 JSON/HTML 报告写入磁盘到当前 run 输出目录。
  */
-function writeBenchmarkArtifacts(results: LlmBenchmarkResultItem[], options: LlmBenchmarkRunOptions) {
+function writeBenchmarkArtifacts(
+  results: LlmBenchmarkResultItem[],
+  options: LlmBenchmarkRunOptions,
+  samplesForExcel?: LlmBenchmarkSample[],
+) {
   const outputDir = getReportOutputDir(options);
   fs.mkdirSync(outputDir, { recursive: true });
 
@@ -592,21 +653,39 @@ function writeBenchmarkArtifacts(results: LlmBenchmarkResultItem[], options: Llm
   fs.writeFileSync(jsonPath, json, 'utf-8');
   fs.writeFileSync(htmlPath, html, 'utf-8');
 
+  const writeExcel = options.writeExcel !== false;
+  let xlsxPath: string | undefined;
+  if (writeExcel) {
+    const runDirLabel = path.basename(path.resolve(outputDir)) || 'run';
+    const xlsxFileName = `report_${runDirLabel}.xlsx`;
+    xlsxPath = path.resolve(outputDir, xlsxFileName);
+    const excelDetailRows = buildBenchmarkExcelDetailRows(results, samplesForExcel);
+    writeReportXlsx(xlsxPath, excelDetailRows, comparisonByScenario);
+  }
+
   if (benchmarkTotalMs != null) {
     console.log(`\nTotal benchmark elapsed: ${benchmarkTotalMs} ms`);
   }
   console.log('\nReport Files');
   console.log(`- JSON: ${jsonPath}`);
   console.log(`- HTML: ${htmlPath}`);
+  if (writeExcel && xlsxPath) {
+    console.log(`- XLSX: ${xlsxPath}`);
+  }
 }
 
 /**
  * 统一输出 benchmark 结果，支持表格与 JSON 两种格式。
  * @param results 结果集（由 samples 解析并聚合得到）
  * @param options 当前运行配置（用于展示/输出目录/过滤等）
+ * @param samplesForExcel 与 `results` 同序的原始样本；用于补全「明细」中的 `promptVariant`、`generatedAt` 等（不含大段输出 / schemaJson）
  * @returns 输出的结果集
  */
-export function printLlmBenchmarkResults(results: LlmBenchmarkResultItem[], options: LlmBenchmarkRunOptions) {
+export function printLlmBenchmarkResults(
+  results: LlmBenchmarkResultItem[],
+  options: LlmBenchmarkRunOptions,
+  samplesForExcel?: LlmBenchmarkSample[],
+) {
   const modelList = distinctModels(results);
   const label = modelList.length > 0 ? modelList.join(', ') : options.model;
   console.log(`\nModels: ${label}`);
@@ -618,6 +697,6 @@ export function printLlmBenchmarkResults(results: LlmBenchmarkResultItem[], opti
     printBenchmarkSummary(results);
     printRepeatVolatilityTables(results, options);
   }
-  writeBenchmarkArtifacts(results, options);
+  writeBenchmarkArtifacts(results, options, samplesForExcel);
   return results;
 }
