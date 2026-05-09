@@ -5,7 +5,7 @@ import TemplateList from './TemplateList.vue';
 import {
   HistoryTransferToolbar,
   downloadConversations,
-  mergeConversations,
+  reconcileImportedConversationIds,
 } from '../tab-components/history-transfer';
 
 const emit = defineEmits(['switch-template']);
@@ -18,8 +18,8 @@ const handleImportConversations = (imported: Conversation[]) => {
     return;
   }
 
-  const merged = mergeConversations(conversation.state.conversations, imported);
-  conversation.state.conversations.unshift(...merged);
+  const reconciledImported = reconcileImportedConversationIds(conversation.state.conversations, imported);
+  conversation.state.conversations.unshift(...reconciledImported);
   conversation.saveConversations();
 };
 

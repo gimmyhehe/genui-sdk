@@ -60,8 +60,11 @@ export const parseConversationFile = async (file: File) => {
   return rawData.map(normalizeConversation).filter(Boolean) as Conversation[];
 };
 
-export const mergeConversations = (currentConversations: Conversation[], importedConversations: Conversation[]) => {
-  const existingIds = new Set(currentConversations.map((conversation) => conversation.id));
+export const reconcileImportedConversationIds = (
+  existingConversations: Conversation[],
+  importedConversations: Conversation[],
+) => {
+  const existingIds = new Set(existingConversations.map((conversation) => conversation.id));
 
   return importedConversations.map((conversation) => {
     if (!existingIds.has(conversation.id)) {

@@ -1,6 +1,6 @@
 import { IconDelete, IconEditPen, IconFileOther } from '@opentiny/tiny-robot-svgs';
 import HistoryTransferToolbar from './HistoryTransferToolbar.vue';
-export { downloadConversations, mergeConversations, parseConversationFile } from './history-transfer';
+export { downloadConversations, parseConversationFile, reconcileImportedConversationIds } from './history-transfer';
 
 export { HistoryTransferToolbar };
 
