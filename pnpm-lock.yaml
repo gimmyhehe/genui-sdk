@@ -648,16 +648,7 @@ importers:
       '@babel/standalone':
         specifier: ^7.23.0
         version: 7.28.5
-      '@opentiny/vue-button':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-card':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-carousel':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-carousel-item':
+      '@opentiny/vue':
         specifier: ^3.28.0
         version: 3.28.0
       '@opentiny/vue-chart-bar':
@@ -678,79 +669,13 @@ importers:
       '@opentiny/vue-chart-ring':
         specifier: 3.14.0
         version: 3.14.0
-      '@opentiny/vue-checkbox':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-checkbox-button':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-checkbox-group':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-col':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-date-picker':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-form':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-form-item':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-grid':
-        specifier: ^3.28.0
-        version: 3.28.0
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
-      '@opentiny/vue-input':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-layout':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-notify':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-numeric':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-radio':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-radio-group':
-        specifier: ^3.28.0
-        version: 3.28.0
       '@opentiny/vue-renderless':
         specifier: ^3.28.2
         version: 3.28.2
-      '@opentiny/vue-row':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-search':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-select':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-switch':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-tab-item':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-tabs':
-        specifier: ^3.28.0
-        version: 3.28.0
       '@opentiny/vue-theme':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-transfer':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-tree':
         specifier: ^3.28.0
         version: 3.28.0
       '@vitejs/plugin-vue':
@@ -762,9 +687,6 @@ importers:
       eval5:
         specifier: ^1.4.8
         version: 1.4.8
-      rollup-plugin-visualizer:
-        specifier: 6.0.5
-        version: 6.0.5(rollup@4.54.0)
       vite:
         specifier: ^5.4.2
         version: 5.4.21(@types/node@24.10.4)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)
