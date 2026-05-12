@@ -164,10 +164,15 @@ const schemaCardRenderer = async (props: any) => {
   }
 };
 
-
 const isStreamOperation = (operation: any) => {
-  return (operation.op === 'add' || operation.op === 'replace') && operation.id && operation.path && operation.value
+  return (
+    (operation.op === 'add' || operation.op === 'replace')
+    && typeof operation.id === 'string' && operation.id !== '' 
+    && typeof operation.path === 'string' && operation.path !== ''
+    &&'value' in operation
+  );
 };
+
 /**
  * Applies streamed JSON Patch operations to the current schema.
  * Path resolution is formatted against the immutable pre-request
