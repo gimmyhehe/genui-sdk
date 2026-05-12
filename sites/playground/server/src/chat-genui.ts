@@ -243,6 +243,19 @@ export function createChatGenui() {
     );
     const agentTools = buildAgentTools(agents, abort.signal);
     const { tools: skillTools, systemPrompt: skillPrompt } = buildSkillTools(skills);
+    const duplicateToolNames = new Set<string>();
+    const seenToolNames = new Set<string>();
+    for (const name of [
+      ...Object.keys(mcpTools),
+      ...Object.keys(agentTools),
+      ...Object.keys(skillTools),
+    ]) {
+      if (seenToolNames.has(name)) duplicateToolNames.add(name);
+      seenToolNames.add(name);
+    }
+    if (duplicateToolNames.size) {
+      console.warn(`Duplicate tool names detected: ${[...duplicateToolNames].join(', ')}`);
+    }
     const tools = { ...mcpTools, ...agentTools, ...skillTools };
 
     const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;

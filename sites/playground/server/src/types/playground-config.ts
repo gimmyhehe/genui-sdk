@@ -8,6 +8,6 @@ export interface IPlaygroundConfig {
   promptList: string[];
   model: string;
   temperature: number;
-  agents: PlaygroundAgentConfig[];
-  skills: PlaygroundSkillConfig[];
+  agents?: PlaygroundAgentConfig[];
+  skills?: PlaygroundSkillConfig[];
 }

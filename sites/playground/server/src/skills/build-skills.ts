@@ -15,13 +15,17 @@ interface SkillMeta {
   description: string;
 }
 
+function hasContent(content: string): boolean {
+  return content !== undefined && content !== null;
+}
+
 function getSkillMdContent(modules: Record<string, string>, path: string): string | undefined {
   const exactMatch = modules[path];
-  if (exactMatch) return exactMatch;
+  if (hasContent(exactMatch)) return exactMatch;
 
   const suffix = path.replace(/^\.?\//, '/');
   const matchingKey = Object.keys(modules).find((key) => key.endsWith(suffix));
-  return matchingKey ? modules[matchingKey] : undefined;
+  return hasContent(matchingKey) ? modules[matchingKey] : undefined;
 }
 
 /**
@@ -131,24 +135,25 @@ export const buildSkillTools = (skills: PlaygroundSkillConfig[] = []) => {
         content = getSkillMdContent(modules, resolvedPath);
 
         if (content === undefined && (pathArg.startsWith('./') || pathArg.startsWith('../')) && currentPathArg) {
-          const baseParts = currentPathArg.split('/');
-          if (baseParts.length >= 2) {
-            const skillRoot = baseParts[1];
+          const normalizedCurrentPath = currentPathArg.replace(/^\.?\//, '');
+          const baseParts = normalizedCurrentPath.split('/');
+          if (baseParts.length >= 1 && baseParts[0]) {
+            const skillRoot = baseParts[0];
             const fallbackDummyBase = `http://localhost/${skillRoot}/`;
             const fallbackUrl = new URL(pathArg, fallbackDummyBase);
             const fallbackPath = '.' + fallbackUrl.pathname;
             const fallbackContent = getSkillMdContent(modules, fallbackPath);
-            if (fallbackContent) {
+            if (hasContent(fallbackContent)) {
               content = fallbackContent;
               resolvedPath = fallbackPath;
             }
           }
         }
 
-        if (content && !modules[resolvedPath]) {
+        if (hasContent(content) && !modules[resolvedPath]) {
           const suffix = resolvedPath.replace(/^\.?\//, '/');
           const matchingKey = Object.keys(modules).find((key) => key.endsWith(suffix));
-          if (matchingKey) {
+          if (hasContent(matchingKey)) {
             resolvedPath = matchingKey;
           }
         }
@@ -163,7 +168,7 @@ export const buildSkillTools = (skills: PlaygroundSkillConfig[] = []) => {
         }
       }
 
-      if (content === undefined) {
+      if (!hasContent(content)) {
         return {
           error: '未找到对应技能文档',
           skillName,

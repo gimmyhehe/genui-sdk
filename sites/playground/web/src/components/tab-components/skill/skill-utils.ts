@@ -11,15 +11,13 @@ type InternalNode = {
   isFile: boolean;
 };
 
-export const FRONT_MATTER_BLOCK_REG = /^---\s*\n([\s\S]+?)\s*\n---/;
+export const FRONT_MATTER_BLOCK_REG = /^---\s*\r?\n([\s\S]+?)\s*\r?\n---/;
 
-export const TEXT_EXT =
-  /\.(md|mdx|markdown|txt|json|xml|yaml|yml)$/i;
+export const TEXT_EXT = /\.(md|mdx|markdown|txt|json|xml|yaml|yml)$/i;
 
 export const MAIN_SKILL_PATH_REG = /^\.\/[^/]+\/SKILL\.md$/;
 
-const PATH_SEGMENT_CHAR_BLACKLIST =
-  /[/\\:*?"<>|%\u0000-\u001f\u007f\u2028\u2029]/g;
+const PATH_SEGMENT_CHAR_BLACKLIST = /[/\\:*?"<>|%\u0000-\u001f\u007f\u2028\u2029]/g;
 
 /**
  * 剔除路径非法字符，保留中文等 Unicode。
@@ -99,6 +97,9 @@ export function remapModulesByName(
   const remapped: Record<string, string> = {};
   for (const [key, content] of Object.entries(modules)) {
     const nextKey = key.startsWith(prefix) ? `./${newDir}/${key.slice(prefix.length)}` : key;
+    if (nextKey in remapped) {
+      console.warn(`Module path collision during remap: ${nextKey}`);
+    }
     remapped[nextKey] = content;
   }
   return remapped;
@@ -108,7 +109,7 @@ export function remapModulesByName(
  * 将文件夹中的文件与内容转为与JSON对象描述
  */
 export async function fileListToSkillModules(
-  files: FileList
+  files: FileList,
 ): Promise<{ modules: Record<string, string>; skippedFileNum: number }> {
   const all = Array.from(files);
   const list = all.filter((f) => TEXT_EXT.test(f.name));

@@ -57,33 +57,32 @@ const editSkill = (skill, index) => {
   showSkillFormDialog.value = true;
 };
 
-const deleteSkill = (skill) => {
+const deleteSkill = (index) => {
   const skills = llmConfig.skills || [];
-  llmConfig.skills = skills.filter((s) => s.name !== skill.name);
+  llmConfig.skills = skills.filter((_, i) => i !== index);
 };
 
-const updateSkillEnabled = (skill, enabled) => {
+const updateSkillEnabled = (index, enabled) => {
   const skills = llmConfig.skills || [];
-  llmConfig.skills = skills.map((s) => (s.name === skill.name ? { ...s, enabled } : s));
+  llmConfig.skills = skills.map((s, i) => (i === index ? { ...s, enabled } : s));
 };
 
 const onFolderInputChange = async (e) => {
   const input = e.target;
   const files = input.files;
 
-  if (!files?.length) {
-    TinyNotify({
-      type: 'info',
-      message: '未选择任何文件，或所选文件夹为空',
-      position: 'top-right',
-    });
-    return;
-  }
-
-  const dialogWasOpen = showSkillFormDialog.value;
-  const prevIndex = skillData.value.index;
-
   try {
+    if (!files?.length) {
+      TinyNotify({
+        type: 'info',
+        message: '未选择任何文件，或所选文件夹为空',
+        position: 'top-right',
+      });
+      return;
+    }
+
+    const dialogWasOpen = showSkillFormDialog.value;
+    const prevIndex = skillData.value.index;
     const packHint = skillData.value.name.trim() || 'skill';
     const { modules, skippedFileNum } = await fileListToSkillModules(files, packHint);
 
@@ -108,6 +107,10 @@ const onFolderInputChange = async (e) => {
       index: dialogWasOpen ? prevIndex : -1,
     };
 
+    showSkillFormDialog.value = true;
+    // 先显示dialog，在弹出notify，避免notify被dialog遮挡
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
     const n = Object.keys(remapModules).length;
     let doneMsg = `已导入 ${n} 个文本文件`;
     if (skippedFileNum > 0) {
@@ -128,9 +131,6 @@ const onFolderInputChange = async (e) => {
         position: 'top-right',
       });
     }
-
-    showSkillFormDialog.value = true;
-    await nextTick();
   } catch (err) {
     const msg = err && typeof err === 'object' && 'message' in err ? err.message : String(err);
     TinyNotify({
@@ -138,6 +138,8 @@ const onFolderInputChange = async (e) => {
       message: `读取文件夹失败：${msg}`,
       position: 'top-right',
     });
+  } finally {
+    input.value = '';
   }
 };
 
@@ -181,13 +183,13 @@ const confirmSkill = () => {
       </span>
     </template>
     <div class="skills-list" v-show="showSkills">
-      <div class="skills-item" v-for="(skill, index) in llmConfig.skills || []" :key="skill.name">
+      <div class="skills-item" v-for="(skill, index) in llmConfig.skills || []" :key="`skill-${index}`">
         <div class="skills-item-header">
           <div class="skills-item-name">{{ skill.name }}</div>
           <div>
             <tiny-switch
               :model-value="skill.enabled !== false"
-              @update:model-value="updateSkillEnabled(skill, $event)"
+              @update:model-value="updateSkillEnabled(index, $event)"
               class="skills-item-enabled"
             ></tiny-switch>
             <tiny-popover
@@ -202,7 +204,7 @@ const confirmSkill = () => {
                     <component :is="IconEdit" />
                     <span>编辑</span>
                   </div>
-                  <div @click="deleteSkill(skill)">
+                  <div @click="deleteSkill(index)">
                     <component :is="IconDel" />
                     <span>移除</span>
                   </div>
