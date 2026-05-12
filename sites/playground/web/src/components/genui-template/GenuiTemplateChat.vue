@@ -167,9 +167,9 @@ const schemaCardRenderer = async (props: any) => {
 const isStreamOperation = (operation: any) => {
   return (
     (operation.op === 'add' || operation.op === 'replace')
-    && typeof operation.id === 'string' && operation.id !== '' 
+    && typeof operation.id === 'string' && operation.id !== ''
     && typeof operation.path === 'string' && operation.path !== ''
-    &&'value' in operation
+    && 'value' in operation
   );
 };
 
@@ -191,13 +191,13 @@ const jsonPatchRenderer = async (props: any) => {
     }
 
     const { value, state } = await textToJson(content);
-    if (state!== 'successful-parse' 
+    if (state !== 'successful-parse'
       && state !== 'repaired-parse' // 允许流式处理
     ) return;
     const isComplete = state === 'successful-parse';
     let lastOperationComplete = true;
 
-    const valid = validateJsonPatch(value as any) ;
+    const valid = validateJsonPatch(value as any);
     if (!valid) return;
 
     const operations = value as any[];
