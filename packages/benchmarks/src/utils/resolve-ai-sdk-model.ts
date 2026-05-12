@@ -1,22 +1,29 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
   createProviderModelMapperFromFile,
   loadProviderModelsDataFromFile,
   type ModelInfo,
 } from '../../../../sites/playground/server/src/provider-models-mapper';
+import { resolveMaasModelsJsonPath } from './maas-manifest-models';
 
-let mapperPromise: Promise<Awaited<ReturnType<typeof createProviderModelMapperFromFile>>> | null = null;
-let providerModelsDataPromise: Promise<Record<string, any> | null> | null = null;
+type BenchProviderMapper = Awaited<ReturnType<typeof createProviderModelMapperFromFile>>;
 
-async function getProviderModelMapperForBench() {
-  if (!mapperPromise) {
-    const currentDir = path.dirname(fileURLToPath(import.meta.url));
-    const providerModelsPath = path.resolve(currentDir, '../../../../sites/playground/server/maas-models.json');
-    providerModelsDataPromise = loadProviderModelsDataFromFile(providerModelsPath);
-    mapperPromise = createProviderModelMapperFromFile(providerModelsPath);
+/** 并行加载 mapper 与原始 JSON；任一步失败时清空缓存以便进程内重试，避免永久缓存 rejected promise。 */
+let benchMapperInit: Promise<{ mapper: BenchProviderMapper; data: Record<string, any> | null }> | null = null;
+
+async function getBenchMapperAndData() {
+  if (!benchMapperInit) {
+    const providerModelsPath = resolveMaasModelsJsonPath();
+    benchMapperInit = Promise.all([
+      loadProviderModelsDataFromFile(providerModelsPath),
+      createProviderModelMapperFromFile(providerModelsPath),
+    ])
+      .then(([data, mapper]) => ({ data, mapper }))
+      .catch((err) => {
+        benchMapperInit = null;
+        throw err;
+      });
   }
-  return mapperPromise;
+  return benchMapperInit;
 }
 
 function resolveModelInfoById(providerModelsData: Record<string, any> | null, modelId: string): ModelInfo | undefined {
@@ -41,13 +48,11 @@ function resolveModelInfoById(providerModelsData: Record<string, any> | null, mo
  * @param modelName 业务配置中的模型名称（例如 DeepSeek-V3.2）
  */
 export async function resolveAiSdkModelForBench(modelName: string) {
-  const mapper = await getProviderModelMapperForBench();
+  const { mapper, data: providerModelsData } = await getBenchMapperAndData();
   const modelInfoByName = mapper.getModelInfo(modelName);
-  const providerModelsData = providerModelsDataPromise ? await providerModelsDataPromise : null;
   const modelInfo = modelInfoByName ?? resolveModelInfoById(providerModelsData, modelName);
   if (!modelInfo) {
     throw new Error(`Model not found in maas-models.json: ${modelName}`);
   }
   return mapper.getAiSDKModel(modelInfo);
 }
-

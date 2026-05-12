@@ -15,7 +15,11 @@ function envTrimmed(key: string): string | undefined {
   return t === '' ? undefined : t;
 }
 
-function resolveMaasModelsJsonPath(): string {
+/**
+ * 解析 `BENCH_MAAS_MODELS_PATH` 指向的 `maas-models.json` 绝对路径（相对 benchmarks 包根或绝对路径）。
+ * 与 {@link listMaasManifestModelNames}、`resolveAiSdkModelForBench` 使用同一清单文件。
+ */
+export function resolveMaasModelsJsonPath(): string {
   const configured = envTrimmed('BENCH_MAAS_MODELS_PATH');
   if (configured === undefined) {
     throw new Error(
