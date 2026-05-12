@@ -94,7 +94,7 @@ src/
 | `BENCH_SAMPLES_DIR` | 样本根目录（默认：`packages/benchmarks/reports`，见 `resolveSamplesDir`） |
 | `BENCH_OUTPUT_DIR` | 报告输出目录（默认与本次 run 目录一致） |
 
-更细的默认值见 `src/benchmark.config.ts`（含 `promptConfig`、`llmJudge`、`modelsFromMaasManifest`、`compareEmptySystem` / `compareEmptySystemPlainOnly` 等）。
+`src/benchmark.config.ts` 中对各配置项的默认值有更细的说明（含 `promptConfig`、`llmJudge`、`modelsFromMaasManifest`、`compareEmptySystem` / `compareEmptySystemPlainOnly` 等）。
 
 ### 默认「样本变体」行为（`benchmark.config.ts`）
 
