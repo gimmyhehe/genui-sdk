@@ -45,6 +45,26 @@ export function printBenchmarkTable(results: LlmBenchmarkResultItem[]) {
  * @param results 单次运行结果明细
  */
 export function printBenchmarkSummary(results: LlmBenchmarkResultItem[]) {
+  if (results.length === 0) {
+    console.log('\nBenchmark Summary');
+    console.log('No result rows to summarize (empty input, all runs failed, or filters excluded every row).');
+    console.table([
+      {
+        scenarios: 0,
+        models: 0,
+        runs: 0,
+        validSchema: 'N/A',
+        avgJudgeScore: 'N/A',
+        avgTtftMs: 'N/A',
+        avgTinyCardMs: 'N/A',
+        avgTotalMs: 'N/A',
+        avgTpotMsPerTok: 'N/A',
+        totalTokens: 'N/A',
+      },
+    ]);
+    return;
+  }
+
   const successCount = results.filter((item) => item.isSchemaJsonValidAgainstProtocol).length;
   const avgTtft = averageDefined(results.map((item) => item.ttftMs));
   const avgFirstObs = averageDefined(results.map((item) => item.firstObservableComponentMs));
