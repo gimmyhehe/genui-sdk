@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import type { LlmBenchmarkRunOptions } from '../framework/index';
 
 /** 保序去重：后出现的重复 id 丢弃。 */
@@ -25,12 +27,19 @@ export function resolveModelsForBench(options: LlmBenchmarkRunOptions): string[]
   return [options.model];
 }
 
+const SLUG_MAX_LEN = 96;
+/** 取自完整 model 的 SHA256 十六进制前缀，保证不同 id 在截断/字符归一后仍不共撞文件名。 */
+const SLUG_HASH_HEX_LEN = 12;
+
 /**
- * 将模型名转换为适合文件名的短 slug。
- * @param model 原始模型名
- * @returns 文件安全的模型名（长度上限 96）
+ * 将模型 id 转为安全、稳定且**不易碰撞**的文件名片段：可读前缀 + `_` + 哈希后缀。
+ * 哈希对**完整原始字符串**计算，避免仅靠 lossy slug 截断导致不同模型覆盖同一文件。
  */
 export function slugifyModelForFilename(model: string): string {
-  const s = model.replace(/[^\w.-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
-  return (s || 'model').slice(0, 96);
+  const digest = createHash('sha256').update(model, 'utf8').digest('hex').slice(0, SLUG_HASH_HEX_LEN);
+  const suffix = `_${digest}`;
+  const maxPrefix = Math.max(1, SLUG_MAX_LEN - suffix.length);
+  const raw = model.replace(/[^\w.-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+  const base = (raw || 'model').slice(0, maxPrefix).replace(/_+$/g, '');
+  return `${base}${suffix}`;
 }

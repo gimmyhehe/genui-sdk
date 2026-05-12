@@ -132,7 +132,7 @@ BENCH_TARGET_SAMPLE_RUN_DIR=2026-05-09_09-52-03 pnpm --filter @opentiny/genui-sd
 - 配置 **`models` / `BENCH_MODELS`**：只生成并只汇总这些模型的样本。
 - **仅配置单个 `model`**：报告若未限定 `models`，会读取目录下**全部** `.json` 样本（便于对比历史 run）。
 - 默认每次在样本根目录下新建 **`yyyy-MM-dd_hh-mm-ss`（北京时间）** 子目录；若设置 `BENCH_TARGET_SAMPLE_RUN_DIR` 则写入该目录、不新建时间戳。
-- 样本文件名：**`${modelSlug}_${scenario}_${runIndex}.json`**（plain 为 **`_${runIndex}_plain.json`** 后缀形式，即 `..._${runIndex}_plain.json`；`modelSlug` 由模型 id 安全化）。
+- 样本文件名：**`${modelSlug}_${scenario}_${runIndex}.json`**（plain 为 **`_${runIndex}_plain.json`** 后缀形式，即 `..._${runIndex}_plain.json`；`modelSlug` 为「文件安全可读前缀 + 下划线 + 模型 id 的 SHA256 十二位十六进制」，避免不同 id 经截断后撞名覆盖）。
 - **中断后继续**：见上文「[中断后继续](#中断后继续)」。
 
 ## 运行
