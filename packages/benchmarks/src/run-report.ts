@@ -155,6 +155,7 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
     let promptTokens = 0;
     let completionTokens = 0;
     let totalTokens = 0;
+    let streamError: string | undefined;
     for await (const chunk of streamResult.fullStream) {
       if (chunk.type === 'text-delta' && chunk.text) {
         output += chunk.text;
@@ -164,6 +165,9 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
         promptTokens = u?.inputTokens ?? promptTokens;
         completionTokens = u?.outputTokens ?? completionTokens;
         totalTokens = u?.totalTokens ?? totalTokens;
+      }
+      if (chunk.type === 'error') {
+        streamError = chunk.error instanceof Error ? chunk.error.message : String(chunk.error);
       }
     }
     const settled = await resolveStreamTextUsage(streamResult);
@@ -181,6 +185,9 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
       completionTokens,
       totalTokens,
     };
+    if (streamError) {
+      return { error: streamError, ...usage };
+    }
     const parsed = parseJudgeJson(output);
     if (!parsed || typeof parsed.score !== 'number') {
       return { error: 'Judge output JSON parse failed', ...usage };
