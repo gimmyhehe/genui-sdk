@@ -154,6 +154,17 @@ function jsonStringifyForInlineScript(value: unknown): string {
   return JSON.stringify(value).replace(/<\//g, '<\\/');
 }
 
+/** 写入 HTML 文本节点（非 script）时的转义，与内联脚本中的 escapeHtml 规则一致。 */
+function escapeHtmlReportText(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 /**
  * 生成 HTML 报告字符串（包含对比图表与明细表）。
  * @param results 报告结果列表
@@ -199,9 +210,9 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
 <body>
   <div class="card">
     <h2>GenUI LLM Benchmark</h2>
-    <div>Models: <b>${modelsDisplay}</b></div>
-    <div>Primary config model: <b>${options.model}</b></div>
-    <div>Generated at (Beijing): <b>${beijingNow}</b></div>
+    <div>Models: <b>${escapeHtmlReportText(modelsDisplay)}</b></div>
+    <div>Primary config model: <b>${escapeHtmlReportText(options.model)}</b></div>
+    <div>Generated at (Beijing): <b>${escapeHtmlReportText(beijingNow)}</b></div>
     ${benchmarkTotalMs != null ? `<div>Total benchmark elapsed: <b>${benchmarkTotalMs} ms</b></div>` : ''}
     <div>repeat: <b>${options.repeat ?? 1}</b>${(options.repeat ?? 1) >= 3 ? '（≥3 时汇报含各场景×模型的均值与样本标准差 σ）' : ''}</div>
   </div>
@@ -241,6 +252,16 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
     const modelList = ${modelListPayload};
     const scenarioLabels = comparison.map(function (c) { return c.scenario; });
     const barOpts = { responsive: true, plugins: { legend: { position: 'bottom' } } };
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return '';
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
     function withTitle(baseOpts, titleText) {
       return {
@@ -472,26 +493,26 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
     ];
     const rows = results.map(function (r) {
       return [
-        r.model || '',
-        r.scenario,
-        r.promptVariant || 'full',
+        escapeHtml(r.model || ''),
+        escapeHtml(r.scenario),
+        escapeHtml(r.promptVariant || 'full'),
         r.runIndex || 1,
         typeof r.ttftMs === 'number' ? r.ttftMs.toFixed(2) : '',
         typeof r.firstObservableComponentMs === 'number' ? r.firstObservableComponentMs.toFixed(2) : '',
         r.totalMs.toFixed(2),
         typeof r.tpotMs === 'number' ? r.tpotMs.toFixed(2) : '',
         r.isSchemaJsonValidAgainstProtocol ? '<span class="ok">pass</span>' : '<span class="bad">fail</span>',
-        r.schemaValidationError || '',
+        escapeHtml(r.schemaValidationError || ''),
         typeof r.llmJudgeScore === 'number' ? r.llmJudgeScore.toFixed(2) : '',
-        r.llmJudgeReason || r.llmJudgeError || '',
+        escapeHtml(r.llmJudgeReason || r.llmJudgeError || ''),
         r.promptTokens,
         r.completionTokens,
         r.totalTokens,
-        r.errorMessage || '',
+        escapeHtml(r.errorMessage || ''),
       ];
     });
     const table = document.getElementById('detailTable');
-    table.innerHTML = '<tr>' + headers.map(function (h) { return '<th>' + h + '</th>'; }).join('') + '</tr>' +
+    table.innerHTML = '<tr>' + headers.map(function (h) { return '<th>' + escapeHtml(h) + '</th>'; }).join('') + '</tr>' +
       rows.map(function (row) {
         return '<tr>' + row.map(function (c) { return '<td>' + c + '</td>'; }).join('') + '</tr>';
       }).join('');
@@ -504,8 +525,8 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
           var c = row.byModel[mid];
           if (!c.volatility) return;
           volBody.push([
-            row.scenario,
-            mid,
+            escapeHtml(row.scenario),
+            escapeHtml(mid),
             String(c.runs),
             typeof c.avgTtftMs === 'number' ? c.avgTtftMs.toFixed(2) : '',
             c.volatility.ttftMsStdev != null ? c.volatility.ttftMsStdev.toFixed(2) : '',
@@ -526,7 +547,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
         vt.innerHTML =
           '<tr>' +
           volHead.map(function (h) {
-            return '<th>' + h + '</th>';
+            return '<th>' + escapeHtml(h) + '</th>';
           }).join('') +
           '</tr>' +
           volBody
