@@ -236,6 +236,9 @@ importers:
       rollup-plugin-visualizer:
         specifier: ^6.0.5
         version: 6.0.5(rollup@4.54.0)
+      tsx:
+        specifier: ^4.18.0
+        version: 4.21.0
       typescript:
         specifier: ~5.9.2
         version: 5.9.3
@@ -727,6 +730,9 @@ importers:
       '@opentiny/genui-sdk-vue':
         specifier: 1.1.0
         version: 1.1.0(typescript@5.9.3)(vite@7.3.0(@types/node@17.0.45)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0))
+      '@opentiny/tiny-robot-svgs':
+        specifier: ^0.3.3
+        version: 0.3.3(vue@3.4.38(typescript@5.9.3))
       '@opentiny/vue':
         specifier: ~3.28.0
         version: 3.28.0
@@ -958,6 +964,9 @@ importers:
       schema-renderer-ng-adpater:
         specifier: workspace:*
         version: link:../schema-renderer-ng-adpater
+      uuid:
+        specifier: 11.1.0
+        version: 11.1.0
       vite-commit-hash-plugin:
         specifier: workspace:*
         version: link:../vite-commit-hash-plugin
@@ -12535,6 +12544,10 @@ snapshots:
     dependencies:
       idb: 8.0.3
       vue: 3.5.26(typescript@5.9.3)
+
+  '@opentiny/tiny-robot-svgs@0.3.3(vue@3.4.38(typescript@5.9.3))':
+    dependencies:
+      vue: 3.4.38(typescript@5.9.3)
 
   '@opentiny/tiny-robot-svgs@0.3.3(vue@3.5.26(typescript@5.8.3))':
     dependencies:

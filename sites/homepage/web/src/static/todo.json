@@ -435,8 +435,7 @@
             "data": {
               "type": "JSExpression",
               "value": "this.filteredTodos()"
-            },
-            "max-height": "400px"
+            }
           }
         },
         {
