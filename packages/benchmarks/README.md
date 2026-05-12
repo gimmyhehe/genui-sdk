@@ -68,7 +68,7 @@ src/
 - **API Key / Base URL 的环境变量名**由 `maas-models.json`（及你配置的 `BENCH_MAAS_MODELS_PATH`）里各 provider 的 **`apiKeyEnvName`**、**`baseUrlEnvName`** 决定；仓库自带清单里常见为 **`DEEPSEEK_API_KEY`**，可选 **`DEEPSEEK_BASE_URL`** 覆盖默认 `baseUrl`。
 - 从清单拉多模型名时，必须在 `.env` 中设置 **`BENCH_MAAS_MODELS_PATH`**（未设置或仅空白会在调用 `listMaasManifestModelNames` 时抛错）。
 
-布尔型环境变量：未设置或空字符串表示「用 `benchmark.config.ts` 默认值」；若已设置非空字符串，则 **`1`**、**`true`（仅小写）**、**`yes`（大小写不敏感）** 为真，其它非空值（如 `false`、`0`）为假。
+布尔型环境变量：未设置、空字符串或**仅空白**表示「用 `benchmark.config.ts` 默认值」；若去掉首尾空白后非空，则 **`1`**、**`true`**、**`yes`**（后两者**大小写不敏感**）为真，其它非空值（如 `false`、`0`）为假。
 
 ## 配置项与环境变量（BENCH_*）
 

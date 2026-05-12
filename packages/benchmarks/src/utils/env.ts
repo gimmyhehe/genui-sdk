@@ -13,8 +13,8 @@ export function envString(key: string, fallback: string | undefined): string | u
 }
 
 /**
- * 读取环境变量布尔值；空字符串视为未设置。
- * 接受：`1/true/yes` 视为 `true`。
+ * 读取环境变量布尔值；空字符串或仅空白视为未设置。
+ * 接受：`1`、`true`、`yes`（`true` / `yes` 大小写不敏感）视为 `true`。
  * @param key 环境变量名
  * @param fallback 未设置时的回退值
  * @returns 解析后的布尔值
@@ -24,7 +24,11 @@ export function envBool(key: string, fallback: boolean): boolean {
   if (v === undefined || v === '') {
     return fallback;
   }
-  return v === '1' || v === 'true' || v.toLowerCase() === 'yes';
+  const t = v.trim();
+  if (t === '') {
+    return fallback;
+  }
+  return t === '1' || t.toLowerCase() === 'true' || t.toLowerCase() === 'yes';
 }
 
 /**
