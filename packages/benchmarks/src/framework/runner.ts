@@ -146,6 +146,15 @@ function getReportOutputDir(options: LlmBenchmarkRunOptions) {
 }
 
 /**
+ * 将 JSON 序列化结果安全嵌入 HTML 内联 script。
+ * `JSON.stringify` 不会转义 `</script>` 等序列，会导致提前闭合 script；把 `</` 写成 `<\/`
+ * 在 JSON 中仍解析为同一字符串，且 HTML 解析器不会将其视为结束标签。
+ */
+function jsonStringifyForInlineScript(value: unknown): string {
+  return JSON.stringify(value).replace(/<\//g, '<\\/');
+}
+
+/**
  * 生成 HTML 报告字符串（包含对比图表与明细表）。
  * @param results 报告结果列表
  * @param options 运行配置
@@ -155,9 +164,9 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
   const comparison = buildComparisonByScenario(results, { repeat: options.repeat });
   const modelList = distinctModels(results);
   const modelListForChart = modelList.length > 0 ? modelList : [options.model];
-  const payload = JSON.stringify(results);
-  const comparisonPayload = JSON.stringify(comparison);
-  const modelListPayload = JSON.stringify(modelListForChart);
+  const payload = jsonStringifyForInlineScript(results);
+  const comparisonPayload = jsonStringifyForInlineScript(comparison);
+  const modelListPayload = jsonStringifyForInlineScript(modelListForChart);
   const modelsDisplay = modelList.length ? modelList.join(', ') : options.model;
   const beijingNow = formatBeijingDateTime(new Date(), {
     dateTimeSeparator: ' ',
@@ -226,7 +235,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
     <table id="detailTable"></table>
   </div>
   <script>
-    const repeatForReport = ${JSON.stringify(options.repeat ?? 1)};
+    const repeatForReport = ${jsonStringifyForInlineScript(options.repeat ?? 1)};
     const results = ${payload};
     const comparison = ${comparisonPayload};
     const modelList = ${modelListPayload};
