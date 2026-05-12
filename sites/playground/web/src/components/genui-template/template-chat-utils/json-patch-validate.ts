@@ -26,20 +26,14 @@ function validateOperation(operation: any): boolean {
 }
 
 /**
- * 验证 jsonPatch 的完整性和合法性
- * 1.验证 op 字段的合法性，根据不同的 op 分别验证其他字段
- * 2.验证 path 字段的合法性和完整性
- * 3.验证 value 字段的存在性（不验证完整性，保持流式）
- * 4.如果有 from 字段，验证 from 字段的合法性和完整性
- *
  * 注意：
- * - 只支持传入 JSON 字符串，解析失败则直接返回 false
+ * - 仅接收已解析的 JSON Patch 操作数组
  * - value 字段在流式输出中可能不完整，不进行完整性校验
  *
- * @param jsonPatch 符合 RFC 6902 规范的 json 字符串
+ * @param jsonPatchArray 符合 RFC 6902 规范的操作数组
  * @returns 是否合法
  */
-export const validateJsonPatch = (jsonPatchArray: IJsonPatchOperation[]): boolean => {
+export const validateJsonPatch = (jsonPatchArray: IJsonPatchOperation[]): boolean => {// TODO: 使用zod校验
   if (!Array.isArray(jsonPatchArray)) {
     return false;
   }
