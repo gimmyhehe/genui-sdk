@@ -17,6 +17,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
+import { buildSkillTools } from './skills/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
@@ -213,6 +214,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     model: playgroundConfig.model || '',
     temperature: playgroundConfig.temperature || 0.3,
     agents,
+    skills: playgroundConfig.skills || [],
   };
 };
 
@@ -246,12 +248,13 @@ export function createChatGenui() {
     }
 
     const playgroundConfig = getPlaygroundConfig(playgroundStr);
-    const { mcpServers, framework, userAppendPrompt, agents } = playgroundConfig;
+    const { mcpServers, framework, userAppendPrompt, agents, skills } = playgroundConfig;
 
     const llmConfigParams: LLMConfigParams = {
       model: playgroundConfig.model,
       temperature: playgroundConfig.temperature,
       mcpServers,
+      skills,
     };
 
     const llmConfig = await generateLlmConfig(llmConfigParams);
@@ -261,7 +264,21 @@ export function createChatGenui() {
       abort.signal,
     );
     const agentTools = buildAgentTools(agents, abort.signal);
-    const tools = { ...mcpTools, ...agentTools };
+    const { tools: skillTools, systemPrompt: skillPrompt } = buildSkillTools(skills);
+    const duplicateToolNames = new Set<string>();
+    const seenToolNames = new Set<string>();
+    for (const name of [
+      ...Object.keys(mcpTools),
+      ...Object.keys(agentTools),
+      ...Object.keys(skillTools),
+    ]) {
+      if (seenToolNames.has(name)) duplicateToolNames.add(name);
+      seenToolNames.add(name);
+    }
+    if (duplicateToolNames.size) {
+      console.warn(`Duplicate tool names detected: ${[...duplicateToolNames].join(', ')}`);
+    }
+    const tools = { ...mcpTools, ...agentTools, ...skillTools };
 
     const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;
     const maxSteps = 30;
@@ -269,7 +286,14 @@ export function createChatGenui() {
     const options: StreamTextOptions = {
       model,
       temperature,
-      system: genPrompt(renderConfigForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt,
+      system:
+        genPrompt(renderConfigForFramework, tgCustomConfig) +
+        '\n' +
+        specificPrompt +
+        '\n' +
+        userAppendPrompt +
+        '\n' +
+        skillPrompt,
       messages: body.messages,
       abortSignal: abort.signal,
       tools,
