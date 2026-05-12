@@ -44,6 +44,7 @@ export class GenuiRenderer implements OnInit {
   @Input() customComponentsModule?: Record<string, Type<any>> = {};
   @Input() customActions?: Record<string, ICustomAction> = {};
   @Input() requiredCompleteFieldSelectors?: string[];
+  @Input() isJsonComplete?: boolean;
   public isError = false;
   protected deltaPatcher: DeltaPatcher | null = null;
   protected schema: any = {};
@@ -117,6 +118,8 @@ export class GenuiRenderer implements OnInit {
       } else {
         json = {};
       }
+    } else {
+      isCompleted = this.isJsonComplete ?? true;
     }
     if (this.deltaPatcher) {
       this.deltaPatcher.patchWithDelta(this.schema, json, isCompleted);
