@@ -23,6 +23,28 @@ type StreamTextOptions = Parameters<typeof streamText>[0];
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
+
+function extractStatusCode(error: any): number | undefined {
+  if (!error) {
+    return undefined;
+  }
+  if (typeof error.statusCode === 'number') {
+    return error.statusCode;
+  }
+  if (typeof error?.lastError?.statusCode === 'number') {
+    return error.lastError.statusCode;
+  }
+  if (Array.isArray(error.errors)) {
+    for (const item of error.errors) {
+      if (typeof item?.statusCode === 'number') {
+        return item.statusCode;
+      }
+    }
+  }
+  return undefined;
+}
+
 const initClients = async (
   serverName: string,
   serverConfig: McpServer,
@@ -261,10 +283,25 @@ export function createChatGenui() {
 
         console.error('Error in chat-genui onError:', error);
         const actualError = error?.error?.cause ?? error?.error ?? error;
-        const statusCode = actualError?.statusCode ?? 500;
-        const responseBody = actualError?.responseBody || null;
+        const rawStatusCode = extractStatusCode(actualError);
+        const statusCode =
+          typeof rawStatusCode === 'number' &&
+          Number.isInteger(rawStatusCode) &&
+          rawStatusCode >= 100 &&
+          rawStatusCode <= 599
+            ? rawStatusCode
+            : 500;
+        const responseBody = actualError?.responseBody ?? null;
+        const detailsPart = responseBody
+          ? `; error details: ${typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody)}`
+          : '';
+        const built = (actualError?.message ?? '') + detailsPart;
         const message =
-          actualError?.message + (responseBody ? `; error details: ${responseBody}` : '') || 'Unknown Error Type';
+          statusCode === 429
+            ? BUSY_ERROR_MESSAGE
+            : built.trim() !== ''
+              ? built
+              : 'Unknown Error Type';
         const type = actualError?.name || actualError?.type || 'Unknown Error Type';
         const param = actualError?.param || null;
         const code = statusCode;
