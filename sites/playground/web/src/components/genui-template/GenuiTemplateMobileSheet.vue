@@ -263,11 +263,18 @@ const handleJsonEditorChange = (value: string) => {
     color: #191919;
     font-size: 14px;
     line-height: 22px;
+    text-decoration: none;
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &:hover {
+      color: #191919;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
 
     &:focus-visible {
       outline: 2px solid #1890ff;
@@ -287,11 +294,15 @@ const handleJsonEditorChange = (value: string) => {
     padding: 6px 4px;
     border: none;
     background: transparent;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 22px;
-    color: #1890ff;
+    color: #191919;
     cursor: pointer;
     white-space: nowrap;
+
+    &:hover {
+      color: #191919;
+    }
   }
 
   &__body {

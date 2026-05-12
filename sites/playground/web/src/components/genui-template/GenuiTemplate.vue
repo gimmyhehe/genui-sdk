@@ -367,12 +367,12 @@ onUnmounted(() => {
 
     &-wrapper {
       background-color: #ffffff;
-      border-radius: 16px;
       height: 100%;
       min-height: 0;
       display: flex;
       flex-direction: column;
       position: relative;
+      border-left: 1px solid rgb(232, 232, 232);
 
       .top-button-group {
         flex-shrink: 0;
@@ -381,7 +381,6 @@ onUnmounted(() => {
         min-height: @schema-toolbar-height;
         max-height: @schema-toolbar-height;
         border-bottom: 1px solid rgb(232, 232, 232);
-        border-left: 1px solid rgb(232, 232, 232);
         padding: 0 24px;
         display: flex;
         align-items: center;
@@ -404,11 +403,14 @@ onUnmounted(() => {
           font: inherit;
           text-align: inherit;
           color: #191919;
+          text-decoration: none;
           cursor: pointer;
           user-select: none;
 
           &:hover {
-            color: #1890ff;
+            color: #191919;
+            text-decoration: underline;
+            text-underline-offset: 2px;
           }
 
           &:focus-visible {
@@ -429,7 +431,6 @@ onUnmounted(() => {
         flex: 1;
         padding: 20px;
         overflow: auto;
-        border-left: 1px solid rgb(232, 232, 232);
         box-sizing: border-box;
       }
     }
