@@ -23,7 +23,7 @@
 import { ref } from 'vue';
 import { TinyNotify } from '@opentiny/vue';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
-import { downloadConversations, mergeConversations, parseConversationFile } from './history-transfer';
+import { downloadConversations, parseConversationFile, reconcileImportedConversationIds } from './history-transfer';
 
 const props = defineProps<{
   conversations: Conversation[];
@@ -71,9 +71,9 @@ const handleImportFile = async (event: Event) => {
       return;
     }
 
-    const mergedConversations = mergeConversations(props.conversations, importedConversations);
-    emit('import-conversations', mergedConversations);
-    notify('success', `已导入 ${mergedConversations.length} 条会话`);
+    const reconciledImported = reconcileImportedConversationIds(props.conversations, importedConversations);
+    emit('import-conversations', reconciledImported);
+    notify('success', `已导入 ${reconciledImported.length} 条会话`);
   } catch (error) {
     const message = error instanceof Error ? error.message : '导入失败';
     notify('error', message);

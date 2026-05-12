@@ -17,11 +17,34 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
+import { buildSkillTools } from './skills/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
 
 const isDevelopment = process.env.NODE_ENV === 'development';
+
+const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
+
+function extractStatusCode(error: any): number | undefined {
+  if (!error) {
+    return undefined;
+  }
+  if (typeof error.statusCode === 'number') {
+    return error.statusCode;
+  }
+  if (typeof error?.lastError?.statusCode === 'number') {
+    return error.lastError.statusCode;
+  }
+  if (Array.isArray(error.errors)) {
+    for (const item of error.errors) {
+      if (typeof item?.statusCode === 'number') {
+        return item.statusCode;
+      }
+    }
+  }
+  return undefined;
+}
 
 const initClients = async (
   serverName: string,
@@ -191,6 +214,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     model: playgroundConfig.model || '',
     temperature: playgroundConfig.temperature || 0.3,
     agents,
+    skills: playgroundConfig.skills || [],
   };
 };
 
@@ -224,12 +248,13 @@ export function createChatGenui() {
     }
 
     const playgroundConfig = getPlaygroundConfig(playgroundStr);
-    const { mcpServers, framework, userAppendPrompt, agents } = playgroundConfig;
+    const { mcpServers, framework, userAppendPrompt, agents, skills } = playgroundConfig;
 
     const llmConfigParams: LLMConfigParams = {
       model: playgroundConfig.model,
       temperature: playgroundConfig.temperature,
       mcpServers,
+      skills,
     };
 
     const llmConfig = await generateLlmConfig(llmConfigParams);
@@ -239,7 +264,21 @@ export function createChatGenui() {
       abort.signal,
     );
     const agentTools = buildAgentTools(agents, abort.signal);
-    const tools = { ...mcpTools, ...agentTools };
+    const { tools: skillTools, systemPrompt: skillPrompt } = buildSkillTools(skills);
+    const duplicateToolNames = new Set<string>();
+    const seenToolNames = new Set<string>();
+    for (const name of [
+      ...Object.keys(mcpTools),
+      ...Object.keys(agentTools),
+      ...Object.keys(skillTools),
+    ]) {
+      if (seenToolNames.has(name)) duplicateToolNames.add(name);
+      seenToolNames.add(name);
+    }
+    if (duplicateToolNames.size) {
+      console.warn(`Duplicate tool names detected: ${[...duplicateToolNames].join(', ')}`);
+    }
+    const tools = { ...mcpTools, ...agentTools, ...skillTools };
 
     const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;
     const maxSteps = 30;
@@ -247,7 +286,14 @@ export function createChatGenui() {
     const options: StreamTextOptions = {
       model,
       temperature,
-      system: genPrompt(renderConfigForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt,
+      system:
+        genPrompt(renderConfigForFramework, tgCustomConfig) +
+        '\n' +
+        specificPrompt +
+        '\n' +
+        userAppendPrompt +
+        '\n' +
+        skillPrompt,
       messages: body.messages,
       abortSignal: abort.signal,
       tools,
@@ -261,10 +307,25 @@ export function createChatGenui() {
 
         console.error('Error in chat-genui onError:', error);
         const actualError = error?.error?.cause ?? error?.error ?? error;
-        const statusCode = actualError?.statusCode ?? 500;
-        const responseBody = actualError?.responseBody || null;
+        const rawStatusCode = extractStatusCode(actualError);
+        const statusCode =
+          typeof rawStatusCode === 'number' &&
+          Number.isInteger(rawStatusCode) &&
+          rawStatusCode >= 100 &&
+          rawStatusCode <= 599
+            ? rawStatusCode
+            : 500;
+        const responseBody = actualError?.responseBody ?? null;
+        const detailsPart = responseBody
+          ? `; error details: ${typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody)}`
+          : '';
+        const built = (actualError?.message ?? '') + detailsPart;
         const message =
-          actualError?.message + (responseBody ? `; error details: ${responseBody}` : '') || 'Unknown Error Type';
+          statusCode === 429
+            ? BUSY_ERROR_MESSAGE
+            : built.trim() !== ''
+              ? built
+              : 'Unknown Error Type';
         const type = actualError?.name || actualError?.type || 'Unknown Error Type';
         const param = actualError?.param || null;
         const code = statusCode;
