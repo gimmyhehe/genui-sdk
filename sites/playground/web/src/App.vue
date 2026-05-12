@@ -2,8 +2,19 @@
 import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
 import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER, RENDERER_SETTINGS_KEY } from '@opentiny/genui-sdk-vue';
-import { ref, watch, onMounted, reactive, computed, onUnmounted, provide, defineAsyncComponent, h, shallowRef } from 'vue';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue'
+import {
+  ref,
+  watch,
+  onMounted,
+  reactive,
+  computed,
+  onUnmounted,
+  provide,
+  defineAsyncComponent,
+  h,
+  shallowRef,
+} from 'vue';
+import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
@@ -12,7 +23,12 @@ import PlaygroundSidebar from './components/PlaygroundSidebar.vue';
 import { useInputMessage } from './hooks/use-input-message';
 import { useIsMobile } from './hooks';
 import useTemplate from './components/genui-template/useTemplate';
-import { getOverlapEliminatorHandler, getContinueGeneratingHandler, locationPartialSchemaJson, movePartialSchemaJsonToLastMessage } from './continue-writing';
+import {
+  getOverlapEliminatorHandler,
+  getContinueGeneratingHandler,
+  locationPartialSchemaJson,
+  movePartialSchemaJsonToLastMessage,
+} from './continue-writing';
 import useIcon from './use-icon';
 
 const { topRenderer, addIcons } = useIcon();
@@ -42,7 +58,7 @@ if (location.search.includes('framework=angular')) {
 }
 
 provide(RENDERER_SETTINGS_KEY, {
-  materials: rendererConfig.components,
+  materials: vueMaterials,
 });
 
 const STORAGE_KEY = 'GENUI_SDK_VUE_PLAYGROUND_CONFIG';
@@ -126,7 +142,9 @@ const syncModelFeatures = async (model) => {
 watch(() => llmConfig.model, syncModelFeatures);
 const transformTheme = (themeConfig) => {
   const newThemeConfig = structuredClone(themeConfig);
-  newThemeConfig.css = newThemeConfig.css.replaceAll(':host', `[class*="tiny-genui-playground"]`).replaceAll(':root', `[class*="tiny-genui-playground"]`);
+  newThemeConfig.css = newThemeConfig.css
+    .replaceAll(':host', `[class*="tiny-genui-playground"]`)
+    .replaceAll(':root', `[class*="tiny-genui-playground"]`);
   return newThemeConfig;
 };
 
@@ -138,10 +156,14 @@ const themeMap = {
 
 const themeTool = new ThemeTool();
 
-watch(theme, (newVal) => {
-  const themeConfig = themeMap[newVal] || themeMap.light;
-  themeTool.changeTheme(themeConfig);
-}, { immediate: true });
+watch(
+  theme,
+  (newVal) => {
+    const themeConfig = themeMap[newVal] || themeMap.light;
+    themeTool.changeTheme(themeConfig);
+  },
+  { immediate: true },
+);
 
 watch(
   [() => theme.value, () => llmConfig, () => chatConfig, () => customExamples.value],
@@ -172,32 +194,33 @@ const url = import.meta.env.VITE_CHAT_URL;
 
 // TODO: 后续优化后，在GenUI SDK导出此API
 const insertHandlersAfterName = (handlers, insertHandlers, name) => {
-  const index = handlers.findIndex(handler => handler.name === name);
+  const index = handlers.findIndex((handler) => handler.name === name);
   if (index !== -1) {
     handlers.splice(index + 1, 0, ...insertHandlers);
   }
   return handlers;
-}
+};
 
 const chat = ref(null);
 const conversation = computed(() => chat.value?.getConversation());
 watch(chat, (instance) => {
   if (instance) {
     const defaultResponseHandlers = instance.getResponseHandlers();
-    const contentHandler = defaultResponseHandlers.find(handler => handler.name === 'content');
+    const contentHandler = defaultResponseHandlers.find((handler) => handler.name === 'content');
     const newResponseHandlers = [
       ...defaultResponseHandlers,
       getContinueGeneratingHandler(conversation.value.messageManager),
       locationPartialSchemaJson(),
     ];
 
-    insertHandlersAfterName(newResponseHandlers, [
-      movePartialSchemaJsonToLastMessage(),
-      getOverlapEliminatorHandler(contentHandler),
-    ], 'init');
+    insertHandlersAfterName(
+      newResponseHandlers,
+      [movePartialSchemaJsonToLastMessage(), getOverlapEliminatorHandler(contentHandler)],
+      'init',
+    );
     instance.setResponseHandlers(newResponseHandlers);
   }
-})
+});
 
 // 提供给侧边栏及其子组件使用的共享上下文
 const playgroundContext = {
@@ -286,17 +309,19 @@ const updateCustomExamples = (list) => {
   customExamples.value = normalizeCustomExamples(list);
 };
 
-watch(() => templateSchemaList.value, (newVal) => {
-  if (!newVal) {
-    return;
-  }
-  const templateMap = new Map(newVal.map((item) => [item.id, item]));
-  // Only keep examples that still exist in templateSchemaList,
-  // and always refresh them from the latest template source.
-  customExamples.value = customExamples.value
-    .map((example) => templateMap.get(example.id))
-    .filter(Boolean);
-}, { deep: true });
+watch(
+  () => templateSchemaList.value,
+  (newVal) => {
+    if (!newVal) {
+      return;
+    }
+    const templateMap = new Map(newVal.map((item) => [item.id, item]));
+    // Only keep examples that still exist in templateSchemaList,
+    // and always refresh them from the latest template source.
+    customExamples.value = customExamples.value.map((example) => templateMap.get(example.id)).filter(Boolean);
+  },
+  { deep: true },
+);
 
 onMounted(() => {
   initInputMessage();
@@ -323,19 +348,39 @@ onUnmounted(() => {
 <template>
   <TopIconsRenderer style="height: 0" />
   <div class="genui-playground">
-    <PlaygroundSidebar v-model:expanded="isSidebarOpen" v-model:theme="theme" @new-task="chat?.handleNewConversation()"
-      @update-custom-examples="updateCustomExamples" v-slot="{ activeName }">
+    <PlaygroundSidebar
+      v-model:expanded="isSidebarOpen"
+      v-model:theme="theme"
+      @new-task="chat?.handleNewConversation()"
+      @update-custom-examples="updateCustomExamples"
+      v-slot="{ activeName }"
+    >
       <template v-if="ENABLE_TEMPLATE && isTemplateInit">
         <div v-if="activeName === 'template'" class="chat-container">
-          <component v-if="GenuiTemplate" :is="GenuiTemplate" ref="genuiTemplateRef" :llm-config="llmConfig"
-            :theme="theme" :chat-config="chatConfig" />
+          <component
+            v-if="GenuiTemplate"
+            :is="GenuiTemplate"
+            ref="genuiTemplateRef"
+            :llm-config="llmConfig"
+            :theme="theme"
+            :chat-config="chatConfig"
+          />
         </div>
       </template>
       <div v-show="!ENABLE_TEMPLATE || activeName !== 'template'" class="chat-container">
         <GenuiConfigProvider :theme="theme" style="height: 100%">
-          <GenuiChat :url="url" ref="chat" :messages="messages" :chat-config="chatConfig" :roles="roles"
-            :model="llmConfig.model" :temperature="llmConfig.temperature" :features="modelFeatures"
-            :custom-fetch="customFetch" :custom-examples="customExamples">
+          <GenuiChat
+            :url="url"
+            ref="chat"
+            :messages="messages"
+            :chat-config="chatConfig"
+            :roles="roles"
+            :model="llmConfig.model"
+            :temperature="llmConfig.temperature"
+            :features="modelFeatures"
+            :custom-fetch="customFetch"
+            :custom-examples="customExamples"
+          >
             <template #empty>
               <div class="empty">
                 <IconAi />
@@ -375,7 +420,7 @@ onUnmounted(() => {
   font-size: 32px;
   font-weight: 600;
 
-  &>svg {
+  & > svg {
     width: 56px;
     height: 56px;
   }
@@ -389,7 +434,7 @@ onUnmounted(() => {
   :deep(.action-buttons__button) {
     padding-right: 10px;
 
-    svg[alt="录音"] {
+    svg[alt='录音'] {
       display: none;
     }
   }
@@ -397,7 +442,7 @@ onUnmounted(() => {
   .empty {
     font-size: 24px;
 
-    &>svg {
+    & > svg {
       width: 48px;
       height: 48px;
     }
