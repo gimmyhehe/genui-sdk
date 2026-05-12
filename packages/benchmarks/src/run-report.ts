@@ -12,6 +12,7 @@ import {
   resolvePrimaryBenchmarkModelId,
   resolveSamplesDir,
   resolveStreamTextUsage,
+  benchStreamTextAbortSignal,
 } from './utils';
 
 /**
@@ -133,6 +134,7 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
       ? sample.messages.map((msg) => `[${msg.role}] ${msg.content}`).join('\n')
       : ((sample as LlmBenchmarkSample & { prompt?: string }).prompt ?? '');
     const modelInstance = await resolveAiSdkModelForBench(modelId);
+    const abortSignal = benchStreamTextAbortSignal(options.streamTimeoutMs);
     const streamResult = streamText({
       model: modelInstance,
       temperature: 0,
@@ -147,6 +149,7 @@ async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkR
             `【模型输出】\n${sample.output}\n`,
         },
       ],
+      ...(abortSignal ? { abortSignal } : {}),
     });
     let output = '';
     let promptTokens = 0;

@@ -68,6 +68,25 @@ export function envPositiveInt(key: string, fallback: number): number {
 }
 
 /**
+ * 流式请求超时（毫秒），用于 `streamText({ abortSignal })`。
+ * 未设置或空字符串：使用 `fallback`；`0`：不启用超时（返回 `undefined`）；非法值回退 `fallback`。
+ */
+export function envStreamTimeoutMs(key: string, fallback: number | undefined): number | undefined {
+  const v = process.env[key];
+  if (v === undefined || v === '') {
+    return fallback;
+  }
+  const parsed = Number.parseInt(v.trim(), 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return fallback;
+  }
+  if (parsed === 0) {
+    return undefined;
+  }
+  return parsed;
+}
+
+/**
  * 读取框架选择（Vue/Angular）。
  * @param key 环境变量名
  * @param fallback 默认框架

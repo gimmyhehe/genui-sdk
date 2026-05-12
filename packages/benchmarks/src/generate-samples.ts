@@ -13,6 +13,7 @@ import {
   resolveModelsForBench,
   resolveSamplesDir,
   resolveStreamTextUsage,
+  benchStreamTextAbortSignal,
   slugifyModelForFilename,
 } from './utils';
 import { computeTpotMs } from './utils';
@@ -55,6 +56,7 @@ function selectSampleCases(cases: LlmBenchmarkSampleCase[], options: LlmBenchmar
  * @param runIndex 当前重复序号（从 1 开始）
  * @param system system prompt（对照模式可为空字符串）
  * @param promptVariant 完整 system 或空 system 对照
+ * @param streamTimeoutMs `streamText` 超时毫秒数；`undefined` 或 `≤0` 表示不启用
  * @returns 样本对象（包含指标与输出）
  */
 async function generateSingleSample(
@@ -64,6 +66,7 @@ async function generateSingleSample(
   runIndex: number,
   system: string,
   promptVariant: 'full' | 'plain',
+  streamTimeoutMs: number | undefined,
 ): Promise<LlmBenchmarkSample> {
   const start = Date.now();
   let firstTokenAt = 0;
@@ -75,11 +78,13 @@ async function generateSingleSample(
   let errorMessage: string | undefined;
 
   try {
+    const abortSignal = benchStreamTextAbortSignal(streamTimeoutMs);
     const streamResult = streamText({
       model: modelInstance,
       temperature: 0,
       system,
       messages: sampleCase.messages,
+      ...(abortSignal ? { abortSignal } : {}),
     });
 
     for await (const chunk of streamResult.fullStream) {
@@ -307,6 +312,7 @@ export async function generateSamples(options: LlmBenchmarkRunOptions) {
         job.runIndex,
         job.system,
         job.promptVariant,
+        options.streamTimeoutMs,
       );
 
       // 防御式：即使父目录没创建成功或 sampleFile 被拼成多级目录，也能避免 ENOENT。

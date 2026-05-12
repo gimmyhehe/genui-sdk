@@ -10,6 +10,7 @@ import {
   envBool,
   envFramework,
   envPositiveInt,
+  envStreamTimeoutMs,
   envString,
   envStringList,
   listMaasManifestModelNames,
@@ -61,6 +62,7 @@ function resolveRunOptions(): LlmBenchmarkRunOptions {
   const modelRaw = envString('BENCH_MODEL', model);
   const trimmedModel =
     modelRaw === undefined || modelRaw === '' ? undefined : modelRaw.trim() || undefined;
+  const streamTimeoutMs = envStreamTimeoutMs('BENCH_STREAM_TIMEOUT_MS', benchmarkConfig.streamTimeoutMs);
   return {
     ...(trimmedModel ? { model: trimmedModel } : {}),
     models: models && models.length > 0 ? models : undefined,
@@ -69,6 +71,7 @@ function resolveRunOptions(): LlmBenchmarkRunOptions {
     scenarios,
     repeat: envPositiveInt('BENCH_REPEAT', repeat ?? 1),
     concurrency,
+    streamTimeoutMs,
     promptConfig,
     compareEmptySystem,
     compareEmptySystemPlainOnly,

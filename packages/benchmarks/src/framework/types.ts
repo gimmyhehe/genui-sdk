@@ -82,6 +82,11 @@ export interface LlmBenchmarkRunOptions {
   repeat?: number;
   // 样本生成并发度（最小为 1）
   concurrency?: number;
+  /**
+   * 单次 `streamText` 请求超时（毫秒），超时中止流并记入 `errorMessage`，避免挂死占满 worker。
+   * 默认见 `benchmark.config`；可用 `BENCH_STREAM_TIMEOUT_MS` 覆盖，`0` 表示不限制。
+   */
+  streamTimeoutMs?: number;
   // 生成样本用的 system prompt 配置
   promptConfig: LlmBenchmarkPromptConfig;
   // 报告阶段是否启用 LLM-as-a-Judge 质量评估

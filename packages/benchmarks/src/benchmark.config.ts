@@ -26,6 +26,8 @@ export const benchmarkConfig: LlmBenchmarkRunOptions = {
   targetSampleRunDir: undefined,
   // 生成阶段并发度（最小为 1）；值越大请求并发越高
   concurrency: 5,
+  // streamText 单次请求超时（毫秒）；可由 BENCH_STREAM_TIMEOUT_MS 覆盖；0=不限制
+  streamTimeoutMs: 600_000,
   // 生成样本时的 prompt 组合配置（genPrompt + specificPrompt + userAppendPrompt）
   promptConfig: {
     // genPrompt 的自定义配置（对应 metadata.tinygenui 形态）

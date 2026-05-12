@@ -34,14 +34,14 @@ src/
 │   └── contextual.ts
 └── utils/
     ├── index.ts
-    ├── env.ts               # BENCH_* 解析
+    ├── env.ts               # BENCH_* 解析（含 envStreamTimeoutMs）
     ├── fs-paths.ts          # reports 根目录、run 目录名、样本文件路径
     ├── tpot.ts              # TPOT 计算
     ├── extract-schema-json.ts
     ├── judge.ts
     ├── resolve-models.ts
     ├── resolve-ai-sdk-model.ts   # 按 BENCH_MAAS_MODELS_PATH 读清单，构造 AI SDK model
-    ├── stream-text-usage.ts      # 流结束后解析 usage
+    ├── stream-text-usage.ts      # resolveStreamTextUsage、benchStreamTextAbortSignal（streamText 超时）
     ├── first-observable-component.ts
     ├── excel-detail-rows.ts      # Excel「明细」行
     ├── comparison-scenario-label.ts
@@ -81,6 +81,7 @@ src/
 | `BENCH_SCENARIOS` | 逗号分隔多场景；**优先级高于** `BENCH_SCENARIO` |
 | `BENCH_REPEAT` | 每个「模型 × 场景」重复次数（正整数，默认取自 config） |
 | `BENCH_CONCURRENCY` | 生成阶段并发数（正整数，默认取自 config） |
+| `BENCH_STREAM_TIMEOUT_MS` | 单次 `streamText` 超时（毫秒）；默认 `600000`（10 分钟）；**`0`** 表示不启用超时（生成与 Judge 均适用） |
 | `BENCH_LLM_JUDGE` | 是否启用 Judge（覆盖 `benchmark.config` 中 `llmJudge.enabled`） |
 | `BENCH_LLM_JUDGE_MODEL` | Judge 使用的模型 id（空则复用主模型：显式 `model`，否则为 `models` 首项） |
 | `BENCH_JSON` | `true` 时控制台输出 JSON；否则表格 + Summary |
@@ -94,7 +95,7 @@ src/
 | `BENCH_SAMPLES_DIR` | 样本根目录（默认：`packages/benchmarks/reports`，见 `resolveSamplesDir`） |
 | `BENCH_OUTPUT_DIR` | 报告输出目录（默认与本次 run 目录一致） |
 
-`src/benchmark.config.ts` 中对各配置项的默认值有更细的说明（含 `promptConfig`、`llmJudge`、`modelsFromMaasManifest`、`compareEmptySystem` / `compareEmptySystemPlainOnly` 等）。
+`src/benchmark.config.ts` 中对各配置项的默认值有更细的说明（含 `promptConfig`、`llmJudge`、`streamTimeoutMs`、`modelsFromMaasManifest`、`compareEmptySystem` / `compareEmptySystemPlainOnly` 等）。
 
 ### 默认「样本变体」行为（`benchmark.config.ts`）
 
