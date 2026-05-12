@@ -27,7 +27,7 @@ const cloneDefaultValue = (value: any) => {
   if (!isObjectRecord(value) && !Array.isArray(value)) {
     return value;
   }
-  return structuredClone(value);
+  return JSON.parse(JSON.stringify(value));
 };
 
 const collectPropertyDefaults = (
