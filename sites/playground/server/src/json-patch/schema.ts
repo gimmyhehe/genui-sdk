@@ -45,11 +45,18 @@ const jsonPatchValueSchema: z.ZodType<JsonValue> = z.lazy(() =>
 );
 
 /**
- * RFC 6902 JSON Patch 操作集
- * 增加 .describe() 以优化 LLM 的 Function Calling 或 JSON 生成表现
+ * JSON Patch 操作集：以 RFC 6902 为语法基础，并做 UI 组件树场景下的领域扩展。
+ * 每条操作均带非标准的 `id`（RFC 6902 未定义），用于定位当前 schema 中的目标组件；
+ * `move` 还使用 `positionId` / `position` 等与组件相对位置相关的语义。
+ * 增加 .describe() 以优化 LLM 的 Function Calling 或 JSON 生成表现。
  */
 const baseOperationSchema = z.object({
-  id: z.string().min(1).describe('Target component id in current schema.'),
+  id: z
+    .string()
+    .min(1)
+    .describe(
+      'Target component id in the current UI schema (domain extension; RFC 6902 operations do not include this field).',
+    ),
 });
 
 const movePositionSchema = z
@@ -121,7 +128,7 @@ const testOperation = z
   .describe('Tests that a value at the target location is equal to a specified value.');
 
 /**
- * 最终导出的 JSON Patch Schema
+ * 最终导出的「JSON Patch 风格」操作 Schema（RFC 6902 基础 + 组件定向扩展）
  */
 export const jsonPatchOperationSchema = z.discriminatedUnion('op', [
   addOperation,
@@ -134,7 +141,9 @@ export const jsonPatchOperationSchema = z.discriminatedUnion('op', [
 
 export const jsonPatchSchema = z
   .array(jsonPatchOperationSchema)
-  .describe('An array of JSON Patch operations (RFC 6902) to be applied in order.');
+  .describe(
+    'JSON Patch–style operations (based on RFC 6902), extended with component targeting (`id`, and move positioning) for UI schema manipulation; applied in order.',
+  );
 
 export type JsonPatchOperation = z.infer<typeof jsonPatchOperationSchema>;
 export type JsonPatch = z.infer<typeof jsonPatchSchema>;
