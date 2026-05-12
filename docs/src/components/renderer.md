@@ -235,6 +235,7 @@ type JSSlot = { type: 'JSSlot'; value: string | Record<string, any> };
 ```typescript
 interface IRendererProps {
   content: string | { [prop: string]: any };
+  isJsonComplete?: boolean;
   generating?: boolean;
   customComponents?: Record<string, Component>;
   customActions?: Record<
