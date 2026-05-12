@@ -25,10 +25,9 @@ import {
   validateJsonPatch,
   PARSE_PARTIAL_JSON_STATE,
   formatJsonPatch,
-  formatDateTime,
   generateIdForComponents,
-  generateId,
 } from './template-chat-utils';
+import { formatDate, generateId } from '../../utils';
 import { jsonPatchDeduplicator } from './json-patch-deduplicator';
 import useTemplate from './useTemplate';
 import AssistantFooter from './TemplateAssistantFooter.vue';
@@ -376,7 +375,7 @@ const handleNotification = (event: INotificationPayload) => {
     if (lastMessageCard) {
       lastMessageCard.schema = JSON.stringify(currentSchema.value);
       lastMessageCard.prevSchema = prevSchema.value || '';
-      lastMessageCard.generatedTime = formatDateTime(new Date());
+      lastMessageCard.generatedTime = formatDate(new Date());
     }
   }
 };

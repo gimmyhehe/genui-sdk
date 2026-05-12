@@ -847,6 +847,9 @@ importers:
       zod:
         specifier: ^3.25.76
         version: 3.25.76
+      zod-to-json-schema:
+        specifier: ^3.25.1
+        version: 3.25.1(zod@3.25.76)
     devDependencies:
       '@types/express':
         specifier: ^5.0.1
@@ -926,6 +929,9 @@ importers:
       schema-renderer-ng-adpater:
         specifier: workspace:*
         version: link:../schema-renderer-ng-adpater
+      uuid:
+        specifier: 11.1.0
+        version: 11.1.0
       vite-commit-hash-plugin:
         specifier: workspace:*
         version: link:../vite-commit-hash-plugin
