@@ -22,6 +22,7 @@ const {
   setCurrentSchema,
   setCurrentPreviewSchema,
   currentPreviewSchema,
+  currentPreviewSchemaComplete,
   templateConversationState,
   conversation,
   currentCardId,
@@ -296,6 +297,7 @@ onUnmounted(() => {
       :panel-style="mobileSheetPanelStyle"
       :show-return-latest-button="showReturnLatestButton"
       :current-preview-schema="currentPreviewSchema"
+      :current-preview-schema-complete="currentPreviewSchemaComplete"
       :schema-editor="schemaEditor"
       :editor-options="editorOptions"
       :view-schema-icon="viewSchemaIcon"
@@ -330,7 +332,7 @@ onUnmounted(() => {
               />
             </div>
           </div>
-          <schema-renderer class="schema-renderer" :content="currentPreviewSchema" :generating="false" />
+          <schema-renderer class="schema-renderer" :content="currentPreviewSchema" :generating="false" :isJsonComplete="currentPreviewSchemaComplete" />
         </div>
       </div>
     </template>
