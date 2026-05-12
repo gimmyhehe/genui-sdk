@@ -53,15 +53,19 @@ export type LlmBenchmarkPromptConfig = {
 export type LlmBenchmarkJudgeConfig = {
   // 是否启用 Judge 评估（默认 false）
   enabled?: boolean;
-  // Judge 使用的模型 id；为空时默认复用 `model`
+  // Judge 使用的模型 id；为空时复用主模型（显式 `model`，否则为 `models` 首项）
   model?: string;
   // 覆盖默认 Judge system prompt
   systemPrompt?: string;
 };
 
 export interface LlmBenchmarkRunOptions {
-  model: string;
-  // 多模型对比：与 model 二选一或并存；有非空项时优先按列表逐模型生成/过滤报告
+  /**
+   * 单模型 id，或与 `models` 并存时作为「主模型」元数据（报告、Judge 默认、HTML 展示等）。
+   * 可与 `models` 同时省略其一：至少须提供 **非空的 `models`** 或 **非空的 `model`**；入口会在生成前校验。
+   */
+  model?: string;
+  /** 多模型对比：非空时按列表逐模型生成/过滤报告；与 `model` 可只配置其一或并存（并存时常用于指定主模型 + 多模型列表）。 */
   models?: string[];
   // 与 chat-genui 一致，决定 genPrompt 使用的物料 render-config（Vue / Angular）
   framework?: 'Vue' | 'Angular';

@@ -58,8 +58,11 @@ function resolveRunOptions(): LlmBenchmarkRunOptions {
   const targetSampleRunDir = envString('BENCH_TARGET_SAMPLE_RUN_DIR', defaultTargetRunDir);
   const skipExistingDefault = Boolean(targetSampleRunDir);
   const skipExistingSampleFiles = envBool('BENCH_SKIP_EXISTING_SAMPLES', skipExistingDefault);
+  const modelRaw = envString('BENCH_MODEL', model);
+  const trimmedModel =
+    modelRaw === undefined || modelRaw === '' ? undefined : modelRaw.trim() || undefined;
   return {
-    model: envString('BENCH_MODEL', model) ?? model,
+    ...(trimmedModel ? { model: trimmedModel } : {}),
     models: models && models.length > 0 ? models : undefined,
     framework: envFramework('BENCH_FRAMEWORK', framework),
     scenario: envString('BENCH_SCENARIO', scenario),

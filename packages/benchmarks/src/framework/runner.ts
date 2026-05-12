@@ -13,6 +13,7 @@ import {
   comparisonScenarioLabel,
   formatBeijingDateTime,
   formatNumber,
+  resolvePrimaryBenchmarkModelId,
   resolveSamplesDir,
   sampleStdev,
 } from '../utils';
@@ -174,11 +175,12 @@ function escapeHtmlReportText(value: unknown): string {
 function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchmarkRunOptions) {
   const comparison = buildComparisonByScenario(results, { repeat: options.repeat });
   const modelList = distinctModels(results);
-  const modelListForChart = modelList.length > 0 ? modelList : [options.model];
+  const primaryModelId = resolvePrimaryBenchmarkModelId(options);
+  const modelListForChart = modelList.length > 0 ? modelList : [primaryModelId];
   const payload = jsonStringifyForInlineScript(results);
   const comparisonPayload = jsonStringifyForInlineScript(comparison);
   const modelListPayload = jsonStringifyForInlineScript(modelListForChart);
-  const modelsDisplay = modelList.length ? modelList.join(', ') : options.model;
+  const modelsDisplay = modelList.length ? modelList.join(', ') : primaryModelId;
   const beijingNow = formatBeijingDateTime(new Date(), {
     dateTimeSeparator: ' ',
     timeSeparator: ':',
@@ -211,7 +213,7 @@ function createReportHtml(results: LlmBenchmarkResultItem[], options: LlmBenchma
   <div class="card">
     <h2>GenUI LLM Benchmark</h2>
     <div>Models: <b>${escapeHtmlReportText(modelsDisplay)}</b></div>
-    <div>Primary config model: <b>${escapeHtmlReportText(options.model)}</b></div>
+    <div>Primary config model: <b>${escapeHtmlReportText(primaryModelId)}</b></div>
     <div>Generated at (Beijing): <b>${escapeHtmlReportText(beijingNow)}</b></div>
     ${benchmarkTotalMs != null ? `<div>Total benchmark elapsed: <b>${benchmarkTotalMs} ms</b></div>` : ''}
     <div>repeat: <b>${options.repeat ?? 1}</b>${(options.repeat ?? 1) >= 3 ? '（≥3 时汇报含各场景×模型的均值与样本标准差 σ）' : ''}</div>
@@ -657,7 +659,8 @@ function writeBenchmarkArtifacts(
 
   const modelList = distinctModels(results);
   const comparisonByScenario = buildComparisonByScenario(results, { repeat: options.repeat });
-  const modelsInArtifact = modelList.length > 0 ? modelList : [options.model];
+  const primaryModelId = resolvePrimaryBenchmarkModelId(options);
+  const modelsInArtifact = modelList.length > 0 ? modelList : [primaryModelId];
   const benchmarkTotalMs =
     typeof options.benchmarkStartedAtMs === 'number' ? Math.max(0, Date.now() - options.benchmarkStartedAtMs) : undefined;
 
@@ -666,7 +669,7 @@ function writeBenchmarkArtifacts(
 
   const json = JSON.stringify(
     {
-      model: options.model,
+      model: primaryModelId,
       models: modelsInArtifact,
       repeat: options.repeat ?? 1,
       benchmarkTotalMs,
@@ -717,7 +720,7 @@ export function printLlmBenchmarkResults(
   samplesForExcel?: LlmBenchmarkSample[],
 ) {
   const modelList = distinctModels(results);
-  const label = modelList.length > 0 ? modelList.join(', ') : options.model;
+  const label = modelList.length > 0 ? modelList.join(', ') : resolvePrimaryBenchmarkModelId(options);
   console.log(`\nModels: ${label}`);
 
   if (options.json) {

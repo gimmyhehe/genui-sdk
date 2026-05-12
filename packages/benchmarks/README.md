@@ -74,7 +74,7 @@ src/
 
 | 变量 | 作用 |
 | --- | --- |
-| `BENCH_MODEL` | 单模型 id（`models` 未配置时生效） |
+| `BENCH_MODEL` | 单模型 id；与 `BENCH_MODELS` / 配置里的 `models` **至少其一非空**即可；仅多模型时可不设此项 |
 | `BENCH_MODELS` | 逗号分隔多模型；非空时只跑列表内模型，报告也只统计这些模型 |
 | `BENCH_FRAMEWORK` | `Vue` 或 `Angular` |
 | `BENCH_SCENARIO` | 单场景 id 过滤 |
@@ -82,7 +82,7 @@ src/
 | `BENCH_REPEAT` | 每个「模型 × 场景」重复次数（正整数，默认取自 config） |
 | `BENCH_CONCURRENCY` | 生成阶段并发数（正整数，默认取自 config） |
 | `BENCH_LLM_JUDGE` | 是否启用 Judge（覆盖 `benchmark.config` 中 `llmJudge.enabled`） |
-| `BENCH_LLM_JUDGE_MODEL` | Judge 使用的模型 id（空则复用 `BENCH_MODEL` / config `model`） |
+| `BENCH_LLM_JUDGE_MODEL` | Judge 使用的模型 id（空则复用主模型：显式 `model`，否则为 `models` 首项） |
 | `BENCH_JSON` | `true` 时控制台输出 JSON；否则表格 + Summary |
 | `BENCH_WRITE_EXCEL` | 是否生成 `report_<runDir>.xlsx`（`runDir` 为本次样本/报告所在子目录名；默认 `true`） |
 | `BENCH_MODELS_FROM_MAAS` | 为真且 **`models` 在 config 中为空** 时，用 `BENCH_MAAS_MODELS_PATH` 清单中的模型名作为多模型列表（config 里 `modelsFromMaasManifest: true` 时不必再设此项） |
@@ -130,7 +130,7 @@ BENCH_TARGET_SAMPLE_RUN_DIR=2026-05-09_09-52-03 pnpm --filter @opentiny/genui-sd
 ### 多模型与报告过滤
 
 - 配置 **`models` / `BENCH_MODELS`**：只生成并只汇总这些模型的样本。
-- **仅配置单个 `model`**：报告若未限定 `models`，会读取目录下**全部** `.json` 样本（便于对比历史 run）。
+- **仅配置单个 `model`**（且未限定 `models`）：报告若未限定 `models`，会读取目录下**全部** `.json` 样本（便于对比历史 run）。
 - 默认每次在样本根目录下新建 **`yyyy-MM-dd_hh-mm-ss`（北京时间）** 子目录；若设置 `BENCH_TARGET_SAMPLE_RUN_DIR` 则写入该目录、不新建时间戳。
 - 样本文件名：**`${modelSlug}_${scenario}_${runIndex}.json`**（plain 为 **`_${runIndex}_plain.json`** 后缀形式，即 `..._${runIndex}_plain.json`；`modelSlug` 为「文件安全可读前缀 + 下划线 + 模型 id 的 SHA256 十二位十六进制」，避免不同 id 经截断后撞名覆盖）。
 - **中断后继续**：见上文「[中断后继续](#中断后继续)」。

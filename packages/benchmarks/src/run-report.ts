@@ -9,6 +9,7 @@ import {
   extractSchemaJsonBlock,
   parseJudgeJson,
   resolveAiSdkModelForBench,
+  resolvePrimaryBenchmarkModelId,
   resolveSamplesDir,
   resolveStreamTextUsage,
 } from './utils';
@@ -119,7 +120,7 @@ type LlmJudgeResult = {
  */
 async function judgeOneSample(sample: LlmBenchmarkSample, options: LlmBenchmarkRunOptions): Promise<LlmJudgeResult> {
   const judgeCfg = options.llmJudge;
-  const modelId = judgeCfg?.model || options.model;
+  const modelId = judgeCfg?.model || resolvePrimaryBenchmarkModelId(options);
   const system =
     judgeCfg?.systemPrompt ??
     `你是严格的前端代码评测员。请依据 schemaJson 格式规范，基于用户需求与模型输出从三个角度评估生成的UI代码是否具备完成目标任务的实际能力，并给出评分：

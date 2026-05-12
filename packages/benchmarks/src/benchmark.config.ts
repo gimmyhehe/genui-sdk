@@ -4,7 +4,7 @@ import type { LlmBenchmarkRunOptions } from './framework/index';
  * 基准运行默认配置（可被同目录下 `.env` 中 `BENCH_*` 变量覆盖）。
  */
 export const benchmarkConfig: LlmBenchmarkRunOptions = {
-  // 单模型模式下使用的模型名（当 models 为空时生效）
+  // 单模型 id；未配置 `models` 时必填其一。与 `models` 并存时可作「主模型」元数据（报告 / Judge 默认等）
   model: 'DeepSeek-V3.2',
   // 多模型对比列表；有值时优先于 model，按列表逐模型生成并汇总报告
   models: undefined,

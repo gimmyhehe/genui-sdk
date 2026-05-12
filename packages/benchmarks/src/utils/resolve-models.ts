@@ -15,7 +15,7 @@ function dedupePreserveOrder(ids: string[]): string[] {
 }
 
 /**
- * 生成与报告共用的模型列表：`models` 非空时用之（**保序去重**），否则 `[model]`。
+ * 生成与报告共用的模型列表：`models` 非空时用之（**保序去重**）；否则使用非空的单 `model`；二者皆空时抛错。
  * @param options 运行配置
  * @returns 最终参与执行的模型 id 列表
  */
@@ -24,7 +24,26 @@ export function resolveModelsForBench(options: LlmBenchmarkRunOptions): string[]
   if (raw.length > 0) {
     return dedupePreserveOrder(raw);
   }
-  return [options.model];
+  const single = options.model?.trim();
+  if (single) {
+    return [single];
+  }
+  throw new Error('Set `model` and/or a non-empty `models` array (e.g. BENCH_MODEL / BENCH_MODELS).');
+}
+
+/**
+ * 主模型 id：用于报告元数据、Judge 未单独指定时的默认模型等。
+ * 优先使用显式 `model`，否则取 `models` 中第一个非空项。
+ * 调用方应已保证 `model` 与 `models` 不同时为空（例如已通过 {@link resolveModelsForBench}）。
+ */
+export function resolvePrimaryBenchmarkModelId(
+  options: Pick<LlmBenchmarkRunOptions, 'model' | 'models'>,
+): string {
+  const explicit = options.model?.trim();
+  if (explicit) return explicit;
+  const first = options.models?.map((m) => m.trim()).find((m) => m.length > 0);
+  if (first) return first;
+  throw new Error('Set `model` or a non-empty `models` array (e.g. BENCH_MODEL / BENCH_MODELS).');
 }
 
 const SLUG_MAX_LEN = 96;
