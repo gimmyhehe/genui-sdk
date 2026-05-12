@@ -75,7 +75,7 @@ export class GenuiRenderer implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['content']) {
+    if (changes['content'] || changes['isJsonComplete']) {
       this.processNewContent(changes['content'].currentValue);
       // 异步等待渲染器初始化context后再设置
       Promise.resolve().then(() => {
