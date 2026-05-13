@@ -1075,6 +1075,9 @@ importers:
       '@opentiny/genui-sdk-core':
         specifier: workspace:*
         version: link:../../../packages/core
+      '@opentiny/genui-sdk-materials-vue-opentiny-vue':
+        specifier: workspace:*
+        version: link:../../../packages/materials/vue-opentiny-vue
       '@opentiny/genui-sdk-vue':
         specifier: workspace:*
         version: link:../../../packages/frameworks/vue
