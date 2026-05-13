@@ -1,0 +1,28 @@
+diff --git a/dist/index.js b/dist/index.js
+index 0309759e178fbf74e5e1d824cdb45bc76defcbd3..ffd995d87ddb1c41bfcdddaac4b3700dfacbd76d 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -103,7 +103,8 @@ function createDeepSeek(options = {}) {
+       url: ({ path }) => `${baseURL}${path}`,
+       headers: getHeaders,
+       fetch: options.fetch,
+-      metadataExtractor: deepSeekMetadataExtractor
++      metadataExtractor: deepSeekMetadataExtractor,
++      keepReasoning: modelId.includes("deepseek/deepseek-v4"),
+     });
+   };
+   const provider = (modelId) => createLanguageModel(modelId);
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 8aba38f24dbc0eee2f53a0b152f5ca082e3993bd..8e6a61050634dc3a761ee1b6e51dfa5f67f4de4b 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -81,7 +81,8 @@ function createDeepSeek(options = {}) {
+       url: ({ path }) => `${baseURL}${path}`,
+       headers: getHeaders,
+       fetch: options.fetch,
+-      metadataExtractor: deepSeekMetadataExtractor
++      metadataExtractor: deepSeekMetadataExtractor,
++      keepReasoning: modelId.includes("deepseek/deepseek-v4"),
+     });
+   };
+   const provider = (modelId) => createLanguageModel(modelId);
