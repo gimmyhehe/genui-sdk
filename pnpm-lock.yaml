@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@ai-sdk/deepseek@1.0.7':
-    hash: 81445a27907264fc91bffc084e43c4516d01093280f7a6dc55728dc2b29de2c4
+    hash: 0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7
     path: patches/@ai-sdk__deepseek@1.0.7.patch
   '@ai-sdk/openai-compatible@1.0.7':
     hash: e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0
@@ -49,7 +49,7 @@ importers:
         version: 2.0.57(zod@4.1.13)
       '@ai-sdk/deepseek':
         specifier: 1.0.7
-        version: 1.0.7(patch_hash=81445a27907264fc91bffc084e43c4516d01093280f7a6dc55728dc2b29de2c4)(zod@4.1.13)
+        version: 1.0.7(patch_hash=0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7)(zod@4.1.13)
       '@ai-sdk/openai':
         specifier: ^2.0.10
         version: 2.0.89(zod@4.1.13)
@@ -911,7 +911,7 @@ importers:
         version: 2.0.57(zod@3.25.76)
       '@ai-sdk/deepseek':
         specifier: 1.0.7
-        version: 1.0.7(patch_hash=81445a27907264fc91bffc084e43c4516d01093280f7a6dc55728dc2b29de2c4)(zod@3.25.76)
+        version: 1.0.7(patch_hash=0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7)(zod@3.25.76)
       '@ai-sdk/openai':
         specifier: ^2.0.10
         version: 2.0.89(zod@3.25.76)
@@ -9684,14 +9684,14 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.20(zod@4.1.13)
       zod: 4.1.13
 
-  '@ai-sdk/deepseek@1.0.7(patch_hash=81445a27907264fc91bffc084e43c4516d01093280f7a6dc55728dc2b29de2c4)(zod@3.25.76)':
+  '@ai-sdk/deepseek@1.0.7(patch_hash=0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7)(zod@3.25.76)':
     dependencies:
       '@ai-sdk/openai-compatible': 1.0.7(patch_hash=e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0)(zod@3.25.76)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.3(zod@3.25.76)
       zod: 3.25.76
 
-  '@ai-sdk/deepseek@1.0.7(patch_hash=81445a27907264fc91bffc084e43c4516d01093280f7a6dc55728dc2b29de2c4)(zod@4.1.13)':
+  '@ai-sdk/deepseek@1.0.7(patch_hash=0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7)(zod@4.1.13)':
     dependencies:
       '@ai-sdk/openai-compatible': 1.0.7(patch_hash=e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0)(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
