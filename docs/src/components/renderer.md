@@ -30,6 +30,26 @@ const schemaContent = {
 </script>
 ```
 
+### isJsonComplete
+
+- **类型**: `boolean`
+- **必填**: 否
+- **说明**: 仅当content类型为json对象时生效，标记当前json是否完整，用于辅助缓冲判断是否值完整。
+
+```vue
+<template>
+  <GenuiRenderer :content="content" :isJsonComplete="isJsonComplete" />
+</template>
+
+<script setup>
+const content = ref({
+  componentName: 'Page',
+  css: '.main-content { color:'
+})
+const isJsonComplete = ref(false);
+</script>
+```
+
 ### generating
 
 - **类型**: `boolean`
@@ -215,6 +235,7 @@ type JSSlot = { type: 'JSSlot'; value: string | Record<string, any> };
 ```typescript
 interface IRendererProps {
   content: string | { [prop: string]: any };
+  isJsonComplete?: boolean;
   generating?: boolean;
   customComponents?: Record<string, Component>;
   customActions?: Record<
