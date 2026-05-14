@@ -1,5 +1,7 @@
+import type { LanguageModel } from 'ai';
 import type { McpServersConfig } from './mcp-server.js';
 import type { PlaygroundSkillConfig } from '../skills/index.js';
+import type { ProviderConfig } from '../ai-sdk-providers.js';
 
 export type LLMConfigParams = {
   model?: string;
@@ -9,7 +11,10 @@ export type LLMConfigParams = {
   skills?: PlaygroundSkillConfig[];
 };
 
-export type LLMConfig = LLMConfigParams & {
+export type LLMConfig = Omit<LLMConfigParams, 'model'> & {
+  model?: LanguageModel;
+  provider?: ProviderConfig;
   supportJsonFormat?: boolean;
   specificPrompt?: string;
+  extraBody?: Record<string, unknown>;
 };
