@@ -25,29 +25,31 @@ interface OpenTinyModelsResponse {
 export function convertOpenTinyToProviderModelsData(resp: OpenTinyModelsResponse): Record<string, any> {
   const models = Array.isArray(resp?.models) ? resp.models : [];
 
-  const convertedModels = models.map((m) => {
+  const convertedModels = models.map((model) => {
+    const { display_name, id, type, capabilities, provider } = model;
     const supportImage =
-      m.type === 'vision' || m.capabilities?.vision === true || m.capabilities?.fileUpload?.supportDirectImage === true;
+      type === 'vision' || capabilities?.vision === true || capabilities?.fileUpload?.supportDirectImage === true;
 
-    const model: any = {
-      name: m.display_name || m.id,
-      id: m.id,
+    const modelName = display_name && provider ? `${provider}_${display_name}` : id;
+    const modelData: any = {
+      name: modelName,
+      id,
     };
 
     if (supportImage) {
-      model.features = { supportImage: true };
+      modelData.features = { supportImage: true };
     }
 
-    return model;
+    return modelData;
   });
 
   // 为了与现有 opentiny-models.json 保持一致，统一放在 deepseek 提供商下
   return {
     dynamic: {
       name: 'deepseek',
-      apiKeyEnvName: 'API_KEY',
-      baseUrlEnvName: 'BASE_URL',
-      models: convertedModels,
+      apiKeyEnvName: 'DYNAMIC_API_KEY',
+      baseUrlEnvName: 'DYNAMIC_BASE_URL',
+      models: convertedModels,  
     },
   };
 }
