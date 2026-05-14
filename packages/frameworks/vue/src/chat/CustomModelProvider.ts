@@ -17,8 +17,8 @@ async function readChunk(reader: ReadableStreamDefaultReader<Uint8Array>, handle
       if (lineEnd === -1) break;
       const line = buffer.slice(0, lineEnd).trim();
       buffer = buffer.slice(lineEnd + 1);
-      if (!line.startsWith('data: ')) continue;
-      const data = line.slice(6);
+      if (!line.startsWith('data:')) continue;
+      const data = line.slice(5).trim();
       if (data === '[DONE]') break;
       handler(data);
     }
