@@ -1,20 +1,29 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
-import { TinyInput, TinyForm, TinyFormItem, Modal } from '@opentiny/vue';
-import { IconDel, IconEdit, IconPlus } from '@opentiny/vue-icon';
-import { IconFileOther } from '@opentiny/tiny-robot-svgs';
+import { TinyInput, TinyForm, TinyFormItem, Modal, TinyCheckbox } from '@opentiny/vue';
+import { IconDel, IconEdit, IconPlus, IconDownload } from '@opentiny/vue-icon';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
 
 const TinyIconDel = IconDel();
 const TinyIconEdit = IconEdit();
 const TinyIconPlus = IconPlus();
+const TinyIconDownload = IconDownload();
 
 const emit = defineEmits(['item-click', 'item-action', 'item-title-change', 'add-item']);
 
-const props = defineProps<{
-  listData: Conversation[];
-  currentId: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    listData: Conversation[];
+    currentId: string;
+    /** 为 false 时隐藏「自定义示例」与新增（用于父级按时间分多块列表时仅首块展示） */
+    showHeader?: boolean;
+    /** 时间分组标题，显示在头部下方、列表上方（如「今天」） */
+    timeGroupLabel?: string;
+  }>(),
+  { showHeader: true },
+);
+
+const selectedIds = defineModel<string[]>('selectedIds', { default: () => [] });
 
 // 列表项状态
 const renameId = ref<string | null>(null); // 当前正在重命名的 id
@@ -76,12 +85,14 @@ const handleAdd = () => {
 <template>
   <div class="list-container">
     <!-- 头部：自定义示例 + 增加图标 -->
-    <div class="header-container">
+    <div v-if="props.showHeader" class="header-container">
       <span class="header-title">自定义示例</span>
       <button class="add-icon-button" @click="handleAdd" title="新增">
         <TinyIconPlus class="action-icon-icon"></TinyIconPlus>
       </button>
     </div>
+
+    <div v-if="props.timeGroupLabel" class="time-group-label">{{ props.timeGroupLabel }}</div>
 
     <!-- 列表容器 -->
     <ul class="item-list">
@@ -91,6 +102,7 @@ const handleAdd = () => {
         :class="{ 'list-item': true, active: currentId === item.id }"
         @click="handleItemClick(item)"
       >
+        <tiny-checkbox :label="item.id" :value="item.id" class="list-item__checkbox" text="" @click.stop />
         <!-- 列表项文本/重命名输入框 -->
         <div class="item-content">
           <template v-if="renameId === item.id">
@@ -127,7 +139,7 @@ const handleAdd = () => {
         <template v-if="renameId !== item.id">
           <div class="action-icons">
             <button class="action-icon export-icon" @click.stop="handleExport(item)" title="导出">
-              <IconFileOther class="action-icon-icon" />
+              <TinyIconDownload class="action-icon-icon" />
             </button>
             <button class="action-icon rename-icon" @click.stop="handleRename(item)" title="重命名">
               <TinyIconEdit class="action-icon-icon"></TinyIconEdit>
@@ -182,6 +194,14 @@ const handleAdd = () => {
   background-color: #f9fafb;
 }
 
+.time-group-label {
+  margin-top: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  padding: 0 4px 6px;
+}
+
 .add-icon-button .add-icon {
   font-size: 18px;
   font-weight: 300;
@@ -194,7 +214,6 @@ const handleAdd = () => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .list-item {
@@ -202,8 +221,10 @@ const handleAdd = () => {
   padding: 10px 12px;
   border-radius: 12px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
   background-color: #ffffff;
 
   &:hover,
@@ -212,9 +233,14 @@ const handleAdd = () => {
   }
 }
 
+.list-item__checkbox {
+  flex-shrink: 0;
+}
+
 /* 列表项文本容器 */
 .item-content {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -228,6 +254,7 @@ const handleAdd = () => {
   opacity: 0;
   transition: opacity 0.2s;
   margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .list-item:hover .action-icons {

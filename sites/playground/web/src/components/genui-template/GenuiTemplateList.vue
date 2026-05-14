@@ -1,17 +1,34 @@
 <script setup lang="ts">
 import type { Conversation } from '@opentiny/tiny-robot-kit';
+import { computed, ref, watch } from 'vue';
+import { TinyModal, TinyCheckboxGroup } from '@opentiny/vue';
 import useTemplate from './useTemplate';
 import TemplateList from './TemplateList.vue';
 import {
   HistoryTransferToolbar,
   downloadConversations,
   reconcileImportedConversationIds,
+  groupByTimeBuckets
 } from '../tab-components/history-transfer';
 
 const emit = defineEmits(['switch-template']);
 
 const { templateConversationState, switchTemplate, deleteTemplate, updateTemplateTitle, createTemplate, conversation } =
   useTemplate();
+
+const selectedTemplateIds = ref<string[]>([]);
+
+const conversations = computed(() => templateConversationState.value?.conversations ?? []);
+
+const groupedTemplateList = computed(() => groupByTimeBuckets(conversations.value));
+
+watch(
+  () => conversations.value.map((c) => c.id),
+  () => {
+    const idSet = new Set(conversations.value.map((c) => c.id));
+    selectedTemplateIds.value = selectedTemplateIds.value.filter((id) => idSet.has(id));
+  },
+);
 
 const handleImportConversations = (imported: Conversation[]) => {
   if (!conversation) {
@@ -47,22 +64,69 @@ const handleItemTitleChange = (id: string, title: string) => {
 const handleAddItem = () => {
   createTemplate();
 };
+
+const handleBatchExport = () => {
+  const idSet = new Set(selectedTemplateIds.value);
+  const items = conversations.value.filter((c) => idSet.has(c.id));
+  downloadConversations(items, 'genui-template');
+};
+
+const handleBatchDelete = () => {
+  const ids = [...selectedTemplateIds.value];
+  if (ids.length === 0) {
+    return;
+  }
+  TinyModal.confirm(`确定删除选中的 ${ids.length} 个模板？`)
+    .then((type: 'confirm' | 'cancel') => {
+      if (type === 'cancel') {
+        return;
+      }
+      for (const id of ids) {
+        deleteTemplate(id);
+      }
+      selectedTemplateIds.value = [];
+    });
+};
 </script>
 
 <template>
   <div class="genui-template-list">
     <history-transfer-toolbar
-      :conversations="templateConversationState.conversations"
+      :conversations="conversations"
+      :selected-ids="selectedTemplateIds"
       @import-conversations="handleImportConversations"
+      @batch-export="handleBatchExport"
+      @batch-delete="handleBatchDelete"
     />
-    <template-list
-      :list-data="templateConversationState.conversations"
-      :current-id="templateConversationState.currentId"
-      @item-click="handleItemClick"
-      @item-action="handleItemAction"
-      @item-title-change="handleItemTitleChange"
-      @add-item="handleAddItem"
-    />
+    <tiny-checkbox-group v-model="selectedTemplateIds">
+      <template v-if="groupedTemplateList.length === 0">
+        <template-list
+          v-model:selected-ids="selectedTemplateIds"
+          :list-data="[]"
+          :current-id="templateConversationState?.currentId ?? ''"
+          :show-header="true"
+          @item-click="handleItemClick"
+          @item-action="handleItemAction"
+          @item-title-change="handleItemTitleChange"
+          @add-item="handleAddItem"
+        />
+      </template>
+      <template v-else>
+        <template v-for="(section, index) in groupedTemplateList" :key="section.group">
+          <template-list
+            v-model:selected-ids="selectedTemplateIds"
+            :list-data="section.items"
+            :current-id="templateConversationState?.currentId ?? ''"
+            :show-header="index === 0"
+            :time-group-label="section.group"
+            @item-click="handleItemClick"
+            @item-action="handleItemAction"
+            @item-title-change="handleItemTitleChange"
+            @add-item="handleAddItem"
+          />
+        </template>
+      </template>
+    </tiny-checkbox-group>
   </div>
 </template>
 

@@ -1,14 +1,35 @@
 <template>
   <div class="history-transfer-toolbar">
-    <button class="history-transfer-toolbar__button" type="button" @click="triggerImport">导入</button>
-    <button
-      class="history-transfer-toolbar__button"
-      type="button"
+    <tiny-button round size="small" :disabled="selectedIds.length === 0" @click="emit('batch-delete')">
+      删除
+    </tiny-button>
+    <tiny-button round size="small" @click="triggerImport">导入</tiny-button>
+    <tiny-dropdown
+      border
+      trigger="click"
+      title="导出"
+      size="small"
+      round
+      :hide-on-click="true"
       :disabled="conversations.length === 0"
-      @click="exportAll"
+      @button-click="exportAll"
+      @item-click="handleExportItemClick"
     >
-      导出
-    </button>
+      <template #dropdown>
+        <tiny-dropdown-menu>
+          <tiny-dropdown-item
+            label="导出全部记录"
+            :disabled="conversations.length === 0"
+            :item-data="exportItemAll"
+          />
+          <tiny-dropdown-item
+            label="导出已选记录"
+            :disabled="selectedIds.length === 0"
+            :item-data="exportItemSelected"
+          />
+        </tiny-dropdown-menu>
+      </template>
+    </tiny-dropdown>
     <input
       ref="fileInputRef"
       class="history-transfer-toolbar__file-input"
@@ -21,17 +42,34 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { TinyNotify } from '@opentiny/vue';
+import {
+  TinyNotify,
+  TinyButton,
+  TinyDropdown,
+  TinyDropdownMenu,
+  TinyDropdownItem,
+} from '@opentiny/vue';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
 import { downloadConversations, parseConversationFile, reconcileImportedConversationIds } from './history-transfer';
 
-const props = defineProps<{
-  conversations: Conversation[];
-}>();
+const props = withDefaults(
+  defineProps<{
+    conversations: Conversation[];
+    selectedIds?: string[];
+  }>(),
+  { selectedIds: () => [] },
+);
 
 const emit = defineEmits<{
   'import-conversations': [conversations: Conversation[]];
+  'batch-export': [];
+  'batch-delete': [];
 }>();
+
+type ExportMenuAction = 'all' | 'selected';
+
+const exportItemAll = { action: 'all' as ExportMenuAction };
+const exportItemSelected = { action: 'selected' as ExportMenuAction };
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
@@ -54,6 +92,20 @@ const exportAll = () => {
   }
 
   downloadConversations(props.conversations);
+};
+
+const handleExportItemClick = (payload: { itemData?: { action: ExportMenuAction } }) => {
+  const action = payload?.itemData?.action;
+  if (action === 'all') {
+    exportAll();
+    return;
+  }
+  if (action === 'selected') {
+    if (props.selectedIds.length === 0) {
+      return;
+    }
+    emit('batch-export');
+  }
 };
 
 const handleImportFile = async (event: Event) => {
@@ -86,35 +138,10 @@ const handleImportFile = async (event: Event) => {
 <style lang="less" scoped>
 .history-transfer-toolbar {
   display: flex;
-  justify-content: flex-end;
   gap: 8px;
-  padding: 0 20px;
-}
-
-.history-transfer-toolbar__button {
-  height: 28px;
-  padding: 0 14px;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
-  background: #fff;
-  color: #191919;
-  font-size: 13px;
-  line-height: 26px;
-  cursor: pointer;
-  transition:
-    border-color 0.2s,
-    background-color 0.2s,
-    color 0.2s;
-
-  &:hover:not(:disabled) {
-    border-color: #7b7b7b;
-    background: #f7f7f7;
-  }
-
-  &:disabled {
-    color: #bfbfbf;
-    cursor: not-allowed;
-    background: #fafafa;
+  align-items: center;
+  .tiny-button {
+    margin-left: 0;
   }
 }
 
