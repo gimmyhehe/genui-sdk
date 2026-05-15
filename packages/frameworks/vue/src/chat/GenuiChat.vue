@@ -207,23 +207,27 @@ const messageRenderers = {
     const isGenerating = lastSchemaCardId.value === schemaCardProps.id && generating.value;
 
     return h(
-      GenuiRenderer,
-      {
-        ...schemaCardProps,
-        requiredCompleteFieldSelectors: props.requiredCompleteFieldSelectors || [],
-        generating: isGenerating,
-        customComponents: customComponentsMap,
-        customActions: {
-          ...customActionsMap,
-          continueChat: continueChatAction,
-          saveState: saveStateAction,
+      'div',
+      {},
+      h(
+        GenuiRenderer,
+        {
+          ...schemaCardProps,
+          requiredCompleteFieldSelectors: props.requiredCompleteFieldSelectors || [],
+          generating: isGenerating,
+          customComponents: customComponentsMap,
+          customActions: {
+            ...customActionsMap,
+            continueChat: continueChatAction,
+            saveState: saveStateAction,
+          },
+          key: schemaCardProps.id,
         },
-        key: schemaCardProps.id,
-      },
-      {
-        header: toSlotFunction(props.rendererSlots?.header),
-        footer: toSlotFunction(props.rendererSlots?.footer),
-      },
+        {
+          header: toSlotFunction(props.rendererSlots?.header),
+          footer: toSlotFunction(props.rendererSlots?.footer),
+        },
+      ),
     );
   },
   tool: ToolRenderer,
