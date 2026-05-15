@@ -28,7 +28,7 @@
         "../../../packages/materials/angular-opentiny-ng/src/index.ts"
       ],
       "@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config": [
-        "../../../packages/materials/angular-opentiny-ng/src/render-config.ts"
+        "../../../packages/materials/angular-opentiny-ng/src/render-config/index.ts"
       ]
     }
   },
