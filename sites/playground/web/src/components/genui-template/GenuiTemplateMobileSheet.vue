@@ -3,6 +3,7 @@ import { CodeEditor } from 'monaco-editor-vue3';
 import { GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
 import type { CSSProperties } from 'vue';
+import { useMonacoPlaygroundTheme, type PlaygroundColorTheme } from './use-monaco-playground-theme';
 
 const props = defineProps<{
   visible: boolean;
@@ -12,9 +13,12 @@ const props = defineProps<{
   currentPreviewSchema: Record<string, unknown> | null;
   schemaEditor: string;
   editorOptions: Record<string, unknown>;
+  playgroundTheme: PlaygroundColorTheme;
   viewSchemaIcon: string;
   closeIcon: unknown;
 }>();
+
+const monacoTheme = useMonacoPlaygroundTheme(() => props.playgroundTheme);
 
 const emit = defineEmits<{
   (event: 'update:jsonEditorOpen', value: boolean): void;
@@ -93,7 +97,7 @@ const handleJsonEditorChange = (value: string) => {
                 <code-editor
                   :value="schemaEditor"
                   language="json"
-                  theme="vs"
+                  :theme="monacoTheme"
                   :options="editorOptions"
                   @update:value="handleJsonEditorChange"
                 />

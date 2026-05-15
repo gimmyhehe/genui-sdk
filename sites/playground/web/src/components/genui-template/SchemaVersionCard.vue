@@ -171,11 +171,21 @@ const handleDev = () => {
     }
 
     .icon-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 12px;
       text-align: right;
-      color: var(--tr-text-secondary, inherit);
+      cursor: pointer;
+      color: var(--tr-text-secondary, rgb(128, 128, 128));
+
+      :deep(svg),
+      :deep(svg path) {
+        fill: currentColor;
+      }
 
       &:hover {
+        color: var(--tr-text-primary, rgb(25, 25, 25));
         background-color: var(--tr-container-bg-default-2, #f0f0f0);
       }
     }

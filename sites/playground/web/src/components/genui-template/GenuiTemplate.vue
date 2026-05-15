@@ -11,6 +11,7 @@ import GenuiTemplateChat from './GenuiTemplateChat.vue';
 import GenuiTemplateMobileSheet from './GenuiTemplateMobileSheet.vue';
 import useTemplate from './useTemplate';
 import { useIsMobile } from '../../use-mobile';
+import { useMonacoPlaygroundTheme } from './use-monaco-playground-theme';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 
 const { isMobile } = useIsMobile();
@@ -29,6 +30,8 @@ const {
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
+
+const monacoTheme = useMonacoPlaygroundTheme(() => props.theme);
 
 // 桌面：右侧预览列是否展开（关闭后仅占聊天列；切换会话或点击版本卡片会重新展开）
 const rendererPanelVisible = ref(true);
@@ -285,7 +288,7 @@ onUnmounted(() => {
           />
         </div>
         <div class="schema-version-container__editor">
-          <code-editor v-model:value="schemaEditor" language="json" theme="vs" :options="editorOptions" />
+          <code-editor v-model:value="schemaEditor" language="json" :theme="monacoTheme" :options="editorOptions" />
         </div>
       </div>
     </div>
@@ -298,6 +301,7 @@ onUnmounted(() => {
       :current-preview-schema="currentPreviewSchema"
       :schema-editor="schemaEditor"
       :editor-options="editorOptions"
+      :playground-theme="theme"
       :view-schema-icon="viewSchemaIcon"
       :close-icon="TinyCloseIcon"
       @update:json-editor-open="mobileSchemaJsonEditorOpen = $event"
