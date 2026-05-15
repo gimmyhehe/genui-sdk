@@ -237,15 +237,17 @@ const messageRenderers = {
 const responseHandlers: Ref<IResponseHandler<IStreamData>[]> = ref(defaultResponseHandlers);
 
 const customModelProvider = new CustomModelProvider({
-  url: props.url,
-  model: props.model || '',
-  temperature: props.temperature ?? 0.3,
-  chatConfig: props.chatConfig || { addToolCallContext: false, showThinkingResult: false },
-  customComponents: props.customComponents || [],
-  customSnippets: props.customSnippets || [],
-  customExamples: props.customExamples || [],
-  customActions: [...(props.customActions || []), continueChatAction, saveStateAction],
-  customFetch: props.customFetch,
+  getChatOptions: () => ({
+    url: props.url,
+    model: props.model || '',
+    temperature: props.temperature ?? 0.3,
+    chatConfig: props.chatConfig || { addToolCallContext: false, showThinkingResult: false },
+    customComponents: props.customComponents || [],
+    customSnippets: props.customSnippets || [],
+    customExamples: props.customExamples || [],
+    customActions: [...(props.customActions || []), continueChatAction, saveStateAction],
+    customFetch: props.customFetch,
+  }),
 });
 customModelProvider.setResponseHandlers(responseHandlers.value);
 
@@ -453,13 +455,6 @@ watch(
   () => {
     // 切换会话, 使用带重试机制的滚动函数，确保在 DOM 完全渲染后滚动到底部
     scrollToBottomWithRetry(10, 150);
-  },
-);
-
-watch(
-  () => [props.model, props.temperature],
-  () => {
-    customModelProvider.changeLlmConfig(props.model || '', props.temperature ?? 0.3);
   },
 );
 

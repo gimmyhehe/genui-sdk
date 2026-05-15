@@ -5,6 +5,12 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  '@ai-sdk/deepseek@1.0.7':
+    hash: 0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7
+    path: patches/@ai-sdk__deepseek@1.0.7.patch
+  '@ai-sdk/openai-compatible@1.0.7':
+    hash: e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0
+    path: patches/@ai-sdk__openai-compatible@1.0.7.patch
   ai@6.0.116:
     hash: 391ef8a5ea058148f60a34f00c8049ce6f4bcd4c0d14d4952bef7e5d9f0136d5
     path: patches/ai@6.0.116.patch
@@ -43,7 +49,7 @@ importers:
         version: 2.0.57(zod@4.1.13)
       '@ai-sdk/deepseek':
         specifier: 1.0.7
-        version: 1.0.7(zod@4.1.13)
+        version: 1.0.7(patch_hash=0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7)(zod@4.1.13)
       '@ai-sdk/openai':
         specifier: ^2.0.10
         version: 2.0.89(zod@4.1.13)
@@ -281,6 +287,15 @@ importers:
       '@opentiny/vue-button':
         specifier: ^3.28.0
         version: 3.28.0
+      '@opentiny/vue-card':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-carousel':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-carousel-item':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-chart-bar':
         specifier: ~3.14.0
         version: 3.14.0
@@ -299,13 +314,67 @@ importers:
       '@opentiny/vue-chart-ring':
         specifier: 3.14.0
         version: 3.14.0
+      '@opentiny/vue-checkbox':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-checkbox-button':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-checkbox-group':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-col':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-date-picker':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-form':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-form-item':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-grid':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
+      '@opentiny/vue-input':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-layout':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-notify':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-numeric':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-radio':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-radio-group':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-renderless':
         specifier: ^3.28.2
         version: 3.28.2
+      '@opentiny/vue-row':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-search':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-select':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-switch':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-tab-item':
         specifier: ^3.28.0
         version: 3.28.0
       '@opentiny/vue-tabs':
@@ -314,15 +383,12 @@ importers:
       '@opentiny/vue-theme':
         specifier: ^3.28.0
         version: 3.28.0
-      '@vue/compiler-sfc':
-        specifier: ^3.5.32
-        version: 3.5.32
-      '@vue/shared':
-        specifier: ^3.5.32
-        version: 3.5.32
-      prettier:
-        specifier: ^3.8.2
-        version: 3.8.2
+      '@opentiny/vue-transfer':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-tree':
+        specifier: ^3.28.0
+        version: 3.28.0
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -522,7 +588,16 @@ importers:
       '@babel/standalone':
         specifier: ^7.23.0
         version: 7.28.5
-      '@opentiny/vue':
+      '@opentiny/vue-button':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-card':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-carousel':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-carousel-item':
         specifier: ^3.28.0
         version: 3.28.0
       '@opentiny/vue-chart-bar':
@@ -543,13 +618,79 @@ importers:
       '@opentiny/vue-chart-ring':
         specifier: 3.14.0
         version: 3.14.0
+      '@opentiny/vue-checkbox':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-checkbox-button':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-checkbox-group':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-col':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-date-picker':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-form':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-form-item':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-grid':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
+      '@opentiny/vue-input':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-layout':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-notify':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-numeric':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-radio':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-radio-group':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-renderless':
         specifier: ^3.28.2
         version: 3.28.2
+      '@opentiny/vue-row':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-search':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-select':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-switch':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-tab-item':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-tabs':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-theme':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-transfer':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-tree':
         specifier: ^3.28.0
         version: 3.28.0
       '@vitejs/plugin-vue':
@@ -561,6 +702,9 @@ importers:
       eval5:
         specifier: ^1.4.8
         version: 1.4.8
+      rollup-plugin-visualizer:
+        specifier: 6.0.5
+        version: 6.0.5(rollup@4.54.0)
       vite:
         specifier: ^5.4.2
         version: 5.4.21(@types/node@24.10.4)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)
@@ -767,7 +911,7 @@ importers:
         version: 2.0.57(zod@3.25.76)
       '@ai-sdk/deepseek':
         specifier: 1.0.7
-        version: 1.0.7(zod@3.25.76)
+        version: 1.0.7(patch_hash=0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7)(zod@3.25.76)
       '@ai-sdk/openai':
         specifier: ^2.0.10
         version: 2.0.89(zod@3.25.76)
@@ -828,6 +972,9 @@ importers:
       zod:
         specifier: ^3.25.76
         version: 3.25.76
+      zod-to-json-schema:
+        specifier: ^3.25.1
+        version: 3.25.1(zod@3.25.76)
     devDependencies:
       '@types/express':
         specifier: ^5.0.1
@@ -910,6 +1057,9 @@ importers:
       schema-renderer-ng-adpater:
         specifier: workspace:*
         version: link:../schema-renderer-ng-adpater
+      uuid:
+        specifier: 11.1.0
+        version: 11.1.0
       vite-commit-hash-plugin:
         specifier: workspace:*
         version: link:../vite-commit-hash-plugin
@@ -9610,16 +9760,16 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.20(zod@4.1.13)
       zod: 4.1.13
 
-  '@ai-sdk/deepseek@1.0.7(zod@3.25.76)':
+  '@ai-sdk/deepseek@1.0.7(patch_hash=0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7)(zod@3.25.76)':
     dependencies:
-      '@ai-sdk/openai-compatible': 1.0.7(zod@3.25.76)
+      '@ai-sdk/openai-compatible': 1.0.7(patch_hash=e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0)(zod@3.25.76)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.3(zod@3.25.76)
       zod: 3.25.76
 
-  '@ai-sdk/deepseek@1.0.7(zod@4.1.13)':
+  '@ai-sdk/deepseek@1.0.7(patch_hash=0aa75fefd07c4aa804830e4924007457ae029fda52bf90b82a3b9276bd8143d7)(zod@4.1.13)':
     dependencies:
-      '@ai-sdk/openai-compatible': 1.0.7(zod@4.1.13)
+      '@ai-sdk/openai-compatible': 1.0.7(patch_hash=e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0)(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.3(zod@4.1.13)
       zod: 4.1.13
@@ -9650,13 +9800,13 @@ snapshots:
       '@vercel/oidc': 3.1.0
       zod: 4.1.13
 
-  '@ai-sdk/openai-compatible@1.0.7(zod@3.25.76)':
+  '@ai-sdk/openai-compatible@1.0.7(patch_hash=e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0)(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.3(zod@3.25.76)
       zod: 3.25.76
 
-  '@ai-sdk/openai-compatible@1.0.7(zod@4.1.13)':
+  '@ai-sdk/openai-compatible@1.0.7(patch_hash=e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0)(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.3(zod@4.1.13)
@@ -11181,7 +11331,7 @@ snapshots:
 
   '@npmcli/fs@4.0.0':
     dependencies:
-      semver: 7.7.2
+      semver: 7.7.3
 
   '@npmcli/git@6.0.3':
     dependencies:
@@ -11191,7 +11341,7 @@ snapshots:
       npm-pick-manifest: 10.0.0
       proc-log: 5.0.0
       promise-retry: 2.0.1
-      semver: 7.7.2
+      semver: 7.7.3
       which: 5.0.0
 
   '@npmcli/installed-package-contents@3.0.0':
@@ -11208,7 +11358,7 @@ snapshots:
       hosted-git-info: 8.1.0
       json-parse-even-better-errors: 4.0.0
       proc-log: 5.0.0
-      semver: 7.7.2
+      semver: 7.7.3
       validate-npm-package-license: 3.0.4
 
   '@npmcli/promise-spawn@8.0.3':
@@ -18458,7 +18608,7 @@ snapshots:
       make-fetch-happen: 14.0.3
       nopt: 8.1.0
       proc-log: 5.0.0
-      semver: 7.7.2
+      semver: 7.7.3
       tar: 7.5.2
       tinyglobby: 0.2.15
       which: 5.0.0
@@ -18527,7 +18677,7 @@ snapshots:
 
   npm-install-checks@7.1.2:
     dependencies:
-      semver: 7.7.2
+      semver: 7.7.3
 
   npm-normalize-package-bin@4.0.0: {}
 
@@ -18535,7 +18685,7 @@ snapshots:
     dependencies:
       hosted-git-info: 8.1.0
       proc-log: 5.0.0
-      semver: 7.7.2
+      semver: 7.7.3
       validate-npm-package-name: 6.0.2
 
   npm-package-arg@13.0.0:
@@ -18555,7 +18705,7 @@ snapshots:
       npm-install-checks: 7.1.2
       npm-normalize-package-bin: 4.0.0
       npm-package-arg: 12.0.2
-      semver: 7.7.2
+      semver: 7.7.3
 
   npm-registry-fetch@18.0.2:
     dependencies:
