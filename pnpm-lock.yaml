@@ -11,6 +11,9 @@ patchedDependencies:
   '@ai-sdk/openai-compatible@1.0.7':
     hash: e9a77e12ec644839b6104591deb8c6b099c43fd4508f8f4fd4c1960635ac0be0
     path: patches/@ai-sdk__openai-compatible@1.0.7.patch
+  '@opentiny/ng-checkbox':
+    hash: a97657a05421e6b3c3ce332733415be296883e8fcac2b91df2fb2a3ab7b7de36
+    path: patches/@opentiny__ng-checkbox.patch
   ai@6.0.116:
     hash: 391ef8a5ea058148f60a34f00c8049ce6f4bcd4c0d14d4952bef7e5d9f0136d5
     path: patches/ai@6.0.116.patch
@@ -153,7 +156,7 @@ importers:
         version: 20.3.15(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@opentiny/ng':
         specifier: ^1.0.3
-        version: 1.0.3(455eb20ddee0d8f7a1b17d72e1dc5cca)
+        version: 1.0.3(a4b46d9084bdb054ada55e9818496187)
       '@opentiny/ng-themes':
         specifier: ^1.0.3
         version: 1.0.3
@@ -746,7 +749,7 @@ importers:
         version: 20.3.15(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@opentiny/ng':
         specifier: ^1.0.3
-        version: 1.0.3(455eb20ddee0d8f7a1b17d72e1dc5cca)
+        version: 1.0.3(a4b46d9084bdb054ada55e9818496187)
       '@opentiny/ng-themes':
         specifier: ^1.0.3
         version: 1.0.3
@@ -11460,7 +11463,7 @@ snapshots:
       '@opentiny/ng-utils': 1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3)
       tslib: 2.8.1
 
-  '@opentiny/ng-checkbox@1.0.3(7174416eb3899d125d62e3bb37f575f7)':
+  '@opentiny/ng-checkbox@1.0.3(patch_hash=a97657a05421e6b3c3ce332733415be296883e8fcac2b91df2fb2a3ab7b7de36)(7174416eb3899d125d62e3bb37f575f7)':
     dependencies:
       '@angular/common': 20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
       '@angular/core': 20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)
@@ -12067,13 +12070,13 @@ snapshots:
       '@angular/core': 20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)
       tslib: 2.8.1
 
-  '@opentiny/ng-radio@1.0.3(efa8179383784b299e455f5810488503)':
+  '@opentiny/ng-radio@1.0.3(07f0f0bae97a3772ae7f2345fd0be207)':
     dependencies:
       '@angular/common': 20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
       '@angular/core': 20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)
       '@angular/forms': 20.3.15(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@opentiny/ng-base': 1.0.3(abdfdc73c9ff34aa682e2833ed180114)
-      '@opentiny/ng-checkbox': 1.0.3(7174416eb3899d125d62e3bb37f575f7)
+      '@opentiny/ng-checkbox': 1.0.3(patch_hash=a97657a05421e6b3c3ce332733415be296883e8fcac2b91df2fb2a3ab7b7de36)(7174416eb3899d125d62e3bb37f575f7)
       '@opentiny/ng-outline': 1.0.3(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))
       tslib: 2.8.1
 
@@ -12344,13 +12347,13 @@ snapshots:
       '@opentiny/ng-utils': 1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3)
       tslib: 2.8.1
 
-  '@opentiny/ng-transfer@1.0.3(e9efe23daf57bd2fd5be7a91c528e903)':
+  '@opentiny/ng-transfer@1.0.3(c0a2eace77e171099641b60de3c1ab8a)':
     dependencies:
       '@angular/common': 20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
       '@angular/core': 20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)
       '@angular/forms': 20.3.15(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@opentiny/ng-base': 1.0.3(abdfdc73c9ff34aa682e2833ed180114)
-      '@opentiny/ng-checkbox': 1.0.3(7174416eb3899d125d62e3bb37f575f7)
+      '@opentiny/ng-checkbox': 1.0.3(patch_hash=a97657a05421e6b3c3ce332733415be296883e8fcac2b91df2fb2a3ab7b7de36)(7174416eb3899d125d62e3bb37f575f7)
       '@opentiny/ng-drop': 1.0.3(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@opentiny/ng-base@1.0.3(abdfdc73c9ff34aa682e2833ed180114))(@opentiny/ng-utils@1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3))
       '@opentiny/ng-dropsearch': 1.0.3(ddd975c1fe0318a38d63adaf7a0e5da4)
       '@opentiny/ng-icon': 1.0.3(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@opentiny/ng-base@1.0.3(abdfdc73c9ff34aa682e2833ed180114))(@opentiny/ng-utils@1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3))
@@ -12363,14 +12366,14 @@ snapshots:
       '@opentiny/ng-utils': 1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3)
       tslib: 2.8.1
 
-  '@opentiny/ng-tree@1.0.3(fe9b5bf0340d174fc177c4220e43f417)':
+  '@opentiny/ng-tree@1.0.3(234ee2bea0f750ab9bb3e6c19179d64c)':
     dependencies:
       '@angular/cdk': 20.2.14(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
       '@angular/common': 20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
       '@angular/core': 20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)
       '@angular/forms': 20.3.15(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@opentiny/ng-base': 1.0.3(abdfdc73c9ff34aa682e2833ed180114)
-      '@opentiny/ng-checkbox': 1.0.3(7174416eb3899d125d62e3bb37f575f7)
+      '@opentiny/ng-checkbox': 1.0.3(patch_hash=a97657a05421e6b3c3ce332733415be296883e8fcac2b91df2fb2a3ab7b7de36)(7174416eb3899d125d62e3bb37f575f7)
       '@opentiny/ng-icon': 1.0.3(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@opentiny/ng-base@1.0.3(abdfdc73c9ff34aa682e2833ed180114))(@opentiny/ng-utils@1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3))
       '@opentiny/ng-loading': 1.0.3(23152bcb17d21af9b3ec174ea1cd3127)
       '@opentiny/ng-locale': 1.0.3(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@opentiny/ng-utils@1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3))
@@ -12380,20 +12383,20 @@ snapshots:
       '@opentiny/ng-validation': 1.0.3(849566d09b9cc3ffa0b8652ec1dfab54)
       tslib: 2.8.1
 
-  '@opentiny/ng-treeselect@1.0.3(106c00ace8ede4cc99f9cb2be052a357)':
+  '@opentiny/ng-treeselect@1.0.3(41faebcef863f115ff9dc211eff4c574)':
     dependencies:
       '@angular/common': 20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
       '@angular/core': 20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)
       '@angular/forms': 20.3.15(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(rxjs@7.8.2)
       '@opentiny/ng-base': 1.0.3(abdfdc73c9ff34aa682e2833ed180114)
-      '@opentiny/ng-checkbox': 1.0.3(7174416eb3899d125d62e3bb37f575f7)
+      '@opentiny/ng-checkbox': 1.0.3(patch_hash=a97657a05421e6b3c3ce332733415be296883e8fcac2b91df2fb2a3ab7b7de36)(7174416eb3899d125d62e3bb37f575f7)
       '@opentiny/ng-dominator': 1.0.3(f3dd8ceb1fb67fd9d444e20b856eecbe)
       '@opentiny/ng-drop': 1.0.3(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@opentiny/ng-base@1.0.3(abdfdc73c9ff34aa682e2833ed180114))(@opentiny/ng-utils@1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3))
       '@opentiny/ng-dropsearch': 1.0.3(ddd975c1fe0318a38d63adaf7a0e5da4)
       '@opentiny/ng-locale': 1.0.3(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@opentiny/ng-utils@1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3))
       '@opentiny/ng-searchbox': 1.0.3(dfcab7284558d0798dd8667069c9ea43)
       '@opentiny/ng-select': 1.0.3(40a5fb1e8336a2de12ad164fee9e28c6)
-      '@opentiny/ng-tree': 1.0.3(fe9b5bf0340d174fc177c4220e43f417)
+      '@opentiny/ng-tree': 1.0.3(234ee2bea0f750ab9bb3e6c19179d64c)
       '@opentiny/ng-utils': 1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3)
       tslib: 2.8.1
 
@@ -12445,7 +12448,7 @@ snapshots:
       '@opentiny/ng-renderer': 1.0.3(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))
       tslib: 2.8.1
 
-  '@opentiny/ng@1.0.3(455eb20ddee0d8f7a1b17d72e1dc5cca)':
+  '@opentiny/ng@1.0.3(a4b46d9084bdb054ada55e9818496187)':
     dependencies:
       '@angular/common': 20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
       '@angular/core': 20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)
@@ -12462,7 +12465,7 @@ snapshots:
       '@opentiny/ng-buttonselect': 1.0.3(0e54c758cc673ae00ea1dfe472bef208)
       '@opentiny/ng-card': 1.0.3(33aee75538a801e6de9b6916fcc6bdfe)
       '@opentiny/ng-cascader': 1.0.3(e86c25b99d97af72624dc6df195e8fa3)
-      '@opentiny/ng-checkbox': 1.0.3(7174416eb3899d125d62e3bb37f575f7)
+      '@opentiny/ng-checkbox': 1.0.3(patch_hash=a97657a05421e6b3c3ce332733415be296883e8fcac2b91df2fb2a3ab7b7de36)(7174416eb3899d125d62e3bb37f575f7)
       '@opentiny/ng-collapse': 1.0.3(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@opentiny/ng-utils@1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3))
       '@opentiny/ng-collapsebox': 1.0.3(0f800a62ee393d5aef23ffe5641b4ab9)
       '@opentiny/ng-collapsebutton': 1.0.3(6383ec1d195b1511f830e4f2e40cb1cc)
@@ -12519,7 +12522,7 @@ snapshots:
       '@opentiny/ng-productpreview': 1.0.3(f3b0253d170f066bd47b5e6d635797fb)
       '@opentiny/ng-progressbar': 1.0.3(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@opentiny/ng-base@1.0.3(abdfdc73c9ff34aa682e2833ed180114))
       '@opentiny/ng-progresspie': 1.0.3(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))
-      '@opentiny/ng-radio': 1.0.3(efa8179383784b299e455f5810488503)
+      '@opentiny/ng-radio': 1.0.3(07f0f0bae97a3772ae7f2345fd0be207)
       '@opentiny/ng-rate': 1.0.3(33aee75538a801e6de9b6916fcc6bdfe)
       '@opentiny/ng-renderer': 1.0.3(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))
       '@opentiny/ng-rights': 1.0.3(f4faf8f19b2e22f557f0e37bf4b9d42b)
@@ -12545,9 +12548,9 @@ snapshots:
       '@opentiny/ng-time': 1.0.3(2e774488fa30dcf389fe28facf870fb3)
       '@opentiny/ng-timeline': 1.0.3(f4faf8f19b2e22f557f0e37bf4b9d42b)
       '@opentiny/ng-tip': 1.0.3(f32a4533fa3b81eee81fee76a4da057c)
-      '@opentiny/ng-transfer': 1.0.3(e9efe23daf57bd2fd5be7a91c528e903)
-      '@opentiny/ng-tree': 1.0.3(fe9b5bf0340d174fc177c4220e43f417)
-      '@opentiny/ng-treeselect': 1.0.3(106c00ace8ede4cc99f9cb2be052a357)
+      '@opentiny/ng-transfer': 1.0.3(c0a2eace77e171099641b60de3c1ab8a)
+      '@opentiny/ng-tree': 1.0.3(234ee2bea0f750ab9bb3e6c19179d64c)
+      '@opentiny/ng-treeselect': 1.0.3(41faebcef863f115ff9dc211eff4c574)
       '@opentiny/ng-upload': 1.0.3(c64cfb047be1b9b0f32c4b871bb6584e)
       '@opentiny/ng-utils': 1.0.3(@angular/platform-browser-dynamic@21.0.6(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/compiler@20.3.15)(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(@angular/platform-browser@20.3.15(@angular/animations@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1)))(@angular/common@20.3.15(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2))(@angular/core@20.3.15(@angular/compiler@20.3.15)(rxjs@7.8.2)(zone.js@0.15.1))))(color@4.2.3)
       '@opentiny/ng-validation': 1.0.3(849566d09b9cc3ffa0b8652ec1dfab54)
