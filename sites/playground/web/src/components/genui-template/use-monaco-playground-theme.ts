@@ -7,8 +7,8 @@ function useSystemPrefersDark() {
   const prefersDark = ref(false);
   let mql: MediaQueryList | null = null;
   const sync = () => {
-    if (typeof window === 'undefined') return;
-    prefersDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (!mql) return;
+    prefersDark.value = mql.matches;
   };
   onMounted(() => {
     if (typeof window === 'undefined') return;
