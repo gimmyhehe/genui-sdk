@@ -5,7 +5,9 @@ import genuiAbility1 from '@/assets/genui_ability_1.svg';
 import genuiAbility2 from '@/assets/genui_ability_2.webp';
 import genuiAbility3 from '@/assets/create-github.webp';
 import genuiActionVedioCover from '@/assets/order-milk-tea.webp';
+import orderMilkTeaVedio from '@/assets/video/order-milk-tea.mp4';
 import genuiFlowVedioCover from '@/assets/search-ticket.webp';
+import searchTicketVedio from '@/assets/video/search-ticket.mp4';
 import { LinkKey, linkMap } from '@/utils/link';
 import { useMobile } from '@/composables/useMobile';
 import HomeAbility from '@/components/HomeAbility.vue';
@@ -97,10 +99,9 @@ const buttonSize = computed(() => {
         preload="none"
         :poster="genuiActionVedioCover"
       >
-        <source src="/order-milk-tea.mp4" type="video/mp4" />
-    </video>
+        <source :src="orderMilkTeaVedio" type="video/mp4" />
+      </video>
     </home-ability>
-
 
     <home-mcp-tool-mobile v-if="isMobile"></home-mcp-tool-mobile>
     <home-ability
@@ -150,7 +151,7 @@ const buttonSize = computed(() => {
         preload="none"
         :poster="genuiFlowVedioCover"
       >
-        <source src="/search-ticket.mp4" type="video/mp4" />
+        <source :src="searchTicketVedio" type="video/mp4" />
       </video>
     </home-ability>
 
@@ -341,7 +342,7 @@ const buttonSize = computed(() => {
     justify-content: center;
     text-align: center;
     padding: 50px 20px !important;
-    background: url('@/assets/genui_ability_mobile_bg_1.svg')  center/cover no-repeat;
+    background: url('@/assets/genui_ability_mobile_bg_1.svg') center/cover no-repeat;
 
     &-left {
       font-size: var(--font-size-title-md);
@@ -648,5 +649,3 @@ const buttonSize = computed(() => {
   }
 }
 </style>
-
-
