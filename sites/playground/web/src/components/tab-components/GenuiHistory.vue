@@ -1,6 +1,7 @@
 <template>
   <div class="genui-history">
     <history-transfer-toolbar
+      v-model:selection-active="selectionActive"
       :conversations="state.conversations"
       :selected-ids="selectedConversations"
       @import-conversations="handleImportConversations"
@@ -20,7 +21,13 @@
         @item-click="handleItemClick"
       >
         <template #item-prefix="{ item }">
-          <tiny-checkbox :label="item.id" :value="item.id" text="" @click.stop />
+          <tiny-checkbox
+            v-if="selectionActive"
+            :label="item.id"
+            :value="item.id"
+            text=""
+            @click.stop
+          />
         </template>
       </tr-history>
     </tiny-checkbox-group>
@@ -37,6 +44,13 @@ import { computed, ref, watch } from 'vue';
 const { isTouchDevice } = useTouchDevice();
 
 const selectedConversations = ref<string[]>([]);
+const selectionActive = ref(false);
+
+watch(selectionActive, (active) => {
+  if (!active) {
+    selectedConversations.value = [];
+  }
+});
 
 const props = defineProps<{
   conversation: UseConversationReturn;
@@ -125,6 +139,7 @@ const handleBatchDelete = () => {
 .tr-history-container {
   --tr-history-empty-padding: calc((100vh - 380px) / 2) 0;
   --tr-history-empty-padding: calc((100dvh - 380px) / 2) 0;
+  width: 100%;
   :deep(.tr-history__item.selected) {
     background-color: #f2f0f0;
   }

@@ -11,12 +11,13 @@ const TinyIconDownload = IconDownload();
 
 const emit = defineEmits(['item-click', 'item-action', 'item-title-change', 'add-item']);
 
-defineProps<{
+const props = defineProps<{
   listData: Conversation[];
   currentId: string;
+  selectionActive?: boolean;
 }>();
 
-const selectedIds = defineModel<string[]>('selectedIds', { default: () => [] });
+defineModel<string[]>('selectedIds', { default: () => [] });
 
 // 列表项状态
 const renameId = ref<string | null>(null); // 当前正在重命名的 id
@@ -88,12 +89,19 @@ const handleAdd = () => {
     <!-- 列表容器 -->
     <ul class="item-list">
       <li
-        v-for="item in listData"
+        v-for="item in props.listData"
         :key="item.id"
         :class="{ 'list-item': true, active: currentId === item.id }"
         @click="handleItemClick(item)"
       >
-        <tiny-checkbox :label="item.id" :value="item.id" class="list-item__checkbox" text="" @click.stop />
+        <tiny-checkbox
+          v-if="props.selectionActive"
+          :label="item.id"
+          :value="item.id"
+          class="list-item__checkbox"
+          text=""
+          @click.stop
+        />
         <!-- 列表项文本/重命名输入框 -->
         <div class="item-content">
           <template v-if="renameId === item.id">
@@ -204,7 +212,6 @@ const handleAdd = () => {
   padding: 10px 12px;
   border-radius: 12px;
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;

@@ -16,8 +16,15 @@ const { templateConversationState, switchTemplate, deleteTemplate, updateTemplat
   useTemplate();
 
 const selectedTemplateIds = ref<string[]>([]);
+const selectionActive = ref(false);
 
 const conversations = computed(() => templateConversationState.value?.conversations ?? []);
+
+watch(selectionActive, (active) => {
+  if (!active) {
+    selectedTemplateIds.value = [];
+  }
+});
 
 watch(
   () => conversations.value.map((c) => c.id),
@@ -89,6 +96,7 @@ const handleBatchDelete = () => {
 <template>
   <div class="genui-template-list">
     <history-transfer-toolbar
+      v-model:selection-active="selectionActive"
       :conversations="conversations"
       :selected-ids="selectedTemplateIds"
       @import-conversations="handleImportConversations"
@@ -98,6 +106,7 @@ const handleBatchDelete = () => {
     <tiny-checkbox-group v-model="selectedTemplateIds">
       <template-list
         v-model:selected-ids="selectedTemplateIds"
+        :selection-active="selectionActive"
         :list-data="conversations"
         :current-id="templateConversationState?.currentId ?? ''"
         @item-click="handleItemClick"
@@ -128,5 +137,9 @@ const handleBatchDelete = () => {
 .template-schema-card-active {
   background-color: #fff;
   border-color: #808080;
+}
+
+:deep(.history-transfer-toolbar__selection-toggle) {
+  margin-left: 0;
 }
 </style>

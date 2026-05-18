@@ -1,6 +1,14 @@
 <template>
   <div class="history-transfer-toolbar">
-    <tiny-button round size="small" :disabled="selectedIds.length === 0" @click="emit('batch-delete')">
+    <span class="history-transfer-toolbar__selection-toggle" :class="{ 'active': selectionActive }" @click="toggleSelectionMode">
+      {{ selectionActive ? '取消' : '多选' }}
+    </span>
+    <tiny-button
+      round
+      size="small"
+      :disabled="!selectionActive || selectedIds.length === 0"
+      @click="emit('batch-delete')"
+    >
       删除
     </tiny-button>
     <tiny-button round size="small" @click="triggerImport">导入</tiny-button>
@@ -24,7 +32,7 @@
           />
           <tiny-dropdown-item
             label="导出已选记录"
-            :disabled="selectedIds.length === 0"
+            :disabled="!selectionActive || selectedIds.length === 0"
             :item-data="exportItemSelected"
           />
         </tiny-dropdown-menu>
@@ -52,6 +60,8 @@ import {
 import type { Conversation } from '@opentiny/tiny-robot-kit';
 import { downloadConversations, parseConversationFile, reconcileImportedConversationIds } from './history-transfer';
 
+const selectionActive = defineModel<boolean>('selectionActive', { default: false });
+
 const props = withDefaults(
   defineProps<{
     conversations: Conversation[];
@@ -59,6 +69,10 @@ const props = withDefaults(
   }>(),
   { selectedIds: () => [] },
 );
+
+const toggleSelectionMode = () => {
+  selectionActive.value = !selectionActive.value;
+};
 
 const emit = defineEmits<{
   'import-conversations': [conversations: Conversation[]];
@@ -142,6 +156,20 @@ const handleImportFile = async (event: Event) => {
   align-items: center;
   .tiny-button {
     margin-left: 0;
+  }
+}
+
+.history-transfer-toolbar__selection-toggle {
+  margin-left: 12px;
+  padding: 0;
+  margin-right: 8px;
+  font-size: 14px;
+  line-height: 1;
+  color: #191919;
+  cursor: pointer;
+
+  &.active {
+    color: #1476FF;
   }
 }
 
