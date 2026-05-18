@@ -11,17 +11,10 @@ const TinyIconDownload = IconDownload();
 
 const emit = defineEmits(['item-click', 'item-action', 'item-title-change', 'add-item']);
 
-const props = withDefaults(
-  defineProps<{
-    listData: Conversation[];
-    currentId: string;
-    /** 为 false 时隐藏「自定义示例」与新增（用于父级按时间分多块列表时仅首块展示） */
-    showHeader?: boolean;
-    /** 时间分组标题，显示在头部下方、列表上方（如「今天」） */
-    timeGroupLabel?: string;
-  }>(),
-  { showHeader: true },
-);
+defineProps<{
+  listData: Conversation[];
+  currentId: string;
+}>();
 
 const selectedIds = defineModel<string[]>('selectedIds', { default: () => [] });
 
@@ -85,19 +78,17 @@ const handleAdd = () => {
 <template>
   <div class="list-container">
     <!-- 头部：自定义示例 + 增加图标 -->
-    <div v-if="props.showHeader" class="header-container">
+    <div class="header-container">
       <span class="header-title">自定义示例</span>
       <button class="add-icon-button" @click="handleAdd" title="新增">
         <TinyIconPlus class="action-icon-icon"></TinyIconPlus>
       </button>
     </div>
 
-    <div v-if="props.timeGroupLabel" class="time-group-label">{{ props.timeGroupLabel }}</div>
-
     <!-- 列表容器 -->
     <ul class="item-list">
       <li
-        v-for="item in props.listData"
+        v-for="item in listData"
         :key="item.id"
         :class="{ 'list-item': true, active: currentId === item.id }"
         @click="handleItemClick(item)"
@@ -192,14 +183,6 @@ const handleAdd = () => {
 
 .add-icon-button:hover {
   background-color: #f9fafb;
-}
-
-.time-group-label {
-  margin-top: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #6b7280;
-  padding: 0 4px 6px;
 }
 
 .add-icon-button .add-icon {

@@ -8,7 +8,6 @@ import {
   HistoryTransferToolbar,
   downloadConversations,
   reconcileImportedConversationIds,
-  groupByTimeBuckets
 } from '../tab-components/history-transfer';
 
 const emit = defineEmits(['switch-template']);
@@ -19,8 +18,6 @@ const { templateConversationState, switchTemplate, deleteTemplate, updateTemplat
 const selectedTemplateIds = ref<string[]>([]);
 
 const conversations = computed(() => templateConversationState.value?.conversations ?? []);
-
-const groupedTemplateList = computed(() => groupByTimeBuckets(conversations.value));
 
 watch(
   () => conversations.value.map((c) => c.id),
@@ -99,33 +96,15 @@ const handleBatchDelete = () => {
       @batch-delete="handleBatchDelete"
     />
     <tiny-checkbox-group v-model="selectedTemplateIds">
-      <template v-if="groupedTemplateList.length === 0">
-        <template-list
-          v-model:selected-ids="selectedTemplateIds"
-          :list-data="[]"
-          :current-id="templateConversationState?.currentId ?? ''"
-          :show-header="true"
-          @item-click="handleItemClick"
-          @item-action="handleItemAction"
-          @item-title-change="handleItemTitleChange"
-          @add-item="handleAddItem"
-        />
-      </template>
-      <template v-else>
-        <template v-for="(section, index) in groupedTemplateList" :key="section.group">
-          <template-list
-            v-model:selected-ids="selectedTemplateIds"
-            :list-data="section.items"
-            :current-id="templateConversationState?.currentId ?? ''"
-            :show-header="index === 0"
-            :time-group-label="section.group"
-            @item-click="handleItemClick"
-            @item-action="handleItemAction"
-            @item-title-change="handleItemTitleChange"
-            @add-item="handleAddItem"
-          />
-        </template>
-      </template>
+      <template-list
+        v-model:selected-ids="selectedTemplateIds"
+        :list-data="conversations"
+        :current-id="templateConversationState?.currentId ?? ''"
+        @item-click="handleItemClick"
+        @item-action="handleItemAction"
+        @item-title-change="handleItemTitleChange"
+        @add-item="handleAddItem"
+      />
     </tiny-checkbox-group>
   </div>
 </template>
