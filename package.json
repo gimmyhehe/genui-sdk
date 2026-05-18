@@ -25,7 +25,8 @@
     "patchedDependencies": {
       "ai@6.0.116": "patches/ai@6.0.116.patch",
       "@ai-sdk/deepseek@1.0.7": "patches/@ai-sdk__deepseek@1.0.7.patch",
-      "@ai-sdk/openai-compatible@1.0.7": "patches/@ai-sdk__openai-compatible@1.0.7.patch"
+      "@ai-sdk/openai-compatible@1.0.7": "patches/@ai-sdk__openai-compatible@1.0.7.patch",
+      "@opentiny/ng-checkbox": "patches/@opentiny__ng-checkbox.patch"
     }
   },
   "keywords": [],
