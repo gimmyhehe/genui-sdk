@@ -1,7 +1,28 @@
-/** 与 TrHistory 等列表分组标题一致的顺序与文案 */
-export const TIME_BUCKET_LABELS = ['今天', '昨天', '两天前', '一周前', '一个月前'] as const;
+export const TimeBucketKey = {
+  Today: 'today',
+  Yesterday: 'yesterday',
+  TwoDaysAgo: 'twoDaysAgo',
+  AWeekAgo: 'aWeekAgo',
+  AMonthAgo: 'aMonthAgo',
+} as const;
 
-export type TimeBucketLabel = (typeof TIME_BUCKET_LABELS)[number];
+export type TimeBucketLabel = (typeof TimeBucketKey)[keyof typeof TimeBucketKey];
+
+export const TIME_BUCKET_LABELS = [
+  TimeBucketKey.Today,
+  TimeBucketKey.Yesterday,
+  TimeBucketKey.TwoDaysAgo,
+  TimeBucketKey.AWeekAgo,
+  TimeBucketKey.AMonthAgo,
+] as const satisfies readonly TimeBucketLabel[];
+
+export const TIME_BUCKET_DISPLAY_LABELS: Record<TimeBucketLabel, string> = {
+  [TimeBucketKey.Today]: '今天',
+  [TimeBucketKey.Yesterday]: '昨天',
+  [TimeBucketKey.TwoDaysAgo]: '两天前',
+  [TimeBucketKey.AWeekAgo]: '一周前',
+  [TimeBucketKey.AMonthAgo]: '一个月前',
+};
 
 const MS_PER_DAY = 86400000;
 
@@ -17,31 +38,34 @@ export const calendarDayDiffFromToday = (createdAtMs: number, nowMs: number) => 
 };
 
 /**
- * 按本地日历日，根据 `createdAt` 归入「今天 / 昨天 / …」。
- * 无合法 `createdAt` 时归入「一个月前」。
+ * 按本地日历日，根据 `createdAt` 归入时间桶。
+ * 无合法 `createdAt` 时归入 一个月之前。
  */
 export const timeBucketLabelForCreatedAt = (createdAt: unknown, nowMs: number = Date.now()): TimeBucketLabel => {
   if (typeof createdAt !== 'number' || Number.isNaN(createdAt)) {
-    return '一个月前';
+    return TimeBucketKey.AMonthAgo;
   }
 
   const dayDiff = calendarDayDiffFromToday(createdAt, nowMs);
   if (dayDiff <= 0) {
-    return '今天';
+    return TimeBucketKey.Today;
   }
   if (dayDiff === 1) {
-    return '昨天';
+    return TimeBucketKey.Yesterday;
   }
   if (dayDiff === 2) {
-    return '两天前';
+    return TimeBucketKey.TwoDaysAgo;
   }
   if (dayDiff < 7) {
-    return '一周前';
+    return TimeBucketKey.AWeekAgo;
   }
-  return '一个月前';
+  return TimeBucketKey.AMonthAgo;
 };
 
 type WithCreatedAt = { createdAt?: unknown };
+
+const emptyBuckets = <T>(): Record<TimeBucketLabel, T[]> =>
+  Object.fromEntries(TIME_BUCKET_LABELS.map((label) => [label, []])) as Record<TimeBucketLabel, T[]>;
 
 /**
  * 将会话或模板等列表按时间桶拆分；仅返回非空分组。
@@ -50,23 +74,16 @@ type WithCreatedAt = { createdAt?: unknown };
 export const groupByTimeBuckets = <T extends WithCreatedAt>(
   items: readonly T[],
   options?: { nowMs?: number },
-): Array<{ group: TimeBucketLabel; items: T[] }> => {
+): Array<{ group: string; items: T[] }> => {
   const nowMs = options?.nowMs ?? Date.now();
-
-  const buckets: Record<TimeBucketLabel, T[]> = {
-    今天: [],
-    昨天: [],
-    两天前: [],
-    一周前: [],
-    一个月前: [],
-  };
+  const buckets = emptyBuckets<T>();
 
   for (const item of items) {
     buckets[timeBucketLabelForCreatedAt(item.createdAt, nowMs)].push(item);
   }
 
   return TIME_BUCKET_LABELS.filter((label) => buckets[label].length > 0).map((label) => ({
-    group: label,
+    group: TIME_BUCKET_DISPLAY_LABELS[label],
     items: [...buckets[label]],
   }));
 };
