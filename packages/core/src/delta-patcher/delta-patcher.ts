@@ -12,7 +12,7 @@ export interface IPatchOptions {
   requiredCompleteFieldSelectors?: string[];
 }
 
-const deepClone = (obj: any) => {
+function deepClone(obj: any): any {
  if (!obj || typeof obj !== 'object') {
   return obj;
  }
