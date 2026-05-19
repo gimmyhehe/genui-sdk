@@ -18,35 +18,64 @@ const updateShowThinkingResult = (value) => {
 </script>
 
 <template>
-  <div>
-    <tiny-collapse class="playground-tools" v-model="activePanels">
-      <McpServerPanel />
-      <AgentPanel />
-      <SkillPanel />
-    </tiny-collapse>
-    <div class="tool-call-options">
-      <tiny-checkbox :model-value="chatConfig.addToolCallContext" @update:model-value="updateAddToolCallContext">
-        调用结果添加到上下文
-      </tiny-checkbox>
+  <div class="mcp-tools">
+    <div class="mcp-tools__scroll">
+      <div class="mcp-tools__scroll-inner">
+        <tiny-collapse class="playground-tools" v-model="activePanels">
+          <McpServerPanel />
+          <AgentPanel />
+          <SkillPanel />
+        </tiny-collapse>
+      </div>
     </div>
-    <div class="tool-call-options">
-      <tiny-checkbox :model-value="chatConfig.showThinkingResult" @update:model-value="updateShowThinkingResult">
-        调用结果展示在界面中
-      </tiny-checkbox>
+    <div class="mcp-tools__footer">
+      <div class="tool-call-options">
+        <tiny-checkbox :model-value="chatConfig.addToolCallContext" @update:model-value="updateAddToolCallContext">
+          调用结果添加到上下文
+        </tiny-checkbox>
+      </div>
+      <div class="tool-call-options">
+        <tiny-checkbox :model-value="chatConfig.showThinkingResult" @update:model-value="updateShowThinkingResult">
+          调用结果展示在界面中
+        </tiny-checkbox>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="less">
+.mcp-tools {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.mcp-tools__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.mcp-tools__scroll-inner {
+  padding: 0 24px;
+}
+
+.mcp-tools__footer {
+  flex-shrink: 0;
+  padding: 12px 24px 16px;
+  background: var(--ti-base-color-bg, #fff);
+}
+
 .tool-call-options {
-  margin-top: 12px;
   display: flex;
   align-items: center;
   font-size: 14px;
   color: #595959;
 
-  &:last-child {
-    margin-bottom: 16px;
+  & + & {
+    margin-top: 12px;
   }
 }
 
@@ -67,6 +96,9 @@ const updateShowThinkingResult = (value) => {
     .tiny-collapse-item__header {
       padding: 0;
       border-bottom: none;
+      position: sticky;
+      top: 0;
+      z-index: 2;
     }
 
     .tiny-collapse-item__content {

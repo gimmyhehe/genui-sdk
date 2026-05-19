@@ -162,12 +162,19 @@ const updateCustomExamples = (list) => {
         </button>
       </div>
 
-      <tiny-tabs class="playground-sidebar__tabs" v-model="activeName" v-show="expanded">
+      <tiny-tabs
+        class="playground-sidebar__tabs"
+        :class="{ 'playground-sidebar__tabs--tools': activeName === 'tools' }"
+        v-model="activeName"
+        v-show="expanded"
+      >
         <tiny-tab-item title="模型配置" name="model">
           <ModelConfig @createNewTemplate="handleCreateNewTemplate" @update-custom-examples="updateCustomExamples"/>
         </tiny-tab-item>
         <tiny-tab-item title="工具" name="tools">
-          <McpTools />
+          <div class="tools-tab-panel">
+            <McpTools />
+          </div>
         </tiny-tab-item>
         <tiny-tab-item title="主题" name="theme">
           <div class="config-title">切换主题</div>
@@ -274,6 +281,8 @@ const updateCustomExamples = (list) => {
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     .config-title {
       font-size: 14px;
@@ -282,14 +291,47 @@ const updateCustomExamples = (list) => {
       line-height: 32px;
     }
 
+    :deep(.tiny-tabs) {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
     :deep(.tiny-tabs__header.is-top) {
       padding: 0 24px;
+      flex-shrink: 0;
     }
 
     :deep(.tiny-tabs__content) {
-      height: 100%;
+      flex: 1;
+      min-height: 0;
+      height: auto;
       overflow: auto;
       padding: 0 24px 90px;
+    }
+
+    &--tools {
+      :deep(.tiny-tabs__content) {
+        overflow: hidden;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      :deep(.tiny-tabs__content > .tiny-tab-pane) {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      :deep(.tools-tab-panel) {
+        height: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
     }
   }
 
