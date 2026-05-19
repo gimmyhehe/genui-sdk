@@ -82,7 +82,7 @@ export const genRootSchema = /* @__PURE__ */ (componentWhiteList?: string[]) => 
   const nodeSchema = genNodeSchema(componentWhiteList);
   const rootNodeSchema = z
     .object({
-      id: z.string().optional().describe('根节点唯一 id'),
+      id: z.string().optional().describe('根节点可选 id'),
       methods: methodsSchema.optional().describe('方法集合'),
       state: z.record(z.string(), propValueSchema).optional().describe('全局状态，表单双向绑定必须此字段'),
       componentName: z.string().describe('根组件名，通常为 Page'),
@@ -123,7 +123,7 @@ export const genNodeSchema = /* @__PURE__ */ (componentWhiteList?: string[]) => 
       : z.string().describe('组件名');
   const nodeSchema = z
     .object({
-      id: z.string().optional().describe('节点唯一 id'),
+      id: z.string().optional().describe('节点可选 id'),
       componentName: componentNameSchema,
       props: z.record(z.string(), propValueSchema).optional().describe('组件属性集合'),
       children: z
