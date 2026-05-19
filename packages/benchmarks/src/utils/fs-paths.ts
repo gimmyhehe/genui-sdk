@@ -25,15 +25,9 @@ type BeijingDateTimeFormatOptions = {
  * @param options 可选格式配置
  * @returns 格式化后的北京时间字符串
  */
-export function formatBeijingDateTime(
-  date = new Date(),
-  options: BeijingDateTimeFormatOptions = {},
-) {
+export function formatBeijingDateTime(date = new Date(), options: BeijingDateTimeFormatOptions = {}) {
   const d = toBeijingDate(date);
-  const {
-    dateTimeSeparator = '_',
-    timeSeparator = '-',
-  } = options;
+  const { dateTimeSeparator = '_', timeSeparator = '-' } = options;
   const yyyy = d.getUTCFullYear();
   const MM = String(d.getUTCMonth() + 1).padStart(2, '0');
   const DD = String(d.getUTCDate()).padStart(2, '0');
@@ -50,9 +44,7 @@ export function formatBeijingDateTime(
  * @returns 输出根目录绝对路径
  */
 export function resolveSamplesDir(samplesDir?: string) {
-  return samplesDir
-    ? path.resolve(samplesDir)
-    : path.resolve(currentDir, '../../reports');
+  return samplesDir ? path.resolve(samplesDir) : path.resolve(currentDir, '../../reports');
 }
 
 /**
