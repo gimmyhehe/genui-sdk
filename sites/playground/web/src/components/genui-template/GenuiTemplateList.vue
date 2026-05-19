@@ -28,8 +28,8 @@ watch(selectionActive, (active) => {
 
 watch(
   () => conversations.value.map((c) => c.id),
-  () => {
-    const idSet = new Set(conversations.value.map((c) => c.id));
+  (newVal) => {
+    const idSet = new Set(newVal);
     selectedTemplateIds.value = selectedTemplateIds.value.filter((id) => idSet.has(id));
   },
 );

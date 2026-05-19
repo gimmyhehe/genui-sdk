@@ -98,6 +98,7 @@ const handleAdd = () => {
           v-if="props.selectionActive"
           :label="item.id"
           :value="item.id"
+          :aria-label="`选择模板：${item.title}`"
           class="list-item__checkbox"
           text=""
           @click.stop
