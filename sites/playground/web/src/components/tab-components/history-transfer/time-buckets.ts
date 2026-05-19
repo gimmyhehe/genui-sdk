@@ -1,10 +1,10 @@
-export const TimeBucketKey = {
-  Today: 'today',
-  Yesterday: 'yesterday',
-  TwoDaysAgo: 'twoDaysAgo',
-  AWeekAgo: 'aWeekAgo',
-  AMonthAgo: 'aMonthAgo',
-} as const;
+export enum TimeBucketKey {
+  Today = 'today',
+  Yesterday = 'yesterday',
+  TwoDaysAgo = 'twoDaysAgo',
+  AWeekAgo = 'aWeekAgo',
+  AMonthAgo = 'aMonthAgo',
+} ;
 
 export type TimeBucketLabel = (typeof TimeBucketKey)[keyof typeof TimeBucketKey];
 
