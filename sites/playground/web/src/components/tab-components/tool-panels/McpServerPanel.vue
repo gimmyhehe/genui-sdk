@@ -4,7 +4,6 @@ import {
   TinyButton,
   TinySwitch,
   TinyPopover,
-  TinyCheckbox,
   TinyCollapseItem,
   TinyDialogBox,
   TinyForm,
@@ -15,7 +14,7 @@ import {
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
 
 const playgroundContext = inject('playgroundContext');
-const { llmConfig, chatConfig } = playgroundContext;
+const { llmConfig } = playgroundContext;
 
 const IconPlus = iconPlus();
 const IconDel = iconDel();
@@ -89,14 +88,6 @@ const deleteMCPServer = (server) => {
 const updateServerEnabled = (server, enabled) => {
   const mcpServers = llmConfig.mcpServers || [];
   llmConfig.mcpServers = mcpServers.map((s) => (s.name === server.name ? { ...s, enabled } : s));
-};
-
-const updateAddToolCallContext = (value) => {
-  chatConfig.addToolCallContext = value;
-};
-
-const updateShowThinkingResult = (value) => {
-  chatConfig.showThinkingResult = value;
 };
 
 const confirmMCPServer = async () => {
@@ -204,16 +195,6 @@ const confirmMCPServer = async () => {
         </div>
       </div>
     </div>
-    <div class="mcp-server-tool-call-context">
-      <tiny-checkbox :model-value="chatConfig.addToolCallContext" @update:model-value="updateAddToolCallContext">
-        调用结果添加到上下文
-      </tiny-checkbox>
-    </div>
-    <div class="mcp-server-tool-call-context" style="margin-top: 12px">
-      <tiny-checkbox :model-value="chatConfig.showThinkingResult" @update:model-value="updateShowThinkingResult">
-        调用结果展示在界面中
-      </tiny-checkbox>
-    </div>
     <tiny-dialog-box
       v-model:visible="showToolFormDialog"
       :title="mcpServerData.index > -1 ? '编辑 MCP 服务' : '添加 MCP 服务'"
@@ -315,19 +296,6 @@ const confirmMCPServer = async () => {
   width: 12px;
   height: 12px;
   color: #595959;
-}
-
-.mcp-server-tool-call-context {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 14px;
-  color: #595959;
-
-  &:last-child {
-    margin-bottom: 16px;
-  }
 }
 
 :deep(.mcp-server-item-actions-popover) {
