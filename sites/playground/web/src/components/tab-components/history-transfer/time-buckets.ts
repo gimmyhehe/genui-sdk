@@ -4,7 +4,7 @@ export enum TimeBucketKey {
   TwoDaysAgo = 'twoDaysAgo',
   AWeekAgo = 'aWeekAgo',
   AMonthAgo = 'aMonthAgo',
-} ;
+};
 
 export type TimeBucketLabel = (typeof TimeBucketKey)[keyof typeof TimeBucketKey];
 
