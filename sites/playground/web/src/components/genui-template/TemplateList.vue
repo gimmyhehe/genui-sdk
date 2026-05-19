@@ -1,20 +1,23 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue';
-import { TinyInput, TinyForm, TinyFormItem, Modal } from '@opentiny/vue';
-import { IconDel, IconEdit, IconPlus } from '@opentiny/vue-icon';
-import { IconFileOther } from '@opentiny/tiny-robot-svgs';
+import { TinyInput, TinyForm, TinyFormItem, Modal, TinyCheckbox } from '@opentiny/vue';
+import { IconDel, IconEdit, IconPlus, IconDownload } from '@opentiny/vue-icon';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
 
 const TinyIconDel = IconDel();
 const TinyIconEdit = IconEdit();
 const TinyIconPlus = IconPlus();
+const TinyIconDownload = IconDownload();
 
 const emit = defineEmits(['item-click', 'item-action', 'item-title-change', 'add-item']);
 
 const props = defineProps<{
   listData: Conversation[];
   currentId: string;
+  selectionActive?: boolean;
 }>();
+
+defineModel<string[]>('selectedIds', { default: () => [] });
 
 // 列表项状态
 const renameId = ref<string | null>(null); // 当前正在重命名的 id
@@ -91,6 +94,15 @@ const handleAdd = () => {
         :class="{ 'list-item': true, active: currentId === item.id }"
         @click="handleItemClick(item)"
       >
+        <tiny-checkbox
+          v-if="props.selectionActive"
+          :label="item.id"
+          :value="item.id"
+          :aria-label="`选择模板：${item.title}`"
+          class="list-item__checkbox"
+          text=""
+          @click.stop
+        />
         <!-- 列表项文本/重命名输入框 -->
         <div class="item-content">
           <template v-if="renameId === item.id">
@@ -127,7 +139,7 @@ const handleAdd = () => {
         <template v-if="renameId !== item.id">
           <div class="action-icons">
             <button class="action-icon export-icon" @click.stop="handleExport(item)" title="导出">
-              <IconFileOther class="action-icon-icon" />
+              <TinyIconDownload class="action-icon-icon" />
             </button>
             <button class="action-icon rename-icon" @click.stop="handleRename(item)" title="重命名">
               <TinyIconEdit class="action-icon-icon"></TinyIconEdit>
@@ -194,7 +206,6 @@ const handleAdd = () => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .list-item {
@@ -202,8 +213,9 @@ const handleAdd = () => {
   padding: 10px 12px;
   border-radius: 12px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
   background-color: #ffffff;
 
   &:hover,
@@ -212,9 +224,14 @@ const handleAdd = () => {
   }
 }
 
+.list-item__checkbox {
+  flex-shrink: 0;
+}
+
 /* 列表项文本容器 */
 .item-content {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -228,6 +245,7 @@ const handleAdd = () => {
   opacity: 0;
   transition: opacity 0.2s;
   margin-left: 8px;
+  flex-shrink: 0;
 }
 
 .list-item:hover .action-icons {
