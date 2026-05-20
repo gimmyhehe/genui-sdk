@@ -1,20 +1,10 @@
 <script setup>
-import { ref, inject } from 'vue';
-import { TinyCollapse, TinyCheckbox } from '@opentiny/vue';
+import { ref } from 'vue';
+import { TinyCollapse } from '@opentiny/vue';
 import { AgentPanel, McpServerPanel, SkillPanel } from './tool-panels';
-
-const playgroundContext = inject('playgroundContext');
-const { chatConfig } = playgroundContext;
+import ToolCallConfig from './ToolCallConfig.vue';
 
 const activePanels = ref(['mcp', 'agent', 'skills']);
-
-const updateAddToolCallContext = (value) => {
-  chatConfig.addToolCallContext = value;
-};
-
-const updateShowThinkingResult = (value) => {
-  chatConfig.showThinkingResult = value;
-};
 </script>
 
 <template>
@@ -29,16 +19,7 @@ const updateShowThinkingResult = (value) => {
       </div>
     </div>
     <div class="mcp-tools__footer">
-      <div class="tool-call-options">
-        <tiny-checkbox :model-value="chatConfig.addToolCallContext" @update:model-value="updateAddToolCallContext">
-          调用结果添加到上下文
-        </tiny-checkbox>
-      </div>
-      <div class="tool-call-options">
-        <tiny-checkbox :model-value="chatConfig.showThinkingResult" @update:model-value="updateShowThinkingResult">
-          调用结果展示在界面中
-        </tiny-checkbox>
-      </div>
+      <ToolCallConfig />
     </div>
   </div>
 </template>
@@ -66,17 +47,6 @@ const updateShowThinkingResult = (value) => {
   flex-shrink: 0;
   padding: 12px 24px 16px;
   background: var(--ti-base-color-bg, #fff);
-}
-
-.tool-call-options {
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  color: #595959;
-
-  & + & {
-    margin-top: 12px;
-  }
 }
 
 :deep(.tiny-collapse) {
