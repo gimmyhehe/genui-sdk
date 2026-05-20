@@ -465,6 +465,7 @@ onUnmounted(() => {
         @cancel="messageManager.abortRequest"
       >
       </tr-sender>
+      <div class="footer-text">内容由AI生成，仅供参考</div>
     </div>
   </div>
 </template>
@@ -473,7 +474,7 @@ onUnmounted(() => {
 .tg-chat-container {
   --ti-gen-chat-container-bg-color: #f0f0f0;
   --thinking-display: initial;
-  --sender-bg: url('./assets/sender-light.svg') no-repeat center;
+  --sender-bg: url('../../assets/images/sender-light.svg') no-repeat center;
   --sender-border-color: #e5e5e5;
   --generating-bg-before: linear-gradient(90deg, #fff, #a2c7f4);
   --generating-bg-after: #fff;
@@ -487,7 +488,7 @@ onUnmounted(() => {
   overflow: auto;
   &.dark {
     --ti-gen-chat-container-bg-color: #191919;
-    --sender-bg: url('./assets/sender-dark.svg') no-repeat center;
+    --sender-bg: url('../../assets/images/sender-dark.svg') no-repeat center;
     --sender-border-color: #333;
     --generating-bg-before: linear-gradient(90deg, #262626, #808080);
     --generating-bg-after: #191919;
@@ -658,5 +659,12 @@ onUnmounted(() => {
 .tiny-sender {
   width: 80%;
   margin: 0 auto;
+}
+
+.footer-text {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin-top: 16px;
 }
 </style>

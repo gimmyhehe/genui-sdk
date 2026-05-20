@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import type { Conversation } from '@opentiny/tiny-robot-kit';
+import { TrHistory, useTouchDevice } from '@opentiny/tiny-robot';
 import { computed, ref, watch } from 'vue';
-import { TinyModal, TinyCheckboxGroup } from '@opentiny/vue';
+import { TinyModal, TinyCheckboxGroup, TinyCheckbox } from '@opentiny/vue';
+import { iconPlus } from '@opentiny/vue-icon';
 import useTemplate from './useTemplate';
-import TemplateList from './TemplateList.vue';
 import {
   HistoryTransferToolbar,
   downloadConversations,
   reconcileImportedConversationIds,
+  historyMenuItems,
 } from '../tab-components/history-transfer';
+
+const TinyIconPlus = iconPlus();
+const { isTouchDevice } = useTouchDevice();
 
 const emit = defineEmits(['switch-template']);
 
@@ -57,12 +62,18 @@ const handleItemAction = (action: { id: string }, item: Conversation) => {
   }
 
   if (action.id === 'delete') {
-    deleteTemplate(item.id);
+    TinyModal.confirm('确定删除该模板吗？')
+      .then((type: 'confirm' | 'cancel') => {
+        if (type === 'cancel') {
+          return;
+        }
+        deleteTemplate(item.id);
+      });
   }
 };
 
-const handleItemTitleChange = (id: string, title: string) => {
-  updateTemplateTitle(id, title);
+const handleItemTitleChange = (title: string, item: Conversation) => {
+  updateTemplateTitle(item.id, title);
 };
 
 const handleAddItem = () => {
@@ -95,6 +106,10 @@ const handleBatchDelete = () => {
 
 <template>
   <div class="genui-template-list">
+    <button class="new-template-btn" type="button" @click="handleAddItem">
+      <TinyIconPlus :size="16" />
+      <span class="new-template-btn__text">新建模板</span>
+    </button>
     <history-transfer-toolbar
       v-model:selection-active="selectionActive"
       :conversations="conversations"
@@ -104,39 +119,77 @@ const handleBatchDelete = () => {
       @batch-delete="handleBatchDelete"
     />
     <tiny-checkbox-group v-model="selectedTemplateIds">
-      <template-list
-        v-model:selected-ids="selectedTemplateIds"
-        :selection-active="selectionActive"
-        :list-data="conversations"
-        :current-id="templateConversationState?.currentId ?? ''"
-        @item-click="handleItemClick"
+      <tr-history
+        class="tr-history-container"
+        :data="conversations"
+        :selected="templateConversationState?.currentId || undefined"
+        :show-rename-controls="isTouchDevice"
+        :menu-items="historyMenuItems"
+        :menu-list-gap="12"
         @item-action="handleItemAction"
         @item-title-change="handleItemTitleChange"
-        @add-item="handleAddItem"
-      />
+        @item-click="handleItemClick"
+      >
+        <template #item-prefix="{ item }">
+          <tiny-checkbox
+            v-if="selectionActive"
+            :label="item.id"
+            :value="item.id"
+            text=""
+            @click.stop
+          />
+        </template>
+      </tr-history>
     </tiny-checkbox-group>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="less">
 .genui-template-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.template-schema-card {
+.new-template-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  height: 36px;
+  border: 1px solid #c2c2c2;
+  border-radius: 10px;
   cursor: pointer;
+  white-space: nowrap;
+  background: transparent;
+  appearance: none;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid #1677ff;
+    outline-offset: 2px;
+  }
+
+  &__text {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+
+  &:hover {
+    background: #0000000a;
+  }
 }
 
-.template-schema-card:hover {
-  background-color: #fff;
-  border-color: #808080;
-}
+.tr-history-container {
+  --tr-history-empty-padding: calc((100vh - 380px) / 2) 0;
+  --tr-history-empty-padding: calc((100dvh - 380px) / 2) 0;
+  width: 100%;
 
-.template-schema-card-active {
-  background-color: #fff;
-  border-color: #808080;
+  :deep(.tr-history__item.selected) {
+    background-color: #f2f0f0;
+  }
 }
 
 :deep(.history-transfer-toolbar__selection-toggle) {
