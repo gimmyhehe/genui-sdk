@@ -10,7 +10,6 @@ import {
   downloadConversations,
   reconcileImportedConversationIds,
   historyMenuItems,
-  groupByTimeBuckets,
 } from '../tab-components/history-transfer';
 
 const TinyIconPlus = iconPlus();
@@ -25,7 +24,6 @@ const selectedTemplateIds = ref<string[]>([]);
 const selectionActive = ref(false);
 
 const conversations = computed(() => templateConversationState.value?.conversations ?? []);
-const groupedTemplateData = computed(() => groupByTimeBuckets(conversations.value));
 
 watch(selectionActive, (active) => {
   if (!active) {
@@ -123,7 +121,7 @@ const handleBatchDelete = () => {
     <tiny-checkbox-group v-model="selectedTemplateIds">
       <tr-history
         class="tr-history-container"
-        :data="groupedTemplateData"
+        :data="conversations"
         :selected="templateConversationState?.currentId || undefined"
         :show-rename-controls="isTouchDevice"
         :menu-items="historyMenuItems"
