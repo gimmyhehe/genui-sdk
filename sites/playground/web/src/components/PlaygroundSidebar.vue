@@ -172,9 +172,7 @@ const updateCustomExamples = (list) => {
           <ModelConfig @createNewTemplate="handleCreateNewTemplate" @update-custom-examples="updateCustomExamples"/>
         </tiny-tab-item>
         <tiny-tab-item title="工具" name="tools">
-          <div class="tools-tab-panel">
-            <McpTools />
-          </div>
+          <McpTools />
         </tiny-tab-item>
         <tiny-tab-item title="主题" name="theme">
           <div class="config-title">切换主题</div>
@@ -291,13 +289,6 @@ const updateCustomExamples = (list) => {
       line-height: 32px;
     }
 
-    :deep(.tiny-tabs) {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-height: 0;
-    }
-
     :deep(.tiny-tabs__header.is-top) {
       padding: 0 24px;
       flex-shrink: 0;
@@ -306,30 +297,19 @@ const updateCustomExamples = (list) => {
     :deep(.tiny-tabs__content) {
       flex: 1;
       min-height: 0;
-      height: auto;
       overflow: auto;
       padding: 0 24px 90px;
     }
 
-    &--tools {
-      :deep(.tiny-tabs__content) {
-        overflow: hidden;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-      }
+    &--tools :deep(.tiny-tabs__content) {
+      overflow: hidden;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
 
-      :deep(.tiny-tabs__content > .tiny-tab-pane) {
+      > .tiny-tab-pane {
         flex: 1;
         min-height: 0;
-        overflow: hidden;
-      }
-
-      :deep(.tools-tab-panel) {
-        height: 100%;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
         overflow: hidden;
       }
     }
