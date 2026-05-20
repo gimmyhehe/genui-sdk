@@ -57,7 +57,7 @@
     "devDoc": "开发文档",
     "step1": {
       "title": "步骤1：引入并使用chat组件",
-      "description": "开箱即用的caht组件内置了对话界面与消息管理",
+      "description": "开箱即用的chat组件内置了对话界面与消息管理",
       "mobile": "引入组件"
     },
     "step2": {
