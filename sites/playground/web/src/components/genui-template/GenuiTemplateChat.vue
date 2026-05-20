@@ -465,6 +465,7 @@ onUnmounted(() => {
         @cancel="messageManager.abortRequest"
       >
       </tr-sender>
+      <div class="footer-text">内容由AI生成，仅供参考</div>
     </div>
   </div>
 </template>
@@ -658,5 +659,12 @@ onUnmounted(() => {
 .tiny-sender {
   width: 80%;
   margin: 0 auto;
+}
+
+.footer-text {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin-top: 16px;
 }
 </style>
