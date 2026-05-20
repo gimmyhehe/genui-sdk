@@ -6,6 +6,8 @@ import html from 'highlight.js/lib/languages/xml'
 import json from 'highlight.js/lib/languages/json'
 import './reset.css'
 import Home from './views/home.vue'
+import LanguageSwitcher from './components/LanguageSwitcher.vue'
+import { locale } from './i18n'
 
 hljs.registerLanguage('javascript', javascript)
 hljs.registerLanguage('css', css)
@@ -14,7 +16,8 @@ hljs.registerLanguage('json', json)
 </script>
 
 <template>
-  <Home />
+  <LanguageSwitcher />
+  <Home :key="locale" />
 </template>
 
 <style>
