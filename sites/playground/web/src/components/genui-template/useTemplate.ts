@@ -10,6 +10,9 @@ let templateProvider: CustomModelProvider | null = null;
 const isTemplateInit = ref(false);
 // 当前 schema。 可能是：AI 生成的 schemaJson、AI 生成的 jsonPatch 更新后的 schema、切换到历史版本的 schema、编辑器中手动修改的 schema。
 const currentSchema = shallowRef<any>(null);
+// 当前预览 schema。用于编辑器显示。
+const currentPreviewSchema = shallowRef<any>(null);
+const currentPreviewSchemaComplete = ref(true);
 // 当前卡片 id，用于记录卡片 id，避免重复执行 patch 操作
 const currentCardId = ref<string>('');
 const DEFAULT_TEMPLATE_TITLE = '新模板';
@@ -82,7 +85,18 @@ export default function useTemplate(options?: UseTemplateOptions) {
   };
 
   /**
-   * 设置当前 schema，渲染器使用。
+   * 设置当前预览 schema，编辑器使用。
+   * @param schema 模板 schema
+   */
+  const setCurrentPreviewSchema = (schema: any, isComplete: boolean = true) => {
+    currentPreviewSchema.value = schema;
+    if (isComplete !== currentPreviewSchemaComplete.value) {
+      currentPreviewSchemaComplete.value = isComplete;
+    }
+  };
+
+  /**
+   * 设置当前 schema，供服务端组装 prompt 时使用。
    * @param schema 模板 schema
    */
   const setCurrentSchema = (schema: any) => {
@@ -102,6 +116,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
     createConversation(DEFAULT_TEMPLATE_TITLE);
     saveConversations();
     setCurrentSchema(null);
+    setCurrentPreviewSchema(null);
   };
 
   /**
@@ -120,6 +135,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
 
     if (!currentConversation?.messages.length) {
       setCurrentSchema(null);
+      setCurrentPreviewSchema(null);
       setCurrentCardId('');
 
       return;
@@ -140,10 +156,12 @@ export default function useTemplate(options?: UseTemplateOptions) {
 
     if (latestSchema) {
       setCurrentSchema(JSON.parse(latestSchema));
+      setCurrentPreviewSchema(JSON.parse(latestSchema));
       return;
     }
 
     setCurrentSchema(null);
+    setCurrentPreviewSchema(null);
     setCurrentCardId('');
   };
 
@@ -255,6 +273,8 @@ export default function useTemplate(options?: UseTemplateOptions) {
     templateConversationState,
     conversation: conversation.value,
     currentSchema,
+    currentPreviewSchema,
+    currentPreviewSchemaComplete,
     currentCardId,
     currentConversationId,
     templateProvider,
@@ -262,6 +282,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
     templateSchemaList,
     createTemplate,
     changeLlmConfig,
+    setCurrentPreviewSchema,
     setCurrentSchema,
     setCurrentCardId,
     getCurrentCardId,

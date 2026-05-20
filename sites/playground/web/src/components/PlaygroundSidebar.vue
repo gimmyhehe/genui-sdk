@@ -43,6 +43,8 @@ const currentConversationTitle = computed(() => {
 // 侧边栏宽度（使用样式中定义的 CSS 变量，避免重复）
 const sidebarWidth = computed(() => (props.expanded ? 'var(--config-tas-width)' : 'var(--config-tas-width-collapsed)'));
 
+const showNewTaskButton = computed(() => activeName.value !== 'template');
+
 watch(isMobile, (mobile) => {
   if (mobile) emit('update:expanded', false);
 });
@@ -90,7 +92,7 @@ const updateCustomExamples = (list) => {
       <div class="playground-topbar__title">
         {{ currentConversationTitle }}
       </div>
-      <button type="button" class="playground-topbar__icon-btn" aria-label="新建会话" @click="handleNewTask">
+      <button v-if="showNewTaskButton" type="button" class="playground-topbar__icon-btn" aria-label="新建会话" @click="handleNewTask">
         <span class="svg-icon" :innerHTML="NewSvg"></span>
       </button>
     </div>
@@ -137,7 +139,7 @@ const updateCustomExamples = (list) => {
             </button>
           </div>
           <button
-            v-if="!expanded && !isMobile"
+            v-if="!expanded && !isMobile && showNewTaskButton"
             type="button"
             class="playground-sidebar__icon-btn"
             aria-label="新建会话"
@@ -150,7 +152,7 @@ const updateCustomExamples = (list) => {
       </header>
 
       <div class="playground-sidebar__new-task">
-        <button v-if="expanded" class="new-task-btn" type="button" @click="handleNewTask">
+        <button v-if="expanded && showNewTaskButton" class="new-task-btn" type="button" @click="handleNewTask">
           <TinyIconPlus :size="16" />
           <span class="new-task-btn__text">新建会话</span>
           <div class="new-task-btn__shortcut">
@@ -160,7 +162,12 @@ const updateCustomExamples = (list) => {
         </button>
       </div>
 
-      <tiny-tabs class="playground-sidebar__tabs" v-model="activeName" v-show="expanded">
+      <tiny-tabs
+        class="playground-sidebar__tabs"
+        :class="{ 'playground-sidebar__tabs--tools': activeName === 'tools' }"
+        v-model="activeName"
+        v-show="expanded"
+      >
         <tiny-tab-item title="模型配置" name="model">
           <ModelConfig @createNewTemplate="handleCreateNewTemplate" @update-custom-examples="updateCustomExamples"/>
         </tiny-tab-item>
@@ -272,6 +279,8 @@ const updateCustomExamples = (list) => {
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     .config-title {
       font-size: 14px;
@@ -282,12 +291,27 @@ const updateCustomExamples = (list) => {
 
     :deep(.tiny-tabs__header.is-top) {
       padding: 0 24px;
+      flex-shrink: 0;
     }
 
     :deep(.tiny-tabs__content) {
-      height: 100%;
+      flex: 1;
+      min-height: 0;
       overflow: auto;
       padding: 0 24px 90px;
+    }
+
+    &--tools :deep(.tiny-tabs__content) {
+      overflow: hidden;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+
+      > .tiny-tab-pane {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
     }
   }
 
