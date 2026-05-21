@@ -33,6 +33,7 @@ import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
 import { emitter } from './template-chat-event-emitter';
 import useIcon from '../../use-icon';
+import { t } from '../../i18n';
 
 const { addIcons } = useIcon();
 addIcons(IconAi, IconUser, IconArrowDown);
@@ -324,7 +325,7 @@ const showMessages = computed(() => {
       ...showMessages,
       {
         role: 'assistant',
-        content: '正在思考中...',
+        content: t('loading.thinking'),
         loading: true,
       },
     ];
@@ -454,7 +455,7 @@ onUnmounted(() => {
       <tr-sender
         v-model="inputMessage"
         :placeholder="
-          GeneratingStatus.includes(messageManager.messageState.status) ? '正在思考中...' : '请输入您的问题～'
+          GeneratingStatus.includes(messageManager.messageState.status) ? t('loading.thinking') : t('placeholder.input')
         "
         :clearable="true"
         :loading="GeneratingStatus.includes(messageManager.messageState.status)"
@@ -465,7 +466,7 @@ onUnmounted(() => {
         @cancel="messageManager.abortRequest"
       >
       </tr-sender>
-      <div class="footer-text">内容由AI生成，仅供参考</div>
+      <div class="footer-text">{{ t('footer.aiGenerated') }}</div>
     </div>
   </div>
 </template>
