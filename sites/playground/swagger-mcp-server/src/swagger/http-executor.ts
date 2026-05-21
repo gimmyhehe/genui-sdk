@@ -1,0 +1,108 @@
+import type { ApiOperation, ToolCallArgs } from '../types.js';
+
+function fillPathTemplate(path: string, pathArgs: Record<string, unknown>): string {
+  return path.replace(/\{([^}]+)\}/g, (_, key: string) => {
+    const value = pathArgs[key];
+    if (value === undefined || value === null) {
+      throw new Error(`Missing required path parameter: ${key}`);
+    }
+    return encodeURIComponent(String(value));
+  });
+}
+
+function buildUrl(baseUrl: string, path: string, queryArgs: Record<string, unknown>): string {
+  const url = new URL(`${baseUrl}${path.startsWith('/') ? path : `/${path}`}`);
+
+  for (const [key, value] of Object.entries(queryArgs)) {
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        url.searchParams.append(key, String(item));
+      }
+    } else {
+      url.searchParams.set(key, String(value));
+    }
+  }
+
+  return url.toString();
+}
+
+export async function executeApiOperation(
+  operation: ApiOperation,
+  baseUrl: string,
+  args: ToolCallArgs,
+  defaultHeaders: Record<string, string> = {},
+): Promise<{ status: number; statusText: string; headers: Record<string, string>; body: unknown }> {
+  const pathArgs: Record<string, unknown> = {};
+  const queryArgs: Record<string, unknown> = {};
+  const headerArgs: Record<string, unknown> = {};
+
+  for (const param of operation.parameters) {
+    const value = args[param.name];
+    if (value === undefined || value === null) {
+      if (param.required) {
+        throw new Error(`Missing required parameter: ${param.name}`);
+      }
+      continue;
+    }
+
+    switch (param.in) {
+      case 'path':
+        pathArgs[param.name] = value;
+        break;
+      case 'query':
+        queryArgs[param.name] = value;
+        break;
+      case 'header':
+        headerArgs[param.name] = value;
+        break;
+      case 'cookie':
+        break;
+    }
+  }
+
+  const filledPath = fillPathTemplate(operation.path, pathArgs);
+  const url = buildUrl(baseUrl, filledPath, queryArgs);
+
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    ...defaultHeaders,
+    ...Object.fromEntries(
+      Object.entries(headerArgs).map(([k, v]) => [k, String(v)]),
+    ),
+  };
+
+  const init: RequestInit = {
+    method: operation.method,
+    headers,
+  };
+
+  if (args.body !== undefined && args.body !== null) {
+    headers['Content-Type'] = operation.requestBodyContentType ?? 'application/json';
+    init.body =
+      typeof args.body === 'string' ? args.body : JSON.stringify(args.body);
+  }
+
+  const response = await fetch(url, init);
+  const contentType = response.headers.get('content-type') ?? '';
+  let body: unknown;
+
+  if (contentType.includes('application/json')) {
+    const text = await response.text();
+    body = text ? JSON.parse(text) : null;
+  } else {
+    body = await response.text();
+  }
+
+  const responseHeaders: Record<string, string> = {};
+  response.headers.forEach((value, key) => {
+    responseHeaders[key] = value;
+  });
+
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    headers: responseHeaders,
+    body,
+  };
+}
