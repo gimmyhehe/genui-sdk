@@ -1,0 +1,546 @@
+{
+  "data": {
+    "framework": "Vue",
+    "materials": {
+      "components": [
+        {
+          "name": {
+            "zh_CN": "卡片"
+          },
+          "component": "ElCard",
+          "icon": "card",
+          "description": "Element Plus 卡片，用于包裹展示内容",
+          "doc_url": "",
+          "screenshot": "",
+          "tags": "",
+          "keywords": "",
+          "dev_mode": "proCode",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElCard",
+            "destructuring": true
+          },
+          "group": "布局组件",
+          "category": "element-plus",
+          "configure": {
+            "loop": true,
+            "condition": true,
+            "styles": true,
+            "isContainer": true,
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "header",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "卡片标题"
+                      }
+                    }
+                  },
+                  {
+                    "property": "shadow",
+                    "type": "string",
+                    "defaultValue": "always",
+                    "label": {
+                      "text": {
+                        "zh_CN": "阴影"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "slots": {
+              "default": {
+                "label": {
+                  "zh_CN": "默认插槽"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "栅格行"
+          },
+          "component": "ElRow",
+          "icon": "row",
+          "description": "Element Plus 栅格行",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElRow",
+            "destructuring": true
+          },
+          "group": "布局组件",
+          "category": "element-plus",
+          "configure": {
+            "isContainer": true,
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "gutter",
+                    "type": "number",
+                    "label": {
+                      "text": {
+                        "zh_CN": "栅格间隔"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "栅格列"
+          },
+          "component": "ElCol",
+          "icon": "col",
+          "description": "Element Plus 栅格列",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElCol",
+            "destructuring": true
+          },
+          "group": "布局组件",
+          "category": "element-plus",
+          "configure": {
+            "isContainer": true,
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "span",
+                    "type": "number",
+                    "defaultValue": 12,
+                    "label": {
+                      "text": {
+                        "zh_CN": "占据列数"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "选择器"
+          },
+          "component": "ElSelect",
+          "icon": "select",
+          "description": "Element Plus 下拉选择",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElSelect",
+            "destructuring": true
+          },
+          "group": "表单组件",
+          "category": "element-plus",
+          "configure": {
+            "loop": true,
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "modelValue",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "绑定值"
+                      }
+                    }
+                  },
+                  {
+                    "property": "placeholder",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "占位文本"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "events": {
+              "onUpdate:modelValue": {
+                "label": {
+                  "zh_CN": "值变化"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "选项"
+          },
+          "component": "ElOption",
+          "icon": "option",
+          "description": "Element Plus 下拉选项，需作为 ElSelect 子节点",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElOption",
+            "destructuring": true
+          },
+          "group": "表单组件",
+          "category": "element-plus",
+          "configure": {
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "label",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "显示文本"
+                      }
+                    }
+                  },
+                  {
+                    "property": "value",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "选项值"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "单选框"
+          },
+          "component": "ElRadio",
+          "icon": "radio",
+          "description": "Element Plus 单选框",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElRadio",
+            "destructuring": true
+          },
+          "group": "表单组件",
+          "category": "element-plus",
+          "configure": {
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "label",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "显示文本"
+                      }
+                    }
+                  },
+                  {
+                    "property": "value",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "选项值"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "单选组"
+          },
+          "component": "ElRadioGroup",
+          "icon": "radio-group",
+          "description": "Element Plus 单选组",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElRadioGroup",
+            "destructuring": true
+          },
+          "group": "表单组件",
+          "category": "element-plus",
+          "configure": {
+            "isContainer": true,
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "modelValue",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "绑定值"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "events": {
+              "onUpdate:modelValue": {
+                "label": {
+                  "zh_CN": "值变化"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "开关"
+          },
+          "component": "ElSwitch",
+          "icon": "switch",
+          "description": "Element Plus 开关",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElSwitch",
+            "destructuring": true
+          },
+          "group": "表单组件",
+          "category": "element-plus",
+          "configure": {
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "modelValue",
+                    "type": "boolean",
+                    "label": {
+                      "text": {
+                        "zh_CN": "绑定值"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "复选框"
+          },
+          "component": "ElCheckbox",
+          "icon": "checkbox",
+          "description": "Element Plus 复选框",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElCheckbox",
+            "destructuring": true
+          },
+          "group": "表单组件",
+          "category": "element-plus",
+          "configure": {
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "modelValue",
+                    "type": "boolean",
+                    "label": {
+                      "text": {
+                        "zh_CN": "绑定值"
+                      }
+                    }
+                  },
+                  {
+                    "property": "label",
+                    "type": "string",
+                    "label": {
+                      "text": {
+                        "zh_CN": "显示文本"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "标签"
+          },
+          "component": "ElTag",
+          "icon": "tag",
+          "description": "Element Plus 标签",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElTag",
+            "destructuring": true
+          },
+          "group": "数据展示",
+          "category": "element-plus",
+          "configure": {
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "type",
+                    "type": "string",
+                    "defaultValue": "primary",
+                    "label": {
+                      "text": {
+                        "zh_CN": "类型"
+                      }
+                    }
+                  }
+                ]
+              }
+            ],
+            "slots": {
+              "default": {
+                "label": {
+                  "zh_CN": "默认插槽"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": {
+            "zh_CN": "分割线"
+          },
+          "component": "ElDivider",
+          "icon": "divider",
+          "description": "Element Plus 分割线",
+          "npm": {
+            "package": "element-plus",
+            "exportName": "ElDivider",
+            "destructuring": true
+          },
+          "group": "布局组件",
+          "category": "element-plus",
+          "configure": {
+            "framework": "Vue"
+          },
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础属性"
+                },
+                "content": [
+                  {
+                    "property": "contentPosition",
+                    "type": "string",
+                    "defaultValue": "center",
+                    "label": {
+                      "text": {
+                        "zh_CN": "内容位置"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "snippets": [
+        {
+          "group": "card",
+          "label": {
+            "zh_CN": "卡片"
+          },
+          "children": [
+            {
+              "name": {
+                "zh_CN": "基础卡片"
+              },
+              "snippetName": "ElCard",
+              "schema": {
+                "componentName": "ElCard",
+                "props": {
+                  "header": "卡片标题",
+                  "shadow": "hover"
+                },
+                "children": [
+                  {
+                    "componentName": "p",
+                    "children": "卡片内容区域"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
