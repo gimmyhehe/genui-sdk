@@ -347,6 +347,7 @@ onUnmounted(() => {
   <TopIconsRenderer style="height: 0" />
   <div class="genui-playground">
     <PlaygroundSidebar
+      :key="locale"
       v-model:expanded="isSidebarOpen"
       v-model:theme="theme"
       @new-task="chat?.handleNewConversation()"
