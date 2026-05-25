@@ -227,7 +227,6 @@ const buttonSize = computed(() => {
 
     &-title {
       font-size: var(--font-size-title-xl);
-      line-height: var(--line-height-title-xl);
       font-weight: 700;
       text-align: left;
       margin-bottom: 6px;
@@ -238,7 +237,6 @@ const buttonSize = computed(() => {
 
     &-subtitle {
       font-size: var(--font-size-title-lg);
-      line-height: var(--line-height-title-lg);
       font-weight: 700;
       text-align: left;
       color: rgba(14, 112, 255, 1);
@@ -289,6 +287,7 @@ const buttonSize = computed(() => {
 
       &-right {
         width: 45%;
+        flex-shrink: 0;
       }
     }
 
