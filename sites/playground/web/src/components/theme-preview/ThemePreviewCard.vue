@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { THEME_PREVIEW_COLOR_PRESETS } from './theme-colors';
+import ThemePreviewContent from './ThemePreviewContent.vue';
 
 const props = defineProps({
   themeVariant: {
@@ -13,154 +14,60 @@ const props = defineProps({
   },
 });
 
-const themeStyleVars = computed(() => {
-  const preset = THEME_PREVIEW_COLOR_PRESETS[props.themeVariant] || THEME_PREVIEW_COLOR_PRESETS.lite;
-  const colors = { ...preset, ...props.themeColors };
+const resolvePreset = (variant) => {
+  const presetVariant = variant === 'auto' ? 'light' : variant;
+  return THEME_PREVIEW_COLOR_PRESETS[presetVariant] || THEME_PREVIEW_COLOR_PRESETS.light;
+};
 
-  return {
-    '--preview-border': colors.previewBorder,
-    '--preview-bg': colors.previewBg,
-    '--sidebar-bg': colors.sidebarBg,
-    '--main-bg': colors.mainBg,
-    '--skeleton-bg': colors.skeletonBg,
-    '--new-task-bg': colors.newTaskBg,
-    '--bubble-border': colors.bubbleBorder,
-    '--bubble-bg': colors.bubbleBg,
-    '--sender-border': colors.senderBorder,
-    '--sender-bg': colors.senderBg,
-  };
+const toStyleVars = (colors) => ({
+  '--preview-border': colors.previewBorder,
+  '--preview-bg': colors.previewBg,
+  '--sidebar-bg': colors.sidebarBg,
+  '--main-bg': colors.mainBg,
+  '--skeleton-bg': colors.skeletonBg,
+  '--new-task-bg': colors.newTaskBg,
+  '--bubble-border': colors.bubbleBorder,
+  '--bubble-bg': colors.bubbleBg,
+  '--sender-border': colors.senderBorder,
+  '--sender-bg': colors.senderBg,
+});
+
+const themeStyleVars = computed(() => {
+  const preset = resolvePreset(props.themeVariant);
+  const colors = { ...preset, ...props.themeColors };
+  return toStyleVars(colors);
 });
 </script>
 
 <template>
   <div class="theme-card__preview" :style="themeStyleVars">
-    <div class="theme-card__preview-body">
-      <div class="theme-card__preview-sidebar">
-        <div class="theme-card__preview-logo"></div>
-        <div class="theme-card__preview-new-task"></div>
-        <div class="theme-card__preview-tab"></div>
-        <div class="theme-card__preview-tab"></div>
-        <div class="theme-card__preview-tab"></div>
-      </div>
-      <div class="theme-card__preview-main">
-        <div class="theme-card__preview-chat-header"></div>
-        <div class="theme-card__preview-bubble">
-          <div class="theme-card__preview-line theme-card__preview-line--long"></div>
-          <div class="theme-card__preview-line"></div>
-          <div class="theme-card__preview-line theme-card__preview-line--short"></div>
-        </div>
-        <div class="theme-card__preview-sender">
-          <div class="theme-card__preview-input"></div>
-        </div>
-      </div>
+    <div class="theme-card__preview-body" :style="themeStyleVars">
+      <ThemePreviewContent />
     </div>
   </div>
 </template>
 
 <style scoped lang="less">
 .theme-card__preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   border-radius: 6px;
   overflow: hidden;
   border: 1px solid var(--preview-border);
-  min-height: 100px;
+  height: 96px;
+  box-sizing: border-box;
+  padding-bottom: 0;
   background: var(--preview-bg);
 }
 
 .theme-card__preview-body {
-  padding: 4px;
   display: flex;
   gap: 6px;
-  min-height: 98px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 4px 0;
+  margin-bottom: -1px;
   align-items: stretch;
-}
-
-.theme-card__preview-sidebar {
-  width: 34%;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 4px;
-  border-radius: 4px;
-  background: var(--sidebar-bg);
-}
-
-.theme-card__preview-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  background: var(--main-bg);
-  border-radius: 4px;
-  padding: 4px;
-}
-
-.theme-card__preview-logo {
-  height: 8px;
-  width: 72%;
-  border-radius: 999px;
-  background: var(--skeleton-bg);
-}
-
-.theme-card__preview-new-task {
-  height: 10px;
-  border-radius: 4px;
-  background: var(--new-task-bg);
-  margin-bottom: 2px;
-}
-
-.theme-card__preview-tab {
-  height: 7px;
-  border-radius: 999px;
-  background: var(--skeleton-bg);
-}
-
-.theme-card__preview-chat-header {
-  height: 7px;
-  width: 42%;
-  border-radius: 999px;
-  background: var(--skeleton-bg);
-}
-
-.theme-card__preview-bubble {
-  border-radius: 6px;
-  border: 1px solid var(--bubble-border);
-  padding: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-height: 46px;
-  background: var(--bubble-bg);
-}
-
-.theme-card__preview-line {
-  height: 6px;
-  border-radius: 999px;
-  background: var(--skeleton-bg);
-  width: 100%;
-}
-
-.theme-card__preview-line--long {
-  width: 100%;
-}
-
-.theme-card__preview-line--short {
-  width: 62%;
-}
-
-.theme-card__preview-input {
-  height: 8px;
-  width: 74%;
-  border-radius: 999px;
-  background: var(--skeleton-bg);
-}
-
-.theme-card__preview-sender {
-  margin-top: auto;
-  border-radius: 4px;
-  border: 1px solid var(--sender-border);
-  padding: 4px;
-  background: var(--sender-bg);
-  display: flex;
-  justify-content: center;
 }
 </style>

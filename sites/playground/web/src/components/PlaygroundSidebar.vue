@@ -1,5 +1,5 @@
 <script setup>
-import { TinyTabs, TinyTabItem, TinyRadioGroup, TinyRadio } from '@opentiny/vue';
+import { TinyTabs, TinyTabItem, TinyRadioGroup, TinyRadio, TinyCheckbox } from '@opentiny/vue';
 import { iconPlus } from '@opentiny/vue-icon';
 import { ref, watch, computed, inject, defineAsyncComponent, shallowRef } from 'vue';
 import NewSvg from '../assets/images/new.svg?raw';
@@ -41,12 +41,15 @@ const frameworkOptions = [
 ];
 const componentLibOptions = ['TinyVue', 'ElementUI'];
 const materialThemeOptions = [
-  { text: '清新', value: 'lite' },
+  { text: '亮色', value: 'light' },
   { text: '暗黑', value: 'dark' },
+  { text: '清新', value: 'lite' },
+  { text: '跟随系统', value: 'auto' },
 ];
 const materialThemeColorMap = {
-  lite: THEME_PREVIEW_COLOR_PRESETS.lite,
+  light: THEME_PREVIEW_COLOR_PRESETS.light,
   dark: THEME_PREVIEW_COLOR_PRESETS.dark,
+  lite: THEME_PREVIEW_COLOR_PRESETS.lite,
 };
 
 const { isMobile } = useIsMobile();
@@ -64,16 +67,6 @@ const showNewTaskButton = computed(() => activeName.value !== 'template');
 watch(isMobile, (mobile) => {
   if (mobile) emit('update:expanded', false);
 });
-
-watch(
-  () => props.theme,
-  (currentTheme) => {
-    if (!['lite', 'dark'].includes(currentTheme)) {
-      emit('update:theme', 'lite');
-    }
-  },
-  { immediate: true },
-);
 
 const handleOverlayClick = () => {
   if (isMobile.value) emit('update:expanded', false);
@@ -226,19 +219,35 @@ const updateCustomExamples = (list) => {
             <div
               v-for="item in materialThemeOptions"
               :key="item.value"
-              class="theme-card"
-              :class="[ `theme-card--${item.value}`, { 'theme-card--active': theme === item.value } ]"
-              role="radio"
-              :aria-checked="theme === item.value"
-              tabindex="0"
-              @click="emit('update:theme', item.value)"
-              @keydown.enter="emit('update:theme', item.value)"
-              @keydown.space.prevent="emit('update:theme', item.value)"
+              class="theme-card-item"
             >
-              <ThemePreviewCard
-                :theme-variant="item.value"
-                :theme-colors="materialThemeColorMap[item.value]"
-              />
+              <div
+                class="theme-card"
+                :class="[ `theme-card--${item.value}`, { 'theme-card--active': theme === item.value } ]"
+                role="radio"
+                :aria-checked="theme === item.value"
+                tabindex="0"
+                @click="emit('update:theme', item.value)"
+                @keydown.enter="emit('update:theme', item.value)"
+                @keydown.space.prevent="emit('update:theme', item.value)"
+              >
+                <tiny-checkbox
+                  v-if="theme === item.value"
+                  class="theme-card__check"
+                  :model-value="true"
+                  @click.stop
+                />
+                <ThemePreviewCard
+                  :theme-variant="item.value"
+                  :theme-colors="materialThemeColorMap[item.value]"
+                />
+              </div>
+              <span
+                class="theme-card__label"
+                :class="{ 'theme-card__label--active': theme === item.value }"
+              >
+                {{ item.text }}
+              </span>
             </div>
           </div>
         </tiny-tab-item>
@@ -415,28 +424,64 @@ const updateCustomExamples = (list) => {
     }
 
     .theme-card-group {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
       margin-bottom: 20px;
+      box-sizing: border-box;
+    }
+
+    .theme-card-item {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      min-width: 0;
+      box-sizing: border-box;
     }
 
     .theme-card {
-      flex: 1;
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
       border: 1px solid #e6e6e6;
       border-radius: 8px;
       padding: 8px 8px 0;
-      text-align: center;
-      font-size: 14px;
-      line-height: 20px;
-      color: #595959;
       cursor: pointer;
       user-select: none;
+      overflow: hidden;
+    }
+
+    .theme-card__check {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 1;
+      pointer-events: none;
+
+      :deep(.tiny-checkbox) {
+        margin: 0;
+      }
+
+      :deep(.tiny-checkbox__label) {
+        display: none;
+      }
+    }
+
+    .theme-card__label {
+      font-size: 12px;
+      line-height: 1;
+      color: #595959;
+      text-align: center;
+    }
+
+    .theme-card__label--active {
+      color: #191919;
+      font-weight: 500;
     }
 
     .theme-card--active {
       border-color: #191919;
-      color: #191919;
-      font-weight: 500;
     }
 
     :deep(.tiny-tabs__header.is-top) {

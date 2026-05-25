@@ -1,4 +1,16 @@
 export const THEME_PREVIEW_COLOR_PRESETS = {
+  light: {
+    previewBorder: '#e6e6e6',
+    previewBg: '#ffffff',
+    sidebarBg: '#fafafa',
+    mainBg: '#f5f5f5',
+    skeletonBg: '#e6e6e6',
+    newTaskBg: '#e6e6e6',
+    bubbleBorder: '#e6e6e6',
+    bubbleBg: 'transparent',
+    senderBorder: '#d9d9d9',
+    senderBg: '#ffffff',
+  },
   lite: {
     previewBorder: '#d9e7f6',
     previewBg: '#ffffff',
