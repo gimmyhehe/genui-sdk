@@ -4,6 +4,7 @@ import { PatternExtractor } from '@opentiny/genui-sdk-core';
 import type { IStreamDelta } from '@opentiny/genui-sdk-core';
 import { emitter } from './template-chat-event-emitter';
 import { templateChat } from './template-chat-api';
+import { getBackendChatMessages, getLastUserMessage } from './template-chat-utils';
 import type { LLMConfig, IChatMessage, IMessageItem } from './chat.types';
 
 export interface ICustomModelProviderOptions {
@@ -45,7 +46,7 @@ export class CustomModelProvider extends BaseModelProvider {
   async getData(request: ChatCompletionRequest) {
     return templateChat({
       url: this.url,
-      messages: request.messages,
+      messages: getBackendChatMessages(request.messages),
       signal: request.options?.signal,
       templateSchema: this.templateSchema,
       llmConfig: this.llmConfig,
@@ -69,7 +70,8 @@ export class CustomModelProvider extends BaseModelProvider {
       content: '',
       messages: [] as IMessageItem[],
     });
-    const { content: input, messageId } = request.messages[request.messages.length - 1];
+    const lastUserMessage = getLastUserMessage(request.messages);
+    const { content: input, messageId } = lastUserMessage;
     onData(chatMessage);
 
     const onMarkdown = (content: string, delta: IStreamDelta) => {

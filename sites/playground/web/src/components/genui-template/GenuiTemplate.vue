@@ -12,6 +12,7 @@ import GenuiTemplateMobileSheet from './GenuiTemplateMobileSheet.vue';
 import useTemplate from './useTemplate';
 import { useIsMobile } from '../../use-mobile';
 import { useMonacoPlaygroundTheme } from './use-monaco-playground-theme';
+import { findLatestSchemaInConversation, isRenderableSchema } from './template-chat-utils';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 
 const { isMobile } = useIsMobile();
@@ -25,8 +26,9 @@ const {
   currentPreviewSchema,
   currentPreviewSchemaComplete,
   templateConversationState,
-  conversation,
   currentCardId,
+  currentConversationId,
+  applySchemaFromMessages,
 } = useTemplate();
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
@@ -34,7 +36,16 @@ const props = defineProps<{
 
 const monacoTheme = useMonacoPlaygroundTheme(() => props.theme);
 
-// 桌面：右侧预览列是否展开（关闭后仅占聊天列；切换会话或点击版本卡片会重新展开）
+const rendererSchema = computed(() => {
+  const schema = currentPreviewSchema.value ?? currentSchema.value;
+  return isRenderableSchema(schema) ? schema : null;
+});
+
+const rendererSchemaKey = computed(() => {
+  const schema = rendererSchema.value as Record<string, unknown> | null;
+  const componentName = schema?.componentName ?? 'schema';
+  return `${currentCardId.value || 'preview'}-${String(componentName)}`;
+});
 const rendererPanelVisible = ref(true);
 // schema 编辑器是否可见（移动端：底部抽屉；抽屉内先预览再可打开 JSON）
 const schemaEditorVisible = ref(false);
@@ -51,13 +62,7 @@ const latestSchemaCardId = computed(() => {
   const currentConversation = conversationState?.conversations?.find(
     (item: Conversation) => item.id === conversationState.currentId,
   );
-  const lastMessage = currentConversation?.messages?.[currentConversation.messages.length - 1] as IMessage | undefined;
-  const schemaMessage = lastMessage?.messages?.find(
-    (message): message is ISchemaCardMessageItem | IJsonPatchMessageItem =>
-      message.type === 'schema-card' || message.type === 'json-patch',
-  );
-
-  return schemaMessage?.cardId ?? '';
+  return findLatestSchemaInConversation(currentConversation?.messages)?.cardId ?? '';
 });
 // 仅当正在查看历史版本时显示“返回最新版本/应用此版本”
 const showReturnLatestButton = computed(() =>
@@ -200,31 +205,15 @@ const applyCurrentVersion = () => {
 };
 
 const resetToLatestVersion = () => {
-  // 获取最新版本的 schema
   const conversationState = templateConversationState.value;
   if (!conversationState) {
     return;
   }
   const currentConversation = conversationState.conversations.find(
-    (conversation: Conversation) => conversation.id === conversationState.currentId,
+    (item: Conversation) => item.id === conversationState.currentId,
   );
-  const lastMessage = currentConversation?.messages?.[currentConversation?.messages.length - 1] as IMessage | undefined;
-  const schemaMessage = lastMessage?.messages?.find(
-    (message): message is ISchemaCardMessageItem | IJsonPatchMessageItem =>
-      message.type === 'schema-card' || message.type === 'json-patch',
-  );
-  const latestSchema = schemaMessage?.schema;
-  currentCardId.value = schemaMessage?.cardId ?? '';
+  applySchemaFromMessages(currentConversation?.messages, { clearIfMissing: false });
   isHistoryVersionApplied.value = true;
-  if (latestSchema) {
-    try {
-      const parsedLatestSchema = JSON.parse(latestSchema);
-      setCurrentSchema(parsedLatestSchema);
-      setCurrentPreviewSchema(parsedLatestSchema);
-    } catch (error) {
-      console.error('Failed to restore latest schema:', error);
-    }
-  }
   if (isMobile.value) {
     mobileSchemaJsonEditorOpen.value = false;
   }
@@ -249,15 +238,22 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 };
 
-const currentConversationId = computed(() => conversation?.state.currentId);
-
 watch(currentConversationId, () => {
   schemaEditorVisible.value = false;
   mobileSchemaJsonEditorOpen.value = false;
-  currentCardId.value = '';
   isHistoryVersionApplied.value = true;
   rendererPanelVisible.value = true;
+  resetToLatestVersion();
 });
+
+watch(
+  () => templateConversationState.value?.loading,
+  (loading, prevLoading) => {
+    if (prevLoading === true && loading === false) {
+      resetToLatestVersion();
+    }
+  },
+);
 
 onMounted(() => {
   resetToLatestVersion();
@@ -315,8 +311,9 @@ onUnmounted(() => {
       @reset-to-latest-version="resetToLatestVersion"
     />
     <template v-else>
-      <div class="genui-schema-template-item renderer-container" v-if="currentPreviewSchema && rendererPanelVisible">
-        <div class="renderer-container-wrapper">
+      <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && rendererPanelVisible">
+        <GenuiConfigProvider :theme="theme" style="height: 100%; width: 100%">
+          <div class="renderer-container-wrapper">
           <div class="top-button-group">
             <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
               <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
@@ -336,8 +333,15 @@ onUnmounted(() => {
               />
             </div>
           </div>
-          <schema-renderer class="schema-renderer" :content="currentPreviewSchema" :generating="false" :isJsonComplete="currentPreviewSchemaComplete" />
-        </div>
+            <schema-renderer
+              :key="rendererSchemaKey"
+              class="schema-renderer"
+              :content="rendererSchema"
+              :generating="false"
+              :is-json-complete="true"
+            />
+          </div>
+        </GenuiConfigProvider>
       </div>
     </template>
   </div>

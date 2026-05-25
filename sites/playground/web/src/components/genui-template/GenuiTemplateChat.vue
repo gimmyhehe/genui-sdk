@@ -2,8 +2,6 @@
 import { ref, watch, computed, h, inject, onMounted, onUnmounted, toRaw } from 'vue';
 import type { Ref } from 'vue';
 import '@opentiny/tiny-robot/dist/style.css';
-import * as jsonPatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
-import type { JsonPatchOp } from 'jsondiffpatch/formatters/jsonpatch-apply';
 import { DeltaPatcher, type IChatMessage } from '@opentiny/genui-sdk-core';
 import {
   TrBubbleList,
@@ -15,20 +13,25 @@ import {
 import { GeneratingStatus, STATUS } from '@opentiny/tiny-robot-kit';
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import { IconAi, IconUser, IconArrowDown } from '@opentiny/tiny-robot-svgs';
-import type { BubbleRoleConfig } from '@opentiny/tiny-robot';
+import type { BubbleProps, BubbleRoleConfig } from '@opentiny/tiny-robot';
 import { requiredCompleteFieldSelectors, scrollEnd, throttle, GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
+import { TinyButton } from '@opentiny/vue';
 import copy from 'clipboard-copy';
 import type { INotificationPayload, IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
 import {
   textToJson,
   validateJsonPatch,
   PARSE_PARTIAL_JSON_STATE,
-  formatJsonPatch,
+  applyJsonPatchOperations,
   generateIdForComponents,
+  findLatestSchemaInConversation,
+  getLastNonCompressMessage,
+  isContextCompressMessage,
 } from './template-chat-utils';
 import { formatDate, generateId } from '../../utils';
 import useTemplate from './useTemplate';
+import { useContextZip } from './use-context-zip';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
 import { emitter } from './template-chat-event-emitter';
@@ -53,10 +56,13 @@ const {
   currentSchema,
   currentPreviewSchema,
   currentCardId,
+  currentConversationId,
   setCurrentSchema,
   setCurrentPreviewSchema,
   updateTemplateTitle,
   setCurrentCardId,
+  getTemplateChatConfig,
+  saveConversations,
 } = useTemplate();
 
 watch(
@@ -79,6 +85,8 @@ const { messageManager } = conversation;
 const messages = computed(() => messageManager.value.messages.value);
 
 const generating = computed(() => GeneratingStatus.includes(conversation.messageManager.value.messageState.status));
+
+const messagesContainer: Ref<HTMLElement | undefined> = ref();
 
 const roles: Record<string, BubbleRoleConfig> = {
   assistant: {
@@ -110,8 +118,31 @@ const roles: Record<string, BubbleRoleConfig> = {
     avatar: h(IconUser, { style: { fontSize: '32px' } }),
     customContentField: 'messages',
   },
+  'context-compress': {
+    placement: 'start',
+    maxWidth: '100%',
+    slots: {
+      default: () => null,
+    },
+  },
+  zip: {
+    placement: 'start',
+    maxWidth: '100%',
+    slots: {
+      default: (slotProps) => {
+        return h('div', { class: 'context-zip-divider' }, [
+          h('span', { class: 'context-zip-divider__line' }),
+          h(
+            'span',
+            { class: 'context-zip-divider__text' },
+            typeof slotProps?.bubbleProps?.content === 'string' ? slotProps.bubbleProps.content : '',
+          ),
+          h('span', { class: 'context-zip-divider__line' }),
+        ]);
+      },
+    },
+  },
 };
-
 
 const handleSchemaJsonChanged = (event: { type: 'schema-card' | 'json-patch', cardId: string, content: string, delta: any, newMessage: boolean }) => {
   const { type, cardId, content, newMessage } = event;
@@ -214,21 +245,16 @@ const jsonPatchRenderer = async (props: any) => {
       return;
     }
 
-    const newOperations = formatJsonPatch(toRaw(lastPreviewSchema.value), operations);
-
-    if (newOperations.length === 0) {
+    const patchBaseline = lastPreviewSchema.value ?? currentSchema.value;
+    if (!patchBaseline) {
       return;
     }
 
-    const standardOperations: JsonPatchOp[] = newOperations.map((op) => {
-      const { id, idToPath, relativePath, ...standardOp } = op as any;
-      return standardOp as JsonPatchOp;
-    });
+    const targetSchema = applyJsonPatchOperations(patchBaseline, operations);
+    if (!targetSchema) {
+      return;
+    }
 
-    // 增量 patch 需要基于“当前预览态”持续叠加，避免每个 chunk 都从已应用态重建导致丢操作。
-    const patchBaseline = lastPreviewSchema.value ?? currentSchema.value;
-    const targetSchema = JSON.parse(JSON.stringify(patchBaseline));
-    jsonPatchFormatter.patch(targetSchema, standardOperations);
     setCurrentPreviewSchema(generateIdForComponents(targetSchema), isComplete || lastOperationComplete);
   } catch (error) {
     errorMessagesMap.value.set(props.cardId, error.message);
@@ -261,6 +287,7 @@ const handleRefresh = ({ index }: { index: number }) => {
     setCurrentPreviewSchema(currentSchema);
   }
   messages.value = messages.value.slice(0, index);
+  resetContextZip();
   setCurrentCardId(messages.value[messages.value.length - 1].messageId as string);
   send();
 };
@@ -316,12 +343,33 @@ if (props.messages?.length) {
   messages.value.splice(0, messages.value.length, ...(props.messages as any));
 }
 
-const showMessages = computed(() => {
-  let showMessages = messages.value;
+const { scrollToBottom, autoScrollToBottom, isLastMessageInBottom } = scrollEnd(messagesContainer);
+const throttledScrollToBottom = throttle(autoScrollToBottom, 400);
+
+const contextZip = useContextZip({
+  messages,
+  generating,
+  currentConversationId,
+  getTemplateChatConfig,
+  saveConversations,
+  scrollToBottom,
+});
+
+const { isButtonDisabled, isCompressing, compress, showDivider, dividerText, reset: resetContextZip } = contextZip;
+
+const toShowMessage = (message: ChatMessage): BubbleProps => {
+  if (isContextCompressMessage(message)) {
+    return { role: 'context-compress', content: '' };
+  }
+  return message as BubbleProps;
+};
+
+const showMessages = computed((): BubbleProps[] => {
+  let list = messages.value.map(toShowMessage);
 
   if (messageManager.value.messageState.status === STATUS.PROCESSING) {
     return [
-      ...showMessages,
+      ...list,
       {
         role: 'assistant',
         content: '正在思考中...',
@@ -330,19 +378,18 @@ const showMessages = computed(() => {
     ];
   }
 
-  const lastMessage = messages.value[messages.value.length - 1];
+  const lastMessage = getLastNonCompressMessage(messages.value);
 
-  // 在流式返回过程中，为最后一条助手消息添加 loading-text 组件
   if (generating.value && lastMessage?.role === 'assistant') {
+    const lastIndex = messages.value.indexOf(lastMessage);
     const existingMessages = Array.isArray((lastMessage as any)?.messages) ? (lastMessage as any).messages : [];
-    // 检查是否已经存在 loading-text，避免重复添加
     const hasLoadingText = existingMessages.some((msg: any) => msg.type === 'loading-text');
 
-    if (!hasLoadingText) {
-      return [
-        ...showMessages.slice(0, -1),
+    if (!hasLoadingText && lastIndex !== -1) {
+      list = [
+        ...list.slice(0, lastIndex),
         {
-          ...lastMessage,
+          ...toShowMessage(lastMessage),
           messages: [
             ...existingMessages,
             {
@@ -352,12 +399,17 @@ const showMessages = computed(() => {
               showThinkingResult: false,
             },
           ],
-        },
+        } as BubbleProps,
+        ...list.slice(lastIndex + 1),
       ];
     }
   }
 
-  return showMessages;
+  if (showDivider.value) {
+    list = [...list, { role: 'zip', content: dividerText.value }];
+  }
+
+  return list;
 });
 
 const clearInputMessage = () => {
@@ -394,11 +446,9 @@ const handleSendMessage = async () => {
 const handleNotification = (event: INotificationPayload) => {
   if (event.type === 'done') {
     setCurrentSchema(currentPreviewSchema.value);
-    // 将 schema 缓存到卡片中
-    const lastMessage = messages.value[messages.value.length - 1];
-    const lastMessageCard = (lastMessage as any).messages.find(
-      (msg: any) => msg.type === 'schema-card' || msg.type === 'json-patch',
-    );
+    // 将 schema 缓存到卡片中（跳过末尾 context-compress，取最近一条含 schema 的卡片）
+    const lastMessage = findLatestSchemaInConversation(messages.value);
+    const lastMessageCard = lastMessage?.cardMessage;
 
     if (lastMessageCard) {
       lastMessageCard.schema = JSON.stringify(currentSchema.value);
@@ -407,11 +457,6 @@ const handleNotification = (event: INotificationPayload) => {
     }
   }
 };
-
-const messagesContainer: Ref<HTMLElement | undefined> = ref();
-
-const { scrollToBottom, autoScrollToBottom, isLastMessageInBottom } = scrollEnd(messagesContainer);
-const throttledScrollToBottom = throttle(autoScrollToBottom, 400);
 
 watch(() => messages.value, throttledScrollToBottom, { deep: true });
 
@@ -450,6 +495,17 @@ onUnmounted(() => {
         @click="scrollToBottom"
       >
         <IconArrowDown class="icon-arrow-down" />
+      </div>
+      <!-- 会话压缩和报错修复按钮 -->
+      <div class="sender-tool-buttons">
+        <TinyButton round class="zip-button" :disabled="isButtonDisabled" :loading="isCompressing" @click="compress">
+          <IconZip class="icon-zip" />
+          会话压缩
+        </TinyButton>
+        <TinyButton round class="fix-button">
+          <IconFix class="icon-fix" />
+          报错修复
+        </TinyButton>
       </div>
       <tr-sender
         v-model="inputMessage"
@@ -538,7 +594,7 @@ onUnmounted(() => {
   width: 100%;
 }
 
-:deep(.tr-bubble__content-wrapper) {
+:deep(.tr-bubble__content-wrapper:not(:has(.context-zip-divider))) {
   @avatar-and-gap-width: 56px;
   max-width: calc(100% - @avatar-and-gap-width * 2);
 
@@ -551,12 +607,68 @@ onUnmounted(() => {
   }
 }
 
+// 压缩分割线：由 messages → showMessages 注入 role: zip，撑满列表行宽
+:deep(.tr-bubble-list > .tr-bubble:has(.context-zip-divider)) {
+  width: 100% !important;
+  max-width: 100% !important;
+  --max-width: 100%;
+  margin-left: 0 !important;
+  align-self: stretch;
+  gap: 0 !important;
+}
+
+:deep(.tr-bubble:has(.context-zip-divider)) {
+  .tr-bubble__avatar {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden;
+  }
+
+  .tr-bubble__content-wrapper {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    align-items: stretch !important;
+    margin: 16px 0;
+  }
+
+  .tr-bubble__content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+:deep(.context-zip-divider) {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 12px;
+  color: #999;
+  user-select: none;
+
+  &__line {
+    height: 1px;
+    background: var(--sender-border-color, #e5e5e5);
+  }
+
+  &__text {
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 768px) {
-  :deep(.tr-bubble__content-wrapper) {
+  :deep(.tr-bubble__content-wrapper:not(:has(.context-zip-divider))) {
     max-width: calc(100% - 12px);
   }
 
-  :deep(.tr-bubble__content-wrapper .tr-bubble__content-items) {
+  :deep(.tr-bubble__content-wrapper:not(:has(.context-zip-divider)) .tr-bubble__content-items) {
     overflow-x: hidden;
   }
 }
@@ -569,6 +681,14 @@ onUnmounted(() => {
 
   .attachments-container {
     padding: 0 20px;
+  }
+
+  .sender-tool-buttons {
+    display: flex;
+    width: 80%;
+    justify-content: flex-end;
+    margin: 0 auto;
+    margin-bottom: 8px;
   }
 }
 

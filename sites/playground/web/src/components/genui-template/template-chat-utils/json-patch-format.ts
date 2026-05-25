@@ -1,29 +1,39 @@
 import * as jsonPatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
+import type { JsonPatchOp } from 'jsondiffpatch/formatters/jsonpatch-apply';
 import { findComponentPath, getPositionRelativePath, mergePath } from './schema-path';
 
+export type IFormattedJsonPatchOperation = JsonPatchOp & {
+  id?: string;
+  idToPath?: string | null;
+  relativePath?: string;
+};
+
+function toStandardPatchOp(item: IFormattedJsonPatchOperation): JsonPatchOp {
+  const { id, idToPath, relativePath, ...standardOp } = item;
+  return standardOp as JsonPatchOp;
+}
+
 /**
- * 格式化 jsonPatch
- * @param currentSchema 当前 schema
- * @param value jsonPatch
- * @returns 格式化后的 jsonPatch
+ * 格式化 jsonPatch：将带 id 的领域扩展操作转为 RFC 6902 绝对路径
  */
-export const formatJsonPatch = (currentSchema: any, value: any) => {
-  let templeSchema = structuredClone(currentSchema);
+export const formatJsonPatch = (
+  currentSchema: any,
+  value: any[],
+): IFormattedJsonPatchOperation[] => {
+  const templeSchema = structuredClone(currentSchema ?? {});
+
   return value.map((originItem: any) => {
-    const item = structuredClone(originItem);
-    // 通过 id 从 currentSchema 中找到对应的组件路径
+    const item = structuredClone(originItem) as IFormattedJsonPatchOperation;
     const componentPath = findComponentPath(templeSchema, item.id);
     item.idToPath = componentPath;
 
     if (!componentPath) {
-      // 如果找不到组件路径，返回原 item
       console.error(`找不到组件路径: ${item.id}`);
       return item;
     }
 
     if (item.op !== 'move') {
       if (item.path) {
-        // 如果 path 不为空，则把组件路径拼接到 path 前面
         item.relativePath = item.path;
         item.path = componentPath === '/' ? item.path : `${componentPath}${item.path}`;
       } else {
@@ -32,21 +42,47 @@ export const formatJsonPatch = (currentSchema: any, value: any) => {
     }
 
     if (item.op === 'move') {
-      const { id, position, positionId } = item;
+      const { id, position, positionId } = item as IFormattedJsonPatchOperation & {
+        position?: string;
+        positionId?: string;
+      };
       if (id) {
-        item.from = findComponentPath(templeSchema, id);
+        item.from = findComponentPath(templeSchema, id) ?? undefined;
       }
-      if (position) {
+      if (position && positionId) {
         const positionPath = findComponentPath(templeSchema, positionId);
-        const relativePath = getPositionRelativePath(position, positionId, positionPath, item.from);
+        const relativePath = getPositionRelativePath(position, positionId, positionPath!, item.from!);
         item.relativePath = relativePath;
-
-        item.path = positionPath === '/' ? relativePath : mergePath(positionPath, relativePath);
+        item.path = positionPath === '/' ? relativePath : mergePath(positionPath!, relativePath);
       }
     }
 
-    jsonPatchFormatter.patch(templeSchema, [item]);
+    // 路径解析需基于前序操作后的 schema，必须使用标准 RFC6902 op
+    jsonPatchFormatter.patch(templeSchema, [toStandardPatchOp(item)]);
 
     return item;
   });
 };
+
+/** 将 jsonPatch 操作应用到 baseline，返回新 schema；无法解析 id 的操作会被跳过 */
+export function applyJsonPatchOperations(
+  baseline: unknown,
+  operations: unknown[],
+): Record<string, unknown> | null {
+  if (!baseline || !Array.isArray(operations) || operations.length === 0) {
+    return null;
+  }
+
+  const formatted = formatJsonPatch(baseline, operations);
+  const standardOperations = formatted
+    .filter((op) => op.idToPath)
+    .map((op) => toStandardPatchOp(op));
+
+  if (standardOperations.length === 0) {
+    return null;
+  }
+
+  const target = structuredClone(baseline) as Record<string, unknown>;
+  jsonPatchFormatter.patch(target, standardOperations);
+  return target;
+}

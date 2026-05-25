@@ -3,9 +3,12 @@ import { useConversation, IndexedDBStrategy } from '@opentiny/genui-sdk-vue';
 import { AIClient, type ChatMessage } from '@opentiny/tiny-robot-kit';
 import { CustomModelProvider } from './template-provider';
 import type { LLMConfig, IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
+import { findLatestSchemaInConversation, resolveRenderableSchemaFromMessages } from './template-chat-utils';
 
 const conversation = shallowRef<ReturnType<typeof useConversation> | null>(null);
 let templateProvider: CustomModelProvider | null = null;
+let templateChatUrl = '';
+let templateLlmConfig: LLMConfig = { model: '', temperature: 0.3 };
 // 判断模板会话是否初始化完成。
 const isTemplateInit = ref(false);
 // 当前 schema。 可能是：AI 生成的 schemaJson、AI 生成的 jsonPatch 更新后的 schema、切换到历史版本的 schema、编辑器中手动修改的 schema。
@@ -17,6 +20,34 @@ const currentPreviewSchemaComplete = ref(true);
 const currentCardId = ref<string>('');
 const DEFAULT_TEMPLATE_TITLE = '新模板';
 
+function applySchemaFromMessages(
+  messages: ChatMessage[] | undefined,
+  options: { clearIfMissing?: boolean } = {},
+) {
+  const { clearIfMissing = true } = options;
+  const latestSchemaInfo = findLatestSchemaInConversation(messages);
+
+  if (latestSchemaInfo) {
+    const resolved = resolveRenderableSchemaFromMessages(messages);
+    if (resolved) {
+      currentSchema.value = resolved.schema;
+      currentPreviewSchema.value = resolved.schema;
+      currentPreviewSchemaComplete.value = true;
+      templateProvider?.setTemplateSchema(resolved.schema);
+      currentCardId.value = resolved.cardId;
+      return true;
+    }
+  }
+
+  if (clearIfMissing) {
+    currentSchema.value = null;
+    currentPreviewSchema.value = null;
+    currentCardId.value = '';
+  }
+
+  return false;
+}
+
 export interface UseTemplateOptions {
   url: string;
   llmConfig?: LLMConfig;
@@ -25,6 +56,8 @@ export interface UseTemplateOptions {
 export default function useTemplate(options?: UseTemplateOptions) {
   if (!conversation.value && options?.url) {
     const { url, llmConfig } = options;
+    templateChatUrl = url;
+    templateLlmConfig = llmConfig || templateLlmConfig;
 
     // 创建 provider 实例
     templateProvider = new CustomModelProvider({
@@ -55,6 +88,8 @@ export default function useTemplate(options?: UseTemplateOptions) {
             conversation.value!.createConversation(DEFAULT_TEMPLATE_TITLE);
             conversation.value!.saveConversations();
           }
+          // IndexedDB 加载完成后再恢复 schema，避免早于 GenuiTemplate onMounted 的空窗期
+          applySchemaFromMessages(conversation.value!.getCurrentConversation()?.messages);
         },
         onFinish(data: any, context) {
           if (data?.type === 'error') {
@@ -130,8 +165,6 @@ export default function useTemplate(options?: UseTemplateOptions) {
 
     conversation.value.switchConversation(id);
     const currentConversation = conversation.value.getCurrentConversation();
-    // 更新 schema 卡片
-    let latestSchema = null;
 
     if (!currentConversation?.messages.length) {
       setCurrentSchema(null);
@@ -141,28 +174,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
       return;
     }
 
-    const lastMessage = currentConversation?.messages[currentConversation.messages.length - 1];
-
-    (lastMessage?.messages as IMessageItem[])?.some((message: IMessageItem) => {
-      if (message.type === 'schema-card' || message.type === 'json-patch') {
-        latestSchema = message.schema;
-        setCurrentCardId(message.cardId ?? '');
-
-        return true;
-      }
-
-      return false;
-    });
-
-    if (latestSchema) {
-      setCurrentSchema(JSON.parse(latestSchema));
-      setCurrentPreviewSchema(JSON.parse(latestSchema));
-      return;
-    }
-
-    setCurrentSchema(null);
-    setCurrentPreviewSchema(null);
-    setCurrentCardId('');
+    applySchemaFromMessages(currentConversation.messages);
   };
 
   /**
@@ -256,22 +268,32 @@ export default function useTemplate(options?: UseTemplateOptions) {
     }
 
     return conversation.value.state.conversations.map((item) => {
-      const lastMessage = item.messages[item.messages.length - 1];
-      const schemaMessage = (lastMessage?.messages as IMessageItem[])?.find(
-        (message) => message.type === 'schema-card' || message.type === 'json-patch',
-      );
+      const schemaInfo = findLatestSchemaInConversation(item.messages);
       return {
         id: item.id,
         name: item.title,
-        schema: schemaMessage?.schema ?? '',
+        schema: schemaInfo?.schema ?? '',
       };
     });
   });
+
+  const getTemplateChatConfig = () => ({
+    url: templateChatUrl,
+    llmConfig: templateLlmConfig,
+    templateSchema: currentSchema.value,
+  });
+
+  const saveConversations = () => {
+    conversation.value?.saveConversations();
+  };
 
   return {
     isTemplateInit,
     templateConversationState,
     conversation: conversation.value,
+    getTemplateChatConfig,
+    saveConversations,
+    applySchemaFromMessages,
     currentSchema,
     currentPreviewSchema,
     currentPreviewSchemaComplete,
