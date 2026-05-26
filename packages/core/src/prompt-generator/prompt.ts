@@ -194,3 +194,26 @@ export const genPrompt = (
 
   return sections.join('\n\n');
 };
+
+export function genMiniPrompt(
+  rendererConfig: IRendererConfig,
+  tgCustomConfig?: IGenPromptCustomConfig,
+  options?: { isSkill?: boolean },
+) {
+  const { materialsList, examples, whiteList, wrapperComponent = 'TinyCard' } = rendererConfig;
+  const { customComponents, customExamples, customActions } = tgCustomConfig || {};
+  const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
+
+  const additionRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
+
+  const sections = [
+    options?.isSkill ? skillPromptPrefix : promptPrefix,
+    genComponentsPrompt(materialsList, extendWhiteList, customComponents || []),
+    genExamplesPrompt(examples.concat(customExamples || []), wrapperComponent),
+    aboutThis.trim(),
+    genCustomActionsPrompt(customActions || []),
+    genRulesPrompt(additionRules, tgCustomConfig),
+  ].filter(Boolean);
+
+  return sections.join('\n\n');
+}

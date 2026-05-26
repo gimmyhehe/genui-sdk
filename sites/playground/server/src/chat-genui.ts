@@ -5,9 +5,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { rendererConfig, miniRendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { ngRendererConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
-import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
+import { genPrompt, genMiniPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
@@ -301,6 +301,7 @@ export function createChatGenui() {
       temperature,
       system:
         genPrompt(renderConfigForFramework, tgCustomConfig) +
+        // genMiniPrompt(miniRendererConfig, tgCustomConfig) +
         '\n' +
         specificPrompt +
         '\n' +
