@@ -60,8 +60,9 @@ export class GenuiRenderer implements OnInit {
   callAction(actionName: string, params: any) {
     if (!this.customActions?.[actionName]) {
       console.warn(`Action ${actionName} not found`);
+      return;
     }
-    this.customActions?.[actionName]?.execute(params, this.instance?.getContext() || {});
+    return this.customActions[actionName]?.execute(params, this.instance?.getContext() || {});
   }
 
   ngOnInit() {

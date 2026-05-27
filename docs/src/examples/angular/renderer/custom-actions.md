@@ -8,8 +8,10 @@
 
 - `name`: 动作名称
 - `description`: 动作描述
+- `parameters`: 参数 JSON Schema 描述
+- `returns`: 返回值 JSON Schema 描述，无返回值时使用 `{ type: 'null' }`
+- `async`: 是否为异步 Action；为 `true` 时 `execute` 返回 Promise
 - `execute`: 执行函数，接收 `params` 和 `context` 两个参数
-- `params`: 参数定义数组（可选），用于描述动作接收的参数，大模型根据描述生成参数传递给`execute`第一个参数
 
 ### execute 函数参数说明
 
@@ -53,6 +55,8 @@ const response = await fetch(url, {
               },
               required: ['url', 'target'],
             },
+            async: false,
+            returns: { type: 'null' },
           }
         ]
       }),

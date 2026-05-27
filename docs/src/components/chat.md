@@ -221,6 +221,8 @@ const customActions = [
   {
     name: 'openPage',
     description: '打开新页面',
+    async: false,
+    returns: { type: 'null' },
     parameters: {
       type: 'object',
       properties: {
@@ -482,7 +484,29 @@ interface IChatConfig {
 interface ICustomComponentItem extends IGenPromptComponent {
   ref?: Component; // 组件引用，用于传给 GenuiRenderer
 }
+```
 
+### ICustomActionItem
+
+```typescript
+interface ICustomActionItem extends IGenPromptAction {
+  execute: (params: any, context: Record<string, any>) => void | Promise<any>;
+}
+
+interface IGenPromptAction {
+  name: string;
+  description?: string;
+  parameters?: JSONSchema;
+  /** 返回值 JSON Schema 描述，无返回值时使用 `{ type: 'null' }` */
+  returns?: JSONSchema;
+  /** 是否为异步 Action */
+  async?: boolean;
+}
+```
+
+### IGenPromptComponent
+
+```typescript
 interface IGenPromptComponent {
   component: string; // 组件名
   schema: {
