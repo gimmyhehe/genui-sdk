@@ -2,7 +2,6 @@ import type { ApiOperation, ToolCallArgs } from '../types.js';
 
 const DEFAULT_API_REQUEST_TIMEOUT_MS = 60_000;
 
-/** 上游 API 请求超时（毫秒），可通过 MCP_API_TIMEOUT_MS 配置 */
 export function loadApiRequestTimeoutMs(): number {
   const parsed = Number.parseInt(process.env.MCP_API_TIMEOUT_MS ?? '', 10);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : DEFAULT_API_REQUEST_TIMEOUT_MS;
@@ -42,14 +41,12 @@ function buildUrl(baseUrl: string, path: string, queryArgs: Record<string, unkno
 
 function formatCookiePair(name: string, value: unknown): string {
   const raw = Array.isArray(value) ? value.map(String).join(',') : String(value);
-  // 仅当含分隔符时再编码，避免破坏 session/token 等原始 cookie 值
   if (/[;\r\n]/.test(name) || /[;\r\n]/.test(raw)) {
     return `${encodeURIComponent(name)}=${encodeURIComponent(raw)}`;
   }
   return `${name}=${raw}`;
 }
 
-/** 将 OpenAPI cookie 参数合并为单个 Cookie 请求头 */
 function mergeCookieHeader(
   headers: Record<string, string>,
   cookieArgs: Record<string, unknown>,

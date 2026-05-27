@@ -7,7 +7,6 @@ const SWAGGER_SYSTEM_PROMPT = `## Swagger / OpenAPI 工具（内置）
 2. 用 list_tools 查看已注册的 API 工具
 3. 调用对应 API 工具执行请求`;
 
-/** 与内置 Swagger MCP 同地址的外部配置（避免重复注册） */
 export function isBuiltinSwaggerMcpUrl(url: string): boolean {
   if (process.env.SWAGGER_MCP_ENABLED === 'false') {
     return false;
@@ -32,7 +31,6 @@ export function isBuiltinSwaggerMcpUrl(url: string): boolean {
   }
 }
 
-/** 内置 Swagger 工具（默认启用，设 SWAGGER_MCP_ENABLED=false 关闭） */
 export function buildBuiltinSwaggerTools(): Record<string, ReturnType<typeof buildSwaggerAiSdkTools>[string]> {
   if (process.env.SWAGGER_MCP_ENABLED === 'false') {
     return {};

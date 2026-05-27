@@ -17,7 +17,6 @@ function registeredToolToAiSdkTool(name: string, registered: RegisteredTool) {
   });
 }
 
-/** 将内置 Swagger MCP 工具转为 AI SDK tools（无需在 Playground 配置外部 MCP 服务） */
 export function buildSwaggerAiSdkTools(): Record<string, ReturnType<typeof tool>> {
   const tools: Record<string, ReturnType<typeof tool>> = {};
 

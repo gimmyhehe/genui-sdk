@@ -32,7 +32,6 @@ function parseExcludeMethods(value?: string | string[]): string[] | undefined {
   return value.split(',').map((s) => s.trim()).filter(Boolean);
 }
 
-/** 注册元工具：parse_swagger、list_tools */
 export function registerMetaTools(registry: SwaggerToolRegistry): void {
   registry.registerTool(
     'parse_swagger',

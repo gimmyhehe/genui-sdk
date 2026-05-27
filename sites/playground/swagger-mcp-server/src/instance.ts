@@ -6,7 +6,6 @@ import type { SwaggerMcpToolCatalogEntry } from './server/mcp-tool-catalog.js';
 let swaggerMcpServer: McpServer | null = null;
 let swaggerToolRegistry: SwaggerToolRegistry | null = null;
 
-/** 进程内共享的 Swagger MCP 实例（HTTP 与内置 AI 工具共用同一注册表） */
 export function getSwaggerMcpServer(): McpServer {
   if (!swaggerMcpServer) {
     const server = new McpServer(
@@ -36,7 +35,6 @@ export function getSwaggerToolRegistry(): SwaggerToolRegistry {
 
 export type { SwaggerMcpToolCatalogEntry as SwaggerMcpToolEntry };
 
-/** 列出 catalog 中已注册且启用的工具（元工具 + 动态 API 工具） */
 export function listSwaggerMcpToolEntries(): SwaggerMcpToolCatalogEntry[] {
   return getSwaggerToolRegistry().listRegisteredTools();
 }

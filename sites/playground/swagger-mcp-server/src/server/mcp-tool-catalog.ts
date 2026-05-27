@@ -14,7 +14,6 @@ type ToolConfig<InputArgs extends ZodRawShape> = {
   inputSchema?: InputArgs;
 };
 
-/** registerTool 时同步维护的工具表，供 AI SDK 桥接与 list_tools 使用 */
 export class SwaggerMcpToolCatalog {
   private readonly tools = new Map<string, RegisteredTool>();
 
@@ -35,7 +34,6 @@ export class SwaggerMcpToolCatalog {
     this.tools.delete(name);
   }
 
-  /** 移除除 keepNames 外的所有工具 */
   clearExcept(keepNames: ReadonlySet<string>): void {
     for (const name of [...this.tools.keys()]) {
       if (keepNames.has(name)) continue;

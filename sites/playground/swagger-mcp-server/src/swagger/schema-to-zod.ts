@@ -103,7 +103,6 @@ function schemaToZod(schema: SchemaObject | ReferenceObject | undefined, require
   return withDescription(required ? result : result.optional(), schema.description);
 }
 
-/** 将 OpenAPI 参数列表转为 MCP tool 的 Zod shape */
 export function parametersToZodShape(parameters: { name: string; schema: SchemaObject; required: boolean; description?: string }[]) {
   const shape: Record<string, ZodTypeAny> = {};
 
@@ -118,7 +117,6 @@ export function parametersToZodShape(parameters: { name: string; schema: SchemaO
   return shape;
 }
 
-/** 请求体 schema 作为单个 `body` 字段 */
 export function requestBodyToZodField(
   schema: SchemaObject | undefined,
   required: boolean,

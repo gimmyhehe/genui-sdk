@@ -10,12 +10,10 @@ import {
 
 export type RegisterSwaggerMcpHttpRoutesOptions = {
   mcpPath?: string;
-  /** 独立运行时注册 /health；集成到已有服务时建议 false */
   registerHealth?: boolean;
   sessionRegistry?: McpSessionRegistry;
 };
 
-/** 将 Swagger MCP HTTP 路由挂载到已有 Express 应用（仅 MCP 路由使用 JSON 解析，不影响其他接口） */
 export function registerSwaggerMcpHttpRoutes(
   app: Express,
   getServer: () => McpServer,

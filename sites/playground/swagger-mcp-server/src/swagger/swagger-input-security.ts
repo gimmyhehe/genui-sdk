@@ -8,11 +8,8 @@ export type SwaggerInputPolicy = {
   allowInline: boolean;
   allowUrlFetch: boolean;
   allowFileRead: boolean;
-  /** 允许 fetch http(s)://127.0.0.1 / localhost（仅建议在受信环境开启） */
   allowLocalhostUrl: boolean;
-  /** 文件读取根目录（已 resolve）；为空则禁止读文件 */
   allowedFileRoots: string[];
-  /** 若非空，仅允许这些 hostname（小写，不含端口） */
   urlHostnameAllowlist: string[] | null;
   fetchTimeoutMs: number;
   maxRedirects: number;
@@ -34,7 +31,6 @@ function parsePathListEnv(name: string): string[] {
     .map((p) => resolve(p));
 }
 
-/** 默认：仅内联；URL/本地文件需显式开启（防 SSRF / 任意文件读） */
 export function loadSwaggerInputPolicyFromEnv(): SwaggerInputPolicy {
   const allowedFileRoots = parsePathListEnv('MCP_SWAGGER_ALLOWED_FILE_DIRS');
 
@@ -97,7 +93,6 @@ function isLocalhostHostname(hostname: string): boolean {
   return host === 'localhost' || host.endsWith('.localhost');
 }
 
-/** 解析后的 IP 是否应拒绝（含 RFC1918 / link-local / loopback 等） */
 function isBlockedResolvedIp(address: string, policy: SwaggerInputPolicy, hostname: string): boolean {
   const normalized = normalizeIpForCheck(address);
   const version = isIP(normalized);

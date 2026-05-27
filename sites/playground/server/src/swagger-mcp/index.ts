@@ -5,7 +5,6 @@ import {
   registerSwaggerMcpHttpRoutes,
 } from 'cloud-service-mcp-server';
 
-/** 将 Swagger MCP 挂载到 playground server（默认开启，设 SWAGGER_MCP_ENABLED=false 可关闭） */
 export function registerSwaggerMcp(app: Express): void {
   if (process.env.SWAGGER_MCP_ENABLED === 'false') {
     return;

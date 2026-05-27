@@ -51,7 +51,6 @@ async function readSpecContent(
   return readSwaggerSpecFile(trimmed, policy);
 }
 
-/** 从 URL、受控本地路径或内联内容解析并校验 OpenAPI 文档 */
 export async function parseSwaggerInput(
   swagger: string,
   policy?: SwaggerInputPolicy,
@@ -65,7 +64,6 @@ function normalizeBaseUrl(url: string): string {
   return url.replace(/\/$/, '');
 }
 
-/** 从 OpenAPI 3 servers 或 Swagger 2 host/basePath/schemes 解析 API 基础地址 */
 export function resolveBaseUrl(spec: OpenAPIV3.Document, override?: string): string {
   if (override) {
     return normalizeBaseUrl(override);
