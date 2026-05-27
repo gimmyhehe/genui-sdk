@@ -2,14 +2,18 @@
   "name": "cloud-service-mcp-server",
   "version": "1.0.0",
   "description": "MCP server that converts Swagger/OpenAPI specs into callable MCP tools",
-  "main": "dist/index.js",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsx src/main.ts",
     "start": "node dist/main.js"
   },
-  "type": "module",
   "dependencies": {
+    "ai": "5.0.10",
     "@apidevtools/swagger-parser": "^12.1.0",
     "@modelcontextprotocol/sdk": "~1.12.1",
     "dotenv": "^17.4.2",

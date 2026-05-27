@@ -1,16 +1,27 @@
 import { randomUUID } from 'node:crypto';
-import express, { type Request, type Response } from 'express';
+import express, { type Express, type Request, type Response } from 'express';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-import { registerAssetsApi } from './assets-api.js';
+import { registerAssetsApi, type RegisterAssetsApiOptions } from './assets-api.js';
 
 type TransportMap = Record<string, StreamableHTTPServerTransport>;
 
-export function createMcpHttpApp(getServer: () => McpServer, mcpPath = '/mcp') {
-  const app = express();
-  app.use(express.json());
+export type RegisterSwaggerMcpHttpRoutesOptions = {
+  mcpPath?: string;
+  assets?: RegisterAssetsApiOptions;
+  /** 独立运行时注册 /health；集成到已有服务时建议 false */
+  registerHealth?: boolean;
+};
 
+/** 将 Swagger MCP HTTP 路由挂载到已有 Express 应用（仅 MCP 路由使用 JSON 解析，不影响其他接口） */
+export function registerSwaggerMcpHttpRoutes(
+  app: Express,
+  getServer: () => McpServer,
+  options: RegisterSwaggerMcpHttpRoutesOptions = {},
+) {
+  const { mcpPath = '/mcp', assets, registerHealth = false } = options;
+  const jsonMiddleware = express.json();
   const transports: TransportMap = {};
 
   const mcpPostHandler = async (req: Request, res: Response) => {
@@ -78,15 +89,29 @@ export function createMcpHttpApp(getServer: () => McpServer, mcpPath = '/mcp') {
     await transports[sessionId].handleRequest(req, res);
   };
 
-  app.post(mcpPath, mcpPostHandler);
+  app.post(mcpPath, jsonMiddleware, mcpPostHandler);
   app.get(mcpPath, mcpGetHandler);
   app.delete(mcpPath, mcpDeleteHandler);
 
-  app.get('/health', (_req, res) => {
-    res.json({ status: 'ok' });
+  if (registerHealth) {
+    app.get('/health', (_req, res) => {
+      res.json({ status: 'ok' });
+    });
+  }
+
+  registerAssetsApi(app, assets);
+}
+
+export function createMcpHttpApp(
+  getServer: () => McpServer,
+  mcpPath = '/mcp',
+  assets?: RegisterAssetsApiOptions,
+) {
+  const app = express();
+  registerSwaggerMcpHttpRoutes(app, getServer, {
+    mcpPath,
+    assets,
+    registerHealth: true,
   });
-
-  registerAssetsApi(app);
-
   return { app };
 }

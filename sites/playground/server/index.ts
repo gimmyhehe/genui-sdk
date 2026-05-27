@@ -9,6 +9,7 @@ import { loadProviderModelsDataFromFile, mergeProviderModelsData } from './src/p
 import { fetchOpenTinyProviderModelsData } from './src/opentiny-models.js';
 import { createChatGenui, checkMcpHandler } from './src/chat-genui.js';
 import { createChatTemplate } from './src/chat-template.js';
+import { registerSwaggerMcp } from './src/swagger-mcp/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,6 +26,8 @@ const { chatTemplateHandler } = createChatTemplate();
 const app = express();
 
 app.use(cors());
+
+registerSwaggerMcp(app);
 
 const providerModelsEnvPath = process.env.providerModelsPath;
 

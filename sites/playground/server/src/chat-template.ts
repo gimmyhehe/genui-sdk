@@ -9,6 +9,11 @@ import getRawBody from 'raw-body';
 import { openaiCompatibleTransformChunk } from '@opentiny/genui-sdk-chat-completions';
 import type { IOpenaiCompatibleChunk } from '@opentiny/genui-sdk-chat-completions';
 import { generateLlmConfig, generateAiSdkTools } from './chat-genui.js';
+import {
+  buildBuiltinSwaggerTools,
+  getBuiltinSwaggerSystemPrompt,
+  isBuiltinSwaggerMcpUrl,
+} from './swagger-mcp/build-tools.js';
 import { generateJsonPatchPrompt } from './json-patch-prompt.js';
 import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
 
@@ -86,15 +91,18 @@ export const createChatTemplate = () => {
 
       const llmConfig = await generateLlmConfig(llmConfigParams);
       const { model, temperature, prompt: customSystemPrompt, specificPrompt } = llmConfig;
-      const { tools, clientsMap } = await generateAiSdkTools(
-        mcpServers.filter((s) => s.enabled),
+      const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
+        mcpServers.filter((s) => s.enabled && !isBuiltinSwaggerMcpUrl(s.url)),
         abort.signal,
       );
+      const swaggerTools = buildBuiltinSwaggerTools();
+      const tools = { ...swaggerTools, ...mcpTools };
       const maxSteps = 30;
       const systemPrompt = `${genPrompt(rendererConfig, tgCustomConfig)}
       ${body.templateSchema ? generateJsonPatchPrompt() : ''}
       ${specificPrompt}
-      ${customSystemPrompt}`;
+      ${customSystemPrompt}
+      ${getBuiltinSwaggerSystemPrompt()}`;
 
       const messages = body.messages;
       if (body.templateSchema) {

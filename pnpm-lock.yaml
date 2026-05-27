@@ -588,7 +588,16 @@ importers:
       '@babel/standalone':
         specifier: ^7.23.0
         version: 7.28.5
-      '@opentiny/vue':
+      '@opentiny/vue-button':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-card':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-carousel':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-carousel-item':
         specifier: ^3.28.0
         version: 3.28.0
       '@opentiny/vue-chart-bar':
@@ -609,10 +618,79 @@ importers:
       '@opentiny/vue-chart-ring':
         specifier: 3.14.0
         version: 3.14.0
+      '@opentiny/vue-checkbox':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-checkbox-button':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-checkbox-group':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-col':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-date-picker':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-form':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-form-item':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-grid':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
+      '@opentiny/vue-input':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-layout':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-notify':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-numeric':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-radio':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-radio-group':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-renderless':
+        specifier: ^3.28.2
+        version: 3.28.2
+      '@opentiny/vue-row':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-search':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-select':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-switch':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-tab-item':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-tabs':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-theme':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-transfer':
+        specifier: ^3.28.0
+        version: 3.28.0
+      '@opentiny/vue-tree':
         specifier: ^3.28.0
         version: 3.28.0
       '@vitejs/plugin-vue':
@@ -624,6 +702,9 @@ importers:
       eval5:
         specifier: ^1.4.8
         version: 1.4.8
+      rollup-plugin-visualizer:
+        specifier: 6.0.5
+        version: 6.0.5(rollup@4.54.0)
       vite:
         specifier: ^5.4.2
         version: 5.4.21(@types/node@24.10.4)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)
@@ -798,46 +879,6 @@ importers:
         specifier: ^9.1.2
         version: 9.2.1
 
-  sites/playground/cloud-service-mcp-server:
-    dependencies:
-      '@apidevtools/swagger-parser':
-        specifier: ^12.1.0
-        version: 12.1.0(openapi-types@12.1.3)
-      '@modelcontextprotocol/sdk':
-        specifier: ~1.12.1
-        version: 1.12.3
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
-      express:
-        specifier: ^5.1.0
-        version: 5.2.1
-      js-yaml:
-        specifier: ^4.1.1
-        version: 4.1.1
-      openapi-types:
-        specifier: ^12.1.3
-        version: 12.1.3
-      zod:
-        specifier: ^3.25.76
-        version: 3.25.76
-    devDependencies:
-      '@types/express':
-        specifier: ^5.0.1
-        version: 5.0.6
-      '@types/js-yaml':
-        specifier: ^4.0.9
-        version: 4.0.9
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.27
-      tsx:
-        specifier: ^4.19.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.3
-
   sites/playground/schema-renderer-ng-adpater:
     dependencies:
       '@opentiny/tiny-schema-renderer-ng':
@@ -895,6 +936,9 @@ importers:
       ai:
         specifier: 5.0.10
         version: 5.0.10(zod@3.25.76)
+      cloud-service-mcp-server:
+        specifier: workspace:*
+        version: link:../swagger-mcp-server
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -959,6 +1003,49 @@ importers:
       vite-plugin-static-copy:
         specifier: ^3.1.2
         version: 3.1.4(vite@7.3.0(@types/node@24.10.4)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0))
+
+  sites/playground/swagger-mcp-server:
+    dependencies:
+      '@apidevtools/swagger-parser':
+        specifier: ^12.1.0
+        version: 12.1.0(openapi-types@12.1.3)
+      '@modelcontextprotocol/sdk':
+        specifier: ~1.12.1
+        version: 1.12.3
+      ai:
+        specifier: 5.0.10
+        version: 5.0.10(zod@3.25.76)
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
+      express:
+        specifier: ^5.1.0
+        version: 5.2.1
+      js-yaml:
+        specifier: ^4.1.1
+        version: 4.1.1
+      openapi-types:
+        specifier: ^12.1.3
+        version: 12.1.3
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.1
+        version: 5.0.6
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
+      tsx:
+        specifier: ^4.19.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
 
   sites/playground/vite-commit-hash-plugin:
     devDependencies:

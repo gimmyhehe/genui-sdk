@@ -18,6 +18,11 @@ import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
 import { buildSkillTools } from './skills/index.js';
+import {
+  buildBuiltinSwaggerTools,
+  getBuiltinSwaggerSystemPrompt,
+  isBuiltinSwaggerMcpUrl,
+} from './swagger-mcp/build-tools.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
@@ -266,15 +271,20 @@ export function createChatGenui() {
 
     const llmConfig = await generateLlmConfig(llmConfigParams);
     const { model, temperature, specificPrompt, provider, extraBody } = llmConfig;
+    const externalMcpServers = mcpServers.filter(
+      (s) => s.enabled && !isBuiltinSwaggerMcpUrl(s.url),
+    );
     const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
-      mcpServers.filter((s) => s.enabled),
+      externalMcpServers,
       abort.signal,
     );
+    const swaggerTools = buildBuiltinSwaggerTools();
     const agentTools = buildAgentTools(agents, abort.signal);
     const { tools: skillTools, systemPrompt: skillPrompt } = buildSkillTools(skills);
     const duplicateToolNames = new Set<string>();
     const seenToolNames = new Set<string>();
     for (const name of [
+      ...Object.keys(swaggerTools),
       ...Object.keys(mcpTools),
       ...Object.keys(agentTools),
       ...Object.keys(skillTools),
@@ -285,7 +295,7 @@ export function createChatGenui() {
     if (duplicateToolNames.size) {
       console.warn(`Duplicate tool names detected: ${[...duplicateToolNames].join(', ')}`);
     }
-    const tools = { ...mcpTools, ...agentTools, ...skillTools };
+    const tools = { ...swaggerTools, ...mcpTools, ...agentTools, ...skillTools };
 
     const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;
     const maxSteps = 30;
@@ -305,6 +315,8 @@ export function createChatGenui() {
         specificPrompt +
         '\n' +
         userAppendPrompt +
+        '\n' +
+        getBuiltinSwaggerSystemPrompt() +
         '\n' +
         skillPrompt,
       messages: body.messages,
