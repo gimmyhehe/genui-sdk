@@ -20,6 +20,7 @@ import TinyGrid from '@opentiny/vue-grid';
 import TinyInput from '@opentiny/vue-input';
 import TinyLayout from '@opentiny/vue-layout';
 import TinyNumeric from '@opentiny/vue-numeric';
+import TinyPager from '@opentiny/vue-pager';
 import TinyRadio from '@opentiny/vue-radio';
 import TinyRadioGroup from '@opentiny/vue-radio-group';
 import TinyRow from '@opentiny/vue-row';
@@ -55,6 +56,7 @@ export const vueMaterials: Record<string, Component> = {
   TinyTree: TinyTree,
   TinyDatePicker: TinyDatePicker,
   TinyNumeric: TinyNumeric,
+  TinyPager: TinyPager,
   TinyTransfer: TinyTransfer,
   TinyChartPie: TinyChartPie,
   TinyChartLine: TinyChartLine,
