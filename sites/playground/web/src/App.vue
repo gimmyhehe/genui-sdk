@@ -1,7 +1,7 @@
 <script setup>
 import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
-import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER, RENDERER_SETTINGS_KEY } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER } from '@opentiny/genui-sdk-vue';
 import {
   ref,
   watch,
@@ -14,7 +14,6 @@ import {
   h,
   shallowRef,
 } from 'vue';
-import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
@@ -56,10 +55,6 @@ if (location.search.includes('framework=angular')) {
   provide(GENUI_RENDERER, SchemaRendererNgAdapter);
   framework = 'Angular';
 }
-
-provide(RENDERER_SETTINGS_KEY, {
-  materials: vueMaterials,
-});
 
 const STORAGE_KEY = 'GENUI_SDK_VUE_PLAYGROUND_CONFIG';
 const {

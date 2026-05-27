@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
+import { RENDERER_SETTINGS_KEY } from '@opentiny/genui-sdk-vue';
 import { TinyConfigProvider } from '@opentiny/vue';
 import { ThemeProvider } from '@opentiny/tiny-robot';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
@@ -58,6 +60,10 @@ const genuiConfig = computed(() => {
 });
 
 provide(GENUI_CONFIG, genuiConfig);
+
+provide(RENDERER_SETTINGS_KEY, {
+  materials: vueMaterials,
+});
 
 watch(
   () => [props.locale, props.i18n] as const,
