@@ -50,11 +50,11 @@ export function registerMetaTools(server: McpServer, registry: SwaggerToolRegist
     'parse_swagger',
     {
       description:
-        '解析 Swagger/OpenAPI 文档（URL、本地路径或 JSON/YAML 正文），并动态注册为可调用的 MCP 工具。',
+        '解析 Swagger/OpenAPI 文档（优先内联 JSON/YAML；URL/本地路径受服务端安全策略限制），并动态注册为可调用的 MCP 工具。',
       inputSchema: {
         swagger: z
           .string()
-          .describe('Swagger/OpenAPI 文档：URL、本地路径或内联 JSON/YAML'),
+          .describe('Swagger/OpenAPI 文档：内联 JSON/YAML，或管理员已放行的 URL / 本地路径'),
         baseUrl: z.string().optional().describe('API 基础地址，不填则从文档自动推导'),
         apiHeaders: z
           .union([z.record(z.string(), z.string()), z.string()])

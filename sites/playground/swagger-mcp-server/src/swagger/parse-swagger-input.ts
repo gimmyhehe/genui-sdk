@@ -1,8 +1,13 @@
-import { readFile } from 'node:fs/promises';
-import { isAbsolute, resolve } from 'node:path';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import yaml from 'js-yaml';
 import type { OpenAPIV3 } from 'openapi-types';
+import {
+  assertInlineSwaggerAllowed,
+  fetchSwaggerSpecUrl,
+  loadSwaggerInputPolicyFromEnv,
+  readSwaggerSpecFile,
+  type SwaggerInputPolicy,
+} from './swagger-input-security.js';
 
 type Swagger2HostFields = {
   host?: string;
@@ -28,26 +33,30 @@ function isInlineSwaggerContent(source: string): boolean {
   );
 }
 
-async function readSpecContent(source: string): Promise<string> {
+async function readSpecContent(
+  source: string,
+  policy: SwaggerInputPolicy = loadSwaggerInputPolicyFromEnv(),
+): Promise<string> {
   if (isInlineSwaggerContent(source)) {
+    assertInlineSwaggerAllowed(policy);
     return source;
   }
 
-  if (/^https?:\/\//i.test(source)) {
-    const response = await fetch(source);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch swagger spec: ${response.status} ${response.statusText}`);
-    }
-    return response.text();
+  const trimmed = source.trim();
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return fetchSwaggerSpecUrl(trimmed, policy);
   }
 
-  const filePath = isAbsolute(source) ? source : resolve(process.cwd(), source);
-  return readFile(filePath, 'utf-8');
+  return readSwaggerSpecFile(trimmed, policy);
 }
 
-/** 从 URL、本地路径或内联内容解析并校验 OpenAPI 文档 */
-export async function parseSwaggerInput(swagger: string): Promise<OpenAPIV3.Document> {
-  const content = await readSpecContent(swagger);
+/** 从 URL、受控本地路径或内联内容解析并校验 OpenAPI 文档 */
+export async function parseSwaggerInput(
+  swagger: string,
+  policy?: SwaggerInputPolicy,
+): Promise<OpenAPIV3.Document> {
+  const content = await readSpecContent(swagger, policy);
   const raw = parseRawSpec(content) as OpenAPIV3.Document;
   return (await SwaggerParser.validate(raw)) as unknown as OpenAPIV3.Document;
 }

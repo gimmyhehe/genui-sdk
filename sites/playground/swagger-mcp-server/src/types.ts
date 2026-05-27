@@ -11,6 +11,8 @@ export type SwaggerMcpConfig = {
   excludePathPrefixes?: string[];
   /** 工具名前缀 */
   toolNamePrefix?: string;
+  /** 单次上游 API 请求超时（毫秒），不填则用环境变量 MCP_API_TIMEOUT_MS（默认 60000） */
+  requestTimeoutMs?: number;
 };
 
 export type ApiParameter = {

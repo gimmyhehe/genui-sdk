@@ -4,6 +4,7 @@ import type { DynamicToolInfo, SwaggerMcpConfig } from '../types.js';
 import {
   extractOperations,
   executeApiOperation,
+  loadApiRequestTimeoutMs,
   parametersToZodShape,
   requestBodyToZodField,
 } from '../swagger/index.js';
@@ -20,6 +21,7 @@ export function registerSwaggerTools(
 } {
   const operations = extractOperations(spec, config);
   const apiHeaders = config.apiHeaders ?? {};
+  const requestTimeoutMs = config.requestTimeoutMs ?? loadApiRequestTimeoutMs();
   const toolNames: string[] = [];
   const toolInfos: DynamicToolInfo[] = [];
   const registeredTools = new Map<string, RegisteredTool>();
@@ -57,6 +59,7 @@ export function registerSwaggerTools(
             baseUrl,
             args,
             apiHeaders,
+            requestTimeoutMs,
           );
 
           const text = JSON.stringify(

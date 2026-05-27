@@ -1,5 +1,18 @@
 import type { ApiOperation, ToolCallArgs } from '../types.js';
 
+const DEFAULT_API_REQUEST_TIMEOUT_MS = 60_000;
+
+/** 上游 API 请求超时（毫秒），可通过 MCP_API_TIMEOUT_MS 配置 */
+export function loadApiRequestTimeoutMs(): number {
+  const parsed = Number.parseInt(process.env.MCP_API_TIMEOUT_MS ?? '', 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : DEFAULT_API_REQUEST_TIMEOUT_MS;
+}
+
+function isRequestTimeoutError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  return error.name === 'TimeoutError' || error.name === 'AbortError';
+}
+
 function fillPathTemplate(path: string, pathArgs: Record<string, unknown>): string {
   return path.replace(/\{([^}]+)\}/g, (_, key: string) => {
     const value = pathArgs[key];
@@ -27,11 +40,13 @@ function buildUrl(baseUrl: string, path: string, queryArgs: Record<string, unkno
   return url.toString();
 }
 
-function encodeCookieValue(value: unknown): string {
-  if (Array.isArray(value)) {
-    return value.map((item) => encodeCookieValue(item)).join(',');
+function formatCookiePair(name: string, value: unknown): string {
+  const raw = Array.isArray(value) ? value.map(String).join(',') : String(value);
+  // 仅当含分隔符时再编码，避免破坏 session/token 等原始 cookie 值
+  if (/[;\r\n]/.test(name) || /[;\r\n]/.test(raw)) {
+    return `${encodeURIComponent(name)}=${encodeURIComponent(raw)}`;
   }
-  return encodeURIComponent(String(value));
+  return `${name}=${raw}`;
 }
 
 /** 将 OpenAPI cookie 参数合并为单个 Cookie 请求头 */
@@ -41,7 +56,7 @@ function mergeCookieHeader(
 ): void {
   const pairs = Object.entries(cookieArgs)
     .filter(([, value]) => value !== undefined && value !== null)
-    .map(([name, value]) => `${name}=${encodeCookieValue(value)}`);
+    .map(([name, value]) => formatCookiePair(name, value));
 
   if (pairs.length === 0) {
     return;
@@ -62,6 +77,7 @@ export async function executeApiOperation(
   baseUrl: string,
   args: ToolCallArgs,
   defaultHeaders: Record<string, string> = {},
+  requestTimeoutMs: number = loadApiRequestTimeoutMs(),
 ): Promise<{ status: number; statusText: string; headers: Record<string, string>; body: unknown }> {
   const pathArgs: Record<string, unknown> = {};
   const queryArgs: Record<string, unknown> = {};
@@ -90,6 +106,10 @@ export async function executeApiOperation(
       case 'cookie':
         cookieArgs[param.name] = value;
         break;
+      default: {
+        const unknownIn = (param as { in: string }).in;
+        throw new Error(`Unsupported parameter location: ${unknownIn} (${param.name})`);
+      }
     }
   }
 
@@ -117,15 +137,33 @@ export async function executeApiOperation(
       typeof args.body === 'string' ? args.body : JSON.stringify(args.body);
   }
 
-  const response = await fetch(url, init);
+  const signal = AbortSignal.timeout(requestTimeoutMs);
+
+  let response: Response;
+  try {
+    response = await fetch(url, { ...init, signal });
+  } catch (error) {
+    if (isRequestTimeoutError(error)) {
+      throw new Error(`API request timed out after ${requestTimeoutMs}ms`);
+    }
+    throw error;
+  }
+
   const contentType = response.headers.get('content-type') ?? '';
   let body: unknown;
 
-  if (contentType.includes('application/json')) {
-    const text = await response.text();
-    body = text ? JSON.parse(text) : null;
-  } else {
-    body = await response.text();
+  try {
+    if (contentType.includes('application/json')) {
+      const text = await response.text();
+      body = text ? JSON.parse(text) : null;
+    } else {
+      body = await response.text();
+    }
+  } catch (error) {
+    if (isRequestTimeoutError(error)) {
+      throw new Error(`API request timed out after ${requestTimeoutMs}ms`);
+    }
+    throw error;
   }
 
   const responseHeaders: Record<string, string> = {};
