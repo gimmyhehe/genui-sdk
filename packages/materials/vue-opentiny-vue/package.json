@@ -29,6 +29,7 @@
     "@opentiny/vue-input": "^3.28.0",
     "@opentiny/vue-layout": "^3.28.0",
     "@opentiny/vue-numeric": "^3.28.0",
+    "@opentiny/vue-pager": "^3.28.0",
     "@opentiny/vue-radio": "^3.28.0",
     "@opentiny/vue-radio-group": "^3.28.0",
     "@opentiny/vue-row": "^3.28.0",
