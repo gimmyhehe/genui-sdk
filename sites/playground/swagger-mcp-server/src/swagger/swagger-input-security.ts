@@ -1,3 +1,4 @@
+import { lookup } from 'node:dns/promises';
 import { readFile, realpath } from 'node:fs/promises';
 import { isIP } from 'node:net';
 import { isAbsolute, relative, resolve } from 'node:path';
@@ -82,6 +83,41 @@ function isPrivateIpv6(host: string): boolean {
   return false;
 }
 
+function normalizeIpForCheck(address: string): string {
+  const lower = address.toLowerCase();
+  if (lower.startsWith('::ffff:')) {
+    const embedded = lower.slice('::ffff:'.length);
+    if (isIP(embedded) === 4) return embedded;
+  }
+  return address;
+}
+
+function isLocalhostHostname(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/\.$/, '');
+  return host === 'localhost' || host.endsWith('.localhost');
+}
+
+/** 解析后的 IP 是否应拒绝（含 RFC1918 / link-local / loopback 等） */
+function isBlockedResolvedIp(address: string, policy: SwaggerInputPolicy, hostname: string): boolean {
+  const normalized = normalizeIpForCheck(address);
+  const version = isIP(normalized);
+  if (version === 4) {
+    if (!isPrivateIpv4(normalized)) return false;
+    if (policy.allowLocalhostUrl && normalized.startsWith('127.') && isLocalhostHostname(hostname)) {
+      return false;
+    }
+    return true;
+  }
+  if (version === 6) {
+    if (!isPrivateIpv6(normalized)) return false;
+    if (policy.allowLocalhostUrl && normalized === '::1' && isLocalhostHostname(hostname)) {
+      return false;
+    }
+    return true;
+  }
+  return true;
+}
+
 function isBlockedHostname(hostname: string, policy: SwaggerInputPolicy): boolean {
   const host = hostname.toLowerCase().replace(/\.$/, '');
 
@@ -89,7 +125,7 @@ function isBlockedHostname(hostname: string, policy: SwaggerInputPolicy): boolea
     return !policy.urlHostnameAllowlist.includes(host);
   }
 
-  if (host === 'localhost' || host.endsWith('.localhost')) {
+  if (isLocalhostHostname(host)) {
     return !policy.allowLocalhostUrl;
   }
 
@@ -104,7 +140,31 @@ function isBlockedHostname(hostname: string, policy: SwaggerInputPolicy): boolea
   return false;
 }
 
-export function validateSwaggerFetchUrl(urlString: string, policy: SwaggerInputPolicy): URL {
+async function assertHostnameResolvesToAllowedIps(hostname: string, policy: SwaggerInputPolicy): Promise<void> {
+  const ipVersion = isIP(hostname);
+  let addresses: string[];
+  if (ipVersion) {
+    addresses = [hostname];
+  } else {
+    try {
+      addresses = (await lookup(hostname, { all: true, verbatim: true })).map((r) => r.address);
+    } catch {
+      throw new Error(`Unable to resolve swagger URL host: ${hostname}`);
+    }
+  }
+
+  if (addresses.length === 0) {
+    throw new Error('Swagger URL host did not resolve to any IP address');
+  }
+
+  for (const address of addresses) {
+    if (isBlockedResolvedIp(address, policy, hostname)) {
+      throw new Error('Swagger URL host resolves to a disallowed IP address');
+    }
+  }
+}
+
+export async function validateSwaggerFetchUrl(urlString: string, policy: SwaggerInputPolicy): Promise<URL> {
   if (!policy.allowUrlFetch) {
     throw new Error(
       'Remote URL fetch is disabled. Pass inline OpenAPI JSON/YAML, or set MCP_SWAGGER_ALLOW_URL_FETCH=true with appropriate host restrictions.',
@@ -130,6 +190,8 @@ export function validateSwaggerFetchUrl(urlString: string, policy: SwaggerInputP
     throw new Error('Swagger URL host is not allowed');
   }
 
+  await assertHostnameResolvesToAllowedIps(url.hostname, policy);
+
   return url;
 }
 
@@ -140,7 +202,7 @@ async function fetchWithRedirectGuard(
   let current = initialUrl;
 
   for (let hop = 0; hop <= policy.maxRedirects; hop += 1) {
-    validateSwaggerFetchUrl(current.toString(), policy);
+    await validateSwaggerFetchUrl(current.toString(), policy);
 
     const signal = AbortSignal.timeout(policy.fetchTimeoutMs);
     const response = await fetch(current.toString(), {
@@ -171,7 +233,7 @@ async function fetchWithRedirectGuard(
 }
 
 export async function fetchSwaggerSpecUrl(urlString: string, policy: SwaggerInputPolicy): Promise<string> {
-  const url = validateSwaggerFetchUrl(urlString, policy);
+  const url = await validateSwaggerFetchUrl(urlString, policy);
   return fetchWithRedirectGuard(url, policy);
 }
 

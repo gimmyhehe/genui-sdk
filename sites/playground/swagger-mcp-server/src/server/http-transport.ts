@@ -45,7 +45,7 @@ export function registerSwaggerMcpHttpRoutes(
           return;
         }
       } else if (isInitializeRequest(req.body)) {
-        if (!sessionRegistry.canAcceptSession()) {
+        if (!sessionRegistry.tryReserveSession()) {
           console.warn('[mcp-http] Session limit reached, rejecting initialize');
           res.status(503).json({
             jsonrpc: '2.0',
@@ -58,22 +58,30 @@ export function registerSwaggerMcpHttpRoutes(
           return;
         }
 
-        transport = new StreamableHTTPServerTransport({
-          sessionIdGenerator: () => randomUUID(),
-          onsessioninitialized: (id) => {
-            sessionRegistry.register(id, transport!);
-          },
-        });
+        let reservationHeld = true;
+        try {
+          transport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: () => randomUUID(),
+            onsessioninitialized: (id) => {
+              reservationHeld = false;
+              sessionRegistry.register(id, transport!);
+            },
+          });
 
-        transport.onclose = () => {
-          const sid = transport?.sessionId;
-          if (sid) {
-            sessionRegistry.remove(sid);
+          transport.onclose = () => {
+            const sid = transport?.sessionId;
+            if (sid) {
+              sessionRegistry.remove(sid);
+            }
+          };
+
+          await getServer().connect(transport);
+          await transport.handleRequest(req, res, req.body);
+        } finally {
+          if (reservationHeld) {
+            sessionRegistry.releaseSessionReservation();
           }
-        };
-
-        await getServer().connect(transport);
-        await transport.handleRequest(req, res, req.body);
+        }
         return;
       } else {
         res.status(400).json({
