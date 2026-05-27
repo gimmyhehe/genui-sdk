@@ -162,7 +162,12 @@ const updateCustomExamples = (list) => {
         </button>
       </div>
 
-      <tiny-tabs class="playground-sidebar__tabs" v-model="activeName" v-show="expanded">
+      <tiny-tabs
+        class="playground-sidebar__tabs"
+        :class="{ 'playground-sidebar__tabs--tools': activeName === 'tools' }"
+        v-model="activeName"
+        v-show="expanded"
+      >
         <tiny-tab-item title="模型配置" name="model">
           <ModelConfig @createNewTemplate="handleCreateNewTemplate" @update-custom-examples="updateCustomExamples"/>
         </tiny-tab-item>
@@ -274,6 +279,8 @@ const updateCustomExamples = (list) => {
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 
     .config-title {
       font-size: 14px;
@@ -284,12 +291,27 @@ const updateCustomExamples = (list) => {
 
     :deep(.tiny-tabs__header.is-top) {
       padding: 0 24px;
+      flex-shrink: 0;
     }
 
     :deep(.tiny-tabs__content) {
-      height: 100%;
+      flex: 1;
+      min-height: 0;
       overflow: auto;
       padding: 0 24px 90px;
+    }
+
+    &--tools :deep(.tiny-tabs__content) {
+      overflow: hidden;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+
+      > .tiny-tab-pane {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
     }
   }
 

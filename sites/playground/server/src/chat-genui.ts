@@ -178,12 +178,19 @@ export async function generateLlmConfig(llmConfigParams: LLMConfigParams | undef
   const modelInfo = providerModelMapper.getModelInfo(model || '');
   const aiSDKModel = modelInfo ? providerModelMapper.getAiSDKModel(modelInfo) : undefined;
 
+  const rawExtraBody = modelInfo?.model?.extraBody;
+  const extraBody =
+    rawExtraBody && typeof rawExtraBody === 'object'
+      ? rawExtraBody
+      : undefined;
+
   return {
     ...llmConfigParams,
     ...modelInfo,
     model: aiSDKModel,
     supportJsonFormat: modelInfo?.model.supportJsonFormat || false,
     specificPrompt: modelInfo?.model.specificPrompt || '',
+    extraBody
   };
 }
 
@@ -258,7 +265,7 @@ export function createChatGenui() {
     };
 
     const llmConfig = await generateLlmConfig(llmConfigParams);
-    const { model, temperature, specificPrompt } = llmConfig;
+    const { model, temperature, specificPrompt, provider, extraBody } = llmConfig;
     const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
       mcpServers.filter((s) => s.enabled),
       abort.signal,
@@ -283,6 +290,12 @@ export function createChatGenui() {
     const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;
     const maxSteps = 30;
     let hasError = false; // 标记是否已经处理了错误
+
+    const providerOptions =
+      provider?.name && extraBody && Object.keys(extraBody).length > 0
+        ? { [provider.name]: extraBody } as StreamTextOptions['providerOptions']
+        : undefined;
+
     const options: StreamTextOptions = {
       model,
       temperature,
@@ -299,6 +312,7 @@ export function createChatGenui() {
       tools,
       toolChoice: 'auto',
       stopWhen: stepCountIs(maxSteps),
+      ...(providerOptions ? { providerOptions } : {}),
       onError: (error: any) => {
         if (hasError) {
           return;

@@ -3,6 +3,7 @@ import { CodeEditor } from 'monaco-editor-vue3';
 import { GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
 import type { CSSProperties } from 'vue';
+import { useMonacoPlaygroundTheme, type PlaygroundColorTheme } from './use-monaco-playground-theme';
 
 const props = defineProps<{
   visible: boolean;
@@ -13,9 +14,12 @@ const props = defineProps<{
   currentPreviewSchemaComplete?: boolean | undefined;
   schemaEditor: string;
   editorOptions: Record<string, unknown>;
+  playgroundTheme: PlaygroundColorTheme;
   viewSchemaIcon: string;
   closeIcon: unknown;
 }>();
+
+const monacoTheme = useMonacoPlaygroundTheme(() => props.playgroundTheme);
 
 const emit = defineEmits<{
   (event: 'update:jsonEditorOpen', value: boolean): void;
@@ -95,7 +99,7 @@ const handleJsonEditorChange = (value: string) => {
                 <code-editor
                   :value="schemaEditor"
                   language="json"
-                  theme="vs"
+                  :theme="monacoTheme"
                   :options="editorOptions"
                   @update:value="handleJsonEditorChange"
                 />
@@ -265,11 +269,18 @@ const handleJsonEditorChange = (value: string) => {
     color: #191919;
     font-size: 14px;
     line-height: 22px;
+    text-decoration: none;
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &:hover {
+      color: #191919;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
 
     &:focus-visible {
       outline: 2px solid #1890ff;
@@ -289,11 +300,15 @@ const handleJsonEditorChange = (value: string) => {
     padding: 6px 4px;
     border: none;
     background: transparent;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 22px;
-    color: #1890ff;
+    color: #191919;
     cursor: pointer;
     white-space: nowrap;
+
+    &:hover {
+      color: #191919;
+    }
   }
 
   &__body {
