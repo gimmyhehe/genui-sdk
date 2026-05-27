@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { SwaggerMcpConfig } from '../types.js';
 import { parseSwaggerInput } from '../swagger/parse-swagger-input.js';
 import type { SwaggerToolRegistry } from './swagger-tool-registry.js';
@@ -33,20 +32,9 @@ function parseExcludeMethods(value?: string | string[]): string[] | undefined {
   return value.split(',').map((s) => s.trim()).filter(Boolean);
 }
 
-const META_TOOLS = [
-  {
-    name: 'parse_swagger',
-    description: '解析 Swagger/OpenAPI 文档并动态注册为 MCP 工具',
-  },
-  {
-    name: 'list_tools',
-    description: '查询当前已注册的 MCP 工具列表（元工具 + 动态 API 工具）',
-  },
-] as const;
-
 /** 注册元工具：parse_swagger、list_tools */
-export function registerMetaTools(server: McpServer, registry: SwaggerToolRegistry): void {
-  server.registerTool(
+export function registerMetaTools(registry: SwaggerToolRegistry): void {
+  registry.registerTool(
     'parse_swagger',
     {
       description:
@@ -134,21 +122,22 @@ export function registerMetaTools(server: McpServer, registry: SwaggerToolRegist
     },
   );
 
-  server.registerTool(
+  registry.registerTool(
     'list_tools',
     {
       description: '查询当前 MCP 服务已注册的工具列表，包含元工具与 parse_swagger 动态注册的 API 工具',
       inputSchema: {},
     },
     async () => {
+      const metaTools = registry.listMetaToolSummaries();
       const dynamicTools = registry.listDynamicTools();
       const baseUrl = registry.getLastBaseUrl();
 
       const result = {
-        metaTools: META_TOOLS.map((t) => ({ ...t })),
+        metaTools,
         dynamicTools,
         dynamicCount: dynamicTools.length,
-        totalCount: META_TOOLS.length + dynamicTools.length,
+        totalCount: metaTools.length + dynamicTools.length,
         baseUrl: baseUrl ?? null,
       };
 

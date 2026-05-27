@@ -1,11 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SwaggerToolRegistry } from './server/swagger-tool-registry.js';
 import { registerMetaTools } from './server/register-meta-tools.js';
-
-type McpServerWithTools = McpServer & {
-  _registeredTools: Record<string, RegisteredTool>;
-};
+import type { SwaggerMcpToolCatalogEntry } from './server/mcp-tool-catalog.js';
 
 let swaggerMcpServer: McpServer | null = null;
 let swaggerToolRegistry: SwaggerToolRegistry | null = null;
@@ -26,7 +22,7 @@ export function getSwaggerMcpServer(): McpServer {
       },
     );
     const registry = new SwaggerToolRegistry(server);
-    registerMetaTools(server, registry);
+    registerMetaTools(registry);
     swaggerMcpServer = server;
     swaggerToolRegistry = registry;
   }
@@ -38,15 +34,9 @@ export function getSwaggerToolRegistry(): SwaggerToolRegistry {
   return swaggerToolRegistry!;
 }
 
-export type SwaggerMcpToolEntry = {
-  name: string;
-  registered: RegisteredTool;
-};
+export type { SwaggerMcpToolCatalogEntry as SwaggerMcpToolEntry };
 
-/** 列出当前已注册且启用的 MCP 工具（含元工具与 parse_swagger 动态工具） */
-export function listSwaggerMcpToolEntries(): SwaggerMcpToolEntry[] {
-  const server = getSwaggerMcpServer() as McpServerWithTools;
-  return Object.entries(server._registeredTools)
-    .filter(([, registered]) => registered.enabled)
-    .map(([name, registered]) => ({ name, registered }));
+/** 列出 catalog 中已注册且启用的工具（元工具 + 动态 API 工具） */
+export function listSwaggerMcpToolEntries(): SwaggerMcpToolCatalogEntry[] {
+  return getSwaggerToolRegistry().listRegisteredTools();
 }

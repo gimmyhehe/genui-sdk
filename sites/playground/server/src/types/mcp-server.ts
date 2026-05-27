@@ -15,3 +15,8 @@ export type McpServer = {
 };
 
 export type McpServersConfig = McpServerConfig[];
+
+/** 未设置 enabled 时视为启用（与 Playground UI 新建 MCP 默认 enabled: true 一致） */
+export function isMcpServerEnabled(server: Pick<McpServerConfig, 'enabled'>): boolean {
+  return server.enabled !== false;
+}

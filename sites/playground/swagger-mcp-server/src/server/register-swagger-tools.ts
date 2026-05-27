@@ -1,4 +1,4 @@
-import { McpServer, type RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { DynamicToolInfo, SwaggerMcpConfig } from '../types.js';
 import {
@@ -8,23 +8,23 @@ import {
   parametersToZodShape,
   requestBodyToZodField,
 } from '../swagger/index.js';
+import type { SwaggerMcpToolCatalog } from './mcp-tool-catalog.js';
 
 export function registerSwaggerTools(
   server: McpServer,
+  catalog: SwaggerMcpToolCatalog,
   spec: OpenAPIV3.Document,
   config: SwaggerMcpConfig,
   baseUrl: string,
 ): {
   toolNames: string[];
   toolInfos: DynamicToolInfo[];
-  registeredTools: Map<string, RegisteredTool>;
 } {
   const operations = extractOperations(spec, config);
   const apiHeaders = config.apiHeaders ?? {};
   const requestTimeoutMs = config.requestTimeoutMs ?? loadApiRequestTimeoutMs();
   const toolNames: string[] = [];
   const toolInfos: DynamicToolInfo[] = [];
-  const registeredTools = new Map<string, RegisteredTool>();
 
   for (const operation of operations) {
     const paramShape = parametersToZodShape(
@@ -46,7 +46,8 @@ export function registerSwaggerTools(
       operation.description ??
       `${operation.method} ${operation.path}`;
 
-    const registered = server.registerTool(
+    catalog.register(
+      server,
       operation.toolName,
       {
         description: `[${operation.method} ${operation.path}] ${description}`,
@@ -93,8 +94,7 @@ export function registerSwaggerTools(
       path: operation.path,
       description: `[${operation.method} ${operation.path}] ${description}`,
     });
-    registeredTools.set(operation.toolName, registered);
   }
 
-  return { toolNames, toolInfos, registeredTools };
+  return { toolNames, toolInfos };
 }

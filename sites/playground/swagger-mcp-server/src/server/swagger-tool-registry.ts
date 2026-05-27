@@ -1,9 +1,16 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenAPIV3 } from 'openapi-types';
+import type { ZodRawShape } from 'zod';
+import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { DynamicToolInfo, SwaggerMcpConfig } from '../types.js';
 import { registerSwaggerTools } from './register-swagger-tools.js';
 import { resolveBaseUrl } from '../swagger/parse-swagger-input.js';
+import {
+  SWAGGER_MCP_META_TOOL_NAMES,
+  SwaggerMcpToolCatalog,
+  type SwaggerMcpToolCatalogEntry,
+} from './mcp-tool-catalog.js';
 
 export type SwaggerRegisterResult = {
   toolCount: number;
@@ -12,28 +19,46 @@ export type SwaggerRegisterResult = {
 };
 
 export class SwaggerToolRegistry {
-  private readonly dynamicTools = new Map<string, RegisteredTool>();
+  private readonly catalog = new SwaggerMcpToolCatalog();
   private readonly dynamicToolInfos = new Map<string, DynamicToolInfo>();
   private lastBaseUrl?: string;
 
   constructor(private readonly server: McpServer) {}
 
+  get toolCatalog(): SwaggerMcpToolCatalog {
+    return this.catalog;
+  }
+
+  registerTool<InputArgs extends ZodRawShape>(
+    name: string,
+    config: { description?: string; inputSchema?: InputArgs },
+    handler: ToolCallback<InputArgs>,
+  ): RegisteredTool {
+    return this.catalog.register(this.server, name, config, handler);
+  }
+
+  listRegisteredTools(): SwaggerMcpToolCatalogEntry[] {
+    return this.catalog.listEnabled();
+  }
+
   registerFromSpec(spec: OpenAPIV3.Document, config: SwaggerMcpConfig): SwaggerRegisterResult {
     const baseUrl = resolveBaseUrl(spec, config.baseUrl);
-    const { toolNames, toolInfos, registeredTools } = registerSwaggerTools(
+    const { toolNames, toolInfos } = registerSwaggerTools(
       this.server,
+      this.catalog,
       spec,
       config,
       baseUrl,
     );
 
-    for (const [name, tool] of registeredTools) {
-      this.dynamicTools.get(name)?.remove();
-      this.dynamicTools.set(name, tool);
-    }
-
     for (const info of toolInfos) {
       this.dynamicToolInfos.set(info.name, info);
+    }
+
+    for (const name of [...this.dynamicToolInfos.keys()]) {
+      if (!toolNames.includes(name)) {
+        this.dynamicToolInfos.delete(name);
+      }
     }
 
     this.lastBaseUrl = baseUrl;
@@ -47,17 +72,16 @@ export class SwaggerToolRegistry {
   }
 
   clearDynamicTools(): number {
-    const count = this.dynamicTools.size;
-    for (const tool of this.dynamicTools.values()) {
-      tool.remove();
+    const namesToRemove = [...this.dynamicToolInfos.keys()];
+    for (const name of namesToRemove) {
+      this.catalog.remove(name);
+      this.dynamicToolInfos.delete(name);
     }
-    this.dynamicTools.clear();
-    this.dynamicToolInfos.clear();
     this.lastBaseUrl = undefined;
-    if (count > 0) {
+    if (namesToRemove.length > 0) {
       this.server.sendToolListChanged();
     }
-    return count;
+    return namesToRemove.length;
   }
 
   listDynamicTools(): DynamicToolInfo[] {
@@ -66,5 +90,15 @@ export class SwaggerToolRegistry {
 
   getLastBaseUrl(): string | undefined {
     return this.lastBaseUrl;
+  }
+
+  listMetaToolSummaries(): Array<{ name: string; description: string }> {
+    return this.catalog
+      .listEnabled()
+      .filter((entry) => SWAGGER_MCP_META_TOOL_NAMES.has(entry.name))
+      .map((entry) => ({
+        name: entry.name,
+        description: entry.registered.description ?? entry.name,
+      }));
   }
 }

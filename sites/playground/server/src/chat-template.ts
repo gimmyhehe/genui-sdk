@@ -16,6 +16,7 @@ import {
 } from './swagger-mcp/build-tools.js';
 import { generateJsonPatchPrompt } from './json-patch-prompt.js';
 import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
+import { isMcpServerEnabled } from './types/mcp-server.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
 
@@ -92,7 +93,7 @@ export const createChatTemplate = () => {
       const llmConfig = await generateLlmConfig(llmConfigParams);
       const { model, temperature, prompt: customSystemPrompt, specificPrompt } = llmConfig;
       const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
-        mcpServers.filter((s) => s.enabled && !isBuiltinSwaggerMcpUrl(s.url)),
+        mcpServers.filter((s) => isMcpServerEnabled(s) && !isBuiltinSwaggerMcpUrl(s.url)),
         abort.signal,
       );
       const swaggerTools = buildBuiltinSwaggerTools();

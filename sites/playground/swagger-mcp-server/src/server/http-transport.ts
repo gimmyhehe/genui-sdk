@@ -25,7 +25,9 @@ export function registerSwaggerMcpHttpRoutes(
 ) {
   const { mcpPath = '/mcp', assets, registerHealth = false } = options;
   const jsonMiddleware = express.json();
-  const sessionRegistry = options.sessionRegistry ?? new McpSessionRegistry(loadMcpSessionRegistryOptionsFromEnv());
+  const ownsSessionRegistry = options.sessionRegistry === undefined;
+  const sessionRegistry =
+    options.sessionRegistry ?? new McpSessionRegistry(loadMcpSessionRegistryOptionsFromEnv());
 
   const mcpPostHandler = async (req: Request, res: Response) => {
     try {
@@ -127,7 +129,7 @@ export function registerSwaggerMcpHttpRoutes(
 
   registerAssetsApi(app, assets);
 
-  if (registerHealth) {
+  if (registerHealth && ownsSessionRegistry) {
     const dispose = () => sessionRegistry.dispose();
     process.once('SIGINT', dispose);
     process.once('SIGTERM', dispose);

@@ -170,7 +170,7 @@ const confirmMCPServer = async () => {
         <div class="mcp-server-item-header">
           <div class="mcp-server-item-name">{{ server.name }}</div>
           <div>
-            <tiny-switch :model-value="server.enabled" @update:model-value="updateServerEnabled(server, $event)"
+            <tiny-switch :model-value="server.enabled !== false" @update:model-value="updateServerEnabled(server, $event)"
               class="mcp-server-item-enabled"></tiny-switch>
             <tiny-popover trigger="hover" popper-class="mcp-server-item-actions-popover" :visible-arrow="false"
               :append-to-body="false">

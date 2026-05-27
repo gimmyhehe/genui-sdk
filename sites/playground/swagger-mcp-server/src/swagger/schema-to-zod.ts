@@ -61,16 +61,23 @@ function schemaToZod(schema: SchemaObject | ReferenceObject | undefined, require
         shape[key] = schemaToZod(propSchema as SchemaObject, requiredFields.has(key));
       }
 
-      if (schema.additionalProperties === true) {
-        result = z.record(z.string(), z.unknown());
-        return withDescription(result, schema.description);
-      }
-      if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
-        result = z.record(z.string(), schemaToZod(schema.additionalProperties, true));
-        return withDescription(result, schema.description);
-      }
+      const hasDeclaredProps = Object.keys(shape).length > 0;
+      const additional = schema.additionalProperties;
 
-      result = Object.keys(shape).length ? z.object(shape) : z.record(z.string(), z.unknown());
+      if (additional === false) {
+        result = hasDeclaredProps ? z.object(shape).strict() : z.object({}).strict();
+      } else if (additional === true) {
+        result = hasDeclaredProps
+          ? z.object(shape).catchall(z.unknown())
+          : z.record(z.string(), z.unknown());
+      } else if (additional !== undefined) {
+        const valueSchema = schemaToZod(additional as SchemaObject | ReferenceObject, true);
+        result = hasDeclaredProps
+          ? z.object(shape).catchall(valueSchema)
+          : z.record(z.string(), valueSchema);
+      } else {
+        result = hasDeclaredProps ? z.object(shape) : z.record(z.string(), z.unknown());
+      }
       break;
     }
     default:

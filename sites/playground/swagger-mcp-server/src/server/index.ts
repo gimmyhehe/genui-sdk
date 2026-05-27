@@ -10,3 +10,8 @@ export {
   loadMcpSessionRegistryOptionsFromEnv,
   type McpSessionRegistryOptions,
 } from './mcp-session-registry.js';
+export {
+  SwaggerMcpToolCatalog,
+  SWAGGER_MCP_META_TOOL_NAMES,
+  type SwaggerMcpToolCatalogEntry,
+} from './mcp-tool-catalog.js';
