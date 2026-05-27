@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
-import { RENDERER_SETTINGS_KEY } from '@opentiny/genui-sdk-vue';
+import { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { TinyConfigProvider } from '@opentiny/vue';
 import { ThemeProvider } from '@opentiny/tiny-robot';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
