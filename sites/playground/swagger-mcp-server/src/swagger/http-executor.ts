@@ -27,6 +27,36 @@ function buildUrl(baseUrl: string, path: string, queryArgs: Record<string, unkno
   return url.toString();
 }
 
+function encodeCookieValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.map((item) => encodeCookieValue(item)).join(',');
+  }
+  return encodeURIComponent(String(value));
+}
+
+/** 将 OpenAPI cookie 参数合并为单个 Cookie 请求头 */
+function mergeCookieHeader(
+  headers: Record<string, string>,
+  cookieArgs: Record<string, unknown>,
+): void {
+  const pairs = Object.entries(cookieArgs)
+    .filter(([, value]) => value !== undefined && value !== null)
+    .map(([name, value]) => `${name}=${encodeCookieValue(value)}`);
+
+  if (pairs.length === 0) {
+    return;
+  }
+
+  const segment = pairs.join('; ');
+  const existingKey = Object.keys(headers).find((key) => key.toLowerCase() === 'cookie');
+
+  if (existingKey) {
+    headers[existingKey] = `${headers[existingKey]}; ${segment}`;
+  } else {
+    headers.Cookie = segment;
+  }
+}
+
 export async function executeApiOperation(
   operation: ApiOperation,
   baseUrl: string,
@@ -36,6 +66,7 @@ export async function executeApiOperation(
   const pathArgs: Record<string, unknown> = {};
   const queryArgs: Record<string, unknown> = {};
   const headerArgs: Record<string, unknown> = {};
+  const cookieArgs: Record<string, unknown> = {};
 
   for (const param of operation.parameters) {
     const value = args[param.name];
@@ -57,6 +88,7 @@ export async function executeApiOperation(
         headerArgs[param.name] = value;
         break;
       case 'cookie':
+        cookieArgs[param.name] = value;
         break;
     }
   }
@@ -71,6 +103,8 @@ export async function executeApiOperation(
       Object.entries(headerArgs).map(([k, v]) => [k, String(v)]),
     ),
   };
+
+  mergeCookieHeader(headers, cookieArgs);
 
   const init: RequestInit = {
     method: operation.method,

@@ -53,7 +53,5 @@ export function registerSwaggerMcp(app: Express): void {
     },
   });
 
-  console.info(
-    `[swagger-mcp] MCP: ${mcpPath} | assets: ${assetsBasePath} | dir: ${assetsDir}`,
-  );
+  console.info(`[swagger-mcp] MCP: ${mcpPath} | assets: ${assetsBasePath}`);
 }

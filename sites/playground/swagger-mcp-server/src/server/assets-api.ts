@@ -1,17 +1,37 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
-import { dirname, isAbsolute, relative, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Express, Request, Response } from 'express';
 
 const DEFAULT_ASSETS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../../assets');
 
-function resolveSafeAssetPath(assetsDir: string, filename: string): string | null {
-  const normalized = decodeURIComponent(filename).replace(/^\/+/, '');
-  if (!normalized || normalized.includes('..')) {
+/** 仅允许访问 assets 根目录下的单层文件名（拒绝路径分隔符与 ..） */
+function normalizeAssetFilename(filename: string): string | null {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(filename);
+  } catch {
     return null;
   }
 
-  const fullPath = resolve(assetsDir, normalized);
+  const base = basename(decoded.replace(/^\/+/, ''));
+  if (!base || base === '.' || base === '..' || base.includes('..')) {
+    return null;
+  }
+  if (base.includes('/') || base.includes('\\') || base.includes('\0')) {
+    return null;
+  }
+
+  return base;
+}
+
+function resolveSafeAssetPath(assetsDir: string, filename: string): string | null {
+  const safeName = normalizeAssetFilename(filename);
+  if (!safeName) {
+    return null;
+  }
+
+  const fullPath = resolve(assetsDir, safeName);
   const rel = relative(assetsDir, fullPath);
   if (rel.startsWith('..') || isAbsolute(rel)) {
     return null;
@@ -39,25 +59,40 @@ export function registerAssetsApi(
   app.get(basePath, async (_req: Request, res: Response) => {
     try {
       const entries = await readdir(assetsDir, { withFileTypes: true });
-      const files = await Promise.all(
-        entries
-          .filter((e) => e.isFile())
-          .map(async (e) => {
-            const filePath = resolve(assetsDir, e.name);
-            const info = await stat(filePath);
-            return { name: e.name, size: info.size };
-          }),
-      );
+      const files: Array<{ name: string; size: number }> = [];
 
-      res.json({ directory: assetsDir, files });
+      for (const entry of entries) {
+        if (!entry.isFile()) continue;
+
+        const safeName = normalizeAssetFilename(entry.name);
+        if (!safeName || safeName !== entry.name) {
+          console.warn('[assets-api] Skipping unsafe entry name:', entry.name);
+          continue;
+        }
+
+        try {
+          const info = await stat(resolve(assetsDir, safeName));
+          files.push({ name: safeName, size: info.size });
+        } catch (error) {
+          console.error('[assets-api] Failed to stat asset:', safeName, error);
+        }
+      }
+
+      res.json({ files });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      res.status(500).json({ error: message });
+      console.error('[assets-api] Failed to list assets:', error);
+      res.status(500).json({ error: 'Failed to list assets' });
     }
   });
 
   app.get(`${basePath}/:filename`, async (req: Request, res: Response) => {
-    const filePath = resolveSafeAssetPath(assetsDir, req.params.filename);
+    const safeName = normalizeAssetFilename(req.params.filename);
+    if (!safeName) {
+      res.status(400).json({ error: 'Invalid filename' });
+      return;
+    }
+
+    const filePath = resolveSafeAssetPath(assetsDir, safeName);
     if (!filePath) {
       res.status(400).json({ error: 'Invalid filename' });
       return;
@@ -65,15 +100,15 @@ export function registerAssetsApi(
 
     try {
       const content = await readFile(filePath, 'utf-8');
-      res.type(contentTypeByFilename(req.params.filename)).send(content);
+      res.type(contentTypeByFilename(safeName)).send(content);
     } catch (error) {
       const err = error as NodeJS.ErrnoException;
       if (err.code === 'ENOENT') {
         res.status(404).json({ error: 'File not found' });
         return;
       }
-      const message = error instanceof Error ? error.message : String(error);
-      res.status(500).json({ error: message });
+      console.error('[assets-api] Failed to read asset:', safeName, error);
+      res.status(500).json({ error: 'Failed to read asset' });
     }
   });
 }
