@@ -15,7 +15,7 @@ function resolveSwaggerAssetsDir(): string {
   }
 
   const entryDir = dirname(fileURLToPath(import.meta.url));
-  const distAssets = resolve(entryDir, 'assests');
+  const distAssets = resolve(entryDir, 'assets');
   if (existsSync(distAssets)) {
     return distAssets;
   }
@@ -24,7 +24,7 @@ function resolveSwaggerAssetsDir(): string {
     const require = createRequire(import.meta.url);
     const pkgEntry = require.resolve('cloud-service-mcp-server');
     const pkgRoot = resolve(dirname(pkgEntry), '..');
-    const pkgAssets = resolve(pkgRoot, 'assests');
+    const pkgAssets = resolve(pkgRoot, 'assets');
     if (existsSync(pkgAssets)) {
       return pkgAssets;
     }

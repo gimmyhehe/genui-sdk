@@ -3,7 +3,7 @@ import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Express, Request, Response } from 'express';
 
-const DEFAULT_ASSETS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../../assests');
+const DEFAULT_ASSETS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../../assets');
 
 function resolveSafeAssetPath(assetsDir: string, filename: string): string | null {
   const normalized = decodeURIComponent(filename).replace(/^\/+/, '');
@@ -31,7 +31,7 @@ export type RegisterAssetsApiOptions = {
   assetsDir?: string;
 };
 
-/** 注册 assests 目录 API：列表与读取文件 */
+/** 注册 assets 目录 API：列表与读取文件 */
 export function registerAssetsApi(
   app: Express,
   { basePath = '/api/assets', assetsDir = DEFAULT_ASSETS_DIR }: RegisterAssetsApiOptions = {},

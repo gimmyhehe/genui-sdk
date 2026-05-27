@@ -28,8 +28,8 @@ export default defineConfig(({ mode }) => {
       dest: './',
     },
     {
-      src: '../swagger-mcp-server/assests',
-      dest: './assests',
+      src: '../swagger-mcp-server/assets',
+      dest: './assets',
     },
   ];
   if (envFileExists) {
