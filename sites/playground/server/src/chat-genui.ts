@@ -24,7 +24,6 @@ import {
   isBuiltinSwaggerMcpUrl,
 } from './swagger-mcp/build-tools.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
-import { isMcpServerEnabled } from './types/mcp-server.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
 
@@ -273,7 +272,7 @@ export function createChatGenui() {
     const llmConfig = await generateLlmConfig(llmConfigParams);
     const { model, temperature, specificPrompt, provider, extraBody } = llmConfig;
     const externalMcpServers = mcpServers.filter(
-      (s) => isMcpServerEnabled(s) && !isBuiltinSwaggerMcpUrl(s.url),
+      (s) => s.enabled && !isBuiltinSwaggerMcpUrl(s.url),
     );
     const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
       externalMcpServers,

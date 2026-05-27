@@ -10,7 +10,7 @@ GenUI SDK 是 OpenTiny 面向生成式 UI（Generative UI）场景的全栈开�
 
 ## 立即体验
 
-你可以前往[演练场](https://playground.opentiny.design/genui-sdk)立即体验生成式 UI 能力。演练场正是基于 GenUI SDK 开发的应用。
+你可以前往[演练场](https://opentiny.github.io/genui-sdk/playground/)立即体验生成式 UI 能力。演练场正是基于 GenUI SDK 开发的应用。
 
 ## 快速开始
 

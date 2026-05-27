@@ -16,7 +16,6 @@ import {
 } from './swagger-mcp/build-tools.js';
 import { generateJsonPatchPrompt } from './json-patch-prompt.js';
 import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
-import { isMcpServerEnabled } from './types/mcp-server.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
 
@@ -91,9 +90,9 @@ export const createChatTemplate = () => {
       };
 
       const llmConfig = await generateLlmConfig(llmConfigParams);
-      const { model, temperature, prompt: customSystemPrompt, specificPrompt } = llmConfig;
+      const { model, temperature, prompt: customSystemPrompt, specificPrompt, provider, extraBody } = llmConfig;
       const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
-        mcpServers.filter((s) => isMcpServerEnabled(s) && !isBuiltinSwaggerMcpUrl(s.url)),
+        mcpServers.filter((s) => s.enabled && !isBuiltinSwaggerMcpUrl(s.url)),
         abort.signal,
       );
       const swaggerTools = buildBuiltinSwaggerTools();
@@ -129,6 +128,11 @@ export const createChatTemplate = () => {
           });
         }
       }
+      const providerOptions =
+        provider?.name && extraBody && Object.keys(extraBody).length > 0
+          ? ({ [provider.name]: extraBody } as StreamTextOptions['providerOptions'])
+          : undefined;
+
       const options: StreamTextOptions = {
         model,
         temperature,
@@ -138,6 +142,7 @@ export const createChatTemplate = () => {
         tools,
         toolChoice: 'auto',
         stopWhen: stepCountIs(maxSteps),
+        ...(providerOptions ? { providerOptions } : {}),
       } as const;
 
       res.on('close', async () => {
