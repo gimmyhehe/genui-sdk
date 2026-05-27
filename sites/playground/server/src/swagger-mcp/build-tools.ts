@@ -24,7 +24,7 @@ export function isBuiltinSwaggerMcpUrl(url: string): boolean {
       target.hostname === 'localhost' ||
       target.hostname === '::1';
     const targetPort = target.port || (target.protocol === 'https:' ? '443' : '80');
-    const portMatches = targetPort === port || (targetPort === '80' && port === '3008' && !target.port);
+    const portMatches = targetPort === port;
 
     return isLocalHost && portMatches && target.pathname.replace(/\/$/, '') === normalizedPath.replace(/\/$/, '');
   } catch {
