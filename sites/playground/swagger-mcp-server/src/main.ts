@@ -22,7 +22,6 @@ async function main() {
 
   app.listen(port, () => {
     console.log(`[cloud-service-mcp] http://localhost:${port}${mcpPath}`);
-    console.log(`[cloud-service-mcp] assets: http://localhost:${port}/api/assets`);
     console.log(`[cloud-service-mcp] 请先调用 parse_swagger 注册 API 工具`);
   });
 }

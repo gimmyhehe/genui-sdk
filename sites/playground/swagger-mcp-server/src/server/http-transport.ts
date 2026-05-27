@@ -3,7 +3,6 @@ import express, { type Express, type Request, type Response } from 'express';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-import { registerAssetsApi, type RegisterAssetsApiOptions } from './assets-api.js';
 import {
   loadMcpSessionRegistryOptionsFromEnv,
   McpSessionRegistry,
@@ -11,7 +10,6 @@ import {
 
 export type RegisterSwaggerMcpHttpRoutesOptions = {
   mcpPath?: string;
-  assets?: RegisterAssetsApiOptions;
   /** 独立运行时注册 /health；集成到已有服务时建议 false */
   registerHealth?: boolean;
   sessionRegistry?: McpSessionRegistry;
@@ -23,7 +21,7 @@ export function registerSwaggerMcpHttpRoutes(
   getServer: () => McpServer,
   options: RegisterSwaggerMcpHttpRoutesOptions = {},
 ) {
-  const { mcpPath = '/mcp', assets, registerHealth = false } = options;
+  const { mcpPath = '/mcp', registerHealth = false } = options;
   const jsonMiddleware = express.json();
   const ownsSessionRegistry = options.sessionRegistry === undefined;
   const sessionRegistry =
@@ -135,8 +133,6 @@ export function registerSwaggerMcpHttpRoutes(
     });
   }
 
-  registerAssetsApi(app, assets);
-
   if (registerHealth && ownsSessionRegistry) {
     const dispose = () => sessionRegistry.dispose();
     process.once('SIGINT', dispose);
@@ -144,15 +140,10 @@ export function registerSwaggerMcpHttpRoutes(
   }
 }
 
-export function createMcpHttpApp(
-  getServer: () => McpServer,
-  mcpPath = '/mcp',
-  assets?: RegisterAssetsApiOptions,
-) {
+export function createMcpHttpApp(getServer: () => McpServer, mcpPath = '/mcp') {
   const app = express();
   registerSwaggerMcpHttpRoutes(app, getServer, {
     mcpPath,
-    assets,
     registerHealth: true,
   });
   return { app };

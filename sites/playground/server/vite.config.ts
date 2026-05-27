@@ -27,10 +27,6 @@ export default defineConfig(({ mode }) => {
       src: modelsFileName,
       dest: './',
     },
-    {
-      src: '../swagger-mcp-server/assets',
-      dest: './assets',
-    },
   ];
   if (envFileExists) {
     staticCopyTargets.push({

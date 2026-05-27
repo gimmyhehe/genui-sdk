@@ -3,7 +3,7 @@ import { buildSwaggerAiSdkTools } from 'cloud-service-mcp-server';
 const SWAGGER_SYSTEM_PROMPT = `## Swagger / OpenAPI 工具（内置）
 
 已内置 parse_swagger、list_tools。需要调用 HTTP API 时：
-1. 用 parse_swagger 解析文档（URL、本地路径或内联 JSON/YAML；样例见 /api/swagger-assets）
+1. 用 parse_swagger 解析文档（URL、本地路径或内联 JSON/YAML）
 2. 用 list_tools 查看已注册的 API 工具
 3. 调用对应 API 工具执行请求`;
 

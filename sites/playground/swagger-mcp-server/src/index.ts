@@ -2,9 +2,7 @@ export {
   createSwaggerMcpServer,
   createMcpHttpApp,
   registerSwaggerMcpHttpRoutes,
-  registerAssetsApi,
   type RegisterSwaggerMcpHttpRoutesOptions,
-  type RegisterAssetsApiOptions,
 } from './server/index.js';
 export {
   getSwaggerMcpServer,

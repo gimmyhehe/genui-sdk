@@ -4,7 +4,6 @@ export {
   registerSwaggerMcpHttpRoutes,
   type RegisterSwaggerMcpHttpRoutesOptions,
 } from './http-transport.js';
-export { registerAssetsApi, type RegisterAssetsApiOptions } from './assets-api.js';
 export {
   McpSessionRegistry,
   loadMcpSessionRegistryOptionsFromEnv,
