@@ -230,6 +230,8 @@ const jsonPatchRenderer = async (props: any) => {
     let targetSchema = JSON.parse(JSON.stringify(patchBaseline)) as Record<string, unknown>;
     targetSchema = stripSchemaFieldsWhileStreaming(targetSchema, isComplete);
     jsonPatchFormatter.patch(targetSchema, standardOperations);
+    // 避免流式未完成时 patch 操作把 lifeCycles 写回 schema
+    targetSchema = stripSchemaFieldsWhileStreaming(targetSchema, isComplete);
     setCurrentPreviewSchema(generateIdForComponents(targetSchema), isComplete || lastOperationComplete);
   } catch (error) {
     errorMessagesMap.value.set(props.cardId, error.message);
