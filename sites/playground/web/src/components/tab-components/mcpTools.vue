@@ -1,21 +1,54 @@
 <script setup>
 import { ref } from 'vue';
 import { TinyCollapse } from '@opentiny/vue';
-import { AgentPanel, McpServerPanel } from './tool-panels';
+import { AgentPanel, McpServerPanel, SkillPanel } from './tool-panels';
+import ToolCallConfig from './ToolCallConfig.vue';
 
-const activePanels = ref(['mcp', 'agent']);
+const activePanels = ref(['mcp', 'agent', 'skills']);
 </script>
 
 <template>
-  <div>
-    <tiny-collapse class="playground-tools" v-model="activePanels">
-      <McpServerPanel />
-      <AgentPanel />
-    </tiny-collapse>
+  <div class="mcp-tools">
+    <div class="mcp-tools__scroll">
+      <div class="mcp-tools__scroll-inner">
+        <tiny-collapse class="playground-tools" v-model="activePanels">
+          <McpServerPanel />
+          <AgentPanel />
+          <SkillPanel />
+        </tiny-collapse>
+      </div>
+    </div>
+    <div class="mcp-tools__footer">
+      <ToolCallConfig />
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
+.mcp-tools {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.mcp-tools__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.mcp-tools__scroll-inner {
+  padding: 0 24px;
+}
+
+.mcp-tools__footer {
+  flex-shrink: 0;
+  padding: 12px 24px 16px;
+  background: var(--ti-base-color-bg, #fff);
+}
+
 :deep(.tiny-collapse) {
   border-bottom: none;
 
@@ -33,6 +66,9 @@ const activePanels = ref(['mcp', 'agent']);
     .tiny-collapse-item__header {
       padding: 0;
       border-bottom: none;
+      position: sticky;
+      top: 0;
+      z-index: 2;
     }
 
     .tiny-collapse-item__content {
