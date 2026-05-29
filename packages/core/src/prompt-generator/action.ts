@@ -26,4 +26,21 @@ ${JSON.stringify(actionDefinitions, null, 2)}
   "children": ["点击继续对话"]
 }
 \`\`\`
+
+**异步示例：**
+
+\`\`\`json
+{
+  "methods": {
+    "handleGetData": {
+      "type": "JSFunction",
+      "value": "function() { this.callAction('getData').then((res) => { this.state.tableData = res.data; }); }"
+    },
+    "handleSubmit": {
+      "type": "JSFunction",
+      "value": "async function() { const valid = await this.callAction('validateCustomForm', { formData: this.state.formData }); if (valid) { this.callAction('continueChat', { message: '继续对话' }); } }"
+    }
+  }
+}
+\`\`\`
 ` : '';
