@@ -9,7 +9,7 @@ ${JSON.stringify(actionDefinitions, null, 2)}
 
 - 如果需要使用 \`Action\`，直接写 \`Action\` 的名称即可，不需要具体实现
 - \`Action\` 的参数需要根据 \`Action\` 的定义来填写
-- \`Action\` 的 \`returns\` 描述返回值结构；\`async\` 为 \`true\` 时表示异步 Action，\`this.callAction\` 会返回 Promise
+- \`Action\` 的 \`return\` 描述返回值结构, 如果值是 \`{ type: 'null' }\`或者缺少 \`return\` 字段, 则表示无返回值；\`async\` 为 \`true\` 时表示异步 Action，\`this.callAction\` 会返回 Promise
 - 发起 \`Action\` 调用可以在 \`JSFunction\` 里通过 \`this.callAction(actionName, params)\` 来调用
 
 **示例：**

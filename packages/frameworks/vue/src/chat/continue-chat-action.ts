@@ -14,7 +14,7 @@ export function useChatAction({
       name: 'continueChat',
       description: t('continueChat.description'),
       async: false,
-      returns: { type: 'null' as const },
+      return: { type: 'null' as const },
       execute: (params: { message: string }, context: Record<string, any>) => {
         chat({
           llmFriendlyMessage: `${params.message},${t('continueChat.messageParam')}${JSON.stringify(context.state || {})}`,
@@ -36,7 +36,7 @@ export function useChatAction({
       name: 'saveState',
       description: t('saveState.description'),
       async: false,
-      returns: { type: 'null' as const },
+      return: { type: 'null' as const },
       execute: (params: any, context: Record<string | symbol, any>) => {
         saveState(context);
       },

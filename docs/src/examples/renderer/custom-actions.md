@@ -9,7 +9,7 @@
 - `name`: 动作名称
 - `description`: 动作描述
 - `parameters`: 参数 JSON Schema 描述
-- `returns`: 返回值 JSON Schema 描述，无返回值时使用 `{ type: 'null' }`
+- `return`: 返回值 JSON Schema 描述，无返回值时使用 `{ type: 'null' }`
 - `async`: 是否为异步 Action；为 `true` 时 `execute` 需返回 Promise
 - `execute`: 执行函数，接收 `params` 和 `context` 两个参数
 
@@ -153,7 +153,7 @@ const response = await fetch(url, {
               required: ['url', 'target'],
             },
             async: false,
-            returns: { type: 'null' },
+            return: { type: 'null' },
           }
         ]
       }),

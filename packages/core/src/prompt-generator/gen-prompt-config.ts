@@ -49,7 +49,7 @@ export interface IGenPromptAction {
   name: string;
   description?: string;
   parameters?: JsonSchema7Type;
-  returns?: JsonSchema7Type;
+  return?: JsonSchema7Type;
   async?: boolean;
 }
 
