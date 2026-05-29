@@ -15,7 +15,9 @@ onErrorCaptured((error) => {
   return true;
 });
 
-const props = defineProps<IRendererProps>();
+const props = withDefaults(defineProps<IRendererProps>(), {
+  isJsonComplete: true,
+});
 
 extendMapper(Mapper, props.customComponents || {});
 
