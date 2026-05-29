@@ -284,8 +284,6 @@ const customActions = [
   {
     name: 'openPage',
     description: '打开新页面，用于页面跳转',
-    async: false,
-    return: { type: 'null' },
     parameters: {
       type: 'object',
       properties: {

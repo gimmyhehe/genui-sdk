@@ -221,8 +221,6 @@ const customActions = [
   {
     name: 'openPage',
     description: '打开新页面',
-    async: false,
-    return: { type: 'null' },
     parameters: {
       type: 'object',
       properties: {
@@ -497,9 +495,9 @@ interface IGenPromptAction {
   name: string;
   description?: string;
   parameters?: JSONSchema;
-  /** 返回值 JSON Schema 描述，无返回值时使用 `{ type: 'null' }` */
+  /** 返回值 JSON Schema 描述（可选，无返回值时可省略） */
   return?: JSONSchema;
-  /** 是否为异步 Action */
+  /** 是否为异步 Action（可选，默认为 false） */
   async?: boolean;
 }
 ```
