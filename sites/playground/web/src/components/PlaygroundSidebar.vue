@@ -190,8 +190,6 @@ const updateCustomExamples = (list) => {
             :model-value="theme"
             @update:model-value="emit('update:theme', $event)"
           />
-          <div class="config-title language-switcher-title">{{ t('lang.switch') }}</div>
-          <LanguageSwitcher />
         </tiny-tab-item>
         <tiny-tab-item :title="t('sidebar.tabHistory')" name="history" class="history-tab">
           <GenuiHistory v-if="conversation" :conversation="conversation" />
@@ -200,6 +198,10 @@ const updateCustomExamples = (list) => {
           <component v-if="GenuiTemplateList" :is="GenuiTemplateList" />
         </tiny-tab-item>
       </tiny-tabs>
+
+      <footer v-show="expanded" class="playground-sidebar__footer">
+        <LanguageSwitcher />
+      </footer>
     </div>
 
     <!-- 移动端遮罩层 -->
@@ -302,10 +304,6 @@ const updateCustomExamples = (list) => {
       padding: 0 20px;
     }
 
-    .language-switcher-title {
-      margin-top: 24px;
-    }
-
     :deep(.tiny-tabs__header.is-top) {
       padding: 0 24px;
       flex-shrink: 0;
@@ -330,6 +328,12 @@ const updateCustomExamples = (list) => {
         overflow: hidden;
       }
     }
+  }
+
+  &__footer {
+    flex-shrink: 0;
+    padding: 12px 24px 24px;
+    border-top: 1px solid #f0f0f0;
   }
 
   .svg-icon {

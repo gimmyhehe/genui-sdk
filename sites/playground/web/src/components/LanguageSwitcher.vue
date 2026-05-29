@@ -1,29 +1,46 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { TinyRadioGroup } from '@opentiny/vue';
-import { t, locale, setLocale } from '../i18n';
+import { TinyDropdown } from '@opentiny/vue';
+import { locale, setLocale } from '../i18n';
 
 const langOptions = [
-  { label: 'zh_CN', text: '简体中文' },
-  { label: 'en_US', text: 'English' },
+  { label: '简体中文', value: 'zh_CN' },
+  { label: 'English', value: 'en_US' },
 ];
 
-const currentLang = computed({
-  get: () => locale.value,
-  set: (value: string) => setLocale(value),
-});
+const menuOptions = {
+  options: langOptions,
+  placement: 'top-start',
+};
+
+const currentLangLabel = computed(
+  () => langOptions.find((option) => option.value === locale.value)?.label ?? locale.value,
+);
+
+const itemClick = (payload: { itemData?: { value?: string } }) => {
+  const value = payload?.itemData?.value;
+  if (value) {
+    setLocale(value);
+  }
+};
 </script>
 
 <template>
-  <div class="language-switcher" role="radiogroup" :aria-label="t('lang.switch')">
-    <tiny-radio-group v-model="currentLang" :options="langOptions" />
+  <div class="language-switcher">
+    <tiny-dropdown
+      trigger="click"
+      :menu-options="menuOptions"
+      :title="currentLangLabel"
+      size="small"
+      :hide-on-click="true"
+      @item-click="itemClick"
+    />
   </div>
 </template>
 
 <style scoped>
-.language-switcher :deep(.tiny-radio-group) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+.language-switcher :deep(.tiny-dropdown) {
+  color: #191919;
+  stroke: #808080;
 }
 </style>
