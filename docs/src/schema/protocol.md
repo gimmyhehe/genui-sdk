@@ -308,10 +308,8 @@ interface JSSlot {
   "componentName": "div",
   "id": "list-item",
   "loop": {
-    "list": {
-      "type": "JSExpression",
-      "value": "this.state.items"
-    }
+    "type": "JSExpression",
+    "value": "this.state.items"
   },
   "loopArgs": ["item", "index"],
   "props": {
