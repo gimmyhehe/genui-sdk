@@ -694,6 +694,9 @@ importers:
       '@opentiny/vue-numeric':
         specifier: ^3.28.0
         version: 3.28.0
+      '@opentiny/vue-pager':
+        specifier: ^3.28.0
+        version: 3.28.0
       '@opentiny/vue-radio':
         specifier: ^3.28.0
         version: 3.28.0
