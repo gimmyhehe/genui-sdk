@@ -3,7 +3,7 @@ export const formSchema = {
     'formData': {
       'name': '张三',
       'sex': '男',
-      'department': 'HR',
+      'depart': 'HR',
       'protocolStart': '2023-01-01'
     }
   },
@@ -129,7 +129,7 @@ export const formSchema = {
           'componentName': 'TinyFormItem',
           'props': {
             'label': '入职日期',
-            'prop': 'date',
+            'prop': 'protocolStart',
           },
           'children': [
             {
@@ -140,7 +140,7 @@ export const formSchema = {
                 'modelValue': {
                   'type': 'JSExpression',
                   'model': true,
-                  'value': 'this.state.formData.date',
+                  'value': 'this.state.formData.protocolStart',
                 },
               },
             },

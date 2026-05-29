@@ -89,7 +89,7 @@ export const genRootSchema = /* @__PURE__ */ (componentWhiteList?: string[]) => 
       refs: z
         .record(z.string(), propValueSchema)
         .optional()
-        .describe('组件引用集合，用于在 methods 和事件处理中访问组件实例'),
+        .describe('组件实例引用集合，用于在 methods 和事件处理中访问组件实例'),
       componentName: z.string().describe('根组件名，通常为 Page'),
       props: z.record(z.string(), propValueSchema).optional().describe('根组件属性集合'),
       children: z

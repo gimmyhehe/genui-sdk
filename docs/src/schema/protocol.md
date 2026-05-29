@@ -13,7 +13,7 @@ Schema 协议通过 JSON 对象描述完整的 UI 结构，包括：
 - **组件树结构**：通过嵌套的节点对象描述组件的层次关系
 - **组件属性**：每个组件可以配置属性，支持原始值、JS 表达式、JS 函数等
 - **状态管理**：通过 `state` 字段管理页面级别的状态数据
-- **组件引用**：通过 `refs` 字段声明组件实例引用，可在事件处理中调用组件方法
+- **组件实例引用**：通过 `refs` 字段声明组件实例引用，可在事件处理中调用组件方法
 - **事件处理**：通过 `methods` 字段定义可复用的方法，组件属性可以绑定这些方法
 
 ### 设计原则
@@ -57,7 +57,7 @@ type RootNode = Omit<Node, 'id'> & {
   fileName?: string;              // 文件名
   methods?: Methods;              // 方法集合
   state?: Record<string, unknown>; // 全局状态
-  refs?: Record<string, unknown>; // 组件引用集合
+  refs?: Record<string, unknown>; // 组件实例引用变量表
   schema?: any;                   // 内嵌或外部 Schema
 };
 ```
@@ -105,7 +105,7 @@ interface Node {
 - **fileName** (string): 文件名标识
 - **methods** (Methods): 方法集合，定义可复用的函数
 - **state** (Record<string, unknown>): 全局状态对象
-- **refs** (Record<string, unknown>): 组件引用集合，初始值通常为 `null`（单个引用）或 `[]`（循环场景下的引用数组）
+- **refs** (Record<string, unknown>): 组件实例引用集合，初始值通常为 `null`（单个引用）或 `[]`（循环场景下的引用数组）
 - **schema** (any): 内嵌或外部 Schema
 
 ## 属性值类型
@@ -413,13 +413,13 @@ interface JSSlot {
 }
 ```
 
-## 组件引用
+## 组件实例引用
 
 ### 声明引用
 
 在根节点的 `refs` 字段中声明组件实例引用。初始值用于占位，渲染器会在组件挂载后将实际实例写入对应引用。
 
-- 单个组件引用：初始值设为 `null`
+- 单个组件实例引用：初始值设为 `null`
 - 循环渲染中的引用数组：初始值设为 `[]`
 
 ```json
@@ -458,8 +458,8 @@ interface JSSlot {
 {
   "componentName": "TinyFormItem",
   "loop": {
-    "type": "JSExpression",
-    "value": "this.state.formItemList"
+      "type": "JSExpression",
+      "value": "this.state.formItemList"
   },
   "loopArgs": ["item", "loopIndex"],
   "props": {
@@ -806,7 +806,7 @@ export type RootNode = Omit<Node, 'id'> & {
   fileName?: string;              // 文件名
   methods?: Methods;               // 方法集合
   state?: Record<string, unknown>; // 全局状态
-  refs?: Record<string, unknown>;  // 组件引用集合
+  refs?: Record<string, unknown>;  // 组件实例引用变量表
   schema?: any;                    // 内嵌或外部 Schema
 };
 ```
