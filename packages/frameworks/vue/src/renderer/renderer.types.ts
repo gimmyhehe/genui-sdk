@@ -2,7 +2,7 @@ import type { Component, VNode } from 'vue';
 import type { CardSchema, IGenPromptAction } from '@opentiny/genui-sdk-core';
 
 export interface ICustomAction extends Partial<IGenPromptAction> {
-  execute: (params: any, context: Record<string, any>) => void | Promise<any>;
+  execute: (params: any, context: Record<string, any>) => any;
 }
 
 export interface IRendererProps {

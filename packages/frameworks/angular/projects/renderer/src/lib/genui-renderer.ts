@@ -6,7 +6,7 @@ import { requiredCompleteFieldSelectors } from './config';
 
 export const CARD_ID = Symbol('schema-card-id');
 export interface ICustomAction {
-  execute: (params: any, context: Record<string, any>) => void;
+  execute: (params: any, context: Record<string, any>) => any;
   [key: string]: any;
 }
 

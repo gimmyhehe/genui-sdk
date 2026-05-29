@@ -490,7 +490,7 @@ interface ICustomComponentItem extends IGenPromptComponent {
 
 ```typescript
 interface ICustomActionItem extends IGenPromptAction {
-  execute: (params: any, context: Record<string, any>) => void | Promise<any>;
+  execute: (params: any, context: Record<string, any>) => any;
 }
 
 interface IGenPromptAction {
