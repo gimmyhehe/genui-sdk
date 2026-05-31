@@ -37,3 +37,13 @@ export function useMonacoPlaygroundTheme(
     return isDark ? 'vs-dark' : 'vs';
   });
 }
+
+/** Monaco DiffEditor 共用配置（inline diff，只读） */
+export const SCHEMA_JSON_DIFF_EDITOR_OPTIONS = {
+  fontSize: 14,
+  minimap: { enabled: false },
+  automaticLayout: true,
+  readOnly: true,
+  originalEditable: false,
+  renderSideBySide: false,
+} as const;

@@ -11,7 +11,7 @@ import docEditIcon from '../../assets/images/card-edit.svg';
 const TinyIconRichTextCodeView = iconRichTextCodeView();
 
 export interface IRendererProps {
-  type: 'json-patch' | 'schema-card';
+  type: 'json-patch' | 'schema-card' | 'schema-manual';
   cardId: string;
   input: string;
   content: string;
@@ -29,7 +29,17 @@ const { getMessageByCardId } = useTemplate();
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
 
-const docIcon = computed(() => (props.type === 'schema-card' ? docCardIcon : docEditIcon));
+const cardTitle = computed(() => {
+  const title = props.input?.trim() || (props.type === 'schema-manual' ? '手动编辑保存' : '');
+  return title.length > 20 ? `${title.substring(0, 20)}...` : title;
+});
+
+const docIcon = computed(() => {
+  if (props.type === 'schema-card') {
+    return docCardIcon;
+  }
+  return docEditIcon;
+});
 
 // 判断当前为开发环境
 const isDev = import.meta.env.MODE === 'development';
@@ -64,7 +74,7 @@ const handleDev = () => {
       </div>
       <div class="schema-version-card-content">
         <div class="schema-version-card-content-title">
-          {{ props.input.substring(0, 20) }}{{ props.input.length > 20 ? '...' : '' }}
+          {{ cardTitle }}
         </div>
         <div class="schema-version-card-content-time">
           <template v-if="generating">生成中...</template>

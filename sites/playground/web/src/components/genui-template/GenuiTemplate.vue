@@ -1,23 +1,33 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
-import { CodeEditor } from 'monaco-editor-vue3';
+import { CodeEditor, DiffEditor } from 'monaco-editor-vue3';
 import { GenuiConfigProvider, GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
-import { iconClose } from '@opentiny/vue-icon';
+import { iconClose, iconTime } from '@opentiny/vue-icon';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
-import type { IMessage } from '@opentiny/genui-sdk-vue';
-import type { ISchemaCardMessageItem, IJsonPatchMessageItem } from './chat.types';
 import GenuiTemplateChat from './GenuiTemplateChat.vue';
 import GenuiTemplateMobileSheet from './GenuiTemplateMobileSheet.vue';
+import SchemaVersionHistoryPanel from './SchemaVersionHistoryPanel.vue';
 import useTemplate from './useTemplate';
 import { useIsMobile } from '../../use-mobile';
-import { useMonacoPlaygroundTheme } from './use-monaco-playground-theme';
-import { findLatestSchemaInConversation, isRenderableSchema } from './template-chat-utils';
+import { SCHEMA_JSON_DIFF_EDITOR_OPTIONS, useMonacoPlaygroundTheme } from './use-monaco-playground-theme';
+import {
+  findLatestSchemaInConversation,
+  isRenderableSchema,
+  rebuildSchemaFromCard,
+  collectSchemaVersionHistory,
+  groupSchemaVersionHistory,
+  resolveSchemaVersionDiffOriginal,
+  resolveSchemaVersionDiffModified,
+  hasUnifiedDiffChanges,
+} from './template-chat-utils';
+import type { ISchemaVersionHistoryEntry } from './template-chat-utils/schema-version-history';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 
 const { isMobile } = useIsMobile();
 
 const TinyCloseIcon = iconClose();
+const TinyIconTime = iconTime();
 
 const {
   currentSchema,
@@ -29,6 +39,7 @@ const {
   currentCardId,
   currentConversationId,
   applySchemaFromMessages,
+  appendManualSchemaVersion,
 } = useTemplate();
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
@@ -47,6 +58,7 @@ const rendererSchemaKey = computed(() => {
   return `${currentCardId.value || 'preview'}-${String(componentName)}`;
 });
 const rendererPanelVisible = ref(true);
+const schemaHistoryVisible = ref(false);
 // schema 编辑器是否可见（移动端：底部抽屉；抽屉内先预览再可打开 JSON）
 const schemaEditorVisible = ref(false);
 const mobileSchemaJsonEditorOpen = ref(false);
@@ -57,56 +69,204 @@ const mobileSheetHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
 const mobileSheetDragStartY = ref(0);
 const mobileSheetDragStartHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
 const mobileSheetDragging = ref(false);
-const latestSchemaCardId = computed(() => {
+const currentConversationMessages = computed(() => {
   const conversationState = templateConversationState.value;
-  const currentConversation = conversationState?.conversations?.find(
-    (item: Conversation) => item.id === conversationState.currentId,
+  return (
+    conversationState?.conversations?.find((item: Conversation) => item.id === conversationState.currentId)
+      ?.messages ?? []
   );
-  return findLatestSchemaInConversation(currentConversation?.messages)?.cardId ?? '';
 });
-// 仅当正在查看历史版本时显示“返回最新版本/应用此版本”
-const showReturnLatestButton = computed(() =>
-  Boolean(currentCardId.value && latestSchemaCardId.value && currentCardId.value !== latestSchemaCardId.value),
+
+const latestSchemaCardId = computed(() => {
+  return findLatestSchemaInConversation(currentConversationMessages.value)?.cardId ?? '';
+});
+
+/**
+ * 判断 cardId 是否为当前会话最新 schema 版本
+ * 兼容手动合并卡的 cardId 与最后一次 editId
+ * @param cardId 版本卡片 id 或手动编辑 editId
+ * @returns 是否为最新版本
+ */
+const isLatestSchemaVersionCard = (cardId: string) => {
+  if (!cardId || !latestSchemaCardId.value) {
+    return false;
+  }
+  if (cardId === latestSchemaCardId.value) {
+    return true;
+  }
+  return flatSchemaVersionHistoryEntries.value.some(
+    (entry) => entry.isLatest && entry.cardId === cardId,
+  );
+};
+
+const schemaVersionHistoryGroups = computed(() => {
+  // 从会话消息收集 schema 版本，按日期分组供历史面板展示
+  const entries = collectSchemaVersionHistory(currentConversationMessages.value, {
+    currentCardId: currentCardId.value,
+    latestCardId: latestSchemaCardId.value,
+  });
+  return groupSchemaVersionHistory(entries);
+});
+
+/**
+ * 扁平化历史分组，便于按 cardId 查找当前选中条目
+ */
+const flatSchemaVersionHistoryEntries = computed(() =>
+  schemaVersionHistoryGroups.value.flatMap((group) => group.items),
 );
-// 历史版本在未“应用此版本”前禁止编辑
-const isHistoryVersionApplied = ref(true);
-const isSchemaEditorReadonly = computed(() => showReturnLatestButton.value && !isHistoryVersionApplied.value);
-// 编辑器中显示的代码
-const schemaEditor = computed({
-  get() {
-    // 写入编辑器的代码
-    if (!currentPreviewSchema.value) {
-      schemaEditorVisible.value = false;
-      return '{}';
-    }
 
-    return JSON.stringify(currentPreviewSchema.value, null, 2);
-  },
-  set(value: string) {
-    // 在编辑器中编辑代码
-    try {
-      const schema = JSON.parse(value || '{}');
-      setCurrentPreviewSchema(schema);
-      // 防御式保护：历史版本未应用时，不允许通过编辑器回写当前生效 schema。
-      if (!isSchemaEditorReadonly.value) {
-        setCurrentSchema(schema);
-      }
-    } catch (error) {
-      console.error('schemaEditor set error ===>', error);
-    }
-  },
+/**
+ * 当前预览版本对应的历史条目（含手动编辑的 editId）
+ */
+const currentHistoryEntry = computed(() =>
+  flatSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value) ?? null,
+);
+
+/**
+ * 仅从历史记录面板选中时启用 diff 编辑器（点击聊天气泡卡片不走 diff）
+ */
+const schemaEditorDiffFromHistory = ref(false);
+
+/**
+ * diff 左侧：上一版 schema JSON 文本
+ */
+const schemaEditorDiffOriginal = computed(() => {
+  const entry = currentHistoryEntry.value;
+  if (!entry) {
+    return '{}';
+  }
+  return resolveSchemaVersionDiffOriginal(entry, flatSchemaVersionHistoryEntries.value);
 });
 
-const editorOptions = computed(() => ({
-  fontSize: 14,
-  minimap: { enabled: false },
-  automaticLayout: true,
-  folding: true,
-  foldingHighlight: true,
-  foldingStrategy: 'indentation',
-  formatOnPaste: true,
-  readOnly: isSchemaEditorReadonly.value,
-}));
+/**
+ * diff 右侧：当前选中版 schema JSON 文本
+ */
+const schemaEditorDiffModified = computed(() => {
+  const entry = currentHistoryEntry.value;
+  if (!entry) {
+    return schemaEditorText.value;
+  }
+  return resolveSchemaVersionDiffModified(entry);
+});
+
+/**
+ * 是否以 Monaco diff 展示 schema 变更（有实际差异时）
+ */
+const schemaEditorShowDiffView = computed(() => {
+  if (!schemaEditorDiffFromHistory.value || !currentHistoryEntry.value) {
+    return false;
+  }
+  return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
+});
+
+const toggleSchemaHistoryPanel = () => {
+  schemaHistoryVisible.value = !schemaHistoryVisible.value;
+};
+
+const closeSchemaHistoryPanel = () => {
+  schemaHistoryVisible.value = false;
+};
+
+/**
+ * 用户是否正在预览非最新的历史版本
+ */
+const isViewingHistoryVersion = ref(false);
+const showReturnLatestButton = computed(
+  () =>
+    isViewingHistoryVersion.value
+    && Boolean(currentCardId.value && !isLatestSchemaVersionCard(currentCardId.value)),
+);
+
+/**
+ * 未应用当前预览版本时显示「应用此版本」
+ */
+const showApplyVersionButton = computed(
+  () => showReturnLatestButton.value && !isHistoryVersionApplied.value,
+);
+
+/**
+ * 当前预览的历史版本是否已应用为生效 schema
+ */
+const isHistoryVersionApplied = ref(true);
+
+/**
+ * 预览历史版本但未应用时，编辑器修改仅更新 preview 不回写 currentSchema
+ */
+const isViewingHistoryWithoutApply = computed(
+  () => showReturnLatestButton.value && !isHistoryVersionApplied.value,
+);
+const schemaEditorText = ref('{}');
+const schemaEditorBaseline = ref('{}');
+
+/**
+ * JSON 编辑器是否处于可编辑态（桌面内联 / 移动端 JSON 层）
+ */
+const isSchemaJsonEditorActive = computed(
+  () =>
+    (schemaEditorVisible.value && !isMobile.value)
+    || (isMobile.value && mobileSchemaJsonEditorOpen.value),
+);
+
+/**
+ * 编辑器文本相对 baseline 是否有未保存修改
+ * @returns 是否存在未保存的编辑
+ */
+const hasUnsavedSchemaEditorChanges = () =>
+  schemaEditorText.value !== schemaEditorBaseline.value;
+const schemaEditorDirty = computed(
+  () => isSchemaJsonEditorActive.value && hasUnsavedSchemaEditorChanges(),
+);
+const schemaEditorSaveLoading = ref(false);
+
+/**
+ * 将编辑器文本与 baseline 同步为当前 preview schema
+ */
+const syncSchemaEditorBaseline = () => {
+  if (currentPreviewSchema.value) {
+    const text = JSON.stringify(currentPreviewSchema.value, null, 2);
+    schemaEditorText.value = text;
+    schemaEditorBaseline.value = text;
+  } else {
+    schemaEditorText.value = '{}';
+    schemaEditorBaseline.value = '{}';
+  }
+};
+
+/**
+ * 编辑器输入变更时同步 preview（及已应用版本的 currentSchema）
+ * @param value JSON 编辑器当前文本
+ */
+const applySchemaEditorTextToPreview = (value: string) => {
+  if (schemaEditorDiffFromHistory.value) {
+    return;
+  }
+  schemaEditorText.value = value;
+  try {
+    const schema = JSON.parse(value || '{}');
+    setCurrentPreviewSchema(schema);
+    // 历史版本未应用时，仅更新预览，保存或「应用此版本」后再回写生效 schema
+    if (!isViewingHistoryWithoutApply.value) {
+      setCurrentSchema(schema);
+    }
+  } catch (error) {
+    console.error('schemaEditor parse error ===>', error);
+  }
+};
+
+const editorOptions = computed(() => {
+  const readOnly = schemaEditorDiffFromHistory.value;
+  return {
+    fontSize: 14,
+    minimap: { enabled: false },
+    automaticLayout: true,
+    folding: true,
+    foldingHighlight: true,
+    foldingStrategy: 'indentation',
+    formatOnPaste: !readOnly,
+    readOnly,
+    domReadOnly: readOnly,
+  };
+});
 
 const toggleSchemaEditor = () => {
   schemaEditorVisible.value = !schemaEditorVisible.value;
@@ -118,6 +278,7 @@ const toggleSchemaEditor = () => {
 const closeSchemaEditorView = () => {
   schemaEditorVisible.value = false;
   mobileSchemaJsonEditorOpen.value = false;
+  schemaEditorDiffFromHistory.value = false;
   mobileSheetDragging.value = false;
   mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
 };
@@ -131,6 +292,17 @@ const onMobileSheetMaskClick = () => {
   if (mobileSchemaJsonEditorOpen.value) {
     mobileSchemaJsonEditorOpen.value = false;
   }
+};
+
+/**
+ * 移动端抽屉内打开 JSON 编辑器
+ * @param open 是否打开 JSON 层
+ */
+const handleMobileJsonEditorOpen = (open: boolean) => {
+  if (open) {
+    syncSchemaEditorBaseline();
+  }
+  mobileSchemaJsonEditorOpen.value = open;
 };
 
 const mobileSheetPanelStyle = computed(() => ({
@@ -182,14 +354,54 @@ const onMobileSheetGrabTouchStart = (event: TouchEvent) => {
   window.addEventListener('touchcancel', handleMobileSheetDragEnd);
 };
 
-const toggleSchemaVersion = (schema: Record<string, unknown>, cardId: string) => {
+/**
+ * 历史面板选中条目：切换预览并打开 diff / 只读 JSON 编辑器
+ * @param entry 选中的历史版本条目
+ */
+const handleHistoryEntrySelect = (entry: ISchemaVersionHistoryEntry) => {
+  if (entry.isPending) {
+    return;
+  }
+
+  const schema = rebuildSchemaFromCard(entry.cardMessage);
+  if (!schema) {
+    return;
+  }
+
+  schemaEditorDiffFromHistory.value = true;
+  toggleSchemaVersion(schema, entry.cardId, { diffFromHistory: true });
+  closeSchemaHistoryPanel();
+  syncSchemaEditorBaseline();
+  if (!isMobile.value) {
+    schemaEditorVisible.value = true;
+  } else {
+    mobileSchemaJsonEditorOpen.value = true;
+  }
+};
+
+/**
+ * 切换预览的 schema 版本（聊天气泡或历史面板触发）
+ * @param schema 切换后的可渲染 schema
+ * @param cardId 版本卡片 id 或手动编辑 editId
+ * @param options.diffFromHistory true 表示来自历史面板，启用 diff / 只读态
+ */
+const toggleSchemaVersion = (
+  schema: Record<string, unknown>,
+  cardId: string,
+  options: { diffFromHistory?: boolean } = {},
+) => {
   rendererPanelVisible.value = true;
   currentCardId.value = cardId;
-  isHistoryVersionApplied.value = false;
-  const isLatestVersion = cardId === latestSchemaCardId.value;
+  schemaEditorDiffFromHistory.value = options.diffFromHistory ?? false;
+  const isLatestVersion = isLatestSchemaVersionCard(cardId);
+  isViewingHistoryVersion.value = !isLatestVersion;
+  isHistoryVersionApplied.value = isLatestVersion;
   setCurrentPreviewSchema(schema);
   if (isLatestVersion) {
     setCurrentSchema(schema);
+  }
+  if (schemaEditorVisible.value || isMobile.value) {
+    syncSchemaEditorBaseline();
   }
   // 移动端：先打开底部抽屉仅展示渲染预览；JSON 编辑器由抽屉内「查看 Schema」再打开
   if (isMobile.value) {
@@ -199,11 +411,74 @@ const toggleSchemaVersion = (schema: Record<string, unknown>, cardId: string) =>
   }
 };
 
+/**
+ * 将当前预览的历史版本应用为生效 schema，并退出 diff / 只读态
+ */
 const applyCurrentVersion = () => {
+  if (!showApplyVersionButton.value) {
+    return;
+  }
+
+  const schema = currentPreviewSchema.value;
+  if (!schema || !isRenderableSchema(schema)) {
+    return;
+  }
+
   isHistoryVersionApplied.value = true;
-  setCurrentSchema(currentPreviewSchema.value);
+  schemaEditorDiffFromHistory.value = false;
+  setCurrentSchema(schema);
+  syncSchemaEditorBaseline();
 };
 
+/**
+ * 保存 JSON 编辑器修改，生成 schema-manual 版本卡片
+ */
+const handleSaveSchemaEditor = async () => {
+  if (!schemaEditorDirty.value || schemaEditorSaveLoading.value) {
+    return;
+  }
+  let schema: Record<string, unknown>;
+  try {
+    const parsed = JSON.parse(schemaEditorText.value || '{}');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return;
+    }
+    schema = parsed as Record<string, unknown>;
+  } catch {
+    return;
+  }
+  if (!isRenderableSchema(schema)) {
+    return;
+  }
+
+  schemaEditorSaveLoading.value = true;
+  try {
+    let prevSchema: Record<string, unknown> | undefined;
+    try {
+      const parsedPrev = JSON.parse(schemaEditorBaseline.value || '{}');
+      if (parsedPrev && typeof parsedPrev === 'object' && !Array.isArray(parsedPrev)) {
+        prevSchema = parsedPrev as Record<string, unknown>;
+      }
+    } catch {
+      prevSchema = undefined;
+    }
+
+    const saved = appendManualSchemaVersion(schema, { prevSchema });
+    if (saved) {
+      isViewingHistoryVersion.value = false;
+      isHistoryVersionApplied.value = true;
+      syncSchemaEditorBaseline();
+      // 桌面端编辑时聊天区被隐藏，保存后关闭编辑器以便看到新卡片
+      closeSchemaEditorView();
+    }
+  } finally {
+    schemaEditorSaveLoading.value = false;
+  }
+};
+
+/**
+ * 恢复预览与生效 schema 为会话最新版本
+ */
 const resetToLatestVersion = () => {
   const conversationState = templateConversationState.value;
   if (!conversationState) {
@@ -213,11 +488,40 @@ const resetToLatestVersion = () => {
     (item: Conversation) => item.id === conversationState.currentId,
   );
   applySchemaFromMessages(currentConversation?.messages, { clearIfMissing: false });
+  isViewingHistoryVersion.value = false;
   isHistoryVersionApplied.value = true;
+  // 回到最新版本后关闭 diff 模式
+  schemaEditorDiffFromHistory.value = false;
+  syncSchemaEditorBaseline();
   if (isMobile.value) {
     mobileSchemaJsonEditorOpen.value = false;
   }
 };
+
+watch(schemaEditorVisible, (visible) => {
+  if (visible && !isMobile.value && !hasUnsavedSchemaEditorChanges()) {
+    syncSchemaEditorBaseline();
+  }
+});
+
+watch(mobileSchemaJsonEditorOpen, (open) => {
+  if (open && !hasUnsavedSchemaEditorChanges()) {
+    syncSchemaEditorBaseline();
+  }
+});
+
+watch(
+  currentPreviewSchema,
+  () => {
+    if (schemaEditorShowDiffView.value || hasUnsavedSchemaEditorChanges()) {
+      return;
+    }
+    if (isSchemaJsonEditorActive.value) {
+      syncSchemaEditorBaseline();
+    }
+  },
+  { deep: true },
+);
 
 // 按 Esc：移动端先关 JSON 第二层，再关整个抽屉
 const handleKeydown = (event: KeyboardEvent) => {
@@ -238,9 +542,21 @@ const handleKeydown = (event: KeyboardEvent) => {
   }
 };
 
+/**
+ * 聊天气泡「重新生成」后清除历史预览态
+ */
+const onSchemaRefresh = () => {
+  isViewingHistoryVersion.value = false;
+  isHistoryVersionApplied.value = true;
+  // 刷新重新生成后退出历史 diff 态
+  schemaEditorDiffFromHistory.value = false;
+};
+
 watch(currentConversationId, () => {
   schemaEditorVisible.value = false;
   mobileSchemaJsonEditorOpen.value = false;
+  schemaHistoryVisible.value = false;
+  isViewingHistoryVersion.value = false;
   isHistoryVersionApplied.value = true;
   rendererPanelVisible.value = true;
   resetToLatestVersion();
@@ -271,21 +587,56 @@ onUnmounted(() => {
     <div class="genui-schema-template-item chat-container">
       <!-- 桌面：打开内联编辑器时隐藏聊天；移动端：底部抽屉叠在聊天上，聊天保持挂载以便背后仍可见 -->
       <GenuiConfigProvider v-show="!schemaEditorVisible || isMobile" :theme="theme" style="width: 100%; height: 100%">
-        <genui-template-chat class="genui-template-chat" @schema-version-toggle="toggleSchemaVersion" />
+        <genui-template-chat
+          class="genui-template-chat"
+          @schema-version-toggle="toggleSchemaVersion"
+          @schema-refresh="onSchemaRefresh"
+        />
       </GenuiConfigProvider>
       <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
         <div class="schema-version-container__header">
-          <span class="schema-version-container__title">SchemaJSON</span>
-          <tiny-button
-            type="text"
-            class="genui-schema-toolbar-close-btn"
-            :icon="TinyCloseIcon"
-            aria-label="关闭"
-            @click="closeSchemaEditorView"
-          />
+          <span class="schema-version-container__title">
+            {{ schemaEditorShowDiffView ? 'Schema 变更对比' : 'SchemaJSON' }}
+          </span>
+          <div class="schema-version-container__header-actions">
+            <tiny-button
+              v-if="schemaEditorDirty && !schemaEditorDiffFromHistory"
+              type="primary"
+              size="small"
+              round
+              :loading="schemaEditorSaveLoading"
+              @click="handleSaveSchemaEditor"
+            >
+              保存
+            </tiny-button>
+            <tiny-button
+              type="text"
+              class="genui-schema-toolbar-close-btn"
+              :icon="TinyCloseIcon"
+              aria-label="关闭"
+              @click="closeSchemaEditorView"
+            />
+          </div>
         </div>
         <div class="schema-version-container__editor">
-          <code-editor v-model:value="schemaEditor" language="json" :theme="monacoTheme" :options="editorOptions" />
+          <!-- diff 需 DiffEditor；可编辑/只读共用 CodeEditor，通过 options.readOnly 切换 -->
+          <diff-editor
+            v-if="schemaEditorShowDiffView"
+            :key="currentCardId"
+            :original="schemaEditorDiffOriginal"
+            :value="schemaEditorDiffModified"
+            language="json"
+            :theme="monacoTheme"
+            :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
+          />
+          <code-editor
+            v-else
+            :value="schemaEditorText"
+            language="json"
+            :theme="monacoTheme"
+            :options="editorOptions"
+            @update:value="applySchemaEditorTextToPreview"
+          />
         </div>
       </div>
     </div>
@@ -295,20 +646,28 @@ onUnmounted(() => {
       :json-editor-open="mobileSchemaJsonEditorOpen"
       :panel-style="mobileSheetPanelStyle"
       :show-return-latest-button="showReturnLatestButton"
+      :show-apply-version-button="showApplyVersionButton"
       :current-preview-schema="currentPreviewSchema"
       :current-preview-schema-complete="currentPreviewSchemaComplete"
-      :schema-editor="schemaEditor"
+      :schema-editor="schemaEditorText"
+      :schema-editor-diff-mode="schemaEditorShowDiffView"
+      :schema-editor-mount-key="currentCardId"
+      :schema-editor-diff-original="schemaEditorDiffOriginal"
+      :schema-editor-diff-modified="schemaEditorDiffModified"
       :editor-options="editorOptions"
       :playground-theme="theme"
       :view-schema-icon="viewSchemaIcon"
       :close-icon="TinyCloseIcon"
-      @update:json-editor-open="mobileSchemaJsonEditorOpen = $event"
-      @update:schema-editor="schemaEditor = $event"
+      @update:json-editor-open="handleMobileJsonEditorOpen"
+      @update:schema-editor="applySchemaEditorTextToPreview"
       @mask-click="onMobileSheetMaskClick"
       @grab-touch-start="onMobileSheetGrabTouchStart"
       @close="closeSchemaEditorView"
+      :schema-editor-dirty="schemaEditorDirty"
+      :schema-editor-save-loading="schemaEditorSaveLoading"
       @apply-current-version="applyCurrentVersion"
       @reset-to-latest-version="resetToLatestVersion"
+      @save-schema-editor="handleSaveSchemaEditor"
     />
     <template v-else>
       <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && rendererPanelVisible">
@@ -317,13 +676,24 @@ onUnmounted(() => {
           <div class="top-button-group">
             <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
               <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
-              查看 JSON
+              {{ schemaEditorShowDiffView ? '查看变更' : '查看 JSON' }}
             </button>
             <div class="top-button-group-right">
-              <tiny-button v-if="showReturnLatestButton" type="primary" round @click="resetToLatestVersion">返回最新版本</tiny-button>
-              <tiny-button v-if="showReturnLatestButton" round @click="applyCurrentVersion">
+              <tiny-button v-if="showReturnLatestButton" type="primary" round @click="resetToLatestVersion">
+                返回最新版本
+              </tiny-button>
+              <tiny-button v-if="showApplyVersionButton" round @click="applyCurrentVersion">
                 应用此版本
               </tiny-button>
+              <tiny-button
+                type="text"
+                class="genui-schema-toolbar-close-btn"
+                :class="{ 'is-active': schemaHistoryVisible }"
+                :icon="TinyIconTime"
+                aria-label="历史记录"
+                title="历史记录"
+                @click="toggleSchemaHistoryPanel"
+              />
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
@@ -333,13 +703,22 @@ onUnmounted(() => {
               />
             </div>
           </div>
-            <schema-renderer
-              :key="rendererSchemaKey"
-              class="schema-renderer"
-              :content="rendererSchema"
-              :generating="false"
-              :is-json-complete="true"
-            />
+            <div class="schema-renderer-body">
+              <schema-renderer
+                :key="rendererSchemaKey"
+                class="schema-renderer"
+                :content="rendererSchema"
+                :generating="false"
+                :is-json-complete="true"
+              />
+              <schema-version-history-panel
+                :visible="schemaHistoryVisible"
+                :groups="schemaVersionHistoryGroups"
+                :theme="theme"
+                @close="closeSchemaHistoryPanel"
+                @select="handleHistoryEntrySelect"
+              />
+            </div>
           </div>
         </GenuiConfigProvider>
       </div>
@@ -437,11 +816,26 @@ onUnmounted(() => {
         }
       }
 
+      .schema-renderer-body {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
       .schema-renderer {
         flex: 1;
+        min-height: 0;
         padding: 20px;
         overflow: auto;
         box-sizing: border-box;
+      }
+
+      .genui-schema-toolbar-close-btn.is-active {
+        color: #1677ff;
+        background: rgba(22, 119, 255, 0.1);
       }
     }
   }
@@ -522,6 +916,13 @@ onUnmounted(() => {
     line-height: 22px;
   }
 
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
   &__editor {
     flex: 1;
     min-height: 0;
@@ -530,7 +931,8 @@ onUnmounted(() => {
     overflow: hidden;
   }
 
-  &__editor :deep(.monaco-code-editor) {
+  &__editor :deep(.monaco-code-editor),
+  &__editor :deep(.monaco-diff-editor) {
     flex: 1;
     min-height: 0;
   }

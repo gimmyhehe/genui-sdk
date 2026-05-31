@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
+import type { IMessageItem } from '../chat.types';
 
 /** 压缩摘要消息类型（不展示在气泡列表，仅用于持久化与裁剪上下文） */
 export const CONTEXT_COMPRESS_MESSAGE_TYPE = 'context-compress' as const;
@@ -14,6 +15,22 @@ const CONTEXT_SUMMARY_PREFIX = '以下是此前对话的压缩摘要，请在此
 
 export function isContextCompressMessage(message: ChatMessage): boolean {
   return (message as { type?: string }).type === CONTEXT_COMPRESS_MESSAGE_TYPE;
+}
+
+/**
+ * 用户在 SchemaJSON 编辑器中手动保存的版本消息（非对话输入）
+ * @param message 会话消息
+ * @returns 是否为手动保存的版本消息
+ */
+export function isManualSchemaSaveMessage(message: ChatMessage): boolean {
+  if (message.role !== 'user') {
+    return false;
+  }
+  const items = (message as { messages?: IMessageItem[] }).messages;
+  if (!Array.isArray(items) || items.length === 0) {
+    return false;
+  }
+  return items.every((item) => item.type === 'schema-manual');
 }
 
 /** 页面展示、索引计算：排除压缩摘要 */
@@ -38,7 +55,10 @@ function getMessagesSinceLatestCompress(messages: ChatMessage[]): ChatMessage[] 
   return [messages[compressIndex], ...tail];
 }
 
-function toBackendChatMessage(message: ChatMessage): ChatMessage {
+function toBackendChatMessage(message: ChatMessage): ChatMessage | null {
+  if (isManualSchemaSaveMessage(message)) {
+    return null;
+  }
   if (isContextCompressMessage(message)) {
     const summary = typeof message.content === 'string' ? message.content : '';
     return { role: 'user', content: `${CONTEXT_SUMMARY_PREFIX}${summary}` };
@@ -49,7 +69,9 @@ function toBackendChatMessage(message: ChatMessage): ChatMessage {
 
 /** 发给后端的对话消息：最新压缩摘要 + 之后正常对话，摘要转为普通 user 消息 */
 export function getBackendChatMessages(messages: ChatMessage[]): ChatMessage[] {
-  return getMessagesSinceLatestCompress(messages).map(toBackendChatMessage);
+  return getMessagesSinceLatestCompress(messages)
+    .map(toBackendChatMessage)
+    .filter((message): message is ChatMessage => message !== null);
 }
 
 /** 发起压缩时参与摘要的消息（保留原始结构供 serialize） */
@@ -75,7 +97,9 @@ export function createContextCompressMessage(content: string, messageId: string)
 
 export function getLastUserMessage(messages: ChatMessage[]): ChatMessage {
   for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].role === 'user') return messages[i];
+    if (messages[i].role === 'user' && !isManualSchemaSaveMessage(messages[i])) {
+      return messages[i];
+    }
   }
   return messages[messages.length - 1];
 }

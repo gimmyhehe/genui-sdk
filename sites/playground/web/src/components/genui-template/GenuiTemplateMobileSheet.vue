@@ -1,22 +1,33 @@
 <script setup lang="ts">
-import { CodeEditor } from 'monaco-editor-vue3';
+import { CodeEditor, DiffEditor } from 'monaco-editor-vue3';
 import { GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
 import type { CSSProperties } from 'vue';
-import { useMonacoPlaygroundTheme, type PlaygroundColorTheme } from './use-monaco-playground-theme';
+import {
+  SCHEMA_JSON_DIFF_EDITOR_OPTIONS,
+  useMonacoPlaygroundTheme,
+  type PlaygroundColorTheme,
+} from './use-monaco-playground-theme';
 
 const props = defineProps<{
   visible: boolean;
   jsonEditorOpen: boolean;
   panelStyle: CSSProperties;
   showReturnLatestButton: boolean;
+  showApplyVersionButton?: boolean;
   currentPreviewSchema: Record<string, unknown> | null;
   currentPreviewSchemaComplete?: boolean | undefined;
   schemaEditor: string;
+  schemaEditorDiffMode?: boolean;
+  schemaEditorMountKey?: string;
+  schemaEditorDiffOriginal?: string;
+  schemaEditorDiffModified?: string;
   editorOptions: Record<string, unknown>;
   playgroundTheme: PlaygroundColorTheme;
   viewSchemaIcon: string;
   closeIcon: unknown;
+  schemaEditorDirty?: boolean;
+  schemaEditorSaveLoading?: boolean;
 }>();
 
 const monacoTheme = useMonacoPlaygroundTheme(() => props.playgroundTheme);
@@ -29,6 +40,7 @@ const emit = defineEmits<{
   (event: 'close'): void;
   (event: 'apply-current-version'): void;
   (event: 'reset-to-latest-version'): void;
+  (event: 'save-schema-editor'): void;
 }>();
 
 const handleJsonEditorChange = (value: string) => {
@@ -44,7 +56,7 @@ const handleJsonEditorChange = (value: string) => {
         class="schema-mobile-sheet"
         role="dialog"
         aria-modal="true"
-        :aria-label="jsonEditorOpen ? 'Schema JSON 编辑器' : 'Schema JSON 预览'"
+        :aria-label="jsonEditorOpen ? (schemaEditorDiffMode ? 'Schema 变更对比' : 'Schema JSON 编辑器') : 'Schema JSON 预览'"
       >
         <div class="schema-mobile-sheet__mask" @click="emit('mask-click')" />
         <div class="schema-mobile-sheet__panel" :style="props.panelStyle">
@@ -58,7 +70,7 @@ const handleJsonEditorChange = (value: string) => {
                 @click="emit('update:jsonEditorOpen', true)"
               >
                 <img class="schema-mobile-sheet__entry-icon" :src="viewSchemaIcon" alt="" />
-                查看 JSON
+                {{ schemaEditorDiffMode ? '查看变更' : '查看 JSON' }}
               </button>
               <button
                 v-else
@@ -70,6 +82,16 @@ const handleJsonEditorChange = (value: string) => {
               </button>
             </div>
             <div class="schema-mobile-sheet__header-end">
+              <tiny-button
+                v-if="jsonEditorOpen && schemaEditorDirty && !schemaEditorDiffMode && !editorOptions.readOnly"
+                type="primary"
+                size="small"
+                round
+                :loading="schemaEditorSaveLoading"
+                @click="emit('save-schema-editor')"
+              >
+                保存
+              </tiny-button>
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
@@ -96,7 +118,17 @@ const handleJsonEditorChange = (value: string) => {
             </div>
             <Transition name="schema-mobile-json">
               <div v-show="jsonEditorOpen" class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer">
+                <diff-editor
+                  v-if="schemaEditorDiffMode"
+                  :key="schemaEditorMountKey || `${schemaEditorDiffOriginal?.length}-${schemaEditorDiffModified?.length}`"
+                  :original="schemaEditorDiffOriginal || '{}'"
+                  :value="schemaEditorDiffModified || schemaEditor"
+                  language="json"
+                  :theme="monacoTheme"
+                  :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
+                />
                 <code-editor
+                  v-else
                   :value="schemaEditor"
                   language="json"
                   :theme="monacoTheme"
@@ -107,7 +139,12 @@ const handleJsonEditorChange = (value: string) => {
             </Transition>
           </div>
           <div v-if="showReturnLatestButton" class="schema-mobile-sheet__footer">
-            <tiny-button round class="schema-mobile-sheet__latest-btn" @click="emit('apply-current-version')">
+            <tiny-button
+              v-if="showApplyVersionButton"
+              round
+              class="schema-mobile-sheet__latest-btn"
+              @click="emit('apply-current-version')"
+            >
               应用此版本
             </tiny-button>
             <tiny-button
@@ -350,7 +387,8 @@ const handleJsonEditorChange = (value: string) => {
     box-sizing: border-box;
   }
 
-  &__editor--layer :deep(.monaco-code-editor) {
+  &__editor--layer :deep(.monaco-code-editor),
+  &__editor--layer :deep(.monaco-diff-editor) {
     flex: 1;
     min-height: 0;
   }

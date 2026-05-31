@@ -14,16 +14,28 @@ function toStandardPatchOp(item: IFormattedJsonPatchOperation): JsonPatchOp {
 }
 
 /**
+ * schema / patch 均为纯 JSON，用 JSON 深拷贝避免 structuredClone 无法克隆 Vue Proxy 等对象
+ * @param value 待拷贝的值
+ * @returns 深拷贝后的纯 JSON 对象
+ */
+export function clonePlainJson<T>(value: T): T {
+  if (value === undefined || value === null) {
+    return {} as T;
+  }
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
+/**
  * 格式化 jsonPatch：将带 id 的领域扩展操作转为 RFC 6902 绝对路径
  */
 export const formatJsonPatch = (
   currentSchema: any,
   value: any[],
 ): IFormattedJsonPatchOperation[] => {
-  const templeSchema = structuredClone(currentSchema ?? {});
+  const templeSchema = clonePlainJson(currentSchema ?? {});
 
   return value.map((originItem: any) => {
-    const item = structuredClone(originItem) as IFormattedJsonPatchOperation;
+    const item = clonePlainJson(originItem) as IFormattedJsonPatchOperation;
     const componentPath = findComponentPath(templeSchema, item.id);
     item.idToPath = componentPath;
 
@@ -82,7 +94,7 @@ export function applyJsonPatchOperations(
     return null;
   }
 
-  const target = structuredClone(baseline) as Record<string, unknown>;
+  const target = clonePlainJson(baseline) as Record<string, unknown>;
   jsonPatchFormatter.patch(target, standardOperations);
   return target;
 }

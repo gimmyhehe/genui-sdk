@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
-import type { IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
 import SchemaVersionCard from './SchemaVersionCard.vue';
 import { useIsMobile } from '../../use-mobile';
+import {
+  findSchemaCardByCardId,
+  findManualCardInMessages,
+  rebuildSchemaFromCard,
+  isRenderableSchema,
+} from './template-chat-utils';
 
 const props = defineProps<{
   itemProps: any;
-  type: 'json-patch' | 'schema-card';
+  type: 'json-patch' | 'schema-card' | 'schema-manual';
   prevSchema: string;
   errorMessagesMap: Map<string, string>;
   messages: any[];
@@ -28,33 +33,24 @@ const genuiRendererProps = computed(() => ({
   key: props.itemProps?.cardId,
 }));
 
+/**
+ * 点击版本卡片：还原 schema 并通知父组件切换预览
+ * @param cardId 版本卡片 id 或手动编辑 editId
+ */
 const handleSchemaVersionCardClick = (cardId: string) => {
-  let targetStr = '';
-
-  props.messages.some((msg) => {
-    const card = (msg.messages as IMessageItem[])?.find(
-      (message): message is IJsonPatchMessageItem | ISchemaCardMessageItem =>
-        (message.type === 'schema-card' || message.type === 'json-patch') && message.cardId === cardId,
-    );
-
-    if (card) {
-      targetStr = card.schema;
-      return true;
-    }
-
-    return false;
-  });
-
-  if (!targetStr) {
+  const card =
+    findSchemaCardByCardId(props.messages, cardId)
+    ?? findManualCardInMessages(props.messages, cardId);
+  if (!card) {
     return;
   }
 
-  try {
-    const targetSchema = JSON.parse(targetStr);
-    emit('schema-version-toggle', targetSchema, cardId);
-  } catch (error) {
-    console.error('Failed to parse schema for version toggle:', error);
+  const schema = rebuildSchemaFromCard(card);
+  if (!schema || !isRenderableSchema(schema)) {
+    return;
   }
+
+  emit('schema-version-toggle', schema, cardId);
 };
 </script>
 

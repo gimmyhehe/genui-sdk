@@ -2,8 +2,18 @@ import { ref, shallowRef, computed } from 'vue';
 import { useConversation, IndexedDBStrategy } from '@opentiny/genui-sdk-vue';
 import { AIClient, type ChatMessage } from '@opentiny/tiny-robot-kit';
 import { CustomModelProvider } from './template-provider';
-import type { LLMConfig, IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
-import { findLatestSchemaInConversation, resolveRenderableSchemaFromMessages } from './template-chat-utils';
+import type { LLMConfig, ISchemaManualMessageItem } from './chat.types';
+import { formatDate, generateId } from '../../utils';
+import {
+  findLatestSchemaInConversation,
+  resolveRenderableSchemaFromMessages,
+  findSchemaCardByCardId,
+  findManualCardInMessages,
+  getMergeableManualSaveMessage,
+  getManualEdits,
+  syncManualCardLatestFields,
+  manualEditToCardSnapshot,
+} from './template-chat-utils';
 
 const conversation = shallowRef<ReturnType<typeof useConversation> | null>(null);
 let templateProvider: CustomModelProvider | null = null;
@@ -218,39 +228,23 @@ export default function useTemplate(options?: UseTemplateOptions) {
    * @returns 卡片消息
    */
   const getMessageByCardId = (cardId: string) => {
-    if (!conversation.value) {
+    if (!conversation.value || !cardId) {
       return;
     }
 
-    // 从 messages 中找到对应的卡片。
-    let targetMessage = null;
+    const messages = conversation.value.getCurrentConversation()?.messages;
+    const aiCard = findSchemaCardByCardId(messages, cardId);
+    if (aiCard) {
+      return aiCard;
+    }
 
-    conversation.value.getCurrentConversation()?.messages.some((msg: ChatMessage) => {
-      const messages = msg.messages as IMessageItem[] | undefined;
-
-      if (!messages || !Array.isArray(messages)) {
-        return false;
-      }
-
-      const card = messages.find(
-        (message): message is IJsonPatchMessageItem | ISchemaCardMessageItem =>
-          (message.type === 'schema-card' || message.type === 'json-patch') && message.cardId === cardId,
-      );
-
-      if (card) {
-        targetMessage = card;
-
-        return true;
-      }
-
-      return false;
-    });
-
-    if (!targetMessage) {
+    const manualCard = findManualCardInMessages(messages, cardId);
+    if (!manualCard) {
       return;
     }
 
-    return targetMessage;
+    const matchedEdit = getManualEdits(manualCard).find((edit) => edit.editId === cardId);
+    return matchedEdit ? manualEditToCardSnapshot(manualCard, matchedEdit) : manualCard;
   };
 
   const setCurrentCardId = (cardId: string) => {
@@ -287,12 +281,93 @@ export default function useTemplate(options?: UseTemplateOptions) {
     conversation.value?.saveConversations();
   };
 
+  const MANUAL_SCHEMA_SAVE_INPUT = '手动编辑保存';
+
+  /**
+   * 将编辑器中的 schema 保存为版本卡片（schema-manual 类型消息）
+   * @param schema 保存后的 schema 对象
+   * @param options.prevSchema 保存前的基准 schema，缺省时取 currentSchema
+   * @returns 新建或合并后的卡片 cardId，失败时返回 null
+   */
+  const appendManualSchemaVersion = (
+    schema: Record<string, unknown>,
+    options: { prevSchema?: Record<string, unknown> } = {},
+  ) => {
+    if (!conversation.value) {
+      return null;
+    }
+
+    const prevSchema = options.prevSchema ?? currentSchema.value ?? {};
+    const prevSchemaStr = JSON.stringify(prevSchema);
+    const schemaStr = JSON.stringify(schema);
+    const generatedTime = formatDate(new Date());
+    const editRecord = {
+      editId: generateId(),
+      schema: schemaStr,
+      prevSchema: prevSchemaStr,
+      generatedTime,
+      input: MANUAL_SCHEMA_SAVE_INPUT,
+    };
+
+    const messageMgr = conversation.value.messageManager.value;
+    const currentConversation = conversation.value.getCurrentConversation();
+    if (!messageMgr || !currentConversation) {
+      return null;
+    }
+
+    const msgs = messageMgr.messages.value;
+    const mergeTarget = getMergeableManualSaveMessage(msgs);
+
+    let cardId: string;
+
+    if (mergeTarget) {
+      const { message: lastMessage, card } = mergeTarget;
+      card.edits = [...getManualEdits(card), editRecord];
+      syncManualCardLatestFields(card);
+      cardId = card.cardId;
+      lastMessage.messageId = cardId;
+    } else {
+      cardId = generateId();
+      const cardMessage: ISchemaManualMessageItem = {
+        type: 'schema-manual',
+        content: schemaStr,
+        input: MANUAL_SCHEMA_SAVE_INPUT,
+        cardId,
+        generatedTime,
+        schema: schemaStr,
+        prevSchema: prevSchemaStr,
+        edits: [editRecord],
+      };
+
+      const manualSaveMessage = {
+        role: 'user',
+        content: '',
+        messageId: cardId,
+        messages: [cardMessage],
+      } as ChatMessage;
+
+      msgs.push(manualSaveMessage);
+    }
+
+    messageMgr.messages.value = [...msgs];
+    currentConversation.messages = [...msgs];
+    currentConversation.updatedAt = Date.now();
+
+    setCurrentSchema(schema);
+    setCurrentPreviewSchema(schema);
+    setCurrentCardId(cardId);
+    conversation.value.saveConversations();
+
+    return cardId;
+  };
+
   return {
     isTemplateInit,
     templateConversationState,
     conversation: conversation.value,
     getTemplateChatConfig,
     saveConversations,
+    appendManualSchemaVersion,
     applySchemaFromMessages,
     currentSchema,
     currentPreviewSchema,

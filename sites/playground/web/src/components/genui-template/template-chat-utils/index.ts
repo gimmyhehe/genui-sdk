@@ -6,3 +6,6 @@ export * from './schema-id-generator';
 export * from './compress-context';
 export * from './context-message';
 export * from './conversation-schema';
+export * from './schema-version-history';
+export * from './manual-schema';
+export * from './schema-version-diff';

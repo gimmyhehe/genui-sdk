@@ -35,6 +35,28 @@ export interface IJsonPatchMessageItem {
   prevSchema: string;
 }
 
+/** 单次手动编辑记录（合并卡片内的子版本） */
+export interface ISchemaManualEditRecord {
+  editId: string;
+  schema: string;
+  prevSchema: string;
+  generatedTime: string;
+  input: string;
+}
+
+/** 用户在 SchemaJSON 编辑器中手动保存的版本（连续保存合并为一张卡片） */
+export interface ISchemaManualMessageItem {
+  type: 'schema-manual';
+  content: string;
+  input: string;
+  cardId: string;
+  generatedTime: string;
+  schema: string;
+  prevSchema: string;
+  /** 多次保存的操作记录；缺省时视为仅一次编辑（兼容旧数据） */
+  edits?: ISchemaManualEditRecord[];
+}
+
 export interface IMarkdownMessageItem {
   type: 'markdown';
   content: string;
@@ -42,7 +64,11 @@ export interface IMarkdownMessageItem {
   cardId: string;
 }
 
-export type IMessageItem = IMarkdownMessageItem | IJsonPatchMessageItem | ISchemaCardMessageItem;
+export type IMessageItem =
+  | IMarkdownMessageItem
+  | IJsonPatchMessageItem
+  | ISchemaCardMessageItem
+  | ISchemaManualMessageItem;
 
 export interface IChatMessage {
   role: 'assistant';

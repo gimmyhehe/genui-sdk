@@ -18,7 +18,13 @@ import { requiredCompleteFieldSelectors, scrollEnd, throttle, GENUI_CONFIG } fro
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
 import copy from 'clipboard-copy';
-import type { INotificationPayload, IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
+import type {
+  INotificationPayload,
+  IMessageItem,
+  IJsonPatchMessageItem,
+  ISchemaCardMessageItem,
+  ISchemaManualMessageItem,
+} from './chat.types';
 import {
   textToJson,
   validateJsonPatch,
@@ -26,9 +32,12 @@ import {
   applyJsonPatchOperations,
   generateIdForComponents,
   findLatestSchemaInConversation,
+  findSchemaCardByCardId,
+  findLatestPendingSchemaCard,
   getLastNonCompressMessage,
   isContextCompressMessage,
 } from './template-chat-utils';
+import { clonePlainJson } from './template-chat-utils/json-patch-format';
 import { formatDate, generateId } from '../../utils';
 import useTemplate from './useTemplate';
 import { useContextZip } from './use-context-zip';
@@ -44,7 +53,7 @@ const props = defineProps<{
   messages?: IMessage[];
 }>();
 
-const emit = defineEmits(['schema-version-toggle']);
+const emit = defineEmits(['schema-version-toggle', 'schema-refresh']);
 
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
@@ -245,7 +254,7 @@ const jsonPatchRenderer = async (props: any) => {
       return;
     }
 
-    const patchBaseline = lastPreviewSchema.value ?? currentSchema.value;
+    const patchBaseline = lastPreviewSchema.value ?? clonePlainJson(currentSchema.value);
     if (!patchBaseline) {
       return;
     }
@@ -256,6 +265,9 @@ const jsonPatchRenderer = async (props: any) => {
     }
 
     setCurrentPreviewSchema(generateIdForComponents(targetSchema), isComplete || lastOperationComplete);
+    if (isComplete || lastOperationComplete) {
+      setCurrentSchema(targetSchema);
+    }
   } catch (error) {
     errorMessagesMap.value.set(props.cardId, error.message);
     console.error('jsonPatch error ===>', error);
@@ -265,8 +277,12 @@ const jsonPatchRenderer = async (props: any) => {
 const getCardMessageByIndex = (index: number) => {
   return (
     (messages.value[index]?.messages as IMessageItem[] | undefined)?.find(
-      (message): message is IJsonPatchMessageItem | ISchemaCardMessageItem =>
-        message.type === 'schema-card' || message.type === 'json-patch',
+      (
+        message,
+      ): message is IJsonPatchMessageItem | ISchemaCardMessageItem | ISchemaManualMessageItem =>
+        message.type === 'schema-card'
+        || message.type === 'json-patch'
+        || message.type === 'schema-manual',
     ) || ({} as IJsonPatchMessageItem | ISchemaCardMessageItem)
   );
 };
@@ -288,7 +304,8 @@ const handleRefresh = ({ index }: { index: number }) => {
   }
   messages.value = messages.value.slice(0, index);
   resetContextZip();
-  setCurrentCardId(messages.value[messages.value.length - 1].messageId as string);
+  setCurrentCardId(generateId());
+  emit('schema-refresh');
   send();
 };
 
@@ -322,6 +339,17 @@ const messageRenderers = {
     return h(TemplateSchemaMessageRenderer, {
       itemProps: props,
       type: 'schema-card',
+      prevSchema: prevSchema.value,
+      errorMessagesMap: errorMessagesMap.value,
+      messages: messages.value,
+      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
+        emit('schema-version-toggle', schema, cardId),
+    });
+  },
+  'schema-manual': (props) => {
+    return h(TemplateSchemaMessageRenderer, {
+      itemProps: props,
+      type: 'schema-manual',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
       messages: messages.value,
@@ -443,18 +471,28 @@ const handleSendMessage = async () => {
   scrollToBottom();
 };
 
+/**
+ * 流式生成结束时，将 preview schema 写入对应 AI 卡片并补全 generatedTime
+ */
+const finalizeStreamingSchemaCard = () => {
+  const pendingCard =
+    findSchemaCardByCardId(messages.value, currentCardId.value)
+    ?? findLatestPendingSchemaCard(messages.value)
+    ?? findLatestSchemaInConversation(messages.value)?.cardMessage;
+
+  if (!pendingCard || pendingCard.type === 'schema-manual') {
+    return;
+  }
+
+  pendingCard.schema = JSON.stringify(currentPreviewSchema.value ?? currentSchema.value);
+  pendingCard.prevSchema = prevSchema.value || '';
+  pendingCard.generatedTime = formatDate(new Date());
+};
+
 const handleNotification = (event: INotificationPayload) => {
   if (event.type === 'done') {
     setCurrentSchema(currentPreviewSchema.value);
-    // 将 schema 缓存到卡片中（跳过末尾 context-compress，取最近一条含 schema 的卡片）
-    const lastMessage = findLatestSchemaInConversation(messages.value);
-    const lastMessageCard = lastMessage?.cardMessage;
-
-    if (lastMessageCard) {
-      lastMessageCard.schema = JSON.stringify(currentSchema.value);
-      lastMessageCard.prevSchema = prevSchema.value || '';
-      lastMessageCard.generatedTime = formatDate(new Date());
-    }
+    finalizeStreamingSchemaCard();
   }
 };
 
@@ -577,9 +615,18 @@ onUnmounted(() => {
   }
 }
 
+:deep(.tr-bubble.placement-end:has(.schema-version-card)) {
+  .tr-bubble__content {
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
 :deep(.tr-bubble[data-role='assistant'] .tr-bubble__content-items) {
   // 匹配：type非空 + 排除 schema-card/loading-text 这两个值
-  > [type]:not([type='']):not([type='schema-card']):not([type='loading-text']) {
+  > [type]:not([type='']):not([type='schema-card']):not([type='schema-manual']):not([type='loading-text']) {
     display: var(--thinking-display, initial);
   }
 }
