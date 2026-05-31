@@ -13,9 +13,11 @@ const menuOptions = {
   placement: 'top-start',
 };
 
-const currentLangLabel = computed(
-  () => langOptions.find((option) => option.value === locale.value)?.label ?? locale.value,
-);
+const currentLangLabel = computed(() => {
+  const zhOption = langOptions[0];
+  const enOption = langOptions[1];
+  return locale.value === zhOption.value ? enOption.label : zhOption.label;
+});
 
 const itemClick = (payload: { itemData?: { value?: string } }) => {
   const value = payload?.itemData?.value;
@@ -27,14 +29,7 @@ const itemClick = (payload: { itemData?: { value?: string } }) => {
 
 <template>
   <div class="language-switcher">
-    <tiny-dropdown
-      trigger="click"
-      :menu-options="menuOptions"
-      :title="currentLangLabel"
-      size="small"
-      :hide-on-click="true"
-      @item-click="itemClick"
-    />
+    <tiny-dropdown trigger="click" :menu-options="menuOptions" :title="currentLangLabel" @item-click="itemClick" />
   </div>
 </template>
 
