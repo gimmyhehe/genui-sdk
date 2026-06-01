@@ -96,7 +96,7 @@ export function applyJsonPatchOperations(
     return null;
   }
 
-  const target = clonePlainJson(baseline);
+  const target = clonePlainJson(baseline as Record<string, unknown>);
   if (!target) {
     return null;
   }

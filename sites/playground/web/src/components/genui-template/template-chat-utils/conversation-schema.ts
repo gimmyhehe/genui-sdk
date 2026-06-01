@@ -248,7 +248,7 @@ export function finalizePendingSchemaCard(
     (options.cardId ? findSchemaCardByCardId(messages, options.cardId) : null)
     ?? findLatestPendingSchemaCard(messages);
 
-  if (!pendingCard || pendingCard.type === 'schema-manual' || pendingCard.generatedTime?.trim()) {
+  if (!pendingCard || pendingCard.generatedTime?.trim()) {
     return false;
   }
 
