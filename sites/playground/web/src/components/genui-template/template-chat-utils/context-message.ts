@@ -95,11 +95,11 @@ export function createContextCompressMessage(content: string, messageId: string)
   };
 }
 
-export function getLastUserMessage(messages: ChatMessage[]): ChatMessage {
+export function getLastUserMessage(messages: ChatMessage[]): ChatMessage | undefined {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role === 'user' && !isManualSchemaSaveMessage(messages[i])) {
       return messages[i];
     }
   }
-  return messages[messages.length - 1];
+  return undefined;
 }

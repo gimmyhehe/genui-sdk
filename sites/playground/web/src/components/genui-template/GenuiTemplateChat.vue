@@ -261,15 +261,15 @@ const handleRefresh = ({ index }: { index: number }) => {
   const cardMessage = getCardMessageByIndex(index);
 
   prevSchema.value = cardMessage?.prevSchema;
-  let currentSchema = null;
+  let parsedSchema = null;
   try {
-    currentSchema = JSON.parse(prevSchema.value);
+    parsedSchema = JSON.parse(prevSchema.value);
   } catch (error) {
-    currentSchema = null;
+    parsedSchema = null;
   }
-  if (currentSchema) {
-    setCurrentSchema(currentSchema);
-    setCurrentPreviewSchema(currentSchema);
+  if (parsedSchema) {
+    setCurrentSchema(parsedSchema);
+    setCurrentPreviewSchema(parsedSchema);
   }
   messages.value = messages.value.slice(0, index);
   setCurrentCardId(generateId());

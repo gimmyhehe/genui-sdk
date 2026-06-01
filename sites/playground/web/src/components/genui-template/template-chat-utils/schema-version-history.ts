@@ -35,10 +35,14 @@ const pad2 = (n: number) => String(n).padStart(2, '0');
  * @returns 毫秒时间戳
  */
 export function parseGeneratedTimeMs(generatedTime: string): number {
-  if (!generatedTime?.trim()) {
+  const text = generatedTime?.trim();
+  if (!text) {
     return Date.now();
   }
-  const parsed = new Date(generatedTime.replace(/-/g, '/')).getTime();
+  const normalized = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(text)
+    ? text.replace(' ', 'T')
+    : text;
+  const parsed = new Date(normalized).getTime();
   return Number.isNaN(parsed) ? Date.now() : parsed;
 }
 

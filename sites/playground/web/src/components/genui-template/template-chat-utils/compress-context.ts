@@ -18,9 +18,11 @@ export function serializeMessagesForCompress(messages: ChatMessage[]): string {
       let text = '';
       if (typeof m.content === 'string') {
         text = m.content;
-      } else if (Array.isArray((m as unknown as { messages?: { content?: string }[] }).messages)) {
-        text = ((m as unknown as { messages?: { content?: string }[] }).messages || [])
-          .map((item) => item.content ?? '')
+      } else if (
+        Array.isArray((m as unknown as { messages?: { content?: string; input?: string }[] }).messages)
+      ) {
+        text = ((m as unknown as { messages?: { content?: string; input?: string }[] }).messages || [])
+          .map((item) => item.content ?? item.input ?? '')
           .filter(Boolean)
           .join('\n');
       }
@@ -54,6 +56,7 @@ export async function compressConversationHistory(options: {
   const decoder = new TextDecoder('utf-8');
   let buffer = '';
   let summary = '';
+  let terminalState: 'done' | 'error' | 'aborted' | null = null;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -66,7 +69,18 @@ export async function compressConversationHistory(options: {
       buffer = buffer.slice(lineEnd + 1);
       if (!line.startsWith('data:')) continue;
       const data = line.slice(line.indexOf(':') + 1).trim();
-      if (data === '[DONE]' || data === '[ERROR]' || data === '[ABORTED]') break;
+      if (data === '[DONE]') {
+        terminalState = 'done';
+        break;
+      }
+      if (data === '[ERROR]') {
+        terminalState = 'error';
+        break;
+      }
+      if (data === '[ABORTED]') {
+        terminalState = 'aborted';
+        break;
+      }
       try {
         const chunk = JSON.parse(data);
         const content = chunk.choices?.[0]?.delta?.content;
@@ -77,6 +91,16 @@ export async function compressConversationHistory(options: {
         // ignore malformed SSE lines
       }
     }
+    if (terminalState) {
+      break;
+    }
+  }
+
+  if (terminalState === 'error') {
+    throw new Error('压缩请求失败');
+  }
+  if (terminalState === 'aborted') {
+    throw new Error('压缩请求已中止');
   }
 
   const trimmed = summary.trim();

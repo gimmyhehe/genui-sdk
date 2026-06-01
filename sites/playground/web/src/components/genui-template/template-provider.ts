@@ -71,6 +71,10 @@ export class CustomModelProvider extends BaseModelProvider {
       messages: [] as IMessageItem[],
     });
     const lastUserMessage = getLastUserMessage(request.messages);
+    if (!lastUserMessage) {
+      handler.onError?.(new Error('没有可回复的用户消息'));
+      return;
+    }
     const { content: input, messageId } = lastUserMessage;
     onData(chatMessage);
 

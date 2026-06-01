@@ -18,9 +18,9 @@ function toStandardPatchOp(item: IFormattedJsonPatchOperation): JsonPatchOp {
  * @param value 待拷贝的值
  * @returns 深拷贝后的纯 JSON 对象
  */
-export function clonePlainJson<T>(value: T): T {
+export function clonePlainJson<T>(value: T | null | undefined): T | null {
   if (value === undefined || value === null) {
-    return {} as T;
+    return null;
   }
   return JSON.parse(JSON.stringify(value)) as T;
 }
@@ -32,7 +32,7 @@ export const formatJsonPatch = (
   currentSchema: any,
   value: any[],
 ): IFormattedJsonPatchOperation[] => {
-  const templeSchema = clonePlainJson(currentSchema ?? {});
+  const templeSchema = clonePlainJson(currentSchema ?? {}) ?? {};
 
   return value.map((originItem: any) => {
     const item = clonePlainJson(originItem) as IFormattedJsonPatchOperation;
@@ -61,11 +61,13 @@ export const formatJsonPatch = (
       if (id) {
         item.from = findComponentPath(templeSchema, id) ?? undefined;
       }
-      if (position && positionId) {
+      if (position && positionId && item.from) {
         const positionPath = findComponentPath(templeSchema, positionId);
-        const relativePath = getPositionRelativePath(position, positionId, positionPath!, item.from!);
-        item.relativePath = relativePath;
-        item.path = positionPath === '/' ? relativePath : mergePath(positionPath!, relativePath);
+        if (positionPath) {
+          const relativePath = getPositionRelativePath(position, positionId, positionPath, item.from);
+          item.relativePath = relativePath;
+          item.path = positionPath === '/' ? relativePath : mergePath(positionPath, relativePath);
+        }
       }
     }
 
@@ -94,7 +96,10 @@ export function applyJsonPatchOperations(
     return null;
   }
 
-  const target = clonePlainJson(baseline) as Record<string, unknown>;
+  const target = clonePlainJson(baseline);
+  if (!target) {
+    return null;
+  }
   jsonPatchFormatter.patch(target, standardOperations);
   return target;
 }

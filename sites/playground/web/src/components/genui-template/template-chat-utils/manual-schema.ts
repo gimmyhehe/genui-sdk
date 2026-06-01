@@ -95,8 +95,10 @@ export function getMergeableManualSaveMessage(
     return null;
   }
 
-  const card = (lastMessage as { messages?: ISchemaManualMessageItem[] }).messages?.[0];
-  if (card?.type === 'schema-manual') {
+  const card = (lastMessage as { messages?: ISchemaManualMessageItem[] }).messages?.find(
+    (item) => item.type === 'schema-manual',
+  );
+  if (card) {
     return { message: lastMessage, card };
   }
 

@@ -253,16 +253,13 @@ const revertUnsavedSchemaEditorChanges = () => {
   try {
     const schema = JSON.parse(schemaEditorBaseline.value || '{}');
     setCurrentPreviewSchema(schema);
-    if (!isViewingHistoryWithoutApply.value) {
-      setCurrentSchema(schema);
-    }
   } catch {
     syncSchemaEditorBaseline();
   }
 };
 
 /**
- * 编辑器输入变更时同步 preview（及已应用版本的 currentSchema）
+ * 编辑器输入变更时仅同步 preview；生效 schema 由保存或「应用此版本」提交
  * @param value JSON 编辑器当前文本
  */
 const applySchemaEditorTextToPreview = (value: string) => {
@@ -273,10 +270,6 @@ const applySchemaEditorTextToPreview = (value: string) => {
   try {
     const schema = JSON.parse(value || '{}');
     setCurrentPreviewSchema(schema);
-    // 历史版本未应用时，仅更新预览，保存或「应用此版本」后再回写生效 schema
-    if (!isViewingHistoryWithoutApply.value) {
-      setCurrentSchema(schema);
-    }
   } catch (error) {
     console.error('schemaEditor parse error ===>', error);
   }
@@ -527,7 +520,9 @@ const resetToLatestVersion = () => {
   const currentConversation = conversationState.conversations.find(
     (item: Conversation) => item.id === conversationState.currentId,
   );
-  applySchemaFromMessages(currentConversation?.messages, { clearIfMissing: false });
+  applySchemaFromMessages(currentConversation?.messages, {
+    clearIfMissing: !conversationState.loading,
+  });
   isViewingHistoryVersion.value = false;
   isHistoryVersionApplied.value = true;
   // 回到最新版本后关闭 diff 模式
