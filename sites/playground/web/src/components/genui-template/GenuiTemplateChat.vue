@@ -35,7 +35,7 @@ import {
   findLatestPendingSchemaCard,
 } from './template-chat-utils';
 import { clonePlainJson } from './template-chat-utils/json-patch-format';
-import { formatDate, generateId } from '../../utils';
+import { formatDate, generateId, stripSchemaFieldsWhileStreaming } from '../../utils';
 import useTemplate from './useTemplate';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
@@ -161,7 +161,7 @@ const schemaCardRenderer = async (props: any) => {
       if (!value) {
         return;
       }
-      json = value;
+      json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
     }
     deltaPatcher.patchWithDelta(target, json, isCompleted);
     // 给每个组件添加 id
