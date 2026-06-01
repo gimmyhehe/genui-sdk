@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { TinyButton } from '@opentiny/vue';
-import { iconClose, iconHelp } from '@opentiny/vue-icon';
+import { iconClose } from '@opentiny/vue-icon';
 import type { ISchemaVersionHistoryEntry } from './template-chat-utils/schema-version-history';
 
 const props = defineProps<{
@@ -16,9 +16,27 @@ const emit = defineEmits<{
 }>();
 
 const TinyCloseIcon = iconClose();
-const TinyHelpIcon = iconHelp();
 
 const isDark = computed(() => props.theme === 'dark');
+const collapsedGroups = ref<Record<string, boolean>>({});
+
+watch(
+  () => props.groups.map((group) => group.label),
+  (labels) => {
+    for (const label of labels) {
+      if (!(label in collapsedGroups.value)) {
+        collapsedGroups.value[label] = false;
+      }
+    }
+  },
+  { immediate: true },
+);
+
+const isGroupCollapsed = (label: string) => collapsedGroups.value[label] ?? false;
+
+const toggleGroup = (label: string) => {
+  collapsedGroups.value[label] = !isGroupCollapsed(label);
+};
 </script>
 
 <template>
@@ -31,12 +49,7 @@ const isDark = computed(() => props.theme === 'dark');
       aria-label="历史记录"
     >
       <header class="schema-version-history-panel__header">
-        <div class="schema-version-history-panel__title-wrap">
-          <h3 class="schema-version-history-panel__title">历史记录</h3>
-          <span class="schema-version-history-panel__help" title="按时间查看并切换模板版本">
-            <TinyHelpIcon />
-          </span>
-        </div>
+        <h3 class="schema-version-history-panel__title">历史记录</h3>
         <tiny-button
           type="text"
           class="schema-version-history-panel__close"
@@ -53,27 +66,49 @@ const isDark = computed(() => props.theme === 'dark');
             :key="group.label"
             class="schema-version-history-panel__section"
           >
-            <div class="schema-version-history-panel__section-title">{{ group.label }}</div>
             <button
-              v-for="entry in group.items"
-              :key="entry.cardId"
               type="button"
-              class="schema-version-history-panel__item"
-              :class="{ 'is-active': entry.isCurrent, 'is-pending': entry.isPending }"
-              @click="emit('select', entry)"
+              class="schema-version-history-panel__section-title"
+              :aria-expanded="!isGroupCollapsed(group.label)"
+              @click="toggleGroup(group.label)"
             >
-              <div class="schema-version-history-panel__item-main">
-                <div class="schema-version-history-panel__item-time">{{ entry.timeLabel }}</div>
-                <div class="schema-version-history-panel__item-desc">{{ entry.description }}</div>
-                <div class="schema-version-history-panel__item-author">
-                  <span
-                    class="schema-version-history-panel__author-dot"
-                    :class="entry.authorType === 'user' ? 'is-user' : 'is-ai'"
-                  />
-                  <span class="schema-version-history-panel__author-name">{{ entry.authorLabel }}</span>
-                </div>
-              </div>
+              <svg
+                class="schema-version-history-panel__section-chevron"
+                :class="{ 'is-collapsed': isGroupCollapsed(group.label) }"
+                width="10"
+                height="10"
+                viewBox="0 0 10 10"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2 3.5L5 6.5L8 3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              <span class="schema-version-history-panel__section-label">{{ group.label }}</span>
             </button>
+            <div
+              v-show="!isGroupCollapsed(group.label)"
+              class="schema-version-history-panel__section-items"
+            >
+              <button
+                v-for="entry in group.items"
+                :key="entry.cardId"
+                type="button"
+                class="schema-version-history-panel__item"
+                :class="{ 'is-active': entry.isCurrent, 'is-pending': entry.isPending }"
+                @click="emit('select', entry)"
+              >
+                <div class="schema-version-history-panel__item-main">
+                  <div class="schema-version-history-panel__item-time">{{ entry.timeLabel }}</div>
+                  <div class="schema-version-history-panel__item-desc">{{ entry.description }}</div>
+                </div>
+              </button>
+            </div>
           </section>
         </template>
         <div v-else class="schema-version-history-panel__empty">暂无版本记录</div>
@@ -88,8 +123,8 @@ const isDark = computed(() => props.theme === 'dark');
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(320px, 42%);
-  min-width: 260px;
+  width: 280px;
+  min-width: 280px;
   z-index: 12;
   display: flex;
   flex-direction: column;
@@ -107,11 +142,15 @@ const isDark = computed(() => props.theme === 'dark');
       color: #f5f5f5;
     }
 
-    .schema-version-history-panel__help {
+    .schema-version-history-panel__section-title {
       color: #8c8c8c;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
     }
 
-    .schema-version-history-panel__section-title {
+    .schema-version-history-panel__section-chevron {
       color: #8c8c8c;
     }
 
@@ -121,18 +160,13 @@ const isDark = computed(() => props.theme === 'dark');
       &:hover {
         background: rgba(255, 255, 255, 0.06);
       }
-
-      &.is-active {
-        background: rgba(24, 144, 255, 0.2);
-      }
     }
 
     .schema-version-history-panel__item-time {
       color: #69b1ff;
     }
 
-    .schema-version-history-panel__item-desc,
-    .schema-version-history-panel__author-name {
+    .schema-version-history-panel__item-desc {
       color: #bfbfbf;
     }
 
@@ -152,31 +186,12 @@ const isDark = computed(() => props.theme === 'dark');
     box-sizing: border-box;
   }
 
-  &__title-wrap {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-
   &__title {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
     color: #191919;
-  }
-
-  &__help {
-    display: inline-flex;
-    align-items: center;
-    color: #8c8c8c;
-    font-size: 14px;
-
-    :deep(svg),
-    :deep(svg path) {
-      fill: currentColor;
-    }
   }
 
   &__close {
@@ -191,21 +206,61 @@ const isDark = computed(() => props.theme === 'dark');
   }
 
   &__section + &__section {
-    margin-top: 16px;
+    margin-top: 8px;
   }
 
+  @section-title-padding-x: 8px;
+  @chevron-size: 10px;
+  @chevron-label-gap: 6px;
+  @history-text-indent: @section-title-padding-x + @chevron-size + @chevron-label-gap;
+
   &__section-title {
-    padding: 0 8px 8px;
+    width: 100%;
+    margin: 0;
+    padding: 6px @section-title-padding-x;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: @chevron-label-gap;
     font-size: 13px;
     font-weight: 600;
     line-height: 20px;
     color: #8c8c8c;
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: left;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  &__section-chevron {
+    flex-shrink: 0;
+    display: block;
+    color: #8c8c8c;
+    transition: transform 0.15s ease;
+
+    &.is-collapsed {
+      transform: rotate(-90deg);
+    }
+  }
+
+  &__section-label {
+    line-height: 20px;
+  }
+
+  &__section-items {
+    padding-left: @history-text-indent;
   }
 
   &__item {
     width: 100%;
     margin: 0;
-    padding: 10px 12px;
+    padding: 10px @section-title-padding-x 10px 0;
     border: none;
     border-radius: 8px;
     background: transparent;
@@ -219,12 +274,8 @@ const isDark = computed(() => props.theme === 'dark');
       background: rgba(0, 0, 0, 0.04);
     }
 
-    &.is-active {
-      background: #e6f4ff;
-    }
-
     &.is-pending .schema-version-history-panel__item-desc {
-      color: #8c8c8c;
+      color: #808080;
     }
   }
 
@@ -232,43 +283,15 @@ const isDark = computed(() => props.theme === 'dark');
     font-size: 13px;
     font-weight: 600;
     line-height: 20px;
-    color: #1677ff;
+    color: #000;
   }
 
   &__item-desc {
     margin-top: 2px;
     font-size: 13px;
     line-height: 20px;
-    color: #595959;
+    color: #808080;
     word-break: break-word;
-  }
-
-  &__item-author {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  &__author-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-
-    &.is-user {
-      background: #7c6beb;
-    }
-
-    &.is-ai {
-      background: #4a9eff;
-    }
-  }
-
-  &__author-name {
-    font-size: 12px;
-    line-height: 18px;
-    color: #8c8c8c;
   }
 
   &__empty {

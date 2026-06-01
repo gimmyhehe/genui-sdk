@@ -12,7 +12,7 @@ import useTemplate from './useTemplate';
 import { useIsMobile } from '../../use-mobile';
 import { SCHEMA_JSON_DIFF_EDITOR_OPTIONS, useMonacoPlaygroundTheme } from './use-monaco-playground-theme';
 import {
-  findLatestSchemaInConversation,
+  findLatestSchemaCardInConversation,
   isRenderableSchema,
   rebuildSchemaFromCard,
   collectSchemaVersionHistory,
@@ -78,7 +78,7 @@ const currentConversationMessages = computed(() => {
 });
 
 const latestSchemaCardId = computed(() => {
-  return findLatestSchemaInConversation(currentConversationMessages.value)?.cardId ?? '';
+  return findLatestSchemaCardInConversation(currentConversationMessages.value)?.cardId ?? '';
 });
 
 /**
@@ -693,12 +693,18 @@ onUnmounted(() => {
       :editor-options="editorOptions"
       :playground-theme="theme"
       :view-schema-icon="viewSchemaIcon"
+      :history-icon="TinyIconTime"
+      :history-visible="schemaHistoryVisible"
+      :history-groups="schemaVersionHistoryGroups"
       :close-icon="TinyCloseIcon"
       @update:json-editor-open="handleMobileJsonEditorOpen"
       @update:schema-editor="applySchemaEditorTextToPreview"
       @mask-click="onMobileSheetMaskClick"
       @grab-touch-start="onMobileSheetGrabTouchStart"
       @close="closeSchemaEditorView"
+      @toggle-history="toggleSchemaHistoryPanel"
+      @close-history="closeSchemaHistoryPanel"
+      @history-select="handleHistoryEntrySelect"
       :schema-editor-dirty="schemaEditorDirty"
       :schema-editor-save-loading="schemaEditorSaveLoading"
       @apply-current-version="applyCurrentVersion"

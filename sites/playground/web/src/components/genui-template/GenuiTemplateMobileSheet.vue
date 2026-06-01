@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { CodeEditor, DiffEditor } from 'monaco-editor-vue3';
 import { GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
 import type { CSSProperties } from 'vue';
+import SchemaVersionHistoryPanel from './SchemaVersionHistoryPanel.vue';
+import type { ISchemaVersionHistoryEntry } from './template-chat-utils/schema-version-history';
 import {
   SCHEMA_JSON_DIFF_EDITOR_OPTIONS,
   useMonacoPlaygroundTheme,
@@ -25,6 +28,9 @@ const props = defineProps<{
   editorOptions: Record<string, unknown>;
   playgroundTheme: PlaygroundColorTheme;
   viewSchemaIcon: string;
+  historyIcon: unknown;
+  historyVisible: boolean;
+  historyGroups: Array<{ label: string; items: ISchemaVersionHistoryEntry[] }>;
   closeIcon: unknown;
   schemaEditorDirty?: boolean;
   schemaEditorSaveLoading?: boolean;
@@ -38,13 +44,27 @@ const emit = defineEmits<{
   (event: 'mask-click'): void;
   (event: 'grab-touch-start', value: TouchEvent): void;
   (event: 'close'): void;
+  (event: 'toggle-history'): void;
+  (event: 'close-history'): void;
+  (event: 'history-select', entry: ISchemaVersionHistoryEntry): void;
   (event: 'apply-current-version'): void;
   (event: 'reset-to-latest-version'): void;
   (event: 'save-schema-editor'): void;
 }>();
 
+const headerTitle = computed(() => {
+  if (!props.jsonEditorOpen) {
+    return '渲染效果';
+  }
+  return props.schemaEditorDiffMode ? '查看变更' : 'SchemaJSON';
+});
+
 const handleJsonEditorChange = (value: string) => {
   emit('update:schemaEditor', value);
+};
+
+const toggleJsonEditor = () => {
+  emit('update:jsonEditorOpen', !props.jsonEditorOpen);
 };
 </script>
 
@@ -56,32 +76,14 @@ const handleJsonEditorChange = (value: string) => {
         class="schema-mobile-sheet"
         role="dialog"
         aria-modal="true"
-        :aria-label="jsonEditorOpen ? (schemaEditorDiffMode ? 'Schema 变更对比' : 'Schema JSON 编辑器') : 'Schema JSON 预览'"
+        :aria-label="jsonEditorOpen ? (schemaEditorDiffMode ? 'Schema 变更对比' : 'Schema JSON 编辑器') : 'Schema 渲染预览'"
       >
         <div class="schema-mobile-sheet__mask" @click="emit('mask-click')" />
         <div class="schema-mobile-sheet__panel" :style="props.panelStyle">
           <div class="schema-mobile-sheet__grab" @touchstart="emit('grab-touch-start', $event)" />
           <div class="schema-mobile-sheet__header">
-            <div class="schema-mobile-sheet__header-start">
-              <button
-                v-if="!jsonEditorOpen"
-                type="button"
-                class="schema-mobile-sheet__entry"
-                @click="emit('update:jsonEditorOpen', true)"
-              >
-                <img class="schema-mobile-sheet__entry-icon" :src="viewSchemaIcon" alt="" />
-                {{ schemaEditorDiffMode ? '查看变更' : '查看 JSON' }}
-              </button>
-              <button
-                v-else
-                type="button"
-                class="schema-mobile-sheet__back"
-                @click="emit('update:jsonEditorOpen', false)"
-              >
-                返回预览
-              </button>
-            </div>
-            <div class="schema-mobile-sheet__header-end">
+            <h3 class="schema-mobile-sheet__title">{{ headerTitle }}</h3>
+            <div class="schema-mobile-sheet__header-actions">
               <tiny-button
                 v-if="jsonEditorOpen && schemaEditorDirty && !schemaEditorDiffMode && !editorOptions.readOnly"
                 type="primary"
@@ -92,6 +94,25 @@ const handleJsonEditorChange = (value: string) => {
               >
                 保存
               </tiny-button>
+              <tiny-button
+                type="text"
+                class="genui-schema-toolbar-close-btn"
+                :class="{ 'is-active': historyVisible }"
+                :icon="historyIcon"
+                aria-label="历史记录"
+                title="历史记录"
+                @click="emit('toggle-history')"
+              />
+              <button
+                type="button"
+                class="schema-mobile-sheet__icon-btn"
+                :class="{ 'is-active': jsonEditorOpen }"
+                aria-label="查看 JSON"
+                title="查看 JSON"
+                @click="toggleJsonEditor"
+              >
+                <img class="schema-mobile-sheet__icon-btn-image" :src="viewSchemaIcon" alt="" />
+              </button>
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
@@ -138,6 +159,13 @@ const handleJsonEditorChange = (value: string) => {
                 />
               </div>
             </Transition>
+            <schema-version-history-panel
+              :visible="historyVisible"
+              :groups="historyGroups"
+              :theme="playgroundTheme"
+              @close="emit('close-history')"
+              @select="emit('history-select', $event)"
+            />
           </div>
           <div v-if="showReturnLatestButton" class="schema-mobile-sheet__footer">
             <tiny-button
@@ -186,6 +214,11 @@ const handleJsonEditorChange = (value: string) => {
 
     &:active {
       background: rgba(0, 0, 0, 0.08);
+    }
+
+    &.is-active {
+      color: #1677ff;
+      background: rgba(22, 119, 255, 0.1);
     }
   }
 }
@@ -256,21 +289,60 @@ const handleJsonEditorChange = (value: string) => {
     overflow: hidden;
   }
 
-  &__header-start {
+  &__title {
     flex: 1 1 0;
     min-width: 0;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+    color: #191919;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  &__header-end {
-    flex: 1 1 0;
-    min-width: 0;
+  &__header-actions {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
+    gap: 4px;
+  }
+
+  &__icon-btn {
+    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    &.is-active {
+      background: rgba(22, 119, 255, 0.1);
+    }
+  }
+
+  &__icon-btn-image {
+    width: 16px;
+    height: 16px;
+    display: block;
+    object-fit: contain;
   }
 
   &__latest-btn {
@@ -290,62 +362,6 @@ const handleJsonEditorChange = (value: string) => {
 
     .schema-mobile-sheet__latest-btn {
       max-width: none;
-    }
-  }
-
-  &__entry {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    max-width: 100%;
-    margin: 0;
-    padding: 0;
-    border: none;
-    background: transparent;
-    font: inherit;
-    text-align: inherit;
-    color: #191919;
-    font-size: 14px;
-    line-height: 22px;
-    text-decoration: none;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    &:hover {
-      color: #191919;
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
-
-    &:focus-visible {
-      outline: 2px solid #1890ff;
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
-  }
-
-  &__entry-icon {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-  }
-
-  &__back {
-    margin: 0;
-    padding: 6px 4px;
-    border: none;
-    background: transparent;
-    font-size: 16px;
-    line-height: 22px;
-    color: #191919;
-    cursor: pointer;
-    white-space: nowrap;
-
-    &:hover {
-      color: #191919;
     }
   }
 

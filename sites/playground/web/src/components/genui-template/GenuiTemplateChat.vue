@@ -30,12 +30,10 @@ import {
   PARSE_PARTIAL_JSON_STATE,
   applyJsonPatchOperations,
   generateIdForComponents,
-  findLatestSchemaInConversation,
-  findSchemaCardByCardId,
-  findLatestPendingSchemaCard,
+  finalizePendingSchemaCard,
 } from './template-chat-utils';
 import { clonePlainJson } from './template-chat-utils/json-patch-format';
-import { formatDate, generateId, stripSchemaFieldsWhileStreaming } from '../../utils';
+import { generateId, stripSchemaFieldsWhileStreaming } from '../../utils';
 import useTemplate from './useTemplate';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
@@ -419,18 +417,11 @@ const handleSendMessage = async () => {
  * 流式生成结束时，将 preview schema 写入对应 AI 卡片并补全 generatedTime
  */
 const finalizeStreamingSchemaCard = () => {
-  const pendingCard =
-    findSchemaCardByCardId(messages.value, currentCardId.value)
-    ?? findLatestPendingSchemaCard(messages.value)
-    ?? findLatestSchemaInConversation(messages.value)?.cardMessage;
-
-  if (!pendingCard || pendingCard.type === 'schema-manual') {
-    return;
-  }
-
-  pendingCard.schema = JSON.stringify(currentPreviewSchema.value ?? currentSchema.value);
-  pendingCard.prevSchema = prevSchema.value || '';
-  pendingCard.generatedTime = formatDate(new Date());
+  finalizePendingSchemaCard(messages.value, {
+    cardId: currentCardId.value,
+    schema: currentPreviewSchema.value ?? currentSchema.value,
+    prevSchema: prevSchema.value || '',
+  });
 };
 
 const handleNotification = (event: INotificationPayload) => {

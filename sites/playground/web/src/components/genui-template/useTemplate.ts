@@ -13,6 +13,7 @@ import {
   getManualEdits,
   syncManualCardLatestFields,
   manualEditToCardSnapshot,
+  repairAllStalePendingSchemaCards,
 } from './template-chat-utils';
 
 const conversation = shallowRef<ReturnType<typeof useConversation> | null>(null);
@@ -98,17 +99,22 @@ export default function useTemplate(options?: UseTemplateOptions) {
             conversation.value!.createConversation(DEFAULT_TEMPLATE_TITLE);
             conversation.value!.saveConversations();
           }
+          const loadedMessages = conversation.value!.getCurrentConversation()?.messages;
+          if (repairAllStalePendingSchemaCards(loadedMessages)) {
+            conversation.value!.saveConversations();
+          }
           // IndexedDB 加载完成后再恢复 schema，避免早于 GenuiTemplate onMounted 的空窗期
-          applySchemaFromMessages(conversation.value!.getCurrentConversation()?.messages);
+          applySchemaFromMessages(loadedMessages);
         },
-        onFinish(data: any, context) {
-          if (data?.type === 'error') {
+        onFinish(_data: any, context) {
+          if (_data?.type === 'error') {
             context.messages.value.push({
               role: 'assistant',
               content: '',
-              messages: [{ type: 'error-text', content: data.error.message }],
+              messages: [{ type: 'error-text', content: _data.error.message }],
             });
           }
+          repairAllStalePendingSchemaCards(context.messages.value);
           conversation.value!.saveConversations();
         },
       },

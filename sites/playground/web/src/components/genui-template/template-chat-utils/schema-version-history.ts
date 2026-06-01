@@ -10,6 +10,8 @@ export interface ISchemaVersionHistoryEntry {
   input: string;
   generatedTime: string;
   createdAtMs: number;
+  /** 会话中的出现顺序，越大越新 */
+  sequenceIndex: number;
   timeLabel: string;
   description: string;
   authorLabel: string;
@@ -37,7 +39,7 @@ const pad2 = (n: number) => String(n).padStart(2, '0');
 export function parseGeneratedTimeMs(generatedTime: string): number {
   const text = generatedTime?.trim();
   if (!text) {
-    return Date.now();
+    return 0;
   }
   const normalized = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(text)
     ? text.replace(' ', 'T')
@@ -47,13 +49,13 @@ export function parseGeneratedTimeMs(generatedTime: string): number {
 }
 
 /**
- * 格式化历史条目展示用的时间标签（如「5月26日 16:30」）
+ * 格式化历史条目展示用的时间标签（如「2026/06/01 20:33」）
  * @param createdAtMs 创建时间毫秒戳
  * @returns 展示用时间标签
  */
 export function formatHistoryTimeLabel(createdAtMs: number): string {
   const d = new Date(createdAtMs);
-  return `${d.getMonth() + 1}月${d.getDate()}日 ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  return `${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
 /**
@@ -125,6 +127,7 @@ export function collectSchemaVersionHistory(
   }
 
   const entries: ISchemaVersionHistoryEntry[] = [];
+  let sequenceIndex = 0;
 
   for (const chatMessage of messages) {
     if (isContextCompressMessage(chatMessage)) {
@@ -158,6 +161,7 @@ export function collectSchemaVersionHistory(
             input: edit.input ?? '',
             generatedTime: edit.generatedTime ?? '',
             createdAtMs,
+            sequenceIndex: sequenceIndex++,
             timeLabel: isPending ? '刚刚' : formatHistoryTimeLabel(createdAtMs),
             description: '',
             authorLabel,
@@ -183,6 +187,7 @@ export function collectSchemaVersionHistory(
         input: item.input ?? '',
         generatedTime: item.generatedTime ?? '',
         createdAtMs,
+        sequenceIndex: sequenceIndex++,
         timeLabel: isPending ? '刚刚' : formatHistoryTimeLabel(createdAtMs),
         description: '',
         authorLabel,
@@ -195,11 +200,12 @@ export function collectSchemaVersionHistory(
     }
   }
 
-  const latestCardId = options.latestCardId
-    ?? (entries.length > 0 ? entries[entries.length - 1].cardId : '');
+  const latestEntry = entries.length > 0 ? entries[entries.length - 1] : null;
+  const latestCardId = options.latestCardId ?? latestEntry?.cardId ?? '';
+  const latestSequenceIndex = latestEntry?.sequenceIndex ?? -1;
 
   return entries.map((entry) => {
-    let isLatest = entry.cardId === latestCardId;
+    let isLatest = entry.sequenceIndex === latestSequenceIndex;
     if (!isLatest && entry.type === 'schema-manual') {
       const manualCard = entry.cardMessage as ISchemaManualMessageItem;
       if (manualCard.cardId === latestCardId) {
@@ -225,12 +231,14 @@ export function groupSchemaVersionHistory(
   entries: ISchemaVersionHistoryEntry[],
   nowMs: number = Date.now(),
 ): Array<{ label: string; items: ISchemaVersionHistoryEntry[] }> {
-  const sorted = [...entries].sort((a, b) => b.createdAtMs - a.createdAtMs);
+  const sorted = [...entries].sort((a, b) => b.sequenceIndex - a.sequenceIndex);
   const groupOrder: string[] = [];
   const buckets = new Map<string, ISchemaVersionHistoryEntry[]>();
 
   for (const entry of sorted) {
-    const label = getHistoryTimeGroupLabel(entry.createdAtMs, nowMs);
+    const label = entry.isPending
+      ? '今天'
+      : getHistoryTimeGroupLabel(entry.createdAtMs, nowMs);
     if (!buckets.has(label)) {
       buckets.set(label, []);
       groupOrder.push(label);

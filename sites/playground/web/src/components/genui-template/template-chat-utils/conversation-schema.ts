@@ -1,5 +1,6 @@
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { IJsonPatchMessageItem, ISchemaCardMessageItem, ISchemaManualMessageItem } from '../chat.types';
+import { formatDate } from '../../../utils';
 import { isContextCompressMessage } from './context-message';
 import { applyJsonPatchOperations } from './json-patch-format';
 
@@ -164,7 +165,7 @@ export function findLatestPendingSchemaCard(
       .reverse()
       .find(
         (item): item is IStreamingSchemaCardMessage =>
-          isStreamingSchemaCardItem(item) && !item.generatedTime,
+          isStreamingSchemaCardItem(item) && !item.generatedTime?.trim(),
       );
 
     if (card) {
@@ -173,6 +174,106 @@ export function findLatestPendingSchemaCard(
   }
 
   return null;
+}
+
+/**
+ * 按会话顺序查找最近一条 schema 版本卡片（含未完成 pending，不要求可解析）
+ * @param messages 当前会话消息列表
+ * @returns 最近一条 schema 卡片，未找到时返回 null
+ */
+export function findLatestSchemaCardInConversation(
+  messages: ChatMessage[] | undefined,
+): ISchemaCardLikeMessage | null {
+  if (!messages?.length) {
+    return null;
+  }
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const chatMessage = messages[i];
+    if (isContextCompressMessage(chatMessage)) {
+      continue;
+    }
+
+    const items = (chatMessage as { messages?: ISchemaCardLikeMessage[] }).messages;
+    if (!Array.isArray(items)) {
+      continue;
+    }
+
+    const cardMessage = [...items]
+      .reverse()
+      .find(
+        (item): item is ISchemaCardLikeMessage =>
+          item.type === 'schema-card' || item.type === 'json-patch' || item.type === 'schema-manual',
+      );
+
+    if (cardMessage) {
+      return cardMessage;
+    }
+  }
+
+  return null;
+}
+
+function applyPendingCardFinalization(
+  card: IStreamingSchemaCardMessage,
+  options: { schema?: unknown; prevSchema?: string },
+): void {
+  const schemaPayload = options.schema ?? rebuildSchemaFromCard(card);
+  if (schemaPayload && !card.schema?.trim()) {
+    card.schema = JSON.stringify(schemaPayload);
+  }
+  if (options.prevSchema !== undefined) {
+    card.prevSchema = options.prevSchema;
+  }
+  card.generatedTime = formatDate(new Date());
+}
+
+/**
+ * 流式结束后补全 pending AI 卡片的 generatedTime 与 schema 快照
+ * @param messages 当前会话消息列表
+ * @param options.cardId 优先匹配的卡片 id
+ * @param options.schema 最终 schema，缺省时从卡片内容还原
+ * @param options.prevSchema 变更前 schema
+ * @returns 是否成功补全
+ */
+export function finalizePendingSchemaCard(
+  messages: ChatMessage[] | undefined,
+  options: {
+    cardId?: string;
+    schema?: unknown;
+    prevSchema?: string;
+  } = {},
+): boolean {
+  const pendingCard =
+    (options.cardId ? findSchemaCardByCardId(messages, options.cardId) : null)
+    ?? findLatestPendingSchemaCard(messages);
+
+  if (!pendingCard || pendingCard.type === 'schema-manual' || pendingCard.generatedTime?.trim()) {
+    return false;
+  }
+
+  applyPendingCardFinalization(pendingCard, options);
+  return true;
+}
+
+/**
+ * 修复会话中所有遗留的 pending AI 卡片（如流异常中断或持久化时未写入 generatedTime）
+ * @param messages 当前会话消息列表
+ * @returns 是否修复了至少一条卡片
+ */
+export function repairAllStalePendingSchemaCards(messages: ChatMessage[] | undefined): boolean {
+  let updated = false;
+
+  while (true) {
+    const pending = findLatestPendingSchemaCard(messages);
+    if (!pending) {
+      break;
+    }
+    applyPendingCardFinalization(pending, {});
+    updated = true;
+  }
+
+  return updated;
 }
 
 /** 从会话消息中反向查找最近一条含 schema 的卡片（跳过 context-compress 等无卡片消息） */
