@@ -17,6 +17,9 @@ patchedDependencies:
   '@opentiny/vue-form-item@3.28.0':
     hash: 0efe71be369a844388c7f28464c4b352cb43480c7fea7c457a96eb555ba5bd95
     path: patches/@opentiny__vue-form-item@3.28.0.patch
+  '@opentiny/vue-grid@3.28.0':
+    hash: 29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc
+    path: patches/@opentiny__vue-grid@3.28.0.patch
   '@opentiny/vue-renderless@3.28.2':
     hash: 8691f41c36a35d6d1658b5c25117cc7ae7cb4febb1c691ba33ad0408486ccb8e
     path: patches/@opentiny__vue-renderless@3.28.2.patch
@@ -380,7 +383,7 @@ importers:
         version: 3.28.0(patch_hash=0efe71be369a844388c7f28464c4b352cb43480c7fea7c457a96eb555ba5bd95)
       '@opentiny/vue-grid':
         specifier: ^3.28.0
-        version: 3.28.0
+        version: 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
@@ -684,7 +687,7 @@ importers:
         version: 3.28.0(patch_hash=0efe71be369a844388c7f28464c4b352cb43480c7fea7c457a96eb555ba5bd95)
       '@opentiny/vue-grid':
         specifier: ^3.28.0
-        version: 3.28.0
+        version: 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
@@ -13360,7 +13363,7 @@ snapshots:
       '@opentiny/vue-button': 3.28.0
       '@opentiny/vue-common': 3.28.0
       '@opentiny/vue-dialog-box': 3.28.0
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-icon': 3.28.3
       '@opentiny/vue-input': 3.28.0
       '@opentiny/vue-pager': 3.28.0
@@ -13579,17 +13582,17 @@ snapshots:
 
   '@opentiny/vue-grid-column@3.28.0':
     dependencies:
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
 
   '@opentiny/vue-grid-manager@3.28.0':
     dependencies:
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
 
   '@opentiny/vue-grid-select@3.28.0':
     dependencies:
       '@opentiny/vue-base-select': 3.28.0
       '@opentiny/vue-common': 3.28.0
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-renderless': 3.28.2(patch_hash=8691f41c36a35d6d1658b5c25117cc7ae7cb4febb1c691ba33ad0408486ccb8e)
 
   '@opentiny/vue-grid-toolbar@3.28.0':
@@ -13606,7 +13609,7 @@ snapshots:
       '@opentiny/vue-dropdown': 3.28.0
       '@opentiny/vue-dropdown-item': 3.28.0
       '@opentiny/vue-dropdown-menu': 3.28.0
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-icon': 3.28.3
       '@opentiny/vue-input': 3.28.0
       '@opentiny/vue-layout': 3.28.0
@@ -13627,7 +13630,7 @@ snapshots:
       '@opentiny/vue-tooltip': 3.28.0
       '@opentiny/vue-tree': 3.28.0
 
-  '@opentiny/vue-grid@3.28.0':
+  '@opentiny/vue-grid@3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)':
     dependencies:
       '@opentiny/utils': 3.28.0
       '@opentiny/vue-common': 3.28.0
@@ -13967,7 +13970,7 @@ snapshots:
       '@opentiny/vue-common': 3.28.0
       '@opentiny/vue-dialog-box': 3.28.0
       '@opentiny/vue-directive': 3.28.0
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-icon': 3.28.3
       '@opentiny/vue-input': 3.28.0
       '@opentiny/vue-pager': 3.28.0
@@ -14179,7 +14182,7 @@ snapshots:
       '@opentiny/vue-common': 3.28.0
       '@opentiny/vue-directive': 3.28.0
       '@opentiny/vue-filter-box': 3.28.0
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-icon': 3.28.3
       '@opentiny/vue-input': 3.28.0
       '@opentiny/vue-locale': 3.28.0
@@ -14199,7 +14202,7 @@ snapshots:
       '@opentiny/vue-common': 3.28.0
       '@opentiny/vue-directive': 3.28.0
       '@opentiny/vue-filter-box': 3.28.0
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-icon': 3.28.3
       '@opentiny/vue-input': 3.28.0
       '@opentiny/vue-locale': 3.28.0
@@ -14728,7 +14731,7 @@ snapshots:
       '@opentiny/vue-form': 3.28.0
       '@opentiny/vue-form-item': 3.28.0(patch_hash=0efe71be369a844388c7f28464c4b352cb43480c7fea7c457a96eb555ba5bd95)
       '@opentiny/vue-fullscreen': 3.28.0
-      '@opentiny/vue-grid': 3.28.0
+      '@opentiny/vue-grid': 3.28.0(patch_hash=29024efda9d2c66747d1de10ce6b5f476c6d4456c91bfd50f9ae4cf72baa23cc)
       '@opentiny/vue-grid-column': 3.28.0
       '@opentiny/vue-grid-manager': 3.28.0
       '@opentiny/vue-grid-select': 3.28.0

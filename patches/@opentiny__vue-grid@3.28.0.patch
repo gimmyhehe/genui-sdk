@@ -1,0 +1,23 @@
+diff --git a/lib/index.js b/lib/index.js
+index fc662a8ce85dbd67b4832961431e8082306ca991..6fc66bea563b6340066d11530a092cfa3ed3ea00 100644
+--- a/lib/index.js
++++ b/lib/index.js
+@@ -12059,7 +12059,7 @@ var Grid = defineComponent({
+   render: function render16() {
+     var _this50 = this;
+     var fetchOption = this.fetchOption, listeners = this.listeners, loading = this.loading, optimizOpt2 = this.optimizOpt, editConfigOpt2 = this.editConfigOpt, tooltipOpt2 = this.tooltipOpt, pager = this.pager, pagerConfig = this.pagerConfig, remoteFilter = this.remoteFilter, remoteSort = this.remoteSort, selectToolbar = this.selectToolbar;
+-    var seqIndex2 = this.seqIndex, $slots = this.slots, tableCustoms2 = this.tableCustoms, tableData = this.tableData, tableListeners = this.tableListeners, tableLoading = this.tableLoading, tableProps2 = this.tableProps, toolbar = this.toolbar, vSize3 = this.vSize, designConfig = this.designConfig, viewType2 = this.viewType;
++    var seqIndex2 = this.seqIndex, $slots = this.slots, tableCustoms2 = this.tableCustoms, tableData = this.tableData, tableLoading = this.tableLoading, tableProps2 = this.tableProps, toolbar = this.toolbar, vSize3 = this.vSize, designConfig = this.designConfig, viewType2 = this.viewType;
+     var columnAnchor = this.columnAnchor, columnAnchorParams = this.columnAnchorParams, fullScreenClass = this.fullScreenClass;
+     if (designConfig != null && designConfig.icons) {
+       Object.assign(GlobalConfig$1.icon, designConfig.icons);
+@@ -12073,7 +12073,8 @@ var Grid = defineComponent({
+     if ((designConfig == null ? void 0 : designConfig.stripe) !== void 0 && !props.stripe) {
+       props.stripe = designConfig == null ? void 0 : designConfig.stripe;
+     }
+-    var tableOns = Object.assign(listeners, tableListeners);
++    var currentTableListeners = getListeners(this.$attrs);
++    var tableOns = Object.assign({}, listeners, currentTableListeners);
+     var rowClassName = this.handleRowClassName, sortChangeEvent2 = this.sortChangeEvent, filterChangeEvent2 = this.filterChangeEvent;
+     if (fetchOption) {
+       Object.assign(props, {
