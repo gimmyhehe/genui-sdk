@@ -129,6 +129,7 @@ const handleJsonEditorChange = (value: string) => {
                 />
                 <code-editor
                   v-else
+                  :key="`${schemaEditorMountKey}-${editorOptions.readOnly}`"
                   :value="schemaEditor"
                   language="json"
                   :theme="monacoTheme"

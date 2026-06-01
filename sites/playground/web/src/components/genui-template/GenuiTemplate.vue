@@ -195,6 +195,14 @@ const isHistoryVersionApplied = ref(true);
 const isViewingHistoryWithoutApply = computed(
   () => showReturnLatestButton.value && !isHistoryVersionApplied.value,
 );
+
+/**
+ * JSON 编辑器是否为只读（历史 diff 或未应用的非最新版本）
+ */
+const isSchemaEditorReadOnly = computed(
+  () => schemaEditorDiffFromHistory.value || isViewingHistoryWithoutApply.value,
+);
+
 const schemaEditorText = ref('{}');
 const schemaEditorBaseline = ref('{}');
 
@@ -233,11 +241,32 @@ const syncSchemaEditorBaseline = () => {
 };
 
 /**
+ * 丢弃未保存的 JSON 编辑，恢复 preview（及已生效 schema）到 baseline
+ */
+const revertUnsavedSchemaEditorChanges = () => {
+  if (!hasUnsavedSchemaEditorChanges()) {
+    return;
+  }
+
+  schemaEditorText.value = schemaEditorBaseline.value;
+
+  try {
+    const schema = JSON.parse(schemaEditorBaseline.value || '{}');
+    setCurrentPreviewSchema(schema);
+    if (!isViewingHistoryWithoutApply.value) {
+      setCurrentSchema(schema);
+    }
+  } catch {
+    syncSchemaEditorBaseline();
+  }
+};
+
+/**
  * 编辑器输入变更时同步 preview（及已应用版本的 currentSchema）
  * @param value JSON 编辑器当前文本
  */
 const applySchemaEditorTextToPreview = (value: string) => {
-  if (schemaEditorDiffFromHistory.value) {
+  if (isSchemaEditorReadOnly.value) {
     return;
   }
   schemaEditorText.value = value;
@@ -254,7 +283,7 @@ const applySchemaEditorTextToPreview = (value: string) => {
 };
 
 const editorOptions = computed(() => {
-  const readOnly = schemaEditorDiffFromHistory.value;
+  const readOnly = isSchemaEditorReadOnly.value;
   return {
     fontSize: 14,
     minimap: { enabled: false },
@@ -269,6 +298,11 @@ const editorOptions = computed(() => {
 });
 
 const toggleSchemaEditor = () => {
+  if (schemaEditorVisible.value) {
+    revertUnsavedSchemaEditorChanges();
+  } else if (!isMobile.value) {
+    syncSchemaEditorBaseline();
+  }
   schemaEditorVisible.value = !schemaEditorVisible.value;
   if (isMobile.value) {
     mobileSchemaJsonEditorOpen.value = false;
@@ -276,6 +310,7 @@ const toggleSchemaEditor = () => {
 };
 
 const closeSchemaEditorView = () => {
+  revertUnsavedSchemaEditorChanges();
   schemaEditorVisible.value = false;
   mobileSchemaJsonEditorOpen.value = false;
   schemaEditorDiffFromHistory.value = false;
@@ -290,7 +325,7 @@ const closeRendererPanel = () => {
 
 const onMobileSheetMaskClick = () => {
   if (mobileSchemaJsonEditorOpen.value) {
-    mobileSchemaJsonEditorOpen.value = false;
+    handleMobileJsonEditorOpen(false);
   }
 };
 
@@ -301,6 +336,8 @@ const onMobileSheetMaskClick = () => {
 const handleMobileJsonEditorOpen = (open: boolean) => {
   if (open) {
     syncSchemaEditorBaseline();
+  } else {
+    revertUnsavedSchemaEditorChanges();
   }
   mobileSchemaJsonEditorOpen.value = open;
 };
@@ -390,6 +427,9 @@ const toggleSchemaVersion = (
   cardId: string,
   options: { diffFromHistory?: boolean } = {},
 ) => {
+  if (hasUnsavedSchemaEditorChanges()) {
+    revertUnsavedSchemaEditorChanges();
+  }
   rendererPanelVisible.value = true;
   currentCardId.value = cardId;
   schemaEditorDiffFromHistory.value = options.diffFromHistory ?? false;
@@ -527,7 +567,7 @@ watch(
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     if (isMobile.value && schemaEditorVisible.value && mobileSchemaJsonEditorOpen.value) {
-      mobileSchemaJsonEditorOpen.value = false;
+      handleMobileJsonEditorOpen(false);
       return;
     }
     if (isMobile.value) {
@@ -600,7 +640,7 @@ onUnmounted(() => {
           </span>
           <div class="schema-version-container__header-actions">
             <tiny-button
-              v-if="schemaEditorDirty && !schemaEditorDiffFromHistory"
+              v-if="schemaEditorDirty && !isSchemaEditorReadOnly"
               type="primary"
               size="small"
               round
@@ -631,6 +671,7 @@ onUnmounted(() => {
           />
           <code-editor
             v-else
+            :key="`${currentCardId}-${isSchemaEditorReadOnly}`"
             :value="schemaEditorText"
             language="json"
             :theme="monacoTheme"
