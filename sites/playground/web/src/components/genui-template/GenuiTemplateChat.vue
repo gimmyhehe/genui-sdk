@@ -259,18 +259,26 @@ const handleRefresh = ({ index }: { index: number }) => {
   const { messages, send } = messageManager.value;
   const cardMessage = getCardMessageByIndex(index);
 
-  prevSchema.value = cardMessage?.prevSchema;
-  let parsedSchema = null;
-  try {
-    parsedSchema = JSON.parse(prevSchema.value);
-  } catch (error) {
-    parsedSchema = null;
+  prevSchema.value = cardMessage?.prevSchema ?? '';
+
+  if (cardMessage?.type === 'schema-card') {
+    setCurrentSchema(null);
+    setCurrentPreviewSchema({});
+    lastPreviewSchema.value = {};
+  } else {
+    let parsedSchema = null;
+    try {
+      parsedSchema = JSON.parse(prevSchema.value);
+    } catch (error) {
+      parsedSchema = null;
+    }
+    if (parsedSchema) {
+      setCurrentSchema(parsedSchema);
+      setCurrentPreviewSchema(parsedSchema);
+      lastPreviewSchema.value = JSON.parse(JSON.stringify(parsedSchema));
+    }
   }
-  if (parsedSchema) {
-    setCurrentSchema(parsedSchema);
-    setCurrentPreviewSchema(parsedSchema);
-    lastPreviewSchema.value = JSON.parse(JSON.stringify(parsedSchema));
-  }
+
   messages.value = messages.value.slice(0, index);
 
   // 流式 schema 事件使用最后一条用户消息的 messageId 作为 cardId，需与 currentCardId 对齐
