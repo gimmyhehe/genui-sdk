@@ -174,6 +174,7 @@ const isViewingHistoryVersion = ref(false);
 const showReturnLatestButton = computed(
   () =>
     isViewingHistoryVersion.value
+    && !isHistoryVersionApplied.value
     && Boolean(currentCardId.value && !isLatestSchemaVersionCard(currentCardId.value)),
 );
 
@@ -445,7 +446,7 @@ const toggleSchemaVersion = (
 };
 
 /**
- * 将当前预览的历史版本应用为生效 schema，并退出 diff / 只读态
+ * 将当前预览的历史版本应用为生效 schema，写入版本卡片并退出 diff / 只读态
  */
 const applyCurrentVersion = () => {
   if (!showApplyVersionButton.value) {
@@ -457,9 +458,25 @@ const applyCurrentVersion = () => {
     return;
   }
 
+  let prevSchema: Record<string, unknown> | undefined;
+  const effectiveSchema = currentSchema.value;
+  if (
+    effectiveSchema
+    && typeof effectiveSchema === 'object'
+    && !Array.isArray(effectiveSchema)
+    && isRenderableSchema(effectiveSchema)
+  ) {
+    prevSchema = effectiveSchema as Record<string, unknown>;
+  }
+
+  const saved = appendManualSchemaVersion(schema, { prevSchema });
+  if (!saved) {
+    return;
+  }
+
+  isViewingHistoryVersion.value = false;
   isHistoryVersionApplied.value = true;
   schemaEditorDiffFromHistory.value = false;
-  setCurrentSchema(schema);
   syncSchemaEditorBaseline();
 };
 

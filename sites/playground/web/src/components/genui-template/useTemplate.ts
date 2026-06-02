@@ -293,11 +293,12 @@ export default function useTemplate(options?: UseTemplateOptions) {
    * 将编辑器中的 schema 保存为版本卡片（schema-manual 类型消息）
    * @param schema 保存后的 schema 对象
    * @param options.prevSchema 保存前的基准 schema，缺省时取 currentSchema
+   * @param options.input 版本卡片标题，缺省为「手动编辑保存」
    * @returns 新建或合并后的卡片 cardId，失败时返回 null
    */
   const appendManualSchemaVersion = (
     schema: Record<string, unknown>,
-    options: { prevSchema?: Record<string, unknown> } = {},
+    options: { prevSchema?: Record<string, unknown>; input?: string } = {},
   ) => {
     if (!conversation.value) {
       return null;
@@ -307,12 +308,13 @@ export default function useTemplate(options?: UseTemplateOptions) {
     const prevSchemaStr = JSON.stringify(prevSchema);
     const schemaStr = JSON.stringify(schema);
     const generatedTime = formatDate(new Date());
+    const input = options.input ?? MANUAL_SCHEMA_SAVE_INPUT;
     const editRecord = {
       editId: generateId(),
       schema: schemaStr,
       prevSchema: prevSchemaStr,
       generatedTime,
-      input: MANUAL_SCHEMA_SAVE_INPUT,
+      input,
     };
 
     const messageMgr = conversation.value.messageManager.value;
@@ -337,7 +339,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
       const cardMessage: ISchemaManualMessageItem = {
         type: 'schema-manual',
         content: schemaStr,
-        input: MANUAL_SCHEMA_SAVE_INPUT,
+        input,
         cardId,
         generatedTime,
         schema: schemaStr,
