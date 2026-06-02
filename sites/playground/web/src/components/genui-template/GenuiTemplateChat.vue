@@ -31,6 +31,7 @@ import {
   applyJsonPatchOperations,
   generateIdForComponents,
   finalizePendingSchemaCard,
+  getLastUserMessage,
 } from './template-chat-utils';
 import { clonePlainJson } from './template-chat-utils/json-patch-format';
 import { generateId, stripSchemaFieldsWhileStreaming } from '../../utils';
@@ -268,9 +269,17 @@ const handleRefresh = ({ index }: { index: number }) => {
   if (parsedSchema) {
     setCurrentSchema(parsedSchema);
     setCurrentPreviewSchema(parsedSchema);
+    lastPreviewSchema.value = JSON.parse(JSON.stringify(parsedSchema));
   }
   messages.value = messages.value.slice(0, index);
-  setCurrentCardId(generateId());
+
+  // 流式 schema 事件使用最后一条用户消息的 messageId 作为 cardId，需与 currentCardId 对齐
+  const lastUserMessage = getLastUserMessage(messages.value);
+  if (lastUserMessage && !lastUserMessage.messageId) {
+    lastUserMessage.messageId = generateId();
+  }
+  setCurrentCardId(String(lastUserMessage?.messageId ?? generateId()));
+
   emit('schema-refresh');
   send();
 };
