@@ -1,6 +1,5 @@
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { ISchemaCardLikeMessage } from './conversation-schema';
-import { isContextCompressMessage } from './context-message';
 import { getManualEdits, manualEditToCardSnapshot } from './manual-schema';
 import type { ISchemaManualMessageItem } from '../chat.types';
 
@@ -130,10 +129,6 @@ export function collectSchemaVersionHistory(
   let sequenceIndex = 0;
 
   for (const chatMessage of messages) {
-    if (isContextCompressMessage(chatMessage)) {
-      continue;
-    }
-
     const items = (chatMessage as { messages?: ISchemaCardLikeMessage[] }).messages;
     if (!Array.isArray(items)) {
       continue;
