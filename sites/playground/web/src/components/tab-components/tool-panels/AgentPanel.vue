@@ -19,6 +19,7 @@ const agentCard = ref(null);
 const agentCardStatus = ref('idle'); // idle | loading | success | error
 const agentCardError = ref('');
 const lastQueriedAgentCardUrl = ref('');
+const agentQueryController = ref(null);
 
 const agentData = ref({
   name: '',
@@ -62,6 +63,10 @@ const invalidateAgentCardForUrlChange = () => {
 };
 
 const closeAgentDialog = () => {
+  if (agentQueryController.value) {
+    agentQueryController.value.abort();
+    agentQueryController.value = null;
+  }
   showAgentFormDialog.value = false;
   agentData.value = {
     name: '',
@@ -125,22 +130,27 @@ const queryAgentCard = async () => {
   agentCardStatus.value = 'loading';
   agentCardError.value = '';
 
+  if (agentQueryController.value) {
+    agentQueryController.value.abort();
+  }
+  const controller = new AbortController();
+  agentQueryController.value = controller;
+
   try {
-    const res = await fetch(requestedUrl);
-    const rawText = await res.text();
-    if (!res.ok) {
-      const body = rawText.trim();
-      const statusLine = `${res.status}${res.statusText ? ` ${res.statusText}` : ''}`.trim();
-      throw new Error(formatAgentCardErrorBody(body) || truncateRaw(statusLine));
+    const fetchAgentCardUrl = import.meta.env.VITE_FETCH_AGENT_CARD_URL;
+    const res = await fetch(fetchAgentCardUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: requestedUrl }),
+      signal: controller.signal,
+    });
+    const data = await res.json();
+    if (data.code !== 200) {
+      throw new Error(data.message || `HTTP ${data.code}`);
     }
-    let card;
-    try {
-      card = rawText.trim() ? JSON.parse(rawText) : null;
-    } catch {
-      throw new Error(formatAgentCardErrorBody(rawText) || truncateRaw(rawText));
-    }
+    const card = data.data;
     if (!card || typeof card !== 'object') {
-      throw new Error(formatAgentCardErrorBody(rawText) || truncateRaw(rawText));
+      throw new Error('Agent Card 格式无效');
     }
     agentCard.value = card;
     agentData.value = {
@@ -151,10 +161,14 @@ const queryAgentCard = async () => {
     agentCardStatus.value = 'success';
     lastQueriedAgentCardUrl.value = requestedUrl;
   } catch (error) {
+    if (error?.name === 'AbortError') {
+      return;
+    }
     agentCardStatus.value = 'error';
     agentCardError.value = error?.message ? `获取 Agent Card 失败：${error.message}` : '获取 Agent Card 失败';
   } finally {
     agentQueryLoading.value = false;
+    agentQueryController.value = null;
   }
 };
 
@@ -190,7 +204,7 @@ const confirmAgent = () => {
   if (!apiUrl) {
     TinyNotify({
       type: 'warning',
-      message: 'Agent Card 中缺少 api.url，服务端无法调用该 Agent',
+      message: 'Agent Card 中缺少可调用的 url，服务端无法调用该 Agent',
       position: 'top-right',
     });
     return;
@@ -210,6 +224,10 @@ const confirmAgent = () => {
   const enabledValue = index > -1 ? (agents[index]?.enabled ?? true) : true;
   const nextAgent = {
     ...card,
+    api: {
+      ...(card.api || {}),
+      url: apiUrl,
+    },
     name: nameTrimmed,
     description: (description || '').trim() || card?.description || '',
     agentCardUrl: urlTrimmed,

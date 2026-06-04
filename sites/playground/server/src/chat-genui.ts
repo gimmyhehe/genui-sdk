@@ -17,6 +17,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
+import { resolveAgentApiUrl } from './a2a-tools/resolve-agent-api-url.js';
 import { buildSkillTools } from './skills/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
@@ -208,7 +209,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
 
   const rawAgents = playgroundConfig.agents || [];
   const agents = rawAgents.filter((agent) => {
-    const url = agent.api?.url;
+    const url = resolveAgentApiUrl(agent);
     if (!url) return false;
     // 开发态放开 URL 安全校验，生产态保持 SSRF 防护
     return isDevelopment || isAllowedAgentUrl(url);

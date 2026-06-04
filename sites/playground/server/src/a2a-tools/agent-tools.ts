@@ -1,6 +1,7 @@
 import { tool } from 'ai';
 import net from 'node:net';
 import { z } from 'zod';
+import { invokeA2aAgent } from './invoke-a2a-agent.js';
 
 export type PlaygroundAgentConfig = {
   // 前端 IAgentConfig 字段（从 playground.metadata 直接透传）
@@ -118,82 +119,7 @@ export const buildAgentTools = (
           .describe('可选的附加元数据，将一并发送给 Agent'),
       }),
       execute: async (args: any) => {
-        const baseUrl = agent.api?.url;
-
-        if (!baseUrl) {
-          return {
-            type: 'a2a-agent-error',
-            message: `Agent "${agent.name}" 未配置 api.url，无法调用`,
-          };
-        }
-
-        if (!isAllowedAgentUrl(baseUrl)) {
-          return {
-            type: 'a2a-agent-error',
-            message: `Agent "${agent.name}" 的 api.url "${baseUrl}" 不被允许（仅支持公网 http/https，且禁止访问本地/内网地址）。`,
-          };
-        }
-
-        // 对齐 demo Agent 和 A2A 习惯用法：使用 /tasks 作为任务创建端点
-        const taskUrl = `${baseUrl.replace(/\/$/, '')}/tasks`;
-
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        };
-
-        // 简单支持 bearer / api_key 这两种常见认证方式
-        const authType = agent.auth?.type;
-        const apiKeyFromMetadata = (args?.metadata && (args.metadata.apiKey || args.metadata.token)) as
-          | string
-          | undefined;
-
-        if (authType && apiKeyFromMetadata) {
-          if (authType.toLowerCase() === 'bearer') {
-            headers.Authorization = `Bearer ${apiKeyFromMetadata}`;
-          } else if (authType.toLowerCase() === 'api_key' || authType.toLowerCase() === 'api-key') {
-            headers['x-api-key'] = apiKeyFromMetadata;
-          }
-        }
-
-        try {
-          const res = await fetch(taskUrl, {
-            method: 'POST',
-            headers,
-            signal: abortSignal,
-            body: JSON.stringify({
-              input: args?.input ?? '',
-              metadata: args?.metadata ?? {},
-            }),
-          });
-
-          const text = await res.text();
-
-          if (!res.ok) {
-            return {
-              type: 'agent-function-call-error',
-              agent: {
-                name: agent.name,
-              },
-              status: res.status,
-              statusText: res.statusText,
-              message: text?.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
-            };
-          }
-
-          return {
-            type: 'text',
-            text,
-          };
-        } catch (error: any) {
-          const aborted = error?.name === 'AbortError' || abortSignal?.aborted;
-          return {
-            type: 'agent-function-call-error',
-            agent: {
-              name: agent.name,
-            },
-            message: aborted ? 'Agent request was cancelled' : error?.message || String(error),
-          };
-        }
+        return invokeA2aAgent(agent, args?.input ?? '', args?.metadata ?? {}, abortSignal);
       },
     });
   });

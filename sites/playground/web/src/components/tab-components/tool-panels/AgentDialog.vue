@@ -96,6 +96,7 @@ const agentCapabilityItems = computed((): AgentCapabilityViewItem[] => {
   }
   return [{ title: String(cap) }];
 });
+
 </script>
 
 <template>
@@ -112,7 +113,7 @@ const agentCapabilityItems = computed((): AgentCapabilityViewItem[] => {
         <div class="agent-url-action-row">
           <tiny-input
             :model-value="agentData.agentCardUrl"
-            placeholder="http://localhost:3000/agent-card"
+            placeholder="https://example.com/.well-known/agent-card.json"
             @update:model-value="updateField('agentCardUrl', $event)"
           />
           <tiny-button type="primary" :loading="agentQueryLoading" @click="emit('queryAgentCard')">
@@ -160,7 +161,7 @@ const agentCapabilityItems = computed((): AgentCapabilityViewItem[] => {
         <div class="agent-card-detail__block">
           <span class="agent-card-detail__block-label">API URL</span>
           <div class="agent-card-detail__url" :class="{ 'is-missing': !agentCard.api?.url }">
-            {{ agentCard.api?.url || '缺少 api.url，服务端无法作为工具调用' }}
+            {{ agentCard.api?.url || '缺少可调用的 url，服务端无法作为工具调用' }}
           </div>
         </div>
         <div class="agent-card-detail__block agent-card-detail__capabilities">
