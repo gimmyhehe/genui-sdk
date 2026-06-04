@@ -3,6 +3,10 @@ import { GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
 
 export type PlaygroundColorTheme = 'light' | 'dark' | 'lite' | 'auto';
 
+/**
+ * 监听系统深色模式偏好，供 Monaco theme 的 auto 模式使用
+ * @returns 系统是否偏好深色主题的 ref
+ */
 function useSystemPrefersDark() {
   const prefersDark = ref(false);
   let mql: MediaQueryList | null = null;
@@ -23,7 +27,9 @@ function useSystemPrefersDark() {
 }
 
 /**
- * Monaco：`dark` → vs-dark；`auto` 仅在传入 fallback 时跟系统（Provider 内 auto 已解析则走 inject 即可）。
+ * 根据 playground 主题返回 Monaco 编辑器主题（vs / vs-dark）
+ * @param fallbackTheme 未注入 GENUI_CONFIG 时的主题回退函数
+ * @returns Monaco 主题 computed ref
  */
 export function useMonacoPlaygroundTheme(
   fallbackTheme?: () => PlaygroundColorTheme | undefined,

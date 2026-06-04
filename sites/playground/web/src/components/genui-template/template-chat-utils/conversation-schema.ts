@@ -15,7 +15,11 @@ export interface ILatestSchemaInConversation {
   cardMessage: ISchemaCardLikeMessage;
 }
 
-/** 是否为 tiny-schema-renderer 可渲染的 schema 结构 */
+/**
+ * 是否为 tiny-schema-renderer 可渲染的 schema 结构
+ * @param schema 待校验的 schema 对象
+ * @returns 是否包含 componentName 或非空 children
+ */
 export function isRenderableSchema(schema: unknown): schema is Record<string, unknown> {
   if (!schema || typeof schema !== 'object') {
     return false;
@@ -27,7 +31,11 @@ export function isRenderableSchema(schema: unknown): schema is Record<string, un
   return Array.isArray(node.children) && node.children.length > 0;
 }
 
-/** 从卡片消息解析可渲染的 schema JSON 字符串 */
+/**
+ * 从卡片消息解析可渲染的 schema JSON 字符串
+ * @param card schema-card / json-patch / schema-manual 卡片
+ * @returns schema JSON 文本，无法解析时返回 null
+ */
 export function resolveSchemaStringFromCard(card: ISchemaCardLikeMessage): string | null {
   if (card.schema?.trim()) {
     return card.schema;
@@ -38,6 +46,11 @@ export function resolveSchemaStringFromCard(card: ISchemaCardLikeMessage): strin
   return null;
 }
 
+/**
+ * 将 schema JSON 字符串解析为对象
+ * @param schemaString JSON 文本
+ * @returns 解析后的对象，失败或非对象时返回 null
+ */
 export function parseSchemaJson(schemaString: string): Record<string, unknown> | null {
   if (!schemaString?.trim()) {
     return null;
@@ -50,7 +63,11 @@ export function parseSchemaJson(schemaString: string): Record<string, unknown> |
   }
 }
 
-/** 从 schema-card / json-patch 卡片还原可渲染 schema 对象 */
+/**
+ * 从 schema-card / json-patch / schema-manual 卡片还原可渲染 schema 对象
+ * @param card 版本卡片消息
+ * @returns 可渲染 schema，无法还原时返回 null
+ */
 export function rebuildSchemaFromCard(card: ISchemaCardLikeMessage): Record<string, unknown> | null {
   // json-patch 以 prevSchema + patch 为准，避免 card.schema 缓存滞后
   if (card.type === 'json-patch' && card.prevSchema?.trim() && card.content?.trim()) {
@@ -79,6 +96,11 @@ export function rebuildSchemaFromCard(card: ISchemaCardLikeMessage): Record<stri
   return null;
 }
 
+/**
+ * 判断卡片是否具备可还原 schema 的最低信息（含 json-patch 的 prevSchema + content）
+ * @param card 版本卡片消息
+ * @returns 是否可尝试还原 schema
+ */
 function canResolveSchemaFromCard(card: ISchemaCardLikeMessage): boolean {
   if (resolveSchemaStringFromCard(card)) {
     return true;
@@ -204,6 +226,12 @@ export function findLatestSchemaCardInConversation(
   return null;
 }
 
+/**
+ * 补全 pending AI 卡片的 schema 快照、prevSchema 与 generatedTime
+ * @param card 流式生成中的 AI schema 卡片
+ * @param options.schema 最终 schema，缺省时从卡片内容还原
+ * @param options.prevSchema 变更前 schema 文本
+ */
 function applyPendingCardFinalization(
   card: IStreamingSchemaCardMessage,
   options: { schema?: unknown; prevSchema?: string },
@@ -266,7 +294,11 @@ export function repairAllStalePendingSchemaCards(messages: ChatMessage[] | undef
   return updated;
 }
 
-/** 从会话消息中反向查找最近一条含 schema 的卡片 */
+/**
+ * 从会话消息中反向查找最近一条可解析的 schema 版本
+ * @param messages 当前会话消息列表
+ * @returns 最近 schema 信息（含 cardMessage），未找到时返回 null
+ */
 export function findLatestSchemaInConversation(
   messages: ChatMessage[] | undefined,
 ): ILatestSchemaInConversation | null {
@@ -302,7 +334,11 @@ export function findLatestSchemaInConversation(
   return null;
 }
 
-/** 从会话消息还原右侧预览所需的 schema 对象 */
+/**
+ * 从会话消息还原右侧预览所需的 schema 对象与 cardId
+ * @param messages 当前会话消息列表
+ * @returns 可渲染 schema 与 cardId，无法还原时返回 null
+ */
 export function resolveRenderableSchemaFromMessages(
   messages: ChatMessage[] | undefined,
 ): { schema: Record<string, unknown>; cardId: string } | null {

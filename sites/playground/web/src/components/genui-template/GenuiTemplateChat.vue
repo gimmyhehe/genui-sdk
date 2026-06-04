@@ -172,6 +172,11 @@ const schemaCardRenderer = async (props: any) => {
   }
 };
 
+/**
+ * 判断 patch 操作是否为流式未完成的 add/replace（含 id、path、value）
+ * @param operation jsonPatch 单条操作
+ * @returns 是否为可流式处理的 incomplete 操作
+ */
 const isStreamOperation = (operation: any) => {
   return (
     (operation.op === 'add' || operation.op === 'replace')
@@ -242,6 +247,11 @@ const jsonPatchRenderer = async (props: any) => {
   }
 };
 
+/**
+ * 按消息索引获取其中的 schema 版本卡片（含 schema-manual）
+ * @param index 消息在列表中的索引
+ * @returns 匹配的版本卡片，未找到时返回空对象占位
+ */
 const getCardMessageByIndex = (index: number) => {
   return (
     (messages.value[index]?.messages as IMessageItem[] | undefined)?.find(
@@ -255,6 +265,10 @@ const getCardMessageByIndex = (index: number) => {
   );
 };
 
+/**
+ * 重新生成：截断消息至指定卡片，重置 schema 状态并对齐 cardId
+ * @param index 目标卡片所在消息索引
+ */
 const handleRefresh = ({ index }: { index: number }) => {
   const { messages, send } = messageManager.value;
   const cardMessage = getCardMessageByIndex(index);

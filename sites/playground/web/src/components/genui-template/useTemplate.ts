@@ -31,6 +31,12 @@ const currentPreviewSchemaComplete = ref(true);
 const currentCardId = ref<string>('');
 const DEFAULT_TEMPLATE_TITLE = '新模板';
 
+/**
+ * 从会话消息还原当前生效 schema 与 preview 状态
+ * @param messages 当前会话消息列表
+ * @param options.clearIfMissing 无可用 schema 时是否清空 currentSchema / preview
+ * @returns 是否成功还原 schema
+ */
 function applySchemaFromMessages(
   messages: ChatMessage[] | undefined,
   options: { clearIfMissing?: boolean } = {},
@@ -277,12 +283,19 @@ export default function useTemplate(options?: UseTemplateOptions) {
     });
   });
 
+  /**
+   * 获取模板聊天 API 配置（url、llm、当前 schema）
+   * @returns 模板聊天请求配置
+   */
   const getTemplateChatConfig = () => ({
     url: templateChatUrl,
     llmConfig: templateLlmConfig,
     templateSchema: currentSchema.value,
   });
 
+  /**
+   * 持久化当前会话列表到 IndexedDB
+   */
   const saveConversations = () => {
     conversation.value?.saveConversations();
   };

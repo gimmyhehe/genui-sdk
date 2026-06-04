@@ -23,11 +23,21 @@ export interface ISchemaVersionHistoryEntry {
 
 const MS_PER_DAY = 86400000;
 
+/**
+ * 取本地时区某时刻所在日的 0 点毫秒时间戳
+ * @param timeMs 毫秒时间戳
+ * @returns 当日 0 点的毫秒时间戳
+ */
 const startOfLocalDay = (timeMs: number) => {
   const d = new Date(timeMs);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 };
 
+/**
+ * 数字补零为两位字符串
+ * @param n 待格式化的数字
+ * @returns 两位字符串
+ */
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
 /**
@@ -84,6 +94,13 @@ export function getHistoryTimeGroupLabel(createdAtMs: number, nowMs: number = Da
   return '更早';
 }
 
+/**
+ * 生成历史条目副标题描述
+ * @param card 版本卡片消息
+ * @param options.isLatest 是否为会话最新版本
+ * @param options.isPending 是否仍在流式生成中
+ * @returns 展示用描述文本
+ */
 function buildDescription(
   card: ISchemaCardLikeMessage,
   options: { isLatest: boolean; isPending: boolean },
@@ -103,6 +120,11 @@ function buildDescription(
   return card.input?.trim() || 'AI 生成版本';
 }
 
+/**
+ * 根据卡片类型推断历史条目作者信息
+ * @param card 版本卡片消息
+ * @returns 作者标签与类型（用户 / AI）
+ */
 function buildAuthor(card: ISchemaCardLikeMessage): { authorLabel: string; authorType: 'user' | 'ai' } {
   if (card.type === 'schema-manual') {
     return { authorLabel: '用户', authorType: 'user' };

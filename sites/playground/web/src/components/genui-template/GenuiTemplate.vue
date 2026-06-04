@@ -159,10 +159,16 @@ const schemaEditorShowDiffView = computed(() => {
   return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
 });
 
+/**
+ * 切换右侧 schema 版本历史面板显隐
+ */
 const toggleSchemaHistoryPanel = () => {
   schemaHistoryVisible.value = !schemaHistoryVisible.value;
 };
 
+/**
+ * 关闭 schema 版本历史面板
+ */
 const closeSchemaHistoryPanel = () => {
   schemaHistoryVisible.value = false;
 };
@@ -242,7 +248,7 @@ const syncSchemaEditorBaseline = () => {
 };
 
 /**
- * 丢弃未保存的 JSON 编辑，恢复 preview（及已生效 schema）到 baseline
+ * 丢弃未保存的 JSON 编辑，恢复 preview 到 baseline
  */
 const revertUnsavedSchemaEditorChanges = () => {
   if (!hasUnsavedSchemaEditorChanges()) {
@@ -291,6 +297,9 @@ const editorOptions = computed(() => {
   };
 });
 
+/**
+ * 切换桌面端内联 JSON 编辑器显隐；关闭时丢弃未保存修改
+ */
 const toggleSchemaEditor = () => {
   if (schemaEditorVisible.value) {
     revertUnsavedSchemaEditorChanges();
@@ -303,6 +312,9 @@ const toggleSchemaEditor = () => {
   }
 };
 
+/**
+ * 关闭 JSON 编辑器视图（桌面 / 移动端），并重置 diff 与抽屉状态
+ */
 const closeSchemaEditorView = () => {
   revertUnsavedSchemaEditorChanges();
   schemaEditorVisible.value = false;
@@ -312,11 +324,17 @@ const closeSchemaEditorView = () => {
   mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
 };
 
+/**
+ * 关闭右侧 schema 预览区及关联编辑器
+ */
 const closeRendererPanel = () => {
   rendererPanelVisible.value = false;
   closeSchemaEditorView();
 };
 
+/**
+ * 移动端抽屉遮罩点击：若 JSON 层已打开则先关闭并丢弃未保存修改
+ */
 const onMobileSheetMaskClick = () => {
   if (mobileSchemaJsonEditorOpen.value) {
     handleMobileJsonEditorOpen(false);
@@ -340,9 +358,18 @@ const mobileSheetPanelStyle = computed(() => ({
   height: `${mobileSheetHeightVh.value}vh`,
 }));
 
+/**
+ * 将移动端抽屉高度限制在允许范围内
+ * @param heightVh 目标高度（vh）
+ * @returns 钳制后的高度（vh）
+ */
 const clampMobileSheetHeight = (heightVh: number) =>
   Math.min(MOBILE_SHEET_MAX_HEIGHT_VH, Math.max(MOBILE_SHEET_MIN_HEIGHT_VH, heightVh));
 
+/**
+ * 移动端抽屉拖拽过程中更新面板高度
+ * @param event touchmove 事件
+ */
 const handleMobileSheetDragMove = (event: TouchEvent) => {
   if (!mobileSheetDragging.value) {
     return;
@@ -357,12 +384,18 @@ const handleMobileSheetDragMove = (event: TouchEvent) => {
   event.preventDefault();
 };
 
+/**
+ * 移除移动端抽屉拖拽相关的全局 touch 监听
+ */
 const removeMobileSheetDragListeners = () => {
   window.removeEventListener('touchmove', handleMobileSheetDragMove);
   window.removeEventListener('touchend', handleMobileSheetDragEnd);
   window.removeEventListener('touchcancel', handleMobileSheetDragEnd);
 };
 
+/**
+ * 移动端抽屉拖拽结束：解除监听并钳制最终高度
+ */
 function handleMobileSheetDragEnd() {
   if (!mobileSheetDragging.value) {
     return;
@@ -372,6 +405,10 @@ function handleMobileSheetDragEnd() {
   mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetHeightVh.value);
 }
 
+/**
+ * 移动端抽屉顶部拖拽条 touchstart：开始调整面板高度
+ * @param event touchstart 事件
+ */
 const onMobileSheetGrabTouchStart = (event: TouchEvent) => {
   const touch = event.touches[0];
   if (!touch) {
@@ -446,7 +483,7 @@ const toggleSchemaVersion = (
 };
 
 /**
- * 将当前预览的历史版本应用为生效 schema，写入版本卡片并退出 diff / 只读态
+ * 将当前预览的历史版本应用为生效 schema，写入 schema-manual 卡片并退出 diff / 只读态
  */
 const applyCurrentVersion = () => {
   if (!showApplyVersionButton.value) {
@@ -527,7 +564,7 @@ const handleSaveSchemaEditor = async () => {
 };
 
 /**
- * 恢复预览与生效 schema 为会话最新版本
+ * 恢复预览与生效 schema 为会话最新版本，并退出历史 diff 态
  */
 const resetToLatestVersion = () => {
   const conversationState = templateConversationState.value;
@@ -575,7 +612,10 @@ watch(
   { deep: true },
 );
 
-// 按 Esc：移动端先关 JSON 第二层，再关整个抽屉
+/**
+ * Esc 键关闭 JSON 编辑器：移动端先关 JSON 层，再关整个抽屉
+ * @param event 键盘事件
+ */
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     if (isMobile.value && schemaEditorVisible.value && mobileSchemaJsonEditorOpen.value) {
