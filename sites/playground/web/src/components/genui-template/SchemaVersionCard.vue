@@ -7,6 +7,7 @@ import useTemplate from './useTemplate';
 import { useIsMobile } from '../../use-mobile';
 import docCardIcon from '../../assets/images/card.svg';
 import docEditIcon from '../../assets/images/card-edit.svg';
+import docIncrementalEditorIcon from '../../assets/images/card-manual-editor.svg';
 
 const TinyIconRichTextCodeView = iconRichTextCodeView();
 
@@ -37,6 +38,9 @@ const cardTitle = computed(() => {
 const docIcon = computed(() => {
   if (props.type === 'schema-card') {
     return docCardIcon;
+  }
+  if (props.type === 'schema-manual') {
+    return docIncrementalEditorIcon;
   }
   return docEditIcon;
 });
