@@ -204,17 +204,17 @@ const jsonPatchRenderer = async (props: any) => {
     }
 
     const { value, state } = await textToJson(content);
-    if (state !== 'successful-parse'
-      && state !== 'repaired-parse' // 允许流式处理
+    if (state !== PARSE_PARTIAL_JSON_STATE.SUCCESSFUL_PARSE
+      && state !== PARSE_PARTIAL_JSON_STATE.REPAIRED_PARSE // 允许流式处理
     ) return;
-    const isComplete = state === 'successful-parse';
+    const isSuccessfulParse = state === PARSE_PARTIAL_JSON_STATE.SUCCESSFUL_PARSE;
     let lastOperationComplete = true;
 
     const valid = validateJsonPatch(value as any);
     if (!valid) return;
 
     const operations = value as any[];
-    if (!isComplete) {
+    if (!isSuccessfulParse) {
       const lastOperation = operations[operations.length - 1];
       if (!isStreamOperation(lastOperation)) {
         operations.pop();
@@ -237,8 +237,8 @@ const jsonPatchRenderer = async (props: any) => {
       return;
     }
 
-    setCurrentPreviewSchema(generateIdForComponents(targetSchema), isComplete || lastOperationComplete);
-    if (isComplete || lastOperationComplete) {
+    setCurrentPreviewSchema(generateIdForComponents(targetSchema), isSuccessfulParse || lastOperationComplete);
+    if (isSuccessfulParse || lastOperationComplete) {
       setCurrentSchema(targetSchema);
     }
   } catch (error) {
