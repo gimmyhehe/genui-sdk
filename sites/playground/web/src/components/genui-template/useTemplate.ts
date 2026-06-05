@@ -14,6 +14,7 @@ import {
   syncManualCardLatestFields,
   manualEditToCardSnapshot,
   repairAllStalePendingSchemaCards,
+  normalizeManualSchemaSaveMessages,
 } from './template-chat-utils';
 
 const conversation = shallowRef<ReturnType<typeof useConversation> | null>(null);
@@ -106,7 +107,9 @@ export default function useTemplate(options?: UseTemplateOptions) {
             conversation.value!.saveConversations();
           }
           const loadedMessages = conversation.value!.getCurrentConversation()?.messages;
-          if (repairAllStalePendingSchemaCards(loadedMessages)) {
+          const repairedPending = repairAllStalePendingSchemaCards(loadedMessages);
+          const normalizedManual = normalizeManualSchemaSaveMessages(loadedMessages);
+          if (repairedPending || normalizedManual) {
             conversation.value!.saveConversations();
           }
           // IndexedDB 加载完成后再恢复 schema，避免早于 GenuiTemplate onMounted 的空窗期
@@ -361,7 +364,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
       };
 
       const manualSaveMessage = {
-        role: 'user',
+        role: 'assistant',
         content: '',
         messageId: cardId,
         messages: [cardMessage],

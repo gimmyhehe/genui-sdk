@@ -7,14 +7,32 @@ import type { IMessageItem } from '../chat.types';
  * @returns 是否为手动保存的版本消息
  */
 export function isManualSchemaSaveMessage(message: ChatMessage): boolean {
-  if (message.role !== 'user') {
-    return false;
-  }
   const items = (message as { messages?: IMessageItem[] }).messages;
   if (!Array.isArray(items) || items.length === 0) {
     return false;
   }
   return items.every((item) => item.type === 'schema-manual');
+}
+
+/**
+ * 将历史会话中手动保存版本消息统一为 assistant 侧展示（兼容旧数据 role=user）
+ * @param messages 完整会话消息列表
+ * @returns 是否发生过修正
+ */
+export function normalizeManualSchemaSaveMessages(messages: ChatMessage[] | undefined): boolean {
+  if (!messages?.length) {
+    return false;
+  }
+
+  let changed = false;
+  for (const message of messages) {
+    if (isManualSchemaSaveMessage(message) && message.role === 'user') {
+      message.role = 'assistant';
+      changed = true;
+    }
+  }
+
+  return changed;
 }
 
 /**

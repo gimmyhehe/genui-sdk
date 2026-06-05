@@ -570,6 +570,7 @@ onUnmounted(() => {
   }
 }
 
+:deep(.tr-bubble.placement-start:has(.schema-version-card)),
 :deep(.tr-bubble.placement-end:has(.schema-version-card)) {
   .tr-bubble__content {
     padding: 0;
