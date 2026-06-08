@@ -68,7 +68,8 @@ async function fetchUrlWithRedirectGuard(
  */
 export const fetchAgentCardHandler = async (req: Request, res: Response): Promise<void> => {
   try {
-    const body = JSON.parse(await getRawBody(req, { encoding: 'utf-8' }));
+    const rawBody = await getRawBody(req, { encoding: 'utf-8', limit: '16kb' });
+    const body = JSON.parse(rawBody);
     const requestedUrl = (body?.url || '').trim();
 
     if (!requestedUrl) {
