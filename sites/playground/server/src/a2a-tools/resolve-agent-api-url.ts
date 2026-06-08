@@ -9,16 +9,22 @@
  * 因此 `api.url` 始终是最高优先级来源。
  */
 
+import { resolveAgentProtocolVersion } from './protocol/index.js';
+
 type AgentInterfaceLike = {
   url?: string;
   protocolBinding?: string;
   protocol_binding?: string;
+  protocolVersion?: string;
+  protocol_version?: string;
 };
 
 export type AgentUrlSource = {
-  api?: { url?: string; type?: string };
+  api?: { url?: string; type?: string; version?: string };
   supportedInterfaces?: AgentInterfaceLike[];
   supported_interfaces?: AgentInterfaceLike[];
+  protocolVersion?: string;
+  url?: string;
 };
 
 /**
@@ -51,7 +57,9 @@ export function resolveAgentApiUrl(source: AgentUrlSource | null | undefined): s
  * @param card - 原始 Agent Card JSON
  * @returns 带 api.url 的 Agent Card 副本
  */
-export function normalizeAgentCard<T extends Record<string, unknown>>(card: T): T & { api: { url: string } } {
+export function normalizeAgentCard<T extends Record<string, unknown>>(
+  card: T,
+): T & { api: { url: string; type: string; version: string } } {
   const apiUrl = resolveAgentApiUrl(card as AgentUrlSource);
   const existingApi =
     card.api && typeof card.api === 'object' && !Array.isArray(card.api)
@@ -67,6 +75,7 @@ export function normalizeAgentCard<T extends Record<string, unknown>>(card: T): 
     (existingApi.type as string | undefined) ||
     (typeof protocolBinding === 'string' ? protocolBinding : undefined) ||
     'JSONRPC';
+  const protocolVersion = resolveAgentProtocolVersion(card as AgentUrlSource);
 
   return {
     ...card,
@@ -74,6 +83,7 @@ export function normalizeAgentCard<T extends Record<string, unknown>>(card: T): 
       ...existingApi,
       url: apiUrl,
       type: apiType,
+      version: protocolVersion,
     },
   };
 }

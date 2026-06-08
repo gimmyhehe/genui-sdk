@@ -1,5 +1,12 @@
-import { randomUUID } from 'node:crypto';
 import type { PlaygroundAgentConfig } from './agent-tools.js';
+import {
+  extractA2aResponseText,
+  getA2aProtocolAdapter,
+  getProtocolVersionsToTry,
+  isRetryableProtocolRpcError,
+  resolveAgentProtocolVersion,
+  type A2aProtocolVersion,
+} from './protocol/index.js';
 import { resolveAgentApiUrl } from './resolve-agent-api-url.js';
 
 type AgentInvokeResult =
@@ -17,6 +24,10 @@ type AgentAuthRecord = PlaygroundAgentConfig & {
   authentication?: { schemes?: string[] };
   securitySchemes?: Record<string, { httpAuthSecurityScheme?: { scheme?: string } }>;
 };
+
+type RpcAttemptResult =
+  | { ok: true; text: string }
+  | { ok: false; retryable: boolean; error: AgentInvokeResult };
 
 /**
  * 从 Agent Card 或 metadata 推断认证方式（Bearer / API Key）。
@@ -54,7 +65,7 @@ function inferAuthType(
 /**
  * 构造 A2A JSON-RPC 请求所需的 HTTP 头（含可选 Bearer / API Key）。
  */
-function buildA2aRequestHeaders(
+function buildBaseA2aRequestHeaders(
   agent: AgentAuthRecord,
   metadata?: Record<string, unknown>,
 ): Record<string, string> {
@@ -79,103 +90,114 @@ function buildA2aRequestHeaders(
 }
 
 /**
- * 构造 A2A JSON-RPC 2.0 SendMessage 请求体。
+ * 使用指定协议适配器发起一次 A2A JSON-RPC 调用。
  *
+ * @param agent - Playground Agent 配置
+ * @param endpoint - RPC 端点 URL
  * @param input - 用户自然语言输入
- * @returns JSON-RPC 请求对象
+ * @param version - 本次尝试的协议版本
+ * @param baseHeaders - 基础 HTTP 头（认证等）
+ * @param abortSignal - 可选取消信号
+ * @returns 成功返回文本，失败时标记是否可 fallback 到其他已启用版本
  */
-function buildSendMessageRequest(input: string): Record<string, unknown> {
-  return {
-    jsonrpc: '2.0',
-    id: randomUUID(),
-    method: 'SendMessage',
-    params: {
-      message: {
-        messageId: randomUUID(),
-        role: 'user',
-        parts: [{ kind: 'text', text: input }],
+async function invokeA2aAgentOnce(
+  agent: PlaygroundAgentConfig,
+  endpoint: string,
+  input: string,
+  version: A2aProtocolVersion,
+  baseHeaders: Record<string, string>,
+  abortSignal?: AbortSignal,
+): Promise<RpcAttemptResult> {
+  const adapter = getA2aProtocolAdapter(version);
+  if (!adapter) {
+    return {
+      ok: false,
+      retryable: false,
+      error: {
+        type: 'agent-function-call-error',
+        agent: { name: agent.name },
+        message: `A2A 协议版本 ${version} 未启用`,
       },
+    };
+  }
+
+  const headers = adapter.applyProtocolHeaders(baseHeaders);
+  const body = adapter.buildSendMessageRequest(input);
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    signal: abortSignal,
+    body: JSON.stringify(body),
+  });
+
+  const rawText = await res.text();
+  let payload: Record<string, unknown> | null = null;
+
+  try {
+    payload = rawText.trim() ? (JSON.parse(rawText) as Record<string, unknown>) : null;
+  } catch {
+    return {
+      ok: false,
+      retryable: false,
+      error: {
+        type: 'agent-function-call-error',
+        agent: { name: agent.name },
+        status: res.status,
+        statusText: res.statusText,
+        message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
+      },
+    };
+  }
+
+  if (!res.ok) {
+    return {
+      ok: false,
+      retryable: false,
+      error: {
+        type: 'agent-function-call-error',
+        agent: { name: agent.name },
+        status: res.status,
+        statusText: res.statusText,
+        message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
+      },
+    };
+  }
+
+  const rpcError = payload?.error as { code?: number; message?: string } | undefined;
+  if (rpcError) {
+    return {
+      ok: false,
+      retryable: isRetryableProtocolRpcError(rpcError),
+      error: {
+        type: 'agent-function-call-error',
+        agent: { name: agent.name },
+        message: rpcError.message || JSON.stringify(rpcError),
+      },
+    };
+  }
+
+  if ('result' in (payload || {})) {
+    const text = extractA2aResponseText(payload?.result);
+    return {
+      ok: true,
+      text: text || JSON.stringify(payload?.result),
+    };
+  }
+
+  return {
+    ok: false,
+    retryable: false,
+    error: {
+      type: 'agent-function-call-error',
+      agent: { name: agent.name },
+      message: 'A2A 响应缺少 result 字段',
     },
   };
 }
 
 /**
- * 从 A2A Part 对象中提取可读文本。
- */
-function extractTextFromPart(part: unknown): string {
-  if (!part || typeof part !== 'object') {
-    return '';
-  }
-  const record = part as Record<string, unknown>;
-  if (typeof record.text === 'string' && record.text.trim()) {
-    return record.text;
-  }
-  if (typeof record.content === 'string' && record.content.trim()) {
-    return record.content;
-  }
-  return '';
-}
-
-/**
- * 从 A2A JSON-RPC result 中提取 agent 回复文本（兼容多种返回结构）。
- */
-function extractA2aResponseText(result: unknown): string {
-  if (result == null) {
-    return '';
-  }
-  if (typeof result === 'string') {
-    return result;
-  }
-  if (typeof result !== 'object') {
-    return String(result);
-  }
-
-  const record = result as Record<string, unknown>;
-  const textParts: string[] = [];
-
-  const collectParts = (parts: unknown) => {
-    if (!Array.isArray(parts)) {
-      return;
-    }
-    for (const part of parts) {
-      const text = extractTextFromPart(part);
-      if (text) {
-        textParts.push(text);
-      }
-    }
-  };
-
-  if (record.message && typeof record.message === 'object') {
-    collectParts((record.message as Record<string, unknown>).parts);
-  }
-
-  collectParts(record.parts);
-
-  if (Array.isArray(record.artifacts)) {
-    for (const artifact of record.artifacts) {
-      if (artifact && typeof artifact === 'object') {
-        collectParts((artifact as Record<string, unknown>).parts);
-      }
-    }
-  }
-
-  const status = record.status;
-  if (status && typeof status === 'object') {
-    const statusMessage = (status as Record<string, unknown>).message;
-    if (statusMessage && typeof statusMessage === 'object') {
-      collectParts((statusMessage as Record<string, unknown>).parts);
-    }
-  }
-
-  if (textParts.length) {
-    return textParts.join('\n');
-  }
-
-  return JSON.stringify(result);
-}
-
-/**
- * 调用 A2A Agent：通过 JSON-RPC SendMessage 与远程 Agent 交互。
+ * 调用 A2A Agent：按 Card 推断协议版本，并在已启用版本间按需 fallback。
  *
  * @param agent - Playground Agent 配置
  * @param input - 要转交的自然语言任务
@@ -199,63 +221,44 @@ export async function invokeA2aAgent(
     };
   }
 
-  const headers = buildA2aRequestHeaders(agentRecord, metadata);
+  const preferredVersion = resolveAgentProtocolVersion(agent);
+  const versionsToTry = getProtocolVersionsToTry(preferredVersion);
+  const baseHeaders = buildBaseA2aRequestHeaders(agentRecord, metadata);
+
+  let lastError: AgentInvokeResult | null = null;
 
   try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      signal: abortSignal,
-      body: JSON.stringify(buildSendMessageRequest(input)),
-    });
+    for (let index = 0; index < versionsToTry.length; index += 1) {
+      const version = versionsToTry[index];
+      const attempt = await invokeA2aAgentOnce(
+        agent,
+        endpoint,
+        input,
+        version,
+        baseHeaders,
+        abortSignal,
+      );
 
-    const rawText = await res.text();
-    let payload: Record<string, unknown> | null = null;
+      if (attempt.ok) {
+        return { type: 'text', text: attempt.text };
+      }
 
-    try {
-      payload = rawText.trim() ? (JSON.parse(rawText) as Record<string, unknown>) : null;
-    } catch {
-      return {
+      lastError = attempt.error;
+      const hasNextVersion = index < versionsToTry.length - 1;
+      if (attempt.retryable && hasNextVersion) {
+        continue;
+      }
+
+      return attempt.error;
+    }
+
+    return (
+      lastError || {
         type: 'agent-function-call-error',
         agent: { name: agent.name },
-        status: res.status,
-        statusText: res.statusText,
-        message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
-      };
-    }
-
-    if (!res.ok) {
-      return {
-        type: 'agent-function-call-error',
-        agent: { name: agent.name },
-        status: res.status,
-        statusText: res.statusText,
-        message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
-      };
-    }
-
-    const rpcError = payload?.error as { code?: number; message?: string } | undefined;
-    if (rpcError) {
-      return {
-        type: 'agent-function-call-error',
-        agent: { name: agent.name },
-        message: rpcError.message || JSON.stringify(rpcError),
-      };
-    }
-
-    if ('result' in (payload || {})) {
-      const text = extractA2aResponseText(payload?.result);
-      return {
-        type: 'text',
-        text: text || JSON.stringify(payload?.result),
-      };
-    }
-
-    return {
-      type: 'agent-function-call-error',
-      agent: { name: agent.name },
-      message: 'A2A 响应缺少 result 字段',
-    };
+        message: 'A2A 调用失败',
+      }
+    );
   } catch (error: any) {
     const aborted = error?.name === 'AbortError' || abortSignal?.aborted;
     return {
