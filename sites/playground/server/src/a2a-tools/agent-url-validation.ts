@@ -1,16 +1,20 @@
+import dns from 'node:dns/promises';
 import net from 'node:net';
 
 /**
- * 去掉 URL hostname 上可能残留的 IPv6 方括号。
+ * 规范化 URL hostname：去掉 IPv6 方括号与末尾根域点。
  *
  * @param host - URL hostname
  * @returns 规范化后的 host
  */
 function normalizeHostname(host: string): string {
-  if (host.startsWith('[') && host.endsWith(']')) {
-    return host.slice(1, -1);
+  const trimmed = host.endsWith('.') ? host.slice(0, -1) : host;
+
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    return trimmed.slice(1, -1);
   }
-  return host;
+
+  return trimmed;
 }
 
 /**
@@ -114,14 +118,14 @@ function isPrivateIpv6(host: string): boolean {
 /**
  * 判断 host 是否为本地/内网地址（只做显式阻断，非完整 RFC 覆盖）。
  *
- * @param host - URL hostname
+ * @param host - URL hostname 或 IP 字符串
  * @returns 是否为本地或内网地址
  */
 export function isPrivateOrLocalHost(host: string): boolean {
   const normalizedHost = normalizeHostname(host);
   const lower = normalizedHost.toLowerCase();
 
-  if (lower === 'localhost' || lower === '127.0.0.1' || lower === '::1') {
+  if (lower === 'localhost' || lower.endsWith('.localhost') || lower === '127.0.0.1' || lower === '::1') {
     return true;
   }
 
@@ -138,10 +142,44 @@ export function isPrivateOrLocalHost(host: string): boolean {
 }
 
 /**
- * 校验 Agent URL，仅允许公网 http/https 目标（用于 SSRF 防护）。
+ * 解析 hostname 对应的 A/AAAA 记录；字面量 IP 直接返回自身。
+ *
+ * @param hostname - 已规范化的 hostname
+ * @returns 解析到的 IP 列表，无记录时返回空数组
+ */
+async function resolveHostAddresses(hostname: string): Promise<string[]> {
+  const normalized = normalizeHostname(hostname);
+
+  if (net.isIP(normalized)) {
+    return [normalized];
+  }
+
+  const addresses: string[] = [];
+
+  try {
+    addresses.push(...(await dns.resolve4(normalized)));
+  } catch (error: any) {
+    if (error?.code !== 'ENOTFOUND' && error?.code !== 'ENODATA') {
+      throw error;
+    }
+  }
+
+  try {
+    addresses.push(...(await dns.resolve6(normalized)));
+  } catch (error: any) {
+    if (error?.code !== 'ENOTFOUND' && error?.code !== 'ENODATA') {
+      throw error;
+    }
+  }
+
+  return addresses;
+}
+
+/**
+ * 校验 Agent URL 的字面量 hostname（同步，不含 DNS 解析）。
  *
  * @param urlStr - 待校验 URL
- * @returns 是否允许访问
+ * @returns 是否通过字面量校验
  */
 export function isAllowedAgentUrl(urlStr: string): boolean {
   try {
@@ -156,6 +194,36 @@ export function isAllowedAgentUrl(urlStr: string): boolean {
     }
 
     return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 校验 Agent URL：字面量 hostname 校验 + DNS 解析结果不得为内网/本地地址。
+ *
+ * 用于实际发起 fetch 前的 SSRF 防护（含 DNS rebinding 场景）。
+ *
+ * @param urlStr - 待校验 URL
+ * @returns 是否允许访问
+ */
+export async function isAllowedAgentUrlResolved(urlStr: string): Promise<boolean> {
+  try {
+    if (!isAllowedAgentUrl(urlStr)) {
+      return false;
+    }
+
+    const hostname = normalizeHostname(new URL(urlStr).hostname);
+    if (net.isIP(hostname)) {
+      return true;
+    }
+
+    const addresses = await resolveHostAddresses(hostname);
+    if (addresses.length === 0) {
+      return false;
+    }
+
+    return addresses.every((address) => !isPrivateOrLocalHost(address));
   } catch {
     return false;
   }

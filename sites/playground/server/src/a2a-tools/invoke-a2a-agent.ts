@@ -1,5 +1,5 @@
 import type { PlaygroundAgentConfig } from './agent-tools.js';
-import { isAllowedAgentUrl } from './agent-url-validation.js';
+import { isAllowedAgentUrlResolved } from './agent-url-validation.js';
 import { getA2aBindingTransport } from './protocol/bindings/index.js';
 import {
   getA2aProtocolAdapter,
@@ -108,7 +108,7 @@ export async function invokeA2aAgent(
     };
   }
 
-  if (!isDevelopment && !isAllowedAgentUrl(endpoint)) {
+  if (!isDevelopment && !(await isAllowedAgentUrlResolved(endpoint))) {
     return {
       type: 'a2a-agent-error',
       message: `Agent "${agent.name}" 的 url 不允许访问（已拦截本地或内网地址）`,

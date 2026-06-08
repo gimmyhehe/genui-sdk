@@ -1,6 +1,6 @@
 import type { Request, Response as ExpressResponse } from 'express';
 import getRawBody from 'raw-body';
-import { isAllowedAgentUrl } from './agent-url-validation.js';
+import { isAllowedAgentUrlResolved } from './agent-url-validation.js';
 import { normalizeAgentCard } from './resolve-agent-api-url.js';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -46,7 +46,7 @@ async function fetchUrlWithRedirectGuard(
       }
 
       const nextUrl = new URL(location, currentUrl).toString();
-      if (!allowPrivate && !isAllowedAgentUrl(nextUrl)) {
+      if (!allowPrivate && !(await isAllowedAgentUrlResolved(nextUrl))) {
         throw new Error('重定向到不允许访问的地址');
       }
 
@@ -90,7 +90,7 @@ export const fetchAgentCardHandler = async (req: Request, res: ExpressResponse):
       return;
     }
 
-    if (!isDevelopment && !isAllowedAgentUrl(requestedUrl)) {
+    if (!isDevelopment && !(await isAllowedAgentUrlResolved(requestedUrl))) {
       res.send({ code: 403, message: '不允许访问本地或内网地址' });
       return;
     }
