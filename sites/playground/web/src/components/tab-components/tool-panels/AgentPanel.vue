@@ -137,7 +137,10 @@ const queryAgentCard = async () => {
   agentQueryController.value = controller;
 
   try {
-    const fetchAgentCardUrl = import.meta.env.VITE_FETCH_AGENT_CARD_URL;
+    const fetchAgentCardUrl = (import.meta.env.VITE_FETCH_AGENT_CARD_URL || '').trim();
+    if (!fetchAgentCardUrl) {
+      throw new Error('VITE_FETCH_AGENT_CARD_URL 环境变量未配置');
+    }
     const res = await fetch(fetchAgentCardUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

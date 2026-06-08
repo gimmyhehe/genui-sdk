@@ -1,4 +1,5 @@
 import type { PlaygroundAgentConfig } from './agent-tools.js';
+import { isAllowedAgentUrl } from './agent-url-validation.js';
 import { getA2aBindingTransport } from './protocol/bindings/index.js';
 import {
   getA2aProtocolAdapter,
@@ -8,6 +9,8 @@ import {
   resolveAgentProtocolVersion,
 } from './protocol/index.js';
 import { resolveAgentApiUrl } from './resolve-agent-api-url.js';
+
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 type AgentInvokeResult =
   | { type: 'text'; text: string }
@@ -20,16 +23,11 @@ type AgentInvokeResult =
       message: string;
     };
 
-type AgentAuthRecord = PlaygroundAgentConfig & {
-  authentication?: { schemes?: string[] };
-  securitySchemes?: Record<string, { httpAuthSecurityScheme?: { scheme?: string } }>;
-};
-
 /**
  * 从 Agent Card 或 metadata 推断认证方式（Bearer / API Key）。
  */
 function inferAuthType(
-  agent: AgentAuthRecord,
+  agent: PlaygroundAgentConfig,
   metadata?: Record<string, unknown>,
 ): 'bearer' | 'api_key' | null {
   const explicit = (agent.auth?.type || (metadata?.authType as string) || '').toLowerCase();
@@ -62,7 +60,7 @@ function inferAuthType(
  * 构造 A2A 请求所需的 HTTP 头（含可选 Bearer / API Key）。
  */
 function buildBaseA2aRequestHeaders(
-  agent: AgentAuthRecord,
+  agent: PlaygroundAgentConfig,
   metadata?: Record<string, unknown>,
 ): Record<string, string> {
   const headers: Record<string, string> = {
@@ -87,6 +85,8 @@ function buildBaseA2aRequestHeaders(
 /**
  * 调用 A2A Agent：按 Card 选择 binding 与协议版本，并在失败时自动 fallback。
  *
+ * Fallback 顺序：同一 binding 内先 exhaust 全部版本，再切换 binding（见内层/外层循环）。
+ *
  * @param agent - Playground Agent 配置
  * @param input - 要转交的自然语言任务
  * @param metadata - 可选 metadata（token、apiKey 等）
@@ -100,7 +100,6 @@ export async function invokeA2aAgent(
   abortSignal?: AbortSignal,
 ): Promise<AgentInvokeResult> {
   const endpoint = resolveAgentApiUrl(agent);
-  const agentRecord = agent as AgentAuthRecord;
 
   if (!endpoint) {
     return {
@@ -109,11 +108,18 @@ export async function invokeA2aAgent(
     };
   }
 
+  if (!isDevelopment && !isAllowedAgentUrl(endpoint)) {
+    return {
+      type: 'a2a-agent-error',
+      message: `Agent "${agent.name}" 的 url 不允许访问（已拦截本地或内网地址）`,
+    };
+  }
+
   const preferredBinding = resolveAgentProtocolBinding(agent);
   const preferredVersion = resolveAgentProtocolVersion(agent);
   const bindingsToTry = getProtocolBindingsToTry(preferredBinding);
   const versionsToTry = getProtocolVersionsToTry(preferredVersion);
-  const baseHeaders = buildBaseA2aRequestHeaders(agentRecord, metadata);
+  const baseHeaders = buildBaseA2aRequestHeaders(agent, metadata);
 
   let lastError: AgentInvokeResult | null = null;
 

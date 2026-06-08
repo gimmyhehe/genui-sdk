@@ -102,11 +102,6 @@ export function resolveAgentProtocolVersion(
     return clampToSupportedVersion(fromTopLevel);
   }
 
-  const interfaces = source.supportedInterfaces || source.supported_interfaces || [];
-  if (interfaces.length > 0 && !source.url) {
-    return clampToSupportedVersion('1.0');
-  }
-
   return clampToSupportedVersion(defaultVersion);
 }
 

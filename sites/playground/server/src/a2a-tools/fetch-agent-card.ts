@@ -1,9 +1,64 @@
 import type { Request, Response } from 'express';
 import getRawBody from 'raw-body';
-import { isAllowedAgentUrl } from './agent-tools.js';
+import { isAllowedAgentUrl } from './agent-url-validation.js';
 import { normalizeAgentCard } from './resolve-agent-api-url.js';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
+
+/** 拉取远程 Agent Card 的单次请求超时（毫秒）。 */
+const UPSTREAM_FETCH_TIMEOUT_MS = 10_000;
+
+/** 允许跟随的重定向最大跳数。 */
+const MAX_REDIRECT_HOPS = 5;
+
+/**
+ * 在 SSRF 防护下拉取 URL，手动处理重定向并对每一跳重新校验。
+ *
+ * @param startUrl - 初始 URL
+ * @param allowPrivate - 开发态是否允许内网地址
+ * @returns 非重定向的最终 HTTP 响应
+ */
+async function fetchUrlWithRedirectGuard(
+  startUrl: string,
+  allowPrivate: boolean,
+): Promise<Response> {
+  let currentUrl = startUrl;
+
+  for (let hop = 0; hop < MAX_REDIRECT_HOPS; hop += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), UPSTREAM_FETCH_TIMEOUT_MS);
+
+    let response: Response;
+    try {
+      response = await fetch(currentUrl, {
+        headers: { Accept: 'application/json' },
+        redirect: 'manual',
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location');
+      if (!location) {
+        throw new Error('重定向响应缺少 Location');
+      }
+
+      const nextUrl = new URL(location, currentUrl).toString();
+      if (!allowPrivate && !isAllowedAgentUrl(nextUrl)) {
+        throw new Error('重定向到不允许访问的地址');
+      }
+
+      currentUrl = nextUrl;
+      continue;
+    }
+
+    return response;
+  }
+
+  throw new Error('重定向次数过多');
+}
 
 /**
  * 服务端代理拉取 Agent Card，规避浏览器跨域限制，并规范化 api.url 字段。
@@ -39,9 +94,15 @@ export const fetchAgentCardHandler = async (req: Request, res: Response): Promis
       return;
     }
 
-    const fetchRes = await fetch(requestedUrl, {
-      headers: { Accept: 'application/json' },
-    });
+    let fetchRes: Response;
+    try {
+      fetchRes = await fetchUrlWithRedirectGuard(requestedUrl, isDevelopment);
+    } catch (error: any) {
+      const message = error?.name === 'AbortError' ? '获取 Agent Card 超时' : error?.message || String(error);
+      res.send({ code: 502, message });
+      return;
+    }
+
     const rawText = await fetchRes.text();
 
     if (!fetchRes.ok) {

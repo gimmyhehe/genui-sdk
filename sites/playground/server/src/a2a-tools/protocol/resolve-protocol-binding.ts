@@ -13,7 +13,7 @@ export function parseA2aProtocolBinding(raw: string | undefined | null): A2aProt
   }
 
   const normalized = raw.trim().toUpperCase().replace(/[\s_-]+/g, '');
-  if (normalized === 'JSONRPC' || normalized === 'JSON-RPC') {
+  if (normalized === 'JSONRPC') {
     return 'JSONRPC';
   }
   if (normalized === 'HTTP+JSON' || normalized === 'HTTPJSON' || normalized === 'REST') {

@@ -10,22 +10,19 @@
  */
 
 import { resolveAgentProtocolVersion } from './protocol/index.js';
+import type { AgentInterfaceLike, AgentProtocolSource } from './protocol/types.js';
 
-type AgentInterfaceLike = {
-  url?: string;
-  protocolBinding?: string;
-  protocol_binding?: string;
-  protocolVersion?: string;
-  protocol_version?: string;
-};
+export type AgentUrlSource = AgentProtocolSource;
 
-export type AgentUrlSource = {
-  api?: { url?: string; type?: string; version?: string };
-  supportedInterfaces?: AgentInterfaceLike[];
-  supported_interfaces?: AgentInterfaceLike[];
-  protocolVersion?: string;
-  url?: string;
-};
+/**
+ * 安全地将未知值转为 trim 后的 URL 字符串。
+ *
+ * @param value - 原始字段值
+ * @returns 合法字符串 URL，否则空字符串
+ */
+function trimUrlString(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
 
 /**
  * 从 Agent Card 或已保存的 Agent 配置中解析用于服务端调用的 API 基址。
@@ -39,16 +36,14 @@ export function resolveAgentApiUrl(source: AgentUrlSource | null | undefined): s
     return '';
   }
 
-  // Playground 内部约定：normalizeAgentCard 已将解析结果写入 api.url
-  const fromApi = (source.api?.url || '').trim();
+  const fromApi = trimUrlString(source.api?.url);
   if (fromApi) {
     return fromApi;
   }
 
-  // A2A 规范：supportedInterfaces 按优先级排序，取首个有 url 的
   const interfaces = source.supportedInterfaces || source.supported_interfaces || [];
-  const first = interfaces.find((item) => item?.url);
-  return first ? first.url.trim() : '';
+  const first = interfaces.find((item) => typeof item?.url === 'string' && item.url.trim());
+  return first ? trimUrlString(first.url) : '';
 }
 
 /**
@@ -67,8 +62,7 @@ export function normalizeAgentCard<T extends Record<string, unknown>>(
       : {};
 
   const interfaces = (card.supportedInterfaces || card.supported_interfaces || []) as AgentInterfaceLike[];
-  const matchedInterface =
-    interfaces.find((item) => item?.url === apiUrl);
+  const matchedInterface = interfaces.find((item) => trimUrlString(item?.url) === apiUrl);
 
   const protocolBinding = matchedInterface?.protocolBinding || matchedInterface?.protocol_binding;
   const apiType =

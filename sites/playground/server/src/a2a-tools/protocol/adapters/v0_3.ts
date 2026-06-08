@@ -34,6 +34,10 @@ export const a2aProtocolAdapterV03: A2aProtocolAdapter = {
     };
   },
 
+  /**
+   * 解析 A2A 0.3 HTTP+JSON SendMessage 路径。
+   * 若 api.url 已含 `/v1` 等版本段，则不再追加 `v1/` 前缀。
+   */
   resolveHttpSendMessagePath(baseUrl: string): string {
     if (/\/v\d+(?:\.\d+)*\/?$/i.test(baseUrl)) {
       return 'message:send';
