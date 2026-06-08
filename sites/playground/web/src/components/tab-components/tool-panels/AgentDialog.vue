@@ -74,7 +74,6 @@ function normalizeCapabilityEntry(item: unknown, fallbackTitle?: string): AgentC
   return { title: String(item) };
 }
 
-/** string[] 多为技能 id，通常无单独描述；对象可带 description / summary 等 */
 const agentCapabilityItems = computed((): AgentCapabilityViewItem[] => {
   const cap = props.agentCard?.capabilities;
   if (cap == null) {
@@ -174,14 +173,9 @@ const agentCapabilityItems = computed((): AgentCapabilityViewItem[] => {
           </ul>
           <div v-else class="agent-card-detail__cap-empty">未声明或为空</div>
         </div>
-        <div
-          v-if="agentCard.auth?.type && String(agentCard.auth.type).toLowerCase() !== 'none'"
-          class="agent-card-detail__auth"
-        >
-          <span class="agent-card-detail__block-label">认证</span>
-          <span class="agent-card-detail__auth-text">
-            {{ agentCard.auth.type }} · 工具调用时请在 metadata 中传入 token 或 apiKey
-          </span>
+        <div v-if="agentCard.api?.type" class="agent-card-detail__block">
+          <span class="agent-card-detail__block-label">Binding</span>
+          <div class="agent-card-detail__url">{{ agentCard.api.type }}</div>
         </div>
       </div>
     </div>
@@ -281,17 +275,6 @@ const agentCapabilityItems = computed((): AgentCapabilityViewItem[] => {
       background: #fff2f0;
       font-family: inherit;
     }
-  }
-
-  &__auth {
-    padding-top: 4px;
-  }
-
-  &__auth-text {
-    display: block;
-    font-size: 12px;
-    line-height: 1.5;
-    color: #595959;
   }
 
   &__cap-list {

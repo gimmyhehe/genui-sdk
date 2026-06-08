@@ -1,11 +1,11 @@
 import type { PlaygroundAgentConfig } from './agent-tools.js';
+import { getA2aBindingTransport } from './protocol/bindings/index.js';
 import {
-  extractA2aResponseText,
   getA2aProtocolAdapter,
+  getProtocolBindingsToTry,
   getProtocolVersionsToTry,
-  isRetryableProtocolRpcError,
+  resolveAgentProtocolBinding,
   resolveAgentProtocolVersion,
-  type A2aProtocolVersion,
 } from './protocol/index.js';
 import { resolveAgentApiUrl } from './resolve-agent-api-url.js';
 
@@ -24,10 +24,6 @@ type AgentAuthRecord = PlaygroundAgentConfig & {
   authentication?: { schemes?: string[] };
   securitySchemes?: Record<string, { httpAuthSecurityScheme?: { scheme?: string } }>;
 };
-
-type RpcAttemptResult =
-  | { ok: true; text: string }
-  | { ok: false; retryable: boolean; error: AgentInvokeResult };
 
 /**
  * 从 Agent Card 或 metadata 推断认证方式（Bearer / API Key）。
@@ -63,14 +59,13 @@ function inferAuthType(
 }
 
 /**
- * 构造 A2A JSON-RPC 请求所需的 HTTP 头（含可选 Bearer / API Key）。
+ * 构造 A2A 请求所需的 HTTP 头（含可选 Bearer / API Key）。
  */
 function buildBaseA2aRequestHeaders(
   agent: AgentAuthRecord,
   metadata?: Record<string, unknown>,
 ): Record<string, string> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
   };
 
@@ -90,114 +85,7 @@ function buildBaseA2aRequestHeaders(
 }
 
 /**
- * 使用指定协议适配器发起一次 A2A JSON-RPC 调用。
- *
- * @param agent - Playground Agent 配置
- * @param endpoint - RPC 端点 URL
- * @param input - 用户自然语言输入
- * @param version - 本次尝试的协议版本
- * @param baseHeaders - 基础 HTTP 头（认证等）
- * @param abortSignal - 可选取消信号
- * @returns 成功返回文本，失败时标记是否可 fallback 到其他已启用版本
- */
-async function invokeA2aAgentOnce(
-  agent: PlaygroundAgentConfig,
-  endpoint: string,
-  input: string,
-  version: A2aProtocolVersion,
-  baseHeaders: Record<string, string>,
-  abortSignal?: AbortSignal,
-): Promise<RpcAttemptResult> {
-  const adapter = getA2aProtocolAdapter(version);
-  if (!adapter) {
-    return {
-      ok: false,
-      retryable: false,
-      error: {
-        type: 'agent-function-call-error',
-        agent: { name: agent.name },
-        message: `A2A 协议版本 ${version} 未启用`,
-      },
-    };
-  }
-
-  const headers = adapter.applyProtocolHeaders(baseHeaders);
-  const body = adapter.buildSendMessageRequest(input);
-
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    signal: abortSignal,
-    body: JSON.stringify(body),
-  });
-
-  const rawText = await res.text();
-  let payload: Record<string, unknown> | null = null;
-
-  try {
-    payload = rawText.trim() ? (JSON.parse(rawText) as Record<string, unknown>) : null;
-  } catch {
-    return {
-      ok: false,
-      retryable: false,
-      error: {
-        type: 'agent-function-call-error',
-        agent: { name: agent.name },
-        status: res.status,
-        statusText: res.statusText,
-        message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
-      },
-    };
-  }
-
-  if (!res.ok) {
-    return {
-      ok: false,
-      retryable: false,
-      error: {
-        type: 'agent-function-call-error',
-        agent: { name: agent.name },
-        status: res.status,
-        statusText: res.statusText,
-        message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
-      },
-    };
-  }
-
-  const rpcError = payload?.error as { code?: number; message?: string } | undefined;
-  if (rpcError) {
-    return {
-      ok: false,
-      retryable: isRetryableProtocolRpcError(rpcError),
-      error: {
-        type: 'agent-function-call-error',
-        agent: { name: agent.name },
-        message: rpcError.message || JSON.stringify(rpcError),
-      },
-    };
-  }
-
-  if ('result' in (payload || {})) {
-    const text = extractA2aResponseText(payload?.result);
-    return {
-      ok: true,
-      text: text || JSON.stringify(payload?.result),
-    };
-  }
-
-  return {
-    ok: false,
-    retryable: false,
-    error: {
-      type: 'agent-function-call-error',
-      agent: { name: agent.name },
-      message: 'A2A 响应缺少 result 字段',
-    },
-  };
-}
-
-/**
- * 调用 A2A Agent：按 Card 推断协议版本，并在已启用版本间按需 fallback。
+ * 调用 A2A Agent：按 Card 选择 binding 与协议版本，并在失败时自动 fallback。
  *
  * @param agent - Playground Agent 配置
  * @param input - 要转交的自然语言任务
@@ -221,35 +109,61 @@ export async function invokeA2aAgent(
     };
   }
 
+  const preferredBinding = resolveAgentProtocolBinding(agent);
   const preferredVersion = resolveAgentProtocolVersion(agent);
+  const bindingsToTry = getProtocolBindingsToTry(preferredBinding);
   const versionsToTry = getProtocolVersionsToTry(preferredVersion);
   const baseHeaders = buildBaseA2aRequestHeaders(agentRecord, metadata);
 
   let lastError: AgentInvokeResult | null = null;
 
   try {
-    for (let index = 0; index < versionsToTry.length; index += 1) {
-      const version = versionsToTry[index];
-      const attempt = await invokeA2aAgentOnce(
-        agent,
-        endpoint,
-        input,
-        version,
-        baseHeaders,
-        abortSignal,
-      );
-
-      if (attempt.ok) {
-        return { type: 'text', text: attempt.text };
-      }
-
-      lastError = attempt.error;
-      const hasNextVersion = index < versionsToTry.length - 1;
-      if (attempt.retryable && hasNextVersion) {
+    for (const binding of bindingsToTry) {
+      const transport = getA2aBindingTransport(binding);
+      if (!transport) {
         continue;
       }
 
-      return attempt.error;
+      for (let versionIndex = 0; versionIndex < versionsToTry.length; versionIndex += 1) {
+        const version = versionsToTry[versionIndex];
+        const adapter = getA2aProtocolAdapter(version);
+        if (!adapter) {
+          continue;
+        }
+
+        const attempt = await transport.invoke({
+          baseUrl: endpoint,
+          adapter,
+          input,
+          headers: baseHeaders,
+          abortSignal,
+        });
+
+        if (attempt.ok) {
+          return { type: 'text', text: attempt.text };
+        }
+
+        lastError = {
+          type: 'agent-function-call-error',
+          agent: { name: agent.name },
+          status: attempt.status,
+          statusText: attempt.statusText,
+          message: attempt.message,
+        };
+
+        const hasNextVersion = versionIndex < versionsToTry.length - 1;
+        if (attempt.retryable && hasNextVersion) {
+          continue;
+        }
+
+        const bindingIndex = bindingsToTry.indexOf(binding);
+        const hasNextBinding = bindingIndex < bindingsToTry.length - 1;
+        if (attempt.retryable && hasNextBinding) {
+          break;
+        }
+
+        return lastError;
+      }
     }
 
     return (

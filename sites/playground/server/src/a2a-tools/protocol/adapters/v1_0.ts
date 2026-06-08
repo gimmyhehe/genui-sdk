@@ -5,12 +5,12 @@ import type { A2aProtocolAdapter } from '../types.js';
 const A2A_VERSION_HEADER = '1.0';
 
 /**
- * A2A 1.0 JSON-RPC 适配器。
+ * A2A 1.0 JSON-RPC / HTTP+JSON 适配器。
  */
 export const a2aProtocolAdapterV10: A2aProtocolAdapter = {
   version: '1.0',
 
-  buildSendMessageRequest(input: string): Record<string, unknown> {
+  buildJsonRpcSendMessageRequest(input: string): Record<string, unknown> {
     return {
       jsonrpc: '2.0',
       id: randomUUID(),
@@ -23,6 +23,20 @@ export const a2aProtocolAdapterV10: A2aProtocolAdapter = {
         },
       },
     };
+  },
+
+  buildHttpJsonSendMessageBody(input: string): Record<string, unknown> {
+    return {
+      message: {
+        messageId: randomUUID(),
+        role: 'ROLE_USER',
+        parts: [{ text: input, mediaType: 'text/plain' }],
+      },
+    };
+  },
+
+  resolveHttpSendMessagePath(_baseUrl: string): string {
+    return 'message:send';
   },
 
   applyProtocolHeaders(headers: Record<string, string>): Record<string, string> {

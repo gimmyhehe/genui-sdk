@@ -5,9 +5,13 @@ export { normalizeAgentCard, resolveAgentApiUrl } from './resolve-agent-api-url.
 export {
   A2A_PROTOCOL_CONFIG,
   getA2aProtocolAdapter,
+  getProtocolBindingsToTry,
   getProtocolVersionsToTry,
+  parseA2aProtocolBinding,
   parseA2aProtocolVersion,
+  resolveAgentProtocolBinding,
   resolveAgentProtocolVersion,
   type A2aProtocolAdapter,
+  type A2aProtocolBinding,
   type A2aProtocolVersion,
 } from './protocol/index.js';
