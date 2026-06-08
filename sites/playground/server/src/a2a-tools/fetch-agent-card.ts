@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express';
+import type { Request, Response as ExpressResponse } from 'express';
 import getRawBody from 'raw-body';
 import { isAllowedAgentUrl } from './agent-url-validation.js';
 import { normalizeAgentCard } from './resolve-agent-api-url.js';
@@ -21,14 +21,14 @@ const MAX_REDIRECT_HOPS = 5;
 async function fetchUrlWithRedirectGuard(
   startUrl: string,
   allowPrivate: boolean,
-): Promise<Response> {
+): Promise<globalThis.Response> {
   let currentUrl = startUrl;
 
   for (let hop = 0; hop < MAX_REDIRECT_HOPS; hop += 1) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), UPSTREAM_FETCH_TIMEOUT_MS);
 
-    let response: Response;
+    let response: globalThis.Response;
     try {
       response = await fetch(currentUrl, {
         headers: { Accept: 'application/json' },
@@ -66,7 +66,7 @@ async function fetchUrlWithRedirectGuard(
  * @param req - Express 请求，body 为 `{ url: string }`
  * @param res - Express 响应，`{ code, data?, message? }`
  */
-export const fetchAgentCardHandler = async (req: Request, res: Response): Promise<void> => {
+export const fetchAgentCardHandler = async (req: Request, res: ExpressResponse): Promise<void> => {
   try {
     const rawBody = await getRawBody(req, { encoding: 'utf-8', limit: '16kb' });
     const body = JSON.parse(rawBody);
@@ -95,7 +95,7 @@ export const fetchAgentCardHandler = async (req: Request, res: Response): Promis
       return;
     }
 
-    let fetchRes: Response;
+    let fetchRes: globalThis.Response;
     try {
       fetchRes = await fetchUrlWithRedirectGuard(requestedUrl, isDevelopment);
     } catch (error: any) {

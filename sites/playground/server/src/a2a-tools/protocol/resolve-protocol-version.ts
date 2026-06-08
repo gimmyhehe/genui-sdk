@@ -34,11 +34,12 @@ export function parseA2aProtocolVersion(raw: string | undefined | null): A2aProt
     return null;
   }
 
-  if (normalized.startsWith('1')) {
+  const major = normalized.split('.')[0];
+  if (major === '1') {
     return '1.0';
   }
 
-  if (normalized.startsWith('0')) {
+  if (major === '0') {
     return '0.3';
   }
 
@@ -53,6 +54,16 @@ export function parseA2aProtocolVersion(raw: string | undefined | null): A2aProt
  */
 function clampToSupportedVersion(version: A2aProtocolVersion): A2aProtocolVersion {
   const { supportedVersions, defaultVersion } = A2A_PROTOCOL_CONFIG;
+
+  if (supportedVersions.length === 0) {
+    const validVersions: A2aProtocolVersion[] = ['0.3', '1.0'];
+    if (validVersions.includes(defaultVersion)) {
+      return defaultVersion;
+    }
+    throw new Error(
+      'A2A_PROTOCOL_CONFIG.supportedVersions is empty and defaultVersion is not a valid A2aProtocolVersion',
+    );
+  }
 
   if (supportedVersions.includes(version)) {
     return version;
