@@ -26,10 +26,11 @@ const schema = ref<any>({});
 const rendererInstance = ref<defaultSchemaRenderer>(null);
 
 const callAction = (actionName: string, params: any) => {
-  if (!props.customActions[actionName]) {
+  if (!props.customActions?.[actionName]) {
     console.warn(`Action ${actionName} not found`);
+    return;
   }
-  props.customActions[actionName]?.execute(params, rendererInstance.value.getContext());
+  return props.customActions[actionName]?.execute(params, rendererInstance.value.getContext());
 };
 
 const SchemaRenderer = inject(GENUI_RENDERER, defaultSchemaRenderer);
@@ -100,13 +101,17 @@ watch(
     } else {
       isCompleted = isJsonComplete ?? true;
     }
+    if (!isCompleted && json && 'lifeCycles' in json) {
+      const { lifeCycles, ...rest } = json;
+      json = rest;
+    }
     deltaPatcher.patchWithDelta(schema.value, json, isCompleted); // TODO： 速率限制
     if (!updateActionTimer) {
       updateActionTimer = nextTick(() => {
         if (!rendererInstance.value) return;
         updateContextAndState();
         updateActionTimer = null;
-      })
+      });
     }
   },
   {
