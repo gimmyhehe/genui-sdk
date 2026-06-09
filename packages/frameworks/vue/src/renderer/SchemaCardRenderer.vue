@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide } from 'vue';
 // @ts-ignore
-import defaultSchemaRenderer, { Mapper, APPLY_DEFAULT_PROPS_KEY } from '@opentiny/tiny-schema-renderer';
-import { DeltaPatcher, repairJson, RepairJsonState } from '@opentiny/genui-sdk-core';
+import defaultSchemaRenderer, { Mapper, RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
+import { buildMaterialDefaultValueMap, DeltaPatcher, repairJson, RepairJsonState } from '@opentiny/genui-sdk-core';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { extendMapper } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/extend-renderer'; //TODO: 耦合
-import { applyMaterialDefaultsToNode } from './material-defaults';
 import { requiredCompleteFieldSelectors as internalRequiredCompleteFieldSelectors } from './config';
 import { GENUI_RENDERER } from '../chat/injection-tokens';
 import type { IRendererProps } from './renderer.types';
@@ -34,6 +34,15 @@ const callAction = (actionName: string, params: any) => {
 };
 
 const SchemaRenderer = inject(GENUI_RENDERER, defaultSchemaRenderer);
+
+const materialDefaultPropsMap = buildMaterialDefaultValueMap(rendererConfig.materialsList);
+
+const parentRendererSettings = inject<Record<string, unknown> | null>(RENDERER_SETTINGS_KEY, null);
+
+provide(RENDERER_SETTINGS_KEY, {
+  ...parentRendererSettings,
+  defaultPropsMap: materialDefaultPropsMap,
+});
 
 const deltaPatcher = new DeltaPatcher({
   requiredCompleteFieldSelectors: [
@@ -67,8 +76,6 @@ const displaySchema = computed(() => {
 });
 
 let updateActionTimer: any | null = null;
-
-provide(APPLY_DEFAULT_PROPS_KEY, applyMaterialDefaultsToNode);
 
 function updateContextAndState() {
   rendererInstance.value?.setContext({
