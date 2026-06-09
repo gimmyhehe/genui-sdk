@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
 import { TinyButton, TinyButtonGroup, TinyTooltip } from '@opentiny/vue';
-import { GenuiConfigProvider, GenuiRenderer } from '@opentiny/genui-sdk-vue';
-import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
+import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
 import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
 import { IconArrowRight, IconPause, IconRefresh, IconStartCircle } from '@opentiny/vue-icon';
 import { LinkKey, linkMap } from '@/utils/link';
@@ -310,15 +309,13 @@ onUnmounted(() => {
                   class="home-extend-render-area"
                   :class="{ 'is-visible': cardVisible, 'no-exit': suppressExitAnimation }"
                 >
-                  <GenuiConfigProvider :materials="{ ...vueMaterials }">
-                    <GenuiRenderer
-                      :key="rendererKey"
-                      class="home-extend-schema-renderer"
-                      :content="message?.content || ''"
-                      :generating="generating"
-                      :customActions="customActions"
-                    />
-                  </GenuiConfigProvider>
+                  <GenuiRenderer
+                    :key="rendererKey"
+                    class="home-extend-schema-renderer"
+                    :content="message?.content || ''"
+                    :generating="generating"
+                    :customActions="customActions"
+                  />
                 </div>
               </div>
             </div>
