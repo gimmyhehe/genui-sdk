@@ -45,22 +45,30 @@ function pickJsonRequestBody(
 ): { schema?: OpenAPIV3.SchemaObject; required: boolean; contentType: string } | null {
   if (!requestBody || '$ref' in requestBody) return null;
 
-  const jsonContent =
-    requestBody.content?.['application/json'] ??
-    requestBody.content?.['application/*+json'] ??
-    Object.entries(requestBody.content ?? {}).find(([ct]) => ct.includes('json'))?.[1];
+  const content = requestBody.content ?? {};
+  let mediaType: OpenAPIV3.MediaTypeObject | undefined;
+  let contentType: string | undefined;
 
-  if (!jsonContent?.schema || '$ref' in jsonContent.schema) return null;
+  if (content['application/json']) {
+    mediaType = content['application/json'];
+    contentType = 'application/json';
+  } else if (content['application/*+json']) {
+    mediaType = content['application/*+json'];
+    contentType = 'application/*+json';
+  } else {
+    const found = Object.entries(content).find(([ct]) => ct.includes('json'));
+    if (found) {
+      contentType = found[0];
+      mediaType = found[1];
+    }
+  }
 
-  const contentType =
-    requestBody.content?.['application/json']
-      ? 'application/json'
-      : Object.keys(requestBody.content ?? {})[0] ?? 'application/json';
+  if (!mediaType?.schema || '$ref' in mediaType.schema) return null;
 
   return {
-    schema: jsonContent.schema as OpenAPIV3.SchemaObject,
+    schema: mediaType.schema as OpenAPIV3.SchemaObject,
     required: Boolean(requestBody.required),
-    contentType,
+    contentType: contentType ?? 'application/json',
   };
 }
 
