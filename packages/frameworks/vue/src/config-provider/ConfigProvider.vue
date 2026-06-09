@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
-import { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { TinyConfigProvider } from '@opentiny/vue';
 import { ThemeProvider } from '@opentiny/tiny-robot';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
-import { watch, provide, computed, onMounted, ref } from 'vue';
+import { watch, provide, computed, onMounted, ref, Component } from 'vue';
 import { I18nMessages, useI18n } from '../chat/i18n';
-import { GENUI_I18N, GENUI_CONFIG } from '../chat/injection-tokens';
+import { GENUI_I18N, GENUI_CONFIG, GENUI_VUE_MATERIALS } from '../chat/injection-tokens';
 import { useMediaTheme } from './use-media-theme';
 
 export interface ConfigProviderProps {
@@ -14,6 +12,7 @@ export interface ConfigProviderProps {
   id?: string;
   locale?: string;
   i18n?: I18nMessages;
+  materials?: Record<string, Component>;
 }
 
 interface IRobotProviderProps {
@@ -61,8 +60,8 @@ const genuiConfig = computed(() => {
 
 provide(GENUI_CONFIG, genuiConfig);
 
-provide(RENDERER_SETTINGS_KEY, {
-  materials: vueMaterials,
+provide(GENUI_VUE_MATERIALS, {
+  materials: props.materials,
 });
 
 watch(
