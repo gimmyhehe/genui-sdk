@@ -6,7 +6,7 @@ See [Configure Buffered Fields](../../renderer/required-complete-field-selectors
 
 ### Example
 
-<demo vue="../../../../../demos/angular/renderer/required-complete-field-selectors.vue"  :vueFiles="['../../../../../demos/angular/renderer/required-complete-field-selectors.ts']"/>
+<demo vue="../../../../../demos/angular/renderer/required-complete-field-selectors_en.vue"  :vueFiles="['../../../../../demos/angular/renderer/required-complete-field-selectors.ts']"/>
 
 ### Behavior
 

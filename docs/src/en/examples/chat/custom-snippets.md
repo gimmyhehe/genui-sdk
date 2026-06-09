@@ -83,4 +83,4 @@ const customSnippets = [
 
 ## Full Example
 
-<demo vue="../../../../demos/chat/custom-snippets.vue" />
+<demo vue="../../../../demos/chat/custom-snippets_en.vue" />

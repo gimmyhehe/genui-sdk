@@ -53,7 +53,7 @@ const customActions = {
 
 #### Full Example
 
-<demo vue="../../../../../demos/angular/renderer/state.vue" :vueFiles="['../../../../../demos/angular/renderer/state.ts']"/>
+<demo vue="../../../../../demos/angular/renderer/state_en.vue" :vueFiles="['../../../../../demos/angular/renderer/state.ts']"/>
 
 ## Notes
 

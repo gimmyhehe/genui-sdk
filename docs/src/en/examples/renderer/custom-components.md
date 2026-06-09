@@ -126,4 +126,4 @@ Generated schema can reference registered components:
 
 #### Full Example
 
-<demo vue="../../../../demos/renderer/custom-components.vue" :vueFiles="['../../../../demos/renderer/custom-components.vue', '../../../../demos/renderer/components/user-profile.vue']"" />
+<demo vue="../../../../demos/renderer/custom-components.vue" :vueFiles="['../../../../demos/renderer/custom-components.vue', '../../../../demos/renderer/components/user-profile.vue']" />

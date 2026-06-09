@@ -205,4 +205,4 @@ const customExamples = [
 
 ## Full Example
 
-<demo vue="../../../../demos/chat/custom-examples.vue" />
+<demo vue="../../../../demos/chat/custom-examples_en.vue" />

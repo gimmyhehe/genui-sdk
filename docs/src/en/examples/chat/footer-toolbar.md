@@ -67,4 +67,4 @@ See `assistant-footer.vue` in the full example for detailed code.
 
 See the runnable demo below:
 
-<demo vue="../../../../demos/chat/footer-toolbar.vue" :vueFiles="['../../../../demos/chat/footer-toolbar.vue', '../../../../demos/chat/components/assistant-footer.vue', '../../../../demos/chat/components/user-footer.vue']" />
+<demo vue="../../../../demos/chat/footer-toolbar_en.vue" :vueFiles="['../../../../demos/chat/footer-toolbar_en.vue', '../../../../demos/chat/components/assistant-footer_en.vue', '../../../../demos/chat/components/user-footer_en.vue']" />

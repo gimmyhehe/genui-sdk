@@ -18,7 +18,7 @@ Pass actions via the `customActions` prop. Each action includes:
 
 ### Example: Open a Page
 
-<demo vue="../../../../../demos/angular/renderer/custom-actions-open-page.vue"  :vueFiles="['../../../../../demos/angular/renderer/custom-actions-open-page.ts']"/>
+<demo vue="../../../../../demos/angular/renderer/custom-actions-open-page_en.vue"  :vueFiles="['../../../../../demos/angular/renderer/custom-actions-open-page.ts']"/>
 
 ## Send Custom Actions to the Server
 

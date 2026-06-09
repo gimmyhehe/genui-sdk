@@ -1,12 +1,3 @@
-# GenuiConfigProvider - Custom Theme
-
-`GenuiConfigProvider` supports custom themes via CSS variables. Override CSS variables from TinyRobot and the component library to customize visuals.
-
-## Basic Usage
-
-Use the `id` prop on `GenuiConfigProvider` to create a scoped container, then define custom variables in the matching CSS scope:
-
-```vue {22-43}
 <template>
   <div class="app">
     <GenuiConfigProvider theme="light" id="my-custom-theme">
@@ -23,7 +14,36 @@ import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 const url = 'https://your-chat-backend/api';
 
 const messages = [
-  // messages omitted
+  {
+    role: 'user',
+    content: 'Generate a button',
+  },
+  {
+    role: 'assistant',
+    content: '',
+    messages: [
+      {
+        type: 'schema-card',
+        content: JSON.stringify({
+          componentName: 'Page',
+          children: [
+            {
+              componentName: 'div',
+              children: [
+                {
+                  componentName: 'TinyButton',
+                  props: {
+                    type: 'primary',
+                    text: 'Primary Button',
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+      },
+    ],
+  },
 ];
 </script>
 
@@ -32,7 +52,7 @@ const messages = [
   background-color: #f5f3ff;
 }
 #my-custom-theme .tiny-button {
-  /* Custom primary button colors - purple theme */
+  /* Custom button Primary theme color - using purple */
   --tv-Button-bg-color-primary: #8b5cf6;
   --tv-Button-border-color-primary: #8b5cf6;
   --tv-Button-text-color-primary: #ffffff;
@@ -43,7 +63,7 @@ const messages = [
   --tv-Button-border-radius: 16px;
 }
 #my-custom-theme {
-  /* Custom Tiny-Robot theme colors */
+  /* Custom Tiny-Robot theme color */
   --tr-text-primary: #8b5cf6;
 
   /* Custom Tiny-Robot bubble styles */
@@ -51,18 +71,3 @@ const messages = [
   --tr-bubble-content-padding: 20px 28px;
 }
 </style>
-```
-
-## TinyRobot Theme Customization
-
-See the [TinyRobot theme configuration guide](https://docs.opentiny.design/tiny-robot/guide/theme-config.html) for more options.
-
-## TinyVue Component Theme Customization
-
-See [component design tokens](https://opentiny.design/tiny-vue/zh-CN/os-theme/components/button#token) for per-component theming.
-
-Or edit [base variables in vars.less](https://github.com/opentiny/tiny-vue/blob/dev/packages/theme/src/base/vars.less) to theme all components globally.
-
-## Full Example
-
-<demo vue="../../../../demos/config-provider/custom-theme_en.vue" />

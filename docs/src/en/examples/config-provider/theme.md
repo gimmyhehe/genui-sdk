@@ -4,8 +4,8 @@
 
 ## Theme for GenuiChat
 
-<demo vue="../../../../demos/config-provider/theme.vue" />
+<demo vue="../../../../demos/config-provider/theme_en.vue" />
 
 ## Theme for GenuiRenderer
 
-<demo vue="../../../../demos/config-provider/schema-renderer-theme.vue" />
+<demo vue="../../../../demos/config-provider/schema-renderer-theme_en.vue" />

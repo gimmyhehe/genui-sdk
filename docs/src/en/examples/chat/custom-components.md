@@ -86,4 +86,4 @@ When the AI generates a schema, ensure `componentName` matches the component nam
 
 ## Full Example
 
-<demo vue="../../../../demos/chat/custom-components.vue" :vueFiles="['../../../../demos/chat/custom-components.vue',  '../../../../demos/chat/components/user-profile.vue']" />
+<demo vue="../../../../demos/chat/custom-components_en.vue" :vueFiles="['../../../../demos/chat/custom-components_en.vue',  '../../../../demos/chat/components/user-profile.vue']" />

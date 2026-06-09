@@ -86,4 +86,4 @@ AI-generated Schema can invoke these Actions via `JSFunction`:
 
 ## Full Example
 
-<demo vue="../../../../demos/chat/custom-actions.vue" />
+<demo vue="../../../../demos/chat/custom-actions_en.vue" />
