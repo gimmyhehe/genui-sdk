@@ -2,6 +2,9 @@
 import { computed } from 'vue';
 import { TinyDropdown } from '@opentiny/vue';
 import { locale, setLocale } from '../i18n';
+import { iconLanguage } from '@opentiny/vue-icon';
+
+const IconLanguage = iconLanguage();
 
 const langOptions = [
   { label: '简体中文', value: 'zh_CN' },
@@ -29,7 +32,14 @@ const itemClick = (payload: { itemData?: { value?: string } }) => {
 
 <template>
   <div class="language-switcher">
-    <tiny-dropdown trigger="click" :menu-options="menuOptions" :title="currentLangLabel" @item-click="itemClick" />
+    <tiny-dropdown
+      trigger="click"
+      :prefix-icon="IconLanguage"
+      :show-icon="false"
+      :menu-options="menuOptions"
+      title=""
+      @item-click="itemClick"
+    />
   </div>
 </template>
 
@@ -37,5 +47,8 @@ const itemClick = (payload: { itemData?: { value?: string } }) => {
 .language-switcher :deep(.tiny-dropdown) {
   color: #191919;
   stroke: #808080;
+}
+.language-switcher :deep(.tiny-dropdown__prefix-inner svg) {
+  fill: #191919;
 }
 </style>

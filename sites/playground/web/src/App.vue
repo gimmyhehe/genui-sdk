@@ -429,11 +429,9 @@ onUnmounted(() => {
   .genui-playground {
     --ti-gen-chat-avatar-and-gap-width: 0px;
   }
-  :deep(.action-buttons__button) {
+  :deep(.action-buttons__button .action-buttons__icon) {
     padding-right: 10px;
-    svg[alt='录音'] {
-      display: none;
-    }
+    display: none;
   }
   .empty {
     font-size: 24px;
