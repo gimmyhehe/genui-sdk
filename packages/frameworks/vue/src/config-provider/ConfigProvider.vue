@@ -61,7 +61,7 @@ const genuiConfig = computed(() => {
 provide(GENUI_CONFIG, genuiConfig);
 
 provide(GENUI_VUE_MATERIALS, {
-  materials: props.materials,
+  ...(props.materials ?? {}),
 });
 
 watch(

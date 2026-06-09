@@ -19,7 +19,6 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, './src/index.ts'),
         'render-config': path.resolve(__dirname, './src/render-config/index.ts'),
-        'extend-renderer': path.resolve(__dirname, './src/extend-renderer.ts'),
         'components': path.resolve(__dirname, './src/components/index.ts'),
       },
       formats: ['es'],
