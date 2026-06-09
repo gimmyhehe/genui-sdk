@@ -2,9 +2,9 @@ import type { McpServer, RegisteredTool } from '@modelcontextprotocol/sdk/server
 import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ZodRawShape } from 'zod';
 
-export const SWAGGER_MCP_META_TOOL_NAMES = new Set(['parse_swagger', 'list_tools']);
+export const OPENAPI_MCP_META_TOOL_NAMES = new Set(['parse_openapi', 'list_tools']);
 
-export type SwaggerMcpToolCatalogEntry = {
+export type OpenApiMcpToolCatalogEntry = {
   name: string;
   registered: RegisteredTool;
 };
@@ -14,7 +14,7 @@ type ToolConfig<InputArgs extends ZodRawShape> = {
   inputSchema?: InputArgs;
 };
 
-export class SwaggerMcpToolCatalog {
+export class OpenApiMcpToolCatalog {
   private readonly tools = new Map<string, RegisteredTool>();
 
   register<InputArgs extends ZodRawShape>(
@@ -45,7 +45,7 @@ export class SwaggerMcpToolCatalog {
     return this.tools.has(name);
   }
 
-  listEnabled(): SwaggerMcpToolCatalogEntry[] {
+  listEnabled(): OpenApiMcpToolCatalogEntry[] {
     return [...this.tools.entries()]
       .filter(([, registered]) => registered.enabled)
       .map(([name, registered]) => ({ name, registered }));

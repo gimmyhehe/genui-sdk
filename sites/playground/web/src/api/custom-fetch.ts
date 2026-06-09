@@ -35,6 +35,27 @@ export interface ISkillConfig {
   enabled?: boolean;
 }
 
+export interface IApiMcpServiceConfig {
+  name: string;
+  openapi: string;
+  description?: string;
+  baseUrl?: string;
+  apiHeaders?: Record<string, string>;
+  toolNamePrefix?: string;
+  openapiFileName?: string;
+  excludeMethods?: string[];
+  excludePathPrefixes?: string[];
+  toolCount?: number;
+  toolNames?: string[];
+  tools?: Array<{
+    name: string;
+    summary?: string;
+    method: string;
+    path: string;
+  }>;
+  enabled?: boolean;
+}
+
 export interface IPlaygroundConfig {
   mcpServers: IMcpServerConfig[];
   framework: string;
@@ -43,6 +64,7 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents: IAgentConfig[];
   skills: ISkillConfig[];
+  apiMcpServices: IApiMcpServiceConfig[];
 }
 
 /** 仅序列化已启用的 Skill，并去掉 enabled 字段以减小 metadata 体积 */
@@ -64,7 +86,16 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
     
     const body = JSON.parse(options.body);
     const config = getConfig();
-    const { mcpServers, framework, promptList, model, temperature, agents = [], skills = [] } = config;
+    const {
+      mcpServers,
+      framework,
+      promptList,
+      model,
+      temperature,
+      agents = [],
+      skills = [],
+      apiMcpServices = [],
+    } = config;
 
     const playgroundConfig = {
       mcpServers,
@@ -74,6 +105,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       temperature,
       agents: agents.filter((agent) => agent.enabled),
       skills: skillsPayloadForChat(skills),
+      apiMcpServices: apiMcpServices.filter((service) => service.enabled !== false),
     };
 
     return fetch(url, {

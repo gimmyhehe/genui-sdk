@@ -1,7 +1,7 @@
 {
-  "name": "cloud-service-mcp-server",
+  "name": "openapi-mcp-server",
   "version": "1.0.0",
-  "description": "MCP server that converts Swagger/OpenAPI specs into callable MCP tools",
+  "description": "MCP server that converts OpenAPI specs into callable MCP tools",
   "type": "module",
   "main": "./src/index.ts",
   "exports": {

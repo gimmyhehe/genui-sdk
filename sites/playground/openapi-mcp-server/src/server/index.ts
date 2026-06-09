@@ -1,8 +1,8 @@
-export { createSwaggerMcpServer } from './create-mcp-server.js';
+export { createOpenApiMcpServer } from './create-mcp-server.js';
 export {
   createMcpHttpApp,
-  registerSwaggerMcpHttpRoutes,
-  type RegisterSwaggerMcpHttpRoutesOptions,
+  registerOpenApiMcpHttpRoutes,
+  type RegisterOpenApiMcpHttpRoutesOptions,
 } from './http-transport.js';
 export {
   McpSessionRegistry,
@@ -10,7 +10,7 @@ export {
   type McpSessionRegistryOptions,
 } from './mcp-session-registry.js';
 export {
-  SwaggerMcpToolCatalog,
-  SWAGGER_MCP_META_TOOL_NAMES,
-  type SwaggerMcpToolCatalogEntry,
+  OpenApiMcpToolCatalog,
+  OPENAPI_MCP_META_TOOL_NAMES,
+  type OpenApiMcpToolCatalogEntry,
 } from './mcp-tool-catalog.js';

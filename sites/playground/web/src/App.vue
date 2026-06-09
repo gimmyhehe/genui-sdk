@@ -81,16 +81,30 @@ const normalizeCustomExamples = (examples) => {
 };
 
 const isOpen = ref(true);
-const llmConfig = reactive(
-  cacheLLmConfig || {
-    temperature: 0.5,
-    model: 'qwen3-coder-30b-a3b-instruct',
-    mcpServers: [],
-    agents: [],
-    skills: [],
-    promptList: [],
-  },
-);
+const llmConfig = reactive({
+  temperature: 0.5,
+  model: 'qwen3-coder-30b-a3b-instruct',
+  mcpServers: [],
+  agents: [],
+  skills: [],
+  apiMcpServices: [],
+  promptList: [],
+  ...(cacheLLmConfig || {}),
+});
+if (!Array.isArray(llmConfig.apiMcpServices)) {
+  llmConfig.apiMcpServices = [];
+} else {
+  llmConfig.apiMcpServices = llmConfig.apiMcpServices.map((service) => {
+    if (!service || typeof service !== 'object') {
+      return service;
+    }
+    return {
+      ...service,
+      openapi: service.openapi ?? service.swagger ?? '',
+      openapiFileName: service.openapiFileName ?? service.swaggerFileName,
+    };
+  });
+}
 const customExamples = ref(normalizeCustomExamples(cacheCustomExamples));
 
 const chatConfig = reactive(

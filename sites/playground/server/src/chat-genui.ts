@@ -18,11 +18,7 @@ import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
 import { buildSkillTools } from './skills/index.js';
-import {
-  buildBuiltinSwaggerTools,
-  getBuiltinSwaggerSystemPrompt,
-  isBuiltinSwaggerMcpUrl,
-} from './swagger-mcp/build-tools.js';
+import { buildApiMcpTools, previewOpenApiMcpRegistration, registerApiMcpServices } from './api-mcp/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
@@ -227,6 +223,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     temperature: playgroundConfig.temperature || 0.3,
     agents,
     skills: playgroundConfig.skills || [],
+    apiMcpServices: playgroundConfig.apiMcpServices || [],
   };
 };
 
@@ -260,7 +257,7 @@ export function createChatGenui() {
     }
 
     const playgroundConfig = getPlaygroundConfig(playgroundStr);
-    const { mcpServers, framework, userAppendPrompt, agents, skills } = playgroundConfig;
+    const { mcpServers, framework, userAppendPrompt, agents, skills, apiMcpServices } = playgroundConfig;
 
     const llmConfigParams: LLMConfigParams = {
       model: playgroundConfig.model,
@@ -271,20 +268,19 @@ export function createChatGenui() {
 
     const llmConfig = await generateLlmConfig(llmConfigParams);
     const { model, temperature, specificPrompt, provider, extraBody } = llmConfig;
-    const externalMcpServers = mcpServers.filter(
-      (s) => s.enabled && !isBuiltinSwaggerMcpUrl(s.url),
-    );
+    const externalMcpServers = mcpServers.filter((s) => s.enabled);
     const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
       externalMcpServers,
       abort.signal,
     );
-    const swaggerTools = buildBuiltinSwaggerTools();
+    await registerApiMcpServices(apiMcpServices);
+    const apiMcpTools = buildApiMcpTools();
     const agentTools = buildAgentTools(agents, abort.signal);
     const { tools: skillTools, systemPrompt: skillPrompt } = buildSkillTools(skills);
     const duplicateToolNames = new Set<string>();
     const seenToolNames = new Set<string>();
     for (const name of [
-      ...Object.keys(swaggerTools),
+      ...Object.keys(apiMcpTools),
       ...Object.keys(mcpTools),
       ...Object.keys(agentTools),
       ...Object.keys(skillTools),
@@ -295,7 +291,7 @@ export function createChatGenui() {
     if (duplicateToolNames.size) {
       console.warn(`Duplicate tool names detected: ${[...duplicateToolNames].join(', ')}`);
     }
-    const tools = { ...swaggerTools, ...mcpTools, ...agentTools, ...skillTools };
+    const tools = { ...apiMcpTools, ...mcpTools, ...agentTools, ...skillTools };
 
     const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;
     const maxSteps = 30;
@@ -315,8 +311,6 @@ export function createChatGenui() {
         specificPrompt +
         '\n' +
         userAppendPrompt +
-        '\n' +
-        getBuiltinSwaggerSystemPrompt() +
         '\n' +
         skillPrompt,
       messages: body.messages,
@@ -434,6 +428,41 @@ export function createChatGenui() {
 
   return { chatGenuiHandler };
 }
+
+export const checkApiMcpHandler = async (req: Request, res: Response) => {
+  try {
+    const body = JSON.parse(await getRawBody(req, { encoding: 'utf-8' }));
+    const { openapi, swagger, baseUrl, apiHeaders, toolNamePrefix, excludeMethods, excludePathPrefixes } = body;
+    const openApiDocument = (openapi ?? swagger)?.trim();
+
+    if (!openApiDocument || typeof openApiDocument !== 'string') {
+      res.send({
+        code: 500,
+        message: 'openapi is required',
+      });
+      return;
+    }
+
+    const data = await previewOpenApiMcpRegistration({
+      openapi: openApiDocument,
+      baseUrl,
+      apiHeaders,
+      toolNamePrefix,
+      excludeMethods,
+      excludePathPrefixes,
+    });
+
+    res.send({
+      code: 200,
+      data,
+    });
+  } catch (error: any) {
+    res.send({
+      code: 500,
+      message: error.message || String(error),
+    });
+  }
+};
 
 export const checkMcpHandler = async (req: Request, res: Response) => {
   const abort = new AbortController();

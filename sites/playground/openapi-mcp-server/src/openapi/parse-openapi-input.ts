@@ -2,12 +2,12 @@ import SwaggerParser from '@apidevtools/swagger-parser';
 import yaml from 'js-yaml';
 import type { OpenAPIV3 } from 'openapi-types';
 import {
-  assertInlineSwaggerAllowed,
-  fetchSwaggerSpecUrl,
-  loadSwaggerInputPolicyFromEnv,
-  readSwaggerSpecFile,
-  type SwaggerInputPolicy,
-} from './swagger-input-security.js';
+  assertInlineOpenApiAllowed,
+  fetchOpenApiSpecUrl,
+  loadOpenApiInputPolicyFromEnv,
+  readOpenApiSpecFile,
+  type OpenApiInputPolicy,
+} from './openapi-input-security.js';
 
 type Swagger2HostFields = {
   host?: string;
@@ -23,7 +23,7 @@ function parseRawSpec(content: string): unknown {
   return yaml.load(trimmed);
 }
 
-function isInlineSwaggerContent(source: string): boolean {
+function isInlineOpenApiContent(source: string): boolean {
   const trimmed = source.trim();
   return (
     trimmed.startsWith('{') ||
@@ -35,27 +35,27 @@ function isInlineSwaggerContent(source: string): boolean {
 
 async function readSpecContent(
   source: string,
-  policy: SwaggerInputPolicy = loadSwaggerInputPolicyFromEnv(),
+  policy: OpenApiInputPolicy = loadOpenApiInputPolicyFromEnv(),
 ): Promise<string> {
-  if (isInlineSwaggerContent(source)) {
-    assertInlineSwaggerAllowed(policy);
+  if (isInlineOpenApiContent(source)) {
+    assertInlineOpenApiAllowed(policy);
     return source;
   }
 
   const trimmed = source.trim();
 
   if (/^https?:\/\//i.test(trimmed)) {
-    return fetchSwaggerSpecUrl(trimmed, policy);
+    return fetchOpenApiSpecUrl(trimmed, policy);
   }
 
-  return readSwaggerSpecFile(trimmed, policy);
+  return readOpenApiSpecFile(trimmed, policy);
 }
 
-export async function parseSwaggerInput(
-  swagger: string,
-  policy?: SwaggerInputPolicy,
+export async function parseOpenApiInput(
+  openapi: string,
+  policy?: OpenApiInputPolicy,
 ): Promise<OpenAPIV3.Document> {
-  const content = await readSpecContent(swagger, policy);
+  const content = await readSpecContent(openapi, policy);
   const raw = parseRawSpec(content) as OpenAPIV3.Document;
   return (await SwaggerParser.validate(raw, { resolve: { external: false } })) as unknown as OpenAPIV3.Document;
 }

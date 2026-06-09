@@ -7,9 +7,9 @@ import minimist from 'minimist';
 import { useProviderModelMapperSync, initProviderModelMapperFromData } from './src/use-provider-mapper.js';
 import { loadProviderModelsDataFromFile, mergeProviderModelsData } from './src/provider-models-mapper.js';
 import { fetchOpenTinyProviderModelsData } from './src/opentiny-models.js';
-import { createChatGenui, checkMcpHandler } from './src/chat-genui.js';
+import { createChatGenui, checkApiMcpHandler, checkMcpHandler } from './src/chat-genui.js';
 import { createChatTemplate } from './src/chat-template.js';
-import { registerSwaggerMcp } from './src/swagger-mcp/index.js';
+import { registerOpenApiMcp } from './src/openapi-mcp/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,6 +20,24 @@ const envFileName = mode ? `.env.${mode}` : '.env';
 const envPath = path.resolve(__dirname, envFileName);
 dotenv.config({ path: envPath });
 dotenv.config();
+
+/**
+ * Playground 本地开发默认允许拉取 localhost OpenAPI，便于 API服务 URL 模式验证。
+ * 生产环境请通过环境变量显式配置 MCP_SWAGGER_* 策略。
+ */
+function applyPlaygroundDevOpenApiDefaults(): void {
+  if (process.env.NODE_ENV === 'production') {
+    return;
+  }
+  if (!process.env.MCP_OPENAPI_ALLOW_URL_FETCH && !process.env.MCP_SWAGGER_ALLOW_URL_FETCH) {
+    process.env.MCP_OPENAPI_ALLOW_URL_FETCH = 'true';
+  }
+  if (!process.env.MCP_OPENAPI_ALLOW_LOCALHOST_URL && !process.env.MCP_SWAGGER_ALLOW_LOCALHOST_URL) {
+    process.env.MCP_OPENAPI_ALLOW_LOCALHOST_URL = 'true';
+  }
+}
+applyPlaygroundDevOpenApiDefaults();
+
 const { chatGenuiHandler } = createChatGenui();
 const { chatTemplateHandler } = createChatTemplate();
 
@@ -27,7 +45,7 @@ const app = express();
 
 app.use(cors());
 
-registerSwaggerMcp(app);
+registerOpenApiMcp(app);
 
 const providerModelsEnvPath = process.env.providerModelsPath;
 
@@ -103,6 +121,7 @@ const getModelsHandler = async (req: Request, res: Response) => {
 app.get('/get-models', getModelsHandler);
 app.post('/chat-genui', chatGenuiHandler);
 app.post('/check-mcp', checkMcpHandler);
+app.post('/check-api-mcp', checkApiMcpHandler);
 app.post('/chat-template', chatTemplateHandler);
 
 const port = process.env.PORT || 3008;

@@ -1,20 +1,20 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { DynamicToolInfo, SwaggerMcpConfig } from '../types.js';
+import type { DynamicToolInfo, OpenApiMcpConfig } from '../types.js';
 import {
   extractOperations,
   executeApiOperation,
   loadApiRequestTimeoutMs,
   parametersToZodShape,
   requestBodyToZodField,
-} from '../swagger/index.js';
-import type { SwaggerMcpToolCatalog } from './mcp-tool-catalog.js';
+} from '../openapi/index.js';
+import type { OpenApiMcpToolCatalog } from './mcp-tool-catalog.js';
 
-export function registerSwaggerTools(
+export function registerOpenApiTools(
   server: McpServer,
-  catalog: SwaggerMcpToolCatalog,
+  catalog: OpenApiMcpToolCatalog,
   spec: OpenAPIV3.Document,
-  config: SwaggerMcpConfig,
+  config: OpenApiMcpConfig,
   baseUrl: string,
 ): {
   toolNames: string[];

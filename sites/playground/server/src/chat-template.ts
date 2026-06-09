@@ -9,11 +9,7 @@ import getRawBody from 'raw-body';
 import { openaiCompatibleTransformChunk } from '@opentiny/genui-sdk-chat-completions';
 import type { IOpenaiCompatibleChunk } from '@opentiny/genui-sdk-chat-completions';
 import { generateLlmConfig, generateAiSdkTools } from './chat-genui.js';
-import {
-  buildBuiltinSwaggerTools,
-  getBuiltinSwaggerSystemPrompt,
-  isBuiltinSwaggerMcpUrl,
-} from './swagger-mcp/build-tools.js';
+import { buildApiMcpTools, registerApiMcpServices } from './api-mcp/index.js';
 import { generateJsonPatchPrompt } from './json-patch-prompt.js';
 import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
 
@@ -41,6 +37,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     userAppendPrompt: playgroundConfig.promptList?.filter(Boolean).join('\n') || '',
     model: playgroundConfig.model || '',
     temperature: playgroundConfig.temperature || 0.3,
+    apiMcpServices: playgroundConfig.apiMcpServices || [],
   };
 };
 
@@ -81,7 +78,7 @@ export const createChatTemplate = () => {
       }
 
       const playgroundConfig = getPlaygroundConfig(playgroundStr);
-      const { mcpServers, framework, userAppendPrompt } = playgroundConfig;
+      const { mcpServers, framework, userAppendPrompt, apiMcpServices } = playgroundConfig;
 
       const llmConfigParams: LLMConfigParams = {
         model: playgroundConfig.model,
@@ -92,17 +89,17 @@ export const createChatTemplate = () => {
       const llmConfig = await generateLlmConfig(llmConfigParams);
       const { model, temperature, prompt: customSystemPrompt, specificPrompt, provider, extraBody } = llmConfig;
       const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
-        mcpServers.filter((s) => s.enabled && !isBuiltinSwaggerMcpUrl(s.url)),
+        mcpServers.filter((s) => s.enabled),
         abort.signal,
       );
-      const swaggerTools = buildBuiltinSwaggerTools();
-      const tools = { ...swaggerTools, ...mcpTools };
+      await registerApiMcpServices(apiMcpServices);
+      const apiMcpTools = buildApiMcpTools();
+      const tools = { ...apiMcpTools, ...mcpTools };
       const maxSteps = 30;
       const systemPrompt = `${genPrompt(rendererConfig, tgCustomConfig)}
       ${body.templateSchema ? generateJsonPatchPrompt() : ''}
       ${specificPrompt}
-      ${customSystemPrompt}
-      ${getBuiltinSwaggerSystemPrompt()}`;
+      ${customSystemPrompt}`;
 
       const messages = body.messages;
       if (body.templateSchema) {

@@ -1,6 +1,6 @@
 import type { OpenAPIV3 } from 'openapi-types';
 
-export type SwaggerMcpConfig = {
+export type OpenApiMcpConfig = {
   baseUrl?: string;
   apiHeaders?: Record<string, string>;
   excludeMethods?: string[];
@@ -21,6 +21,7 @@ export type ApiOperation = {
   toolName: string;
   method: string;
   path: string;
+  summary?: string;
   description?: string;
   parameters: ApiParameter[];
   requestBodySchema?: OpenAPIV3.SchemaObject;

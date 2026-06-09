@@ -1,5 +1,5 @@
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ApiOperation, ApiParameter, SwaggerMcpConfig } from '../types.js';
+import type { ApiOperation, ApiParameter, OpenApiMcpConfig } from '../types.js';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const;
 
@@ -66,7 +66,7 @@ function pickJsonRequestBody(
 
 export function extractOperations(
   spec: OpenAPIV3.Document,
-  config: Pick<SwaggerMcpConfig, 'excludeMethods' | 'excludePathPrefixes' | 'toolNamePrefix'>,
+  config: Pick<OpenApiMcpConfig, 'excludeMethods' | 'excludePathPrefixes' | 'toolNamePrefix'>,
 ): ApiOperation[] {
   const excludeMethods = new Set(
     (config.excludeMethods ?? ['options', 'head']).map((m) => m.toLowerCase()),
@@ -110,6 +110,7 @@ export function extractOperations(
         toolName,
         method: method.toUpperCase(),
         path,
+        summary: operation.summary,
         description: operation.description ?? operation.summary,
         parameters: [...parametersMap.values()],
         requestBodySchema: requestBody?.schema,

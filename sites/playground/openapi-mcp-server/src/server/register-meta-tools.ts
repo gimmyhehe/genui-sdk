@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import type { SwaggerMcpConfig } from '../types.js';
-import { parseSwaggerInput } from '../swagger/parse-swagger-input.js';
-import type { SwaggerToolRegistry } from './swagger-tool-registry.js';
+import type { OpenApiMcpConfig } from '../types.js';
+import { parseOpenApiInput } from '../openapi/parse-openapi-input.js';
+import type { OpenApiToolRegistry } from './openapi-tool-registry.js';
 
 function parseOptionalHeaders(
   value?: Record<string, string> | string,
@@ -32,16 +32,16 @@ function parseExcludeMethods(value?: string | string[]): string[] | undefined {
   return value.split(',').map((s) => s.trim()).filter(Boolean);
 }
 
-export function registerMetaTools(registry: SwaggerToolRegistry): void {
+export function registerMetaTools(registry: OpenApiToolRegistry): void {
   registry.registerTool(
-    'parse_swagger',
+    'parse_openapi',
     {
       description:
-        '解析 Swagger/OpenAPI 文档（优先内联 JSON/YAML；URL/本地路径受服务端安全策略限制），并动态注册为可调用的 MCP 工具。',
+        '解析 OpenAPI 文档（优先内联 JSON/YAML；URL/本地路径受服务端安全策略限制），并动态注册为可调用的 MCP 工具。',
       inputSchema: {
-        swagger: z
+        openapi: z
           .string()
-          .describe('Swagger/OpenAPI 文档：内联 JSON/YAML，或管理员已放行的 URL / 本地路径'),
+          .describe('OpenAPI 文档：内联 JSON/YAML，或管理员已放行的 URL / 本地路径'),
         baseUrl: z.string().optional().describe('API 基础地址，不填则从文档自动推导'),
         apiHeaders: z
           .union([z.record(z.string(), z.string()), z.string()])
@@ -63,22 +63,37 @@ export function registerMetaTools(registry: SwaggerToolRegistry): void {
           .describe('是否先移除此前注册的工具，默认 true'),
       },
     },
-    async ({
-      swagger,
-      baseUrl,
-      apiHeaders,
-      toolNamePrefix,
-      excludeMethods,
-      excludePathPrefixes,
-      replaceExisting = true,
-    }) => {
+    async (args) => {
+      const {
+        openapi,
+        baseUrl,
+        apiHeaders,
+        toolNamePrefix,
+        excludeMethods,
+        excludePathPrefixes,
+        replaceExisting = true,
+      } = args as {
+        openapi?: string;
+        swagger?: string;
+        baseUrl?: string;
+        apiHeaders?: Record<string, string> | string;
+        toolNamePrefix?: string;
+        excludeMethods?: string | string[];
+        excludePathPrefixes?: string[];
+        replaceExisting?: boolean;
+      };
+      const openApiDocument = openapi ?? (args as { swagger?: string }).swagger;
       try {
         if (replaceExisting) {
           registry.clearDynamicTools();
         }
 
-        const spec = await parseSwaggerInput(swagger);
-        const config: SwaggerMcpConfig = {
+        if (!openApiDocument?.trim()) {
+          throw new Error('openapi is required');
+        }
+
+        const spec = await parseOpenApiInput(openApiDocument);
+        const config: OpenApiMcpConfig = {
           baseUrl,
           apiHeaders: parseOptionalHeaders(apiHeaders),
           toolNamePrefix,
@@ -124,7 +139,7 @@ export function registerMetaTools(registry: SwaggerToolRegistry): void {
   registry.registerTool(
     'list_tools',
     {
-      description: '查询当前 MCP 服务已注册的工具列表，包含元工具与 parse_swagger 动态注册的 API 工具',
+      description: '查询当前 MCP 服务已注册的工具列表，包含元工具与 parse_openapi 动态注册的 API 工具',
       inputSchema: {},
     },
     async () => {

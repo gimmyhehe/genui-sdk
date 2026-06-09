@@ -3,29 +3,29 @@ import type { RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ZodRawShape } from 'zod';
 import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { DynamicToolInfo, SwaggerMcpConfig } from '../types.js';
-import { registerSwaggerTools } from './register-swagger-tools.js';
-import { resolveBaseUrl } from '../swagger/parse-swagger-input.js';
+import type { DynamicToolInfo, OpenApiMcpConfig } from '../types.js';
+import { registerOpenApiTools } from './register-openapi-tools.js';
+import { resolveBaseUrl } from '../openapi/parse-openapi-input.js';
 import {
-  SWAGGER_MCP_META_TOOL_NAMES,
-  SwaggerMcpToolCatalog,
-  type SwaggerMcpToolCatalogEntry,
+  OPENAPI_MCP_META_TOOL_NAMES,
+  OpenApiMcpToolCatalog,
+  type OpenApiMcpToolCatalogEntry,
 } from './mcp-tool-catalog.js';
 
-export type SwaggerRegisterResult = {
+export type OpenApiRegisterResult = {
   toolCount: number;
   toolNames: string[];
   baseUrl: string;
 };
 
-export class SwaggerToolRegistry {
-  private readonly catalog = new SwaggerMcpToolCatalog();
+export class OpenApiToolRegistry {
+  private readonly catalog = new OpenApiMcpToolCatalog();
   private readonly dynamicToolInfos = new Map<string, DynamicToolInfo>();
   private lastBaseUrl?: string;
 
   constructor(private readonly server: McpServer) {}
 
-  get toolCatalog(): SwaggerMcpToolCatalog {
+  get toolCatalog(): OpenApiMcpToolCatalog {
     return this.catalog;
   }
 
@@ -37,13 +37,13 @@ export class SwaggerToolRegistry {
     return this.catalog.register(this.server, name, config, handler);
   }
 
-  listRegisteredTools(): SwaggerMcpToolCatalogEntry[] {
+  listRegisteredTools(): OpenApiMcpToolCatalogEntry[] {
     return this.catalog.listEnabled();
   }
 
-  registerFromSpec(spec: OpenAPIV3.Document, config: SwaggerMcpConfig): SwaggerRegisterResult {
+  registerFromSpec(spec: OpenAPIV3.Document, config: OpenApiMcpConfig): OpenApiRegisterResult {
     const baseUrl = resolveBaseUrl(spec, config.baseUrl);
-    const { toolNames, toolInfos } = registerSwaggerTools(
+    const { toolNames, toolInfos } = registerOpenApiTools(
       this.server,
       this.catalog,
       spec,
@@ -95,7 +95,7 @@ export class SwaggerToolRegistry {
   listMetaToolSummaries(): Array<{ name: string; description: string }> {
     return this.catalog
       .listEnabled()
-      .filter((entry) => SWAGGER_MCP_META_TOOL_NAMES.has(entry.name))
+      .filter((entry) => OPENAPI_MCP_META_TOOL_NAMES.has(entry.name))
       .map((entry) => ({
         name: entry.name,
         description: entry.registered.description ?? entry.name,

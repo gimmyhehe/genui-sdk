@@ -4,7 +4,7 @@ import { isIP } from 'node:net';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { loadApiRequestTimeoutMs } from './http-executor.js';
 
-export type SwaggerInputPolicy = {
+export type OpenApiInputPolicy = {
   allowInline: boolean;
   allowUrlFetch: boolean;
   allowFileRead: boolean;
@@ -31,14 +31,38 @@ function parsePathListEnv(name: string): string[] {
     .map((p) => resolve(p));
 }
 
-export function loadSwaggerInputPolicyFromEnv(): SwaggerInputPolicy {
-  const allowedFileRoots = parsePathListEnv('MCP_SWAGGER_ALLOWED_FILE_DIRS');
+function readBoolEnv(openApiName: string, legacyName: string, defaultValue: boolean): boolean {
+  if (process.env[openApiName] !== undefined && process.env[openApiName] !== '') {
+    return parseBoolEnv(openApiName, defaultValue);
+  }
+  return parseBoolEnv(legacyName, defaultValue);
+}
+
+function readPathListEnv(openApiName: string, legacyName: string): string[] {
+  const raw = process.env[openApiName] ?? process.env[legacyName];
+  if (!raw?.trim()) return [];
+  return raw
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => resolve(p));
+}
+
+export function loadOpenApiInputPolicyFromEnv(): OpenApiInputPolicy {
+  const allowedFileRoots = readPathListEnv(
+    'MCP_OPENAPI_ALLOWED_FILE_DIRS',
+    'MCP_SWAGGER_ALLOWED_FILE_DIRS',
+  );
 
   return {
-    allowInline: parseBoolEnv('MCP_SWAGGER_ALLOW_INLINE', true),
-    allowUrlFetch: parseBoolEnv('MCP_SWAGGER_ALLOW_URL_FETCH', false),
-    allowFileRead: parseBoolEnv('MCP_SWAGGER_ALLOW_FILE_READ', false),
-    allowLocalhostUrl: parseBoolEnv('MCP_SWAGGER_ALLOW_LOCALHOST_URL', false),
+    allowInline: readBoolEnv('MCP_OPENAPI_ALLOW_INLINE', 'MCP_SWAGGER_ALLOW_INLINE', true),
+    allowUrlFetch: readBoolEnv('MCP_OPENAPI_ALLOW_URL_FETCH', 'MCP_SWAGGER_ALLOW_URL_FETCH', false),
+    allowFileRead: readBoolEnv('MCP_OPENAPI_ALLOW_FILE_READ', 'MCP_SWAGGER_ALLOW_FILE_READ', false),
+    allowLocalhostUrl: readBoolEnv(
+      'MCP_OPENAPI_ALLOW_LOCALHOST_URL',
+      'MCP_SWAGGER_ALLOW_LOCALHOST_URL',
+      false,
+    ),
     allowedFileRoots,
     urlHostnameAllowlist: parseHostnameAllowlistEnv(),
     fetchTimeoutMs: loadApiRequestTimeoutMs(),
@@ -47,7 +71,7 @@ export function loadSwaggerInputPolicyFromEnv(): SwaggerInputPolicy {
 }
 
 function parseHostnameAllowlistEnv(): string[] | null {
-  const raw = process.env.MCP_SWAGGER_URL_HOST_ALLOWLIST;
+  const raw = process.env.MCP_OPENAPI_URL_HOST_ALLOWLIST ?? process.env.MCP_SWAGGER_URL_HOST_ALLOWLIST;
   if (!raw?.trim()) return null;
   const hosts = raw
     .split(',')
@@ -93,7 +117,7 @@ function isLocalhostHostname(hostname: string): boolean {
   return host === 'localhost' || host.endsWith('.localhost');
 }
 
-function isBlockedResolvedIp(address: string, policy: SwaggerInputPolicy, hostname: string): boolean {
+function isBlockedResolvedIp(address: string, policy: OpenApiInputPolicy, hostname: string): boolean {
   const normalized = normalizeIpForCheck(address);
   const version = isIP(normalized);
   if (version === 4) {
@@ -113,7 +137,7 @@ function isBlockedResolvedIp(address: string, policy: SwaggerInputPolicy, hostna
   return true;
 }
 
-function isBlockedHostname(hostname: string, policy: SwaggerInputPolicy): boolean {
+function isBlockedHostname(hostname: string, policy: OpenApiInputPolicy): boolean {
   const host = hostname.toLowerCase().replace(/\.$/, '');
 
   if (policy.urlHostnameAllowlist) {
@@ -135,7 +159,7 @@ function isBlockedHostname(hostname: string, policy: SwaggerInputPolicy): boolea
   return false;
 }
 
-async function assertHostnameResolvesToAllowedIps(hostname: string, policy: SwaggerInputPolicy): Promise<void> {
+async function assertHostnameResolvesToAllowedIps(hostname: string, policy: OpenApiInputPolicy): Promise<void> {
   const ipVersion = isIP(hostname);
   let addresses: string[];
   if (ipVersion) {
@@ -144,25 +168,25 @@ async function assertHostnameResolvesToAllowedIps(hostname: string, policy: Swag
     try {
       addresses = (await lookup(hostname, { all: true, verbatim: true })).map((r) => r.address);
     } catch {
-      throw new Error(`Unable to resolve swagger URL host: ${hostname}`);
+      throw new Error(`Unable to resolve OpenAPI URL host: ${hostname}`);
     }
   }
 
   if (addresses.length === 0) {
-    throw new Error('Swagger URL host did not resolve to any IP address');
+    throw new Error('OpenAPI URL host did not resolve to any IP address');
   }
 
   for (const address of addresses) {
     if (isBlockedResolvedIp(address, policy, hostname)) {
-      throw new Error('Swagger URL host resolves to a disallowed IP address');
+      throw new Error('OpenAPI URL host resolves to a disallowed IP address');
     }
   }
 }
 
-export async function validateSwaggerFetchUrl(urlString: string, policy: SwaggerInputPolicy): Promise<URL> {
+export async function validateOpenApiFetchUrl(urlString: string, policy: OpenApiInputPolicy): Promise<URL> {
   if (!policy.allowUrlFetch) {
     throw new Error(
-      'Remote URL fetch is disabled. Pass inline OpenAPI JSON/YAML, or set MCP_SWAGGER_ALLOW_URL_FETCH=true with appropriate host restrictions.',
+      'Remote URL fetch is disabled. Pass inline OpenAPI JSON/YAML, or set MCP_OPENAPI_ALLOW_URL_FETCH=true with appropriate host restrictions.',
     );
   }
 
@@ -170,11 +194,11 @@ export async function validateSwaggerFetchUrl(urlString: string, policy: Swagger
   try {
     url = new URL(urlString);
   } catch {
-    throw new Error('Invalid swagger URL');
+    throw new Error('Invalid OpenAPI URL');
   }
 
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    throw new Error('Only http(s) URLs are allowed for swagger fetch');
+    throw new Error('Only http(s) URLs are allowed for OpenAPI fetch');
   }
 
   if (url.username || url.password) {
@@ -182,7 +206,7 @@ export async function validateSwaggerFetchUrl(urlString: string, policy: Swagger
   }
 
   if (isBlockedHostname(url.hostname, policy)) {
-    throw new Error('Swagger URL host is not allowed');
+    throw new Error('OpenAPI URL host is not allowed');
   }
 
   await assertHostnameResolvesToAllowedIps(url.hostname, policy);
@@ -192,12 +216,12 @@ export async function validateSwaggerFetchUrl(urlString: string, policy: Swagger
 
 async function fetchWithRedirectGuard(
   initialUrl: URL,
-  policy: SwaggerInputPolicy,
+  policy: OpenApiInputPolicy,
 ): Promise<string> {
   let current = initialUrl;
 
   for (let hop = 0; hop <= policy.maxRedirects; hop += 1) {
-    await validateSwaggerFetchUrl(current.toString(), policy);
+    await validateOpenApiFetchUrl(current.toString(), policy);
 
     const signal = AbortSignal.timeout(policy.fetchTimeoutMs);
     const response = await fetch(current.toString(), {
@@ -211,36 +235,36 @@ async function fetchWithRedirectGuard(
         throw new Error(`Redirect response missing Location header (${response.status})`);
       }
       if (hop >= policy.maxRedirects) {
-        throw new Error('Too many redirects while fetching swagger spec');
+        throw new Error('Too many redirects while fetching OpenAPI spec');
       }
       current = new URL(location, current);
       continue;
     }
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch swagger spec: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to fetch OpenAPI spec: ${response.status} ${response.statusText}`);
     }
 
     return response.text();
   }
 
-  throw new Error('Too many redirects while fetching swagger spec');
+  throw new Error('Too many redirects while fetching OpenAPI spec');
 }
 
-export async function fetchSwaggerSpecUrl(urlString: string, policy: SwaggerInputPolicy): Promise<string> {
-  const url = await validateSwaggerFetchUrl(urlString, policy);
+export async function fetchOpenApiSpecUrl(urlString: string, policy: OpenApiInputPolicy): Promise<string> {
+  const url = await validateOpenApiFetchUrl(urlString, policy);
   return fetchWithRedirectGuard(url, policy);
 }
 
-async function resolveAllowedFilePath(source: string, policy: SwaggerInputPolicy): Promise<string> {
+async function resolveAllowedFilePath(source: string, policy: OpenApiInputPolicy): Promise<string> {
   if (!policy.allowFileRead) {
     throw new Error(
-      'Local file paths are disabled. Pass inline OpenAPI JSON/YAML, or set MCP_SWAGGER_ALLOW_FILE_READ=true and MCP_SWAGGER_ALLOWED_FILE_DIRS.',
+      'Local file paths are disabled. Pass inline OpenAPI JSON/YAML, or set MCP_OPENAPI_ALLOW_FILE_READ=true and MCP_OPENAPI_ALLOWED_FILE_DIRS.',
     );
   }
 
   if (policy.allowedFileRoots.length === 0) {
-    throw new Error('File read is enabled but MCP_SWAGGER_ALLOWED_FILE_DIRS is not configured');
+    throw new Error('File read is enabled but MCP_OPENAPI_ALLOWED_FILE_DIRS is not configured');
   }
 
   const candidate = isAbsolute(source) ? source : resolve(process.cwd(), source);
@@ -254,16 +278,16 @@ async function resolveAllowedFilePath(source: string, policy: SwaggerInputPolicy
     }
   }
 
-  throw new Error('Swagger file path is outside allowed directories');
+  throw new Error('OpenAPI file path is outside allowed directories');
 }
 
-export async function readSwaggerSpecFile(source: string, policy: SwaggerInputPolicy): Promise<string> {
+export async function readOpenApiSpecFile(source: string, policy: OpenApiInputPolicy): Promise<string> {
   const filePath = await resolveAllowedFilePath(source, policy);
   return readFile(filePath, 'utf-8');
 }
 
-export function assertInlineSwaggerAllowed(policy: SwaggerInputPolicy): void {
+export function assertInlineOpenApiAllowed(policy: OpenApiInputPolicy): void {
   if (!policy.allowInline) {
-    throw new Error('Inline swagger content is disabled by server policy');
+    throw new Error('Inline OpenAPI content is disabled by server policy');
   }
 }

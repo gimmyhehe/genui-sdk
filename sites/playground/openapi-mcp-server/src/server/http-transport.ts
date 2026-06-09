@@ -8,16 +8,16 @@ import {
   McpSessionRegistry,
 } from './mcp-session-registry.js';
 
-export type RegisterSwaggerMcpHttpRoutesOptions = {
+export type RegisterOpenApiMcpHttpRoutesOptions = {
   mcpPath?: string;
   registerHealth?: boolean;
   sessionRegistry?: McpSessionRegistry;
 };
 
-export function registerSwaggerMcpHttpRoutes(
+export function registerOpenApiMcpHttpRoutes(
   app: Express,
   getServer: () => McpServer,
-  options: RegisterSwaggerMcpHttpRoutesOptions = {},
+  options: RegisterOpenApiMcpHttpRoutesOptions = {},
 ) {
   const { mcpPath = '/mcp', registerHealth = false } = options;
   const jsonMiddleware = express.json();
@@ -140,7 +140,7 @@ export function registerSwaggerMcpHttpRoutes(
 
 export function createMcpHttpApp(getServer: () => McpServer, mcpPath = '/mcp') {
   const app = express();
-  registerSwaggerMcpHttpRoutes(app, getServer, {
+  registerOpenApiMcpHttpRoutes(app, getServer, {
     mcpPath,
     registerHealth: true,
   });

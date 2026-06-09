@@ -1,7 +1,7 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import type { RegisteredTool } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { listSwaggerMcpToolEntries } from './instance.js';
+import { listOpenApiMcpToolEntries } from './instance.js';
 
 function registeredToolToAiSdkTool(name: string, registered: RegisteredTool) {
   return tool({
@@ -17,10 +17,10 @@ function registeredToolToAiSdkTool(name: string, registered: RegisteredTool) {
   });
 }
 
-export function buildSwaggerAiSdkTools(): Record<string, ReturnType<typeof tool>> {
+export function buildOpenApiAiSdkTools(): Record<string, ReturnType<typeof tool>> {
   const tools: Record<string, ReturnType<typeof tool>> = {};
 
-  for (const { name, registered } of listSwaggerMcpToolEntries()) {
+  for (const { name, registered } of listOpenApiMcpToolEntries()) {
     tools[name] = registeredToolToAiSdkTool(name, registered);
   }
 
