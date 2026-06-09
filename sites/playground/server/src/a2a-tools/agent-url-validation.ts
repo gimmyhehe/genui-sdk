@@ -202,8 +202,6 @@ export function isAllowedAgentUrl(urlStr: string): boolean {
 /**
  * 校验 Agent URL：字面量 hostname 校验 + DNS 解析结果不得为内网/本地地址。
  *
- * 用于实际发起 fetch 前的 SSRF 防护（含 DNS rebinding 场景）。
- *
  * @param urlStr - 待校验 URL
  * @returns 是否允许访问
  */

@@ -1,14 +1,6 @@
 import type { PlaygroundAgentConfig } from './agent-tools.js';
 import { isAllowedAgentUrlResolved } from './agent-url-validation.js';
-import { getA2aBindingTransport } from './protocol/bindings/index.js';
-import {
-  getA2aProtocolAdapter,
-  getProtocolBindingsToTry,
-  getProtocolVersionsToTry,
-  resolveAgentProtocolBinding,
-  resolveAgentProtocolVersion,
-} from './protocol/index.js';
-import { resolveAgentApiUrl } from './resolve-agent-api-url.js';
+import { AgentCardProtocolError, resolveAgentInterface } from './protocol/index.js';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -83,9 +75,7 @@ function buildBaseA2aRequestHeaders(
 }
 
 /**
- * 调用 A2A Agent：按 Card 选择 binding 与协议版本，并在失败时自动 fallback。
- *
- * Fallback 顺序：同一 binding 内先 exhaust 全部版本，再切换 binding（见内层/外层循环）。
+ * 调用 A2A Agent：解析唯一接口，经 binding 传输层 + 版本适配层发起单次请求。
  *
  * @param agent - Playground Agent 配置
  * @param input - 要转交的自然语言任务
@@ -99,86 +89,53 @@ export async function invokeA2aAgent(
   metadata?: Record<string, unknown>,
   abortSignal?: AbortSignal,
 ): Promise<AgentInvokeResult> {
-  const endpoint = resolveAgentApiUrl(agent);
-
-  if (!endpoint) {
+  let resolved;
+  try {
+    resolved = resolveAgentInterface(agent);
+  } catch (error) {
+    const message =
+      error instanceof AgentCardProtocolError
+        ? error.message
+        : error instanceof Error
+          ? error.message
+          : String(error);
     return {
       type: 'a2a-agent-error',
-      message: `Agent "${agent.name}" 未配置可调用的 url，无法调用`,
+      message: `Agent "${agent.name}" ${message}`,
     };
   }
 
-  if (!isDevelopment && !(await isAllowedAgentUrlResolved(endpoint))) {
+  const { url, adapter, transport } = resolved;
+
+  if (!isDevelopment && !(await isAllowedAgentUrlResolved(url))) {
     return {
       type: 'a2a-agent-error',
       message: `Agent "${agent.name}" 的 url 不允许访问（已拦截本地或内网地址）`,
     };
   }
 
-  const preferredBinding = resolveAgentProtocolBinding(agent);
-  const preferredVersion = resolveAgentProtocolVersion(agent);
-  const bindingsToTry = getProtocolBindingsToTry(preferredBinding);
-  const versionsToTry = getProtocolVersionsToTry(preferredVersion);
   const baseHeaders = buildBaseA2aRequestHeaders(agent, metadata);
 
-  let lastError: AgentInvokeResult | null = null;
-
   try {
-    for (const binding of bindingsToTry) {
-      const transport = getA2aBindingTransport(binding);
-      if (!transport) {
-        continue;
-      }
+    const attempt = await transport.invoke({
+      baseUrl: url,
+      adapter,
+      input,
+      headers: baseHeaders,
+      abortSignal,
+    });
 
-      for (let versionIndex = 0; versionIndex < versionsToTry.length; versionIndex += 1) {
-        const version = versionsToTry[versionIndex];
-        const adapter = getA2aProtocolAdapter(version);
-        if (!adapter) {
-          continue;
-        }
-
-        const attempt = await transport.invoke({
-          baseUrl: endpoint,
-          adapter,
-          input,
-          headers: baseHeaders,
-          abortSignal,
-        });
-
-        if (attempt.ok) {
-          return { type: 'text', text: attempt.text };
-        }
-
-        lastError = {
-          type: 'agent-function-call-error',
-          agent: { name: agent.name },
-          status: attempt.status,
-          statusText: attempt.statusText,
-          message: attempt.message,
-        };
-
-        const hasNextVersion = versionIndex < versionsToTry.length - 1;
-        if (attempt.retryable && hasNextVersion) {
-          continue;
-        }
-
-        const bindingIndex = bindingsToTry.indexOf(binding);
-        const hasNextBinding = bindingIndex < bindingsToTry.length - 1;
-        if (attempt.retryable && hasNextBinding) {
-          break;
-        }
-
-        return lastError;
-      }
-    }
-
-    return (
-      lastError || {
+    if (attempt.ok === false) {
+      return {
         type: 'agent-function-call-error',
         agent: { name: agent.name },
-        message: 'A2A 调用失败',
-      }
-    );
+        status: attempt.status,
+        statusText: attempt.statusText,
+        message: attempt.message,
+      };
+    }
+
+    return { type: 'text', text: attempt.text };
   } catch (error: any) {
     const aborted = error?.name === 'AbortError' || abortSignal?.aborted;
     return {

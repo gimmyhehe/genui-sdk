@@ -10,7 +10,10 @@ export type AgentProtocolSource = {
   supportedInterfaces?: AgentInterfaceLike[];
   supported_interfaces?: AgentInterfaceLike[];
   protocolVersion?: string;
+  /** A2A 0.3 Agent Card 顶层 url。 */
   url?: string;
+  /** A2A 0.3 Agent Card 传输声明。 */
+  preferredTransport?: string;
 };
 
 export type AgentInterfaceLike = {
@@ -49,7 +52,7 @@ export interface A2aProtocolAdapter {
    * 解析 HTTP+JSON SendMessage 的路径段（相对 api.url）。
    *
    * @param baseUrl - Agent Card 中的接口基址
-   * @returns 如 `message:send` 或 `v1/message:send`
+   * @returns 相对路径；0.3 为 `v1/message:send` 或 `message:send`，1.0 为 `message:send`（§5.3）
    */
   resolveHttpSendMessagePath(baseUrl: string): string;
 

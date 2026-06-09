@@ -35,8 +35,11 @@ export const a2aProtocolAdapterV03: A2aProtocolAdapter = {
   },
 
   /**
-   * 解析 A2A 0.3 HTTP+JSON SendMessage 路径。
-   * 若 api.url 已含 `/v1` 等版本段，则不再追加 `v1/` 前缀。
+   * A2A 0.3 HTTP+JSON SendMessage 路径。
+   * 0.3 规范使用 `/v1/message:send`；若 `url` 已含版本段则仅追加 `message:send`。
+   *
+   * @param baseUrl - Agent Card 中的接口基址
+   * @returns 相对路径
    */
   resolveHttpSendMessagePath(baseUrl: string): string {
     if (/\/v\d+(?:\.\d+)*\/?$/i.test(baseUrl)) {

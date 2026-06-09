@@ -1,3 +1,5 @@
+const UNRESOLVED_RESPONSE_SUMMARY = 'Agent 返回了无法解析为文本的结构化结果';
+
 /**
  * 从 A2A Part 对象中提取可读文本（兼容 0.3 kind 与 1.0 统一 Part）。
  *
@@ -19,10 +21,19 @@ function extractTextFromPart(part: unknown): string {
 }
 
 /**
+ * 当 result 中无可读文本 part 时返回固定摘要。
+ *
+ * @returns 兜底说明
+ */
+export function summarizeUnresolvedA2aResult(): string {
+  return UNRESOLVED_RESPONSE_SUMMARY;
+}
+
+/**
  * 从 A2A JSON-RPC result 中提取 agent 回复文本（兼容 Task / Message 等多种返回结构）。
  *
  * @param result - JSON-RPC result 字段
- * @returns 可读文本；无法提取时返回 JSON 字符串
+ * @returns 可读文本；无法提取时返回固定摘要
  */
 export function extractA2aResponseText(result: unknown): string {
   if (result == null) {
@@ -76,5 +87,5 @@ export function extractA2aResponseText(result: unknown): string {
     return textParts.join('\n');
   }
 
-  return JSON.stringify(result);
+  return summarizeUnresolvedA2aResult();
 }

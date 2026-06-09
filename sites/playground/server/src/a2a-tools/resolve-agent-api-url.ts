@@ -1,83 +1,51 @@
 /**
  * A2A Agent Card / Playground Agent 配置中端点 URL 的解析。
- *
- * A2A 1.0 规范中，Agent Card 通过 `supportedInterfaces` 声明端点：
- * - 每个 AgentInterface 包含 `url`、`protocolBinding`、`protocolVersion`
- * - 列表按优先级排序，首个即为首选
- *
- * Playground 内部约定：normalizeAgentCard 会将解析结果写入 `api.url`，
- * 因此 `api.url` 始终是最高优先级来源。
  */
 
-import { resolveAgentProtocolVersion } from './protocol/index.js';
-import type { AgentInterfaceLike, AgentProtocolSource } from './protocol/types.js';
+import {
+  AgentCardProtocolError,
+  resolveAgentInterface,
+  tryResolveAgentInterface,
+} from './protocol/supported-interfaces.js';
+import type { AgentProtocolSource } from './protocol/types.js';
 
 export type AgentUrlSource = AgentProtocolSource;
 
-/**
- * 安全地将未知值转为 trim 后的 URL 字符串。
- *
- * @param value - 原始字段值
- * @returns 合法字符串 URL，否则空字符串
- */
-function trimUrlString(value: unknown): string {
-  return typeof value === 'string' ? value.trim() : '';
-}
+export { AgentCardProtocolError };
 
 /**
  * 从 Agent Card 或已保存的 Agent 配置中解析用于服务端调用的 API 基址。
- * 优先级：api.url（Playground 内部约定）→ supportedInterfaces 中首个带 url 的接口。
  *
  * @param source - Agent Card JSON 或 Playground Agent 配置
  * @returns 可用于 HTTP 调用的绝对 URL，无法解析时返回空字符串
  */
 export function resolveAgentApiUrl(source: AgentUrlSource | null | undefined): string {
-  if (!source) {
-    return '';
-  }
-
-  const fromApi = trimUrlString(source.api?.url);
-  if (fromApi) {
-    return fromApi;
-  }
-
-  const interfaces = source.supportedInterfaces || source.supported_interfaces || [];
-  const first = interfaces.find((item) => typeof item?.url === 'string' && item.url.trim());
-  return first ? trimUrlString(first.url) : '';
+  return tryResolveAgentInterface(source)?.url ?? '';
 }
 
 /**
  * 将 Agent Card 规范化为 Playground 使用的结构，确保 api.url 已填充。
  *
  * @param card - 原始 Agent Card JSON
- * @returns 带 api.url 的 Agent Card 副本
+ * @returns 带 api 字段的 Agent Card 副本
+ * @throws {AgentCardProtocolError} Card 不符合 A2A 协议
  */
 export function normalizeAgentCard<T extends Record<string, unknown>>(
   card: T,
 ): T & { api: { url: string; type: string; version: string } } {
-  const apiUrl = resolveAgentApiUrl(card as AgentUrlSource);
+  const resolved = resolveAgentInterface(card as AgentUrlSource);
   const existingApi =
     card.api && typeof card.api === 'object' && !Array.isArray(card.api)
       ? (card.api as Record<string, unknown>)
       : {};
 
-  const interfaces = (card.supportedInterfaces || card.supported_interfaces || []) as AgentInterfaceLike[];
-  const matchedInterface = interfaces.find((item) => trimUrlString(item?.url) === apiUrl);
-
-  const protocolBinding = matchedInterface?.protocolBinding || matchedInterface?.protocol_binding;
-  const apiType =
-    (existingApi.type as string | undefined) ||
-    (typeof protocolBinding === 'string' ? protocolBinding : undefined) ||
-    'JSONRPC';
-  const protocolVersion = resolveAgentProtocolVersion(card as AgentUrlSource);
-
   return {
     ...card,
     api: {
       ...existingApi,
-      url: apiUrl,
-      type: apiType,
-      version: protocolVersion,
+      url: resolved.url,
+      type: resolved.binding,
+      version: resolved.version,
     },
   };
 }

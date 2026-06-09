@@ -1,11 +1,9 @@
 import { joinAgentEndpointPath } from '../resolve-protocol-binding.js';
-import { extractA2aInvokeResponseText, isRetryableHttpJsonError } from './parse-response.js';
+import { extractA2aInvokeResponseText } from './parse-response.js';
 import type { A2aBindingInvokeOptions, A2aInvokeAttemptResult, A2aProtocolBindingTransport } from './types.js';
 
 /**
- * HTTP+JSON binding：向 `{api.url}/{message:send}` 发送 REST POST。
- *
- * 规范建议 Content-Type 为 `application/a2a+json`；部分 Agent 仍接受 `application/json`。
+ * HTTP+JSON binding：向 `{url}/{message:send}` 发送 REST POST。
  */
 export const httpJsonBindingTransport: A2aProtocolBindingTransport = {
   binding: 'HTTP+JSON',
@@ -18,7 +16,7 @@ export const httpJsonBindingTransport: A2aProtocolBindingTransport = {
     const requestHeaders = adapter.applyProtocolHeaders({
       ...headers,
       'Content-Type': 'application/a2a+json',
-      Accept: 'application/a2a+json, application/json',
+      Accept: 'application/a2a+json',
     });
 
     const res = await fetch(url, {
@@ -36,7 +34,6 @@ export const httpJsonBindingTransport: A2aProtocolBindingTransport = {
     } catch {
       return {
         ok: false,
-        retryable: false,
         message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
         status: res.status,
         statusText: res.statusText,
@@ -46,7 +43,6 @@ export const httpJsonBindingTransport: A2aProtocolBindingTransport = {
     if (!res.ok) {
       return {
         ok: false,
-        retryable: isRetryableHttpJsonError(res.status, payload),
         message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
         status: res.status,
         statusText: res.statusText,
@@ -57,7 +53,6 @@ export const httpJsonBindingTransport: A2aProtocolBindingTransport = {
     if (rpcStyleError && typeof rpcStyleError === 'object' && !('result' in (payload || {}))) {
       return {
         ok: false,
-        retryable: isRetryableHttpJsonError(res.status, payload),
         message: rpcStyleError.message || JSON.stringify(rpcStyleError),
       };
     }

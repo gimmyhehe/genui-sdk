@@ -148,8 +148,8 @@ const queryAgentCard = async () => {
       signal: controller.signal,
     });
     const data = await res.json();
-    if (data.code !== 200) {
-      throw new Error(data.message || `HTTP ${data.code}`);
+    if (!res.ok) {
+      throw new Error(data.message || `HTTP ${res.status}`);
     }
     const card = data.data;
     if (!card || typeof card !== 'object') {
@@ -189,11 +189,7 @@ const confirmAgent = () => {
     return;
   }
 
-  if (
-    !agentCard.value ||
-    agentCardStatus.value !== 'success' ||
-    urlTrimmed !== lastQueriedAgentCardUrl.value
-  ) {
+  if (!agentCard.value || agentCardStatus.value !== 'success' || urlTrimmed !== lastQueriedAgentCardUrl.value) {
     TinyNotify({
       type: 'warning',
       message: '请先查询并确认 Agent Card 信息',
@@ -258,15 +254,22 @@ const updateAgentEnabled = (agent, enabled) => {
     <template #title-right>
       <tiny-button type="text" :icon="IconPlus" @click.stop="addAgent"> </tiny-button>
     </template>
-    <div class="mcp-server-list" v-if="llmConfig.agents && llmConfig.agents.length > 0">
+    <div class="mcp-server-list">
       <div class="mcp-server-item" v-for="(agent, index) in llmConfig.agents || []" :key="agent.name">
         <div class="mcp-server-item-header">
           <div class="mcp-server-item-name">{{ agent.name }}</div>
           <div>
-            <tiny-switch :model-value="agent.enabled" @update:model-value="updateAgentEnabled(agent, $event)"
-              class="mcp-server-item-enabled"></tiny-switch>
-            <tiny-popover trigger="hover" popper-class="mcp-server-item-actions-popover" :visible-arrow="false"
-              :append-to-body="false">
+            <tiny-switch
+              :model-value="agent.enabled"
+              @update:model-value="updateAgentEnabled(agent, $event)"
+              class="mcp-server-item-enabled"
+            ></tiny-switch>
+            <tiny-popover
+              trigger="hover"
+              popper-class="mcp-server-item-actions-popover"
+              :visible-arrow="false"
+              :append-to-body="true"
+            >
               <template #default>
                 <div class="mcp-server-item-actions">
                   <div @click="editAgent(agent, index)">
@@ -288,7 +291,7 @@ const updateAgentEnabled = (agent, enabled) => {
         <div class="mcp-server-item-description" v-if="agent.description">{{ agent.description }}</div>
       </div>
     </div>
-    <div v-else class="mcp-server-list-empty">
+    <div v-if="!llmConfig.agents || llmConfig.agents.length === 0" class="mcp-server-list-empty">
       <div class="mcp-server-item-empty">
         <div class="mcp-server-item-empty-icon">
           点击右上角
@@ -297,12 +300,25 @@ const updateAgentEnabled = (agent, enabled) => {
         </div>
       </div>
     </div>
-    <AgentDialog :visible="showAgentFormDialog" :agent-data="agentData" :agent-card="agentCard"
-      :agent-card-status="agentCardStatus" :agent-card-error="agentCardError" :agent-query-loading="agentQueryLoading"
-      :add-agent-loading="addAgentLoading"
-      @update:visible="(val) => { if (!val) closeAgentDialog(); else showAgentFormDialog = val; }"
-      @update:agentData="onUpdateAgentData" @queryAgentCard="queryAgentCard" @confirmAgent="confirmAgent" />
   </tiny-collapse-item>
+  <AgentDialog
+    :visible="showAgentFormDialog"
+    :agent-data="agentData"
+    :agent-card="agentCard"
+    :agent-card-status="agentCardStatus"
+    :agent-card-error="agentCardError"
+    :agent-query-loading="agentQueryLoading"
+    :add-agent-loading="addAgentLoading"
+    @update:visible="
+      (val) => {
+        if (!val) closeAgentDialog();
+        else showAgentFormDialog = val;
+      }
+    "
+    @update:agentData="onUpdateAgentData"
+    @queryAgentCard="queryAgentCard"
+    @confirmAgent="confirmAgent"
+  />
 </template>
 
 <style scoped lang="less">
@@ -384,7 +400,7 @@ const updateAgentEnabled = (agent, enabled) => {
 }
 
 .mcp-server-item-actions {
-  &>div {
+  & > div {
     display: flex;
     align-items: center;
     gap: 8px;

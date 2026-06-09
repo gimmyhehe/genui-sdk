@@ -3,7 +3,7 @@ import type { A2aProtocolAdapter } from '../types.js';
 /** 单次 A2A 调用尝试的结果。 */
 export type A2aInvokeAttemptResult =
   | { ok: true; text: string }
-  | { ok: false; retryable: boolean; message: string; status?: number; statusText?: string };
+  | { ok: false; message: string; status?: number; statusText?: string };
 
 export type A2aBindingInvokeOptions = {
   baseUrl: string;
@@ -23,7 +23,7 @@ export interface A2aProtocolBindingTransport {
    * 通过当前 binding 向 Agent 发送 SendMessage 等价请求。
    *
    * @param options - 调用参数
-   * @returns 尝试结果；`retryable` 为 true 时可切换 binding 或版本重试
+   * @returns 尝试结果
    */
   invoke(options: A2aBindingInvokeOptions): Promise<A2aInvokeAttemptResult>;
 }
