@@ -703,31 +703,30 @@ onUnmounted(() => {
             />
           </div>
         </div>
-      </div>
-      <div class="schema-version-container__editor">
-        <!-- diff 需 DiffEditor；可编辑/只读共用 CodeEditor，通过 options.readOnly 切换 -->
-        <diff-editor
-          v-if="schemaEditorShowDiffView"
-          :key="currentCardId"
-          :original="schemaEditorDiffOriginal"
-          :value="schemaEditorDiffModified"
-          language="json"
-          :theme="monacoTheme"
-          :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
-        />
-        <code-editor
-          v-else
-          :key="`${currentCardId}-${isSchemaEditorReadOnly}`"
-          :value="schemaEditorText"
-          language="json"
-          :theme="monacoTheme"
-          :options="editorOptions"
-          @update:value="applySchemaEditorTextToPreview"
-        />
+        <div class="schema-version-container__editor">
+          <!-- diff 需 DiffEditor；可编辑/只读共用 CodeEditor，通过 options.readOnly 切换 -->
+          <diff-editor
+            v-if="schemaEditorShowDiffView"
+            :key="currentCardId"
+            :original="schemaEditorDiffOriginal"
+            :value="schemaEditorDiffModified"
+            language="json"
+            :theme="monacoTheme"
+            :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
+          />
+          <code-editor
+            v-else
+            :key="`${currentCardId}-${isSchemaEditorReadOnly}`"
+            :value="schemaEditorText"
+            language="json"
+            :theme="monacoTheme"
+            :options="editorOptions"
+            @update:value="applySchemaEditorTextToPreview"
+          />
+        </div>
       </div>
     </div>
-  </div>
-  <genui-template-mobile-sheet
+    <genui-template-mobile-sheet
     v-if="isMobile"
     :visible="isMobile && schemaEditorVisible"
     :json-editor-open="mobileSchemaJsonEditorOpen"
@@ -816,6 +815,7 @@ onUnmounted(() => {
       </GenuiConfigProvider>
     </div>
   </template>
+  </div>
 </template>
 
 <style scoped lang="less">
