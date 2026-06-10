@@ -166,11 +166,13 @@
     "jsonEditorAria": "Schema JSON editor",
     "jsonPreviewAria": "Schema JSON preview",
     "viewJson": "View JSON",
+    "viewChanges": "View changes",
     "backToPreview": "Back to preview",
     "close": "Close",
     "closePreview": "Close preview",
     "applyVersion": "Apply this version",
-    "returnLatest": "Back to latest"
+    "returnLatest": "Back to latest",
+    "history": "History"
   },
   "finishInfo": {
     "title": "Conversation info",

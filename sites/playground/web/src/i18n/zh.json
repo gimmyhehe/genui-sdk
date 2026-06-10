@@ -166,11 +166,13 @@
     "jsonEditorAria": "Schema JSON 编辑器",
     "jsonPreviewAria": "Schema JSON 预览",
     "viewJson": "查看 JSON",
+    "viewChanges": "查看变更",
     "backToPreview": "返回预览",
     "close": "关闭",
     "closePreview": "关闭预览区",
     "applyVersion": "应用此版本",
-    "returnLatest": "返回最新版本"
+    "returnLatest": "返回最新版本",
+    "history": "历史记录"
   },
   "finishInfo": {
     "title": "对话信息",
