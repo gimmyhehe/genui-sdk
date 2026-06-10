@@ -67,7 +67,9 @@ provide(GENUI_VUE_MATERIALS, {
 watch(
   () => [props.locale, props.i18n] as const,
   () => {
-    i18n.setLocale(props.locale);
+    if (props.locale && props.locale !== i18n.locale.value) {
+      i18n.setLocale(props.locale);
+    }
     props.i18n && i18n.mergeMessages(props.i18n);
   },
   { immediate: true },

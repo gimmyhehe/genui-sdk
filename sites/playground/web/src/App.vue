@@ -30,6 +30,7 @@ import {
   movePartialSchemaJsonToLastMessage,
 } from './continue-writing';
 import useIcon from './use-icon';
+import { locale, t } from './i18n';
 
 const { topRenderer, addIcons } = useIcon();
 const TopIconsRenderer = topRenderer();
@@ -179,11 +180,11 @@ watch(
   { deep: true },
 );
 
-const themeData = ref([
-  { text: '默认', value: 'light' },
-  { text: '暗黑', value: 'dark' },
-  { text: '清新', value: 'lite' },
-  { text: '自动', value: 'auto' },
+const themeData = computed(() => [
+  { text: t('theme.default'), value: 'light' },
+  { text: t('theme.dark'), value: 'dark' },
+  { text: t('theme.lite'), value: 'lite' },
+  { text: t('theme.auto'), value: 'auto' },
 ]);
 
 const messages = ref([]);
@@ -347,6 +348,7 @@ onUnmounted(() => {
   <TopIconsRenderer style="height: 0" />
   <div class="genui-playground">
     <PlaygroundSidebar
+      :key="locale"
       v-model:expanded="isSidebarOpen"
       v-model:theme="theme"
       @new-task="chat?.handleNewConversation()"
@@ -366,7 +368,7 @@ onUnmounted(() => {
         </div>
       </template>
       <div v-show="!ENABLE_TEMPLATE || activeName !== 'template'" class="chat-container">
-        <GenuiConfigProvider :theme="theme" :materials="{ ...vueMaterials }" style="height: 100%">
+        <GenuiConfigProvider :theme="theme" :locale="locale" :materials="{ ...vueMaterials }" style="height: 100%">
           <GenuiChat
             :url="url"
             ref="chat"
@@ -382,7 +384,7 @@ onUnmounted(() => {
             <template #empty>
               <div class="empty">
                 <IconAi />
-                <span>GenUI Playground</span>
+                <span>{{ t('app.emptyTitle') }}</span>
               </div>
             </template>
           </GenuiChat>
@@ -428,13 +430,9 @@ onUnmounted(() => {
   .genui-playground {
     --ti-gen-chat-avatar-and-gap-width: 0px;
   }
-
-  :deep(.action-buttons__button) {
+  :deep(.action-buttons__button .action-buttons__icon) {
     padding-right: 10px;
-
-    svg[alt='录音'] {
-      display: none;
-    }
+    display: none;
   }
 
   .empty {
