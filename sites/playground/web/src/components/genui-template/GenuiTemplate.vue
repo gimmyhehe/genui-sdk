@@ -86,12 +86,9 @@ const allSchemaVersionHistoryEntries = computed(() =>
 );
 
 /** 当前预览对应聊天气泡卡片的 cardId（手动合并卡 / AI 卡） */
-const currentHistoryScopeCardId = computed(() => {
-  if (!currentCardId.value) {
-    return '';
-  }
-  return resolveSchemaCardScopeId(messages.value, currentCardId.value) || currentCardId.value;
-});
+const currentHistoryScopeCardId = computed(() =>
+  currentCardId.value ? resolveSchemaCardScopeId(messages.value, currentCardId.value) : '',
+);
 
 const schemaVersionHistoryGroups = computed(() => {
   const scopedEntries = filterSchemaVersionHistoryForCard(

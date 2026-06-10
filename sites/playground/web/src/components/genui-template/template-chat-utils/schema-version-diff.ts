@@ -1,5 +1,5 @@
 import type { ISchemaVersionHistoryEntry } from './schema-version-history';
-import { rebuildSchemaFromCard } from './conversation-schema';
+import { parseSchemaJson, rebuildSchemaFromCard } from './conversation-schema';
 
 /**
  * 递归移除 null 占位，diff 展示时兼容旧版本历史数据
@@ -57,11 +57,9 @@ export function resolveSchemaVersionDiffOriginal(
   const card = entry.cardMessage;
 
   if (card.prevSchema?.trim()) {
-    try {
-      const parsed = JSON.parse(card.prevSchema);
+    const parsed = parseSchemaJson(card.prevSchema);
+    if (parsed) {
       return stringifySchemaForDiff(parsed);
-    } catch {
-      // 解析失败时继续尝试按时间找上一版
     }
   }
 
@@ -89,12 +87,11 @@ export function resolveSchemaVersionDiffModified(entry: ISchemaVersionHistoryEnt
   }
 
   if (entry.cardMessage.schema?.trim()) {
-    try {
-      const parsed = JSON.parse(entry.cardMessage.schema);
+    const parsed = parseSchemaJson(entry.cardMessage.schema);
+    if (parsed) {
       return stringifySchemaForDiff(parsed);
-    } catch {
-      return entry.cardMessage.schema;
     }
+    return entry.cardMessage.schema;
   }
 
   return '{}';

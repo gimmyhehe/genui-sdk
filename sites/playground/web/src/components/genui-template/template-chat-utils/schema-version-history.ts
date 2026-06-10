@@ -93,15 +93,6 @@ export function formatHistoryPointTimeLabel(createdAtMs: number, nowMs: number =
 }
 
 /**
- * 格式化历史条目主时间
- * @param createdAtMs 创建时间毫秒戳
- * @returns 展示用时间标签
- */
-export function formatHistoryTimeLabel(createdAtMs: number): string {
-  return formatHistoryPointTimeLabel(createdAtMs);
-}
-
-/**
  * 根据创建时间返回历史面板分组标签（今天 / 昨天 / 本周星期 / 上周 / 月份）
  * @param createdAtMs 创建时间毫秒戳
  * @param nowMs 当前时间毫秒戳，默认 Date.now()
@@ -163,6 +154,18 @@ function buildDescription(
     return card.input?.trim() || '增量更新';
   }
   return card.input?.trim() || 'AI 生成版本';
+}
+
+/**
+ * 筛出可展示的历史条目（pending 或 schema 可还原）
+ */
+function filterCollectibleHistoryEntries(
+  entries: ISchemaVersionHistoryEntry[],
+  messages: ChatMessage[] | undefined,
+): ISchemaVersionHistoryEntry[] {
+  return entries.filter((entry) =>
+    entry.isPending || isSchemaVersionHistoryCollectible(entry.cardMessage, messages),
+  );
 }
 
 /**
@@ -328,7 +331,7 @@ export function collectSchemaVersionHistory(
             generatedTime: edit.generatedTime ?? '',
             createdAtMs,
             sequenceIndex: sequenceIndex++,
-            timeLabel: isPending ? '刚刚' : formatHistoryTimeLabel(createdAtMs),
+            timeLabel: isPending ? '刚刚' : formatHistoryPointTimeLabel(createdAtMs),
             description: '',
             authorLabel,
             authorType,
@@ -357,7 +360,7 @@ export function collectSchemaVersionHistory(
         generatedTime: item.generatedTime ?? '',
         createdAtMs,
         sequenceIndex: sequenceIndex++,
-        timeLabel: isPending ? '刚刚' : formatHistoryTimeLabel(createdAtMs),
+        timeLabel: isPending ? '刚刚' : formatHistoryPointTimeLabel(createdAtMs),
         description: '',
         authorLabel,
         authorType,
@@ -478,17 +481,12 @@ export function filterSchemaVersionHistoryForCard(
       return [];
     }
 
-    const collectible = scoped.filter((entry) =>
-      entry.isPending || isSchemaVersionHistoryCollectible(entry.cardMessage, messages),
-    );
+    const collectible = filterCollectibleHistoryEntries(scoped, messages);
     if (!collectible.length) {
       return [];
     }
 
-    const latestInScopeId = [...collectible]
-      .sort((a, b) => a.sequenceIndex - b.sequenceIndex)
-      .at(-1)
-      ?.cardId;
+    const latestInScopeId = collectible.at(-1)?.cardId;
     const firstEditId = edits[0]?.editId;
 
     return collectible.map((entry) => {
@@ -513,24 +511,10 @@ export function filterSchemaVersionHistoryForCard(
     });
   }
 
-  const aiCardId = scopeCardId || lookupId;
-  const scoped = entries.filter((entry) => entry.cardId === aiCardId || entry.cardId === lookupId);
+  const scoped = entries.filter((entry) => entry.cardId === lookupId);
   if (!scoped.length) {
     return [];
   }
 
-  const collectible = scoped.filter((entry) =>
-    entry.isPending || isSchemaVersionHistoryCollectible(entry.cardMessage, messages),
-  );
-  if (!collectible.length) {
-    return [];
-  }
-
-  return collectible.map((entry) => ({
-      ...entry,
-      description: buildDescription(entry.cardMessage, {
-        isLatest: entry.isLatest,
-        isPending: entry.isPending,
-      }),
-    }));
+  return filterCollectibleHistoryEntries(scoped, messages);
 }

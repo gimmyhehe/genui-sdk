@@ -120,9 +120,6 @@ export function rebuildSchemaFromCard(
     const operations = parseJsonPatchOperations(card.content);
     if (baseline && operations) {
       const fromPatch = applyJsonPatchOperations(baseline, operations);
-      if (fromPatch && isRenderableSchema(fromPatch)) {
-        return fromPatch;
-      }
       if (fromPatch && typeof fromPatch === 'object') {
         return fromPatch as Record<string, unknown>;
       }
@@ -132,10 +129,7 @@ export function rebuildSchemaFromCard(
   const schemaString = resolveSchemaStringFromCard(card);
   if (schemaString) {
     const parsed = parseSchemaJson(schemaString);
-    if (parsed && isRenderableSchema(parsed)) {
-      return parsed;
-    }
-    if (parsed && (card.type === 'schema-manual' || card.type === 'schema-card' || card.type === 'json-patch')) {
+    if (parsed) {
       return parsed;
     }
   }
