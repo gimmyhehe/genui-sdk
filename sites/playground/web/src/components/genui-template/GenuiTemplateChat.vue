@@ -328,7 +328,6 @@ const messageRenderers = {
       type: 'json-patch',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      messages: messages.value,
       onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
         emit('schema-version-toggle', schema, cardId),
     });
@@ -339,7 +338,6 @@ const messageRenderers = {
       type: 'schema-card',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      messages: messages.value,
       onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
         emit('schema-version-toggle', schema, cardId),
     });
@@ -350,7 +348,6 @@ const messageRenderers = {
       type: 'schema-manual',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      messages: messages.value,
       onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
         emit('schema-version-toggle', schema, cardId),
     });

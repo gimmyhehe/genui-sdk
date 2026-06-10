@@ -2,6 +2,7 @@ import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { IJsonPatchMessageItem, ISchemaCardMessageItem, ISchemaManualMessageItem } from '../chat.types';
 import { formatDate } from '../../../utils';
 import { applyJsonPatchOperations } from './json-patch-format';
+import { getManualEdits } from './manual-schema';
 
 export type ISchemaCardLikeMessage =
   | ISchemaCardMessageItem
@@ -42,6 +43,13 @@ export function resolveSchemaStringFromCard(card: ISchemaCardLikeMessage): strin
   }
   if ((card.type === 'schema-card' || card.type === 'schema-manual') && card.content?.trim()) {
     return card.content;
+  }
+  if (card.type === 'schema-manual') {
+    const edits = getManualEdits(card);
+    const latestEditSchema = edits[edits.length - 1]?.schema;
+    if (latestEditSchema?.trim()) {
+      return latestEditSchema;
+    }
   }
   return null;
 }
@@ -89,6 +97,9 @@ export function rebuildSchemaFromCard(card: ISchemaCardLikeMessage): Record<stri
   if (schemaString) {
     const parsed = parseSchemaJson(schemaString);
     if (parsed && isRenderableSchema(parsed)) {
+      return parsed;
+    }
+    if (parsed && (card.type === 'schema-manual' || card.type === 'schema-card')) {
       return parsed;
     }
   }

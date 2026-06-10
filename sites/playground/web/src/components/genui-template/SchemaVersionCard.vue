@@ -23,8 +23,10 @@ export interface IRendererProps {
   errorMessagesMap?: Map<string, string>;
 }
 
+defineOptions({ inheritAttrs: false });
+
 const props = defineProps<IRendererProps>();
-const emit = defineEmits(['click']);
+const emit = defineEmits(['card-select']);
 
 const { getMessageByCardId } = useTemplate();
 
@@ -57,7 +59,7 @@ const prevSchema = ref<string>('');
 const errorMessage = computed(() => props.errorMessagesMap?.get(props.cardId) ?? '');
 
 const handleClick = () => {
-  emit('click', props.cardId);
+  emit('card-select', props.cardId);
 };
 
 const handleDev = () => {
@@ -72,6 +74,7 @@ const handleDev = () => {
 </script>
 
 <template>
+  <div class="schema-version-card-root">
   <div :class="['schema-version-card', isMobile ? 'is-mobile' : '']" @click="handleClick">
     <div class="schema-version-card-main">
       <div class="schema-version-card-icon">
@@ -102,9 +105,14 @@ const handleDev = () => {
     :jsonPatch="jsonPatch"
     :prevSchema="prevSchema"
   />
+  </div>
 </template>
 
 <style scoped lang="less">
+.schema-version-card-root {
+  display: contents;
+}
+
 .schema-version-card {
   width: 330px;
   max-width: 330px;
