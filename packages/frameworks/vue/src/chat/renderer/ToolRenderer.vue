@@ -2,6 +2,28 @@
   import { IconArrowDown, IconCancelled, IconError, IconLoading, IconPlugin } from '@opentiny/tiny-robot-svgs'
   import { computed, ref, useCssModule, type Component } from 'vue'
   import { useI18n } from '../i18n';
+
+
+  const MAX_HIGHLIGHT_JSON_FIELD_COUNT = 100;
+
+  /**
+   * 递归统计 JSON 对象中的字段总数（含嵌套 object 的 key 与 array 内 object 的 key）。
+   * 非 object（含 null、原始类型）返回 0。
+   *
+   * @param value - 待统计的值
+   * @returns 字段总数
+   */
+  const countObjectFields = (value: unknown): number => {
+    if (!value || typeof value !== 'object') {
+      return 0
+    }
+
+    if (Array.isArray(value)) {
+      return value.reduce((sum, item) => sum + countObjectFields(item), 0)
+    }
+
+    return Object.values(value).reduce((sum, item) => sum + 1 + countObjectFields(item), 0)
+  }
   
   const props = defineProps<{
     name: string
@@ -32,16 +54,26 @@
     }
   
     let prettyJson = ''
+    let parsedValue: unknown = json
     const space = props.formatPretty ? 2 : 0
   
     try {
       if (typeof json === 'string') {
-        prettyJson = JSON.stringify(JSON.parse(json), null, space)
+        parsedValue = JSON.parse(json)
+        prettyJson = JSON.stringify(parsedValue, null, space)
       } else {
+        parsedValue = json
         prettyJson = JSON.stringify(json, null, space)
       }
     } catch (error) {
       console.warn(error)
+    }
+
+    const shouldSkipHighlight =
+      countObjectFields(parsedValue) > MAX_HIGHLIGHT_JSON_FIELD_COUNT
+
+    if (shouldSkipHighlight) {
+      return prettyJson
     }
   
     prettyJson = prettyJson.replace(
@@ -159,6 +191,8 @@
       white-space: pre-wrap;
       word-break: break-word;
       font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
     }
   }
   </style>
