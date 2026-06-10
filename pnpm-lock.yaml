@@ -827,9 +827,6 @@ importers:
 
   sites/homepage/web:
     dependencies:
-      '@opentiny/genui-sdk-materials-vue-opentiny-vue':
-        specifier: workspace:*
-        version: link:../../../packages/materials/vue-opentiny-vue
       '@opentiny/genui-sdk-vue':
         specifier: 1.1.0
         version: 1.1.0(typescript@5.9.3)(vite@7.3.0(@types/node@17.0.45)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0))
