@@ -1,6 +1,6 @@
 import { IChatMessage, IMessageItem, IStreamDelta, IStreamData, PatternExtractor } from "@opentiny/genui-sdk-core";
 import { ThinkTagWrapPattern } from './think-tag-wrap-pattern';
-import { reactive, toRaw, watch } from "vue";
+import { reactive, readonly, watch } from "vue";
 import { v4 as uuidv4 } from 'uuid';
 import { emitter } from './event-emitter';
 import { useI18n } from './i18n';
@@ -31,8 +31,8 @@ function onToolResult(toolCallsResult: any[], delta: IStreamDelta, toolCallIdMap
     emitter.emit('notification', {
       type: 'tool',
       delta,
-      toolCallData: structuredClone(toRaw(toolCallItem)),
-      chatMessage: structuredClone(toRaw(chatMessage)),
+      toolCallData: readonly(toolCallItem),
+      chatMessage: readonly(chatMessage),
     });
 
     if (addToolCallContext) {
@@ -80,7 +80,7 @@ function onToolCall(toolCalls: any[], delta: IStreamDelta, toolCallIdMap: Record
       type: 'tool',
       delta,
       toolCallData: toolCallItem,
-      chatMessage: structuredClone(toRaw(chatMessage)),
+      chatMessage: readonly(chatMessage),
     });
 
   });
@@ -114,7 +114,7 @@ function emitNotification(delta: IStreamDelta, chatMessage: IChatMessage) {
     emitter.emit('notification', {
       type: lastMessage.type as 'markdown' | 'schema-card',
       delta,
-      chatMessage: structuredClone(toRaw(chatMessage)),
+      chatMessage: readonly(chatMessage),
     });
   }
 };
@@ -175,7 +175,7 @@ export const defaultResponseHandlers: IResponseHandler<IStreamData>[] = [
       emitter.emit('notification', {
         type: 'done',
         delta: {},
-        chatMessage: structuredClone(toRaw(context.chatMessage)),
+        chatMessage: readonly(context.chatMessage),
       });
     },
   },
