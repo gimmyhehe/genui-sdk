@@ -4,7 +4,7 @@ import { ThemeProvider } from '@opentiny/tiny-robot';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
 import { watch, provide, computed, onMounted, ref, Component } from 'vue';
 import { I18nMessages, useI18n } from '../chat/i18n';
-import { GENUI_I18N, GENUI_CONFIG, GENUI_VUE_MATERIALS } from '../chat/injection-tokens';
+import { GENUI_I18N, GENUI_CONFIG, GENUI_MATERIALS } from '../chat/injection-tokens';
 import { useMediaTheme } from './use-media-theme';
 
 export interface ConfigProviderProps {
@@ -60,7 +60,7 @@ const genuiConfig = computed(() => {
 
 provide(GENUI_CONFIG, genuiConfig);
 
-provide(GENUI_VUE_MATERIALS, {
+provide(GENUI_MATERIALS, {
   ...(props.materials ?? {}),
 });
 

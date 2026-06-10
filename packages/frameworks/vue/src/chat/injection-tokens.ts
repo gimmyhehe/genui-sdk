@@ -5,7 +5,7 @@ export const GENUI_RENDERER = Symbol('GENUI_RENDERER');
 export const GENUI_CONFIG = Symbol('GENUI_CONFIG');
 export const CUSTOM_CONTEXT = Symbol('CUSTOM_CONTEXT');
 
-/** Schema 渲染器使用的 Vue 组件物料表。 */
-export type VueMaterials = Record<string, Component>;
+/** Schema 渲染器使用的 Genui 组件物料表。 */
+export type GenuiMaterials = Record<string, Component>;
 
-export const GENUI_VUE_MATERIALS: InjectionKey<VueMaterials> = Symbol('GENUI_VUE_MATERIALS');
+export const GENUI_MATERIALS: InjectionKey<GenuiMaterials> = Symbol('GENUI_MATERIALS');
