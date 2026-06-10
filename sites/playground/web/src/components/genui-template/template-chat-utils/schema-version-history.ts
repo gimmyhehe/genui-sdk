@@ -204,13 +204,11 @@ function resolveCardVersionTimeLabel(
 
 /**
  * 通过 prevSchema 与历史条目比对，推断旧数据首条手动保存的来源时间
- * @param edit 手动保存的首条编辑记录
- * @param entries 全量历史条目
- * @returns 推断出的来源时间文本，无法推断时返回 null
  */
 function inferSourceTimeFromPrevSchema(
   edit: ISchemaManualEditRecord,
   entries: ISchemaVersionHistoryEntry[],
+  messages?: ChatMessage[],
 ): string | null {
   const prevSchema = edit.prevSchema?.trim();
   if (!prevSchema) {
@@ -219,7 +217,7 @@ function inferSourceTimeFromPrevSchema(
 
   for (let i = entries.length - 1; i >= 0; i--) {
     const entry = entries[i];
-    const schema = rebuildSchemaFromCard(entry.cardMessage);
+    const schema = rebuildSchemaFromCard(entry.cardMessage, { messages });
     if (!schema) {
       continue;
     }
@@ -232,33 +230,34 @@ function inferSourceTimeFromPrevSchema(
 }
 
 /**
- * 手动合并卡首条 edit 的历史描述：用时间指向来源版本（如「还原自 x 的版本」）
- * @param edit 首条编辑记录
- * @param entries 全量历史条目
- * @param messages 当前会话消息列表
- * @param options.isLatest 是否为该手动卡内最新 edit
- * @param options.isPending 是否仍在生成中
- * @returns 展示用描述
+ * 手动 edit 的历史描述：应用历史版本时用时间指向来源（如「应用自 x 的版本」）
  */
-function buildManualFirstEditDescription(
+function buildManualRestoreDescription(
   edit: ISchemaManualEditRecord,
   entries: ISchemaVersionHistoryEntry[],
   messages: ChatMessage[] | undefined,
-  options: { isLatest: boolean; isPending: boolean },
+  options: { isLatest: boolean; isPending: boolean; allowPrevSchemaInfer?: boolean },
 ): string {
   if (options.isPending) {
     return '生成中...';
   }
 
-  const sourceTime =
-    (edit.sourceCardGeneratedTime?.trim()
-      ? formatHistoryPointTimeLabel(parseGeneratedTimeMs(edit.sourceCardGeneratedTime))
-      : null)
-    || (edit.sourceCardId ? resolveCardVersionTimeLabel(entries, messages, edit.sourceCardId) : null)
-    || inferSourceTimeFromPrevSchema(edit, entries);
+  let sourceTime: string | null = null;
+  if (edit.sourceCardGeneratedTime?.trim()) {
+    sourceTime = formatHistoryPointTimeLabel(parseGeneratedTimeMs(edit.sourceCardGeneratedTime));
+  } else if (edit.sourceCardId) {
+    sourceTime = resolveCardVersionTimeLabel(entries, messages, edit.sourceCardId);
+  } else if (options.allowPrevSchemaInfer) {
+    sourceTime = inferSourceTimeFromPrevSchema(edit, entries, messages);
+  }
 
   if (sourceTime) {
-    return `还原自 ${sourceTime} 的版本`;
+    return `应用自 ${sourceTime} 的版本`;
+  }
+
+  const hasExplicitSource = Boolean(edit.sourceCardId?.trim() || edit.sourceCardGeneratedTime?.trim());
+  if (hasExplicitSource) {
+    return '应用自历史版本';
   }
 
   if (options.isLatest) {
@@ -493,10 +492,14 @@ export function filterSchemaVersionHistoryForCard(
       const isLatestInScope = entry.cardId === latestInScopeId;
       const matchedEdit = edits.find((edit) => edit.editId === entry.cardId);
       const isFirstEdit = entry.cardId === firstEditId;
-      const description = isFirstEdit && matchedEdit
-        ? buildManualFirstEditDescription(matchedEdit, entries, messages, {
+      const hasSourceInfo = Boolean(
+        matchedEdit?.sourceCardId?.trim() || matchedEdit?.sourceCardGeneratedTime?.trim(),
+      );
+      const description = (isFirstEdit || hasSourceInfo) && matchedEdit
+        ? buildManualRestoreDescription(matchedEdit, entries, messages, {
           isLatest: isLatestInScope,
           isPending: entry.isPending,
+          allowPrevSchemaInfer: isFirstEdit,
         })
         : buildDescription(entry.cardMessage, {
           isLatest: isLatestInScope,

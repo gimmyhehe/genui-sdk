@@ -310,6 +310,9 @@ export default function useTemplate(options?: UseTemplateOptions) {
    * @param schema 保存后的 schema 对象
    * @param options.prevSchema 保存前的基准 schema，缺省时取 currentSchema
    * @param options.input 版本卡片标题，缺省为「手动编辑保存」
+   * @param options.sourceCardId 来源版本 id（应用历史版本时传入）
+   * @param options.sourceCardGeneratedTime 来源版本创建时间快照
+   * @param options.sourceCardInput 来源版本标题快照
    * @returns 新建或合并后的卡片 cardId，失败时返回 null
    */
   const appendManualSchemaVersion = (
@@ -317,8 +320,9 @@ export default function useTemplate(options?: UseTemplateOptions) {
     options: {
       prevSchema?: Record<string, unknown>;
       input?: string;
-      /** 首次创建手动卡时，记录基准 schema 来源版本 id */
       sourceCardId?: string;
+      sourceCardGeneratedTime?: string;
+      sourceCardInput?: string;
     } = {},
   ) => {
     if (!conversation.value) {
@@ -338,6 +342,27 @@ export default function useTemplate(options?: UseTemplateOptions) {
       input,
     };
 
+    const attachSourceMetadata = (sourceCardId: string) => {
+      editRecord.sourceCardId = sourceCardId;
+      if (options.sourceCardInput?.trim()) {
+        editRecord.sourceCardInput = options.sourceCardInput.trim();
+      }
+      if (options.sourceCardGeneratedTime?.trim()) {
+        editRecord.sourceCardGeneratedTime = options.sourceCardGeneratedTime.trim();
+      }
+      const sourceCard = getMessageByCardId(sourceCardId);
+      if (!editRecord.sourceCardInput?.trim() && sourceCard?.input?.trim()) {
+        editRecord.sourceCardInput = sourceCard.input.trim();
+      }
+      if (!editRecord.sourceCardGeneratedTime?.trim() && sourceCard?.generatedTime?.trim()) {
+        editRecord.sourceCardGeneratedTime = sourceCard.generatedTime;
+      }
+    };
+
+    if (options.sourceCardId) {
+      attachSourceMetadata(options.sourceCardId);
+    }
+
     const messageMgr = conversation.value.messageManager.value;
     const currentConversation = conversation.value.getCurrentConversation();
     if (!messageMgr || !currentConversation) {
@@ -356,19 +381,6 @@ export default function useTemplate(options?: UseTemplateOptions) {
       cardId = card.cardId;
       lastMessage.messageId = cardId;
     } else {
-      const sourceCardId = options.sourceCardId ?? currentCardId.value;
-      if (sourceCardId) {
-        editRecord.sourceCardId = sourceCardId;
-        const sourceCard = getMessageByCardId(sourceCardId);
-        const sourceLabel = sourceCard?.input?.trim();
-        if (sourceLabel) {
-          editRecord.sourceCardInput = sourceLabel;
-        }
-        if (sourceCard?.generatedTime?.trim()) {
-          editRecord.sourceCardGeneratedTime = sourceCard.generatedTime;
-        }
-      }
-
       cardId = generateId();
       const cardMessage: ISchemaManualMessageItem = {
         type: 'schema-manual',

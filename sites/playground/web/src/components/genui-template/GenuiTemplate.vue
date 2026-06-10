@@ -518,6 +518,10 @@ const applyCurrentVersion = () => {
   const saved = appendManualSchemaVersion(schema, {
     prevSchema,
     sourceCardId: currentCardId.value,
+    sourceCardGeneratedTime: currentHistoryEntry.value?.generatedTime
+      ?? allSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value)?.generatedTime,
+    sourceCardInput: currentHistoryEntry.value?.input
+      ?? allSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value)?.input,
   });
   if (!saved) {
     return;
@@ -564,7 +568,6 @@ const handleSaveSchemaEditor = async () => {
 
     const saved = appendManualSchemaVersion(schema, {
       prevSchema,
-      sourceCardId: currentCardId.value,
     });
     if (saved) {
       isViewingHistoryVersion.value = false;
