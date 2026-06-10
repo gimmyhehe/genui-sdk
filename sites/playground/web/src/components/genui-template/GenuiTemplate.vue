@@ -73,8 +73,8 @@ const mobileSheetDragging = ref(false);
 const currentConversationMessages = computed(() => {
   const conversationState = templateConversationState.value;
   return (
-    conversationState?.conversations?.find((item: Conversation) => item.id === conversationState.currentId)
-      ?.messages ?? []
+    conversationState?.conversations?.find((item: Conversation) => item.id === conversationState.currentId)?.messages ??
+    []
   );
 });
 
@@ -95,9 +95,7 @@ const isLatestSchemaVersionCard = (cardId: string) => {
   if (cardId === latestSchemaCardId.value) {
     return true;
   }
-  return flatSchemaVersionHistoryEntries.value.some(
-    (entry) => entry.isLatest && entry.cardId === cardId,
-  );
+  return flatSchemaVersionHistoryEntries.value.some((entry) => entry.isLatest && entry.cardId === cardId);
 };
 
 const schemaVersionHistoryGroups = computed(() => {
@@ -119,8 +117,8 @@ const flatSchemaVersionHistoryEntries = computed(() =>
 /**
  * 当前预览版本对应的历史条目（含手动编辑的 editId）
  */
-const currentHistoryEntry = computed(() =>
-  flatSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value) ?? null,
+const currentHistoryEntry = computed(
+  () => flatSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value) ?? null,
 );
 
 /**
@@ -180,17 +178,15 @@ const closeSchemaHistoryPanel = () => {
 const isViewingHistoryVersion = ref(false);
 const showReturnLatestButton = computed(
   () =>
-    isViewingHistoryVersion.value
-    && !isHistoryVersionApplied.value
-    && Boolean(currentCardId.value && !isLatestSchemaVersionCard(currentCardId.value)),
+    isViewingHistoryVersion.value &&
+    !isHistoryVersionApplied.value &&
+    Boolean(currentCardId.value && !isLatestSchemaVersionCard(currentCardId.value)),
 );
 
 /**
  * 未应用当前预览版本时显示「应用此版本」
  */
-const showApplyVersionButton = computed(
-  () => showReturnLatestButton.value && !isHistoryVersionApplied.value,
-);
+const showApplyVersionButton = computed(() => showReturnLatestButton.value && !isHistoryVersionApplied.value);
 
 /**
  * 当前预览的历史版本是否已应用为生效 schema
@@ -200,16 +196,12 @@ const isHistoryVersionApplied = ref(true);
 /**
  * 预览历史版本但未应用时，编辑器修改仅更新 preview 不回写 currentSchema
  */
-const isViewingHistoryWithoutApply = computed(
-  () => showReturnLatestButton.value && !isHistoryVersionApplied.value,
-);
+const isViewingHistoryWithoutApply = computed(() => showReturnLatestButton.value && !isHistoryVersionApplied.value);
 
 /**
  * JSON 编辑器是否为只读（历史 diff 或未应用的非最新版本）
  */
-const isSchemaEditorReadOnly = computed(
-  () => schemaEditorDiffFromHistory.value || isViewingHistoryWithoutApply.value,
-);
+const isSchemaEditorReadOnly = computed(() => schemaEditorDiffFromHistory.value || isViewingHistoryWithoutApply.value);
 
 const schemaEditorText = ref('{}');
 const schemaEditorBaseline = ref('{}');
@@ -218,20 +210,15 @@ const schemaEditorBaseline = ref('{}');
  * JSON 编辑器是否处于可编辑态（桌面内联 / 移动端 JSON 层）
  */
 const isSchemaJsonEditorActive = computed(
-  () =>
-    (schemaEditorVisible.value && !isMobile.value)
-    || (isMobile.value && mobileSchemaJsonEditorOpen.value),
+  () => (schemaEditorVisible.value && !isMobile.value) || (isMobile.value && mobileSchemaJsonEditorOpen.value),
 );
 
 /**
  * 编辑器文本相对 baseline 是否有未保存修改
  * @returns 是否存在未保存的编辑
  */
-const hasUnsavedSchemaEditorChanges = () =>
-  schemaEditorText.value !== schemaEditorBaseline.value;
-const schemaEditorDirty = computed(
-  () => isSchemaJsonEditorActive.value && hasUnsavedSchemaEditorChanges(),
-);
+const hasUnsavedSchemaEditorChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
+const schemaEditorDirty = computed(() => isSchemaJsonEditorActive.value && hasUnsavedSchemaEditorChanges());
 const schemaEditorSaveLoading = ref(false);
 
 /**
@@ -499,10 +486,10 @@ const applyCurrentVersion = () => {
   let prevSchema: Record<string, unknown> | undefined;
   const effectiveSchema = currentSchema.value;
   if (
-    effectiveSchema
-    && typeof effectiveSchema === 'object'
-    && !Array.isArray(effectiveSchema)
-    && isRenderableSchema(effectiveSchema)
+    effectiveSchema &&
+    typeof effectiveSchema === 'object' &&
+    !Array.isArray(effectiveSchema) &&
+    isRenderableSchema(effectiveSchema)
   ) {
     prevSchema = effectiveSchema as Record<string, unknown>;
   }
@@ -716,69 +703,69 @@ onUnmounted(() => {
             />
           </div>
         </div>
-        </div>
-        <div class="schema-version-container__editor">
-          <!-- diff 需 DiffEditor；可编辑/只读共用 CodeEditor，通过 options.readOnly 切换 -->
-          <diff-editor
-            v-if="schemaEditorShowDiffView"
-            :key="currentCardId"
-            :original="schemaEditorDiffOriginal"
-            :value="schemaEditorDiffModified"
-            language="json"
-            :theme="monacoTheme"
-            :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
-          />
-          <code-editor
-            v-else
-            :key="`${currentCardId}-${isSchemaEditorReadOnly}`"
-            :value="schemaEditorText"
-            language="json"
-            :theme="monacoTheme"
-            :options="editorOptions"
-            @update:value="applySchemaEditorTextToPreview"
-          />
-        </div>
+      </div>
+      <div class="schema-version-container__editor">
+        <!-- diff 需 DiffEditor；可编辑/只读共用 CodeEditor，通过 options.readOnly 切换 -->
+        <diff-editor
+          v-if="schemaEditorShowDiffView"
+          :key="currentCardId"
+          :original="schemaEditorDiffOriginal"
+          :value="schemaEditorDiffModified"
+          language="json"
+          :theme="monacoTheme"
+          :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
+        />
+        <code-editor
+          v-else
+          :key="`${currentCardId}-${isSchemaEditorReadOnly}`"
+          :value="schemaEditorText"
+          language="json"
+          :theme="monacoTheme"
+          :options="editorOptions"
+          @update:value="applySchemaEditorTextToPreview"
+        />
       </div>
     </div>
-    <genui-template-mobile-sheet
-      v-if="isMobile"
-      :visible="isMobile && schemaEditorVisible"
-      :json-editor-open="mobileSchemaJsonEditorOpen"
-      :panel-style="mobileSheetPanelStyle"
-      :show-return-latest-button="showReturnLatestButton"
-      :show-apply-version-button="showApplyVersionButton"
-      :current-preview-schema="currentPreviewSchema"
-      :current-preview-schema-complete="currentPreviewSchemaComplete"
-      :schema-editor="schemaEditorText"
-      :schema-editor-diff-mode="schemaEditorShowDiffView"
-      :schema-editor-mount-key="currentCardId"
-      :schema-editor-diff-original="schemaEditorDiffOriginal"
-      :schema-editor-diff-modified="schemaEditorDiffModified"
-      :editor-options="editorOptions"
-      :playground-theme="theme"
-      :view-schema-icon="viewSchemaIcon"
-      :history-icon="TinyIconTime"
-      :history-visible="schemaHistoryVisible"
-      :history-groups="schemaVersionHistoryGroups"
-      :close-icon="TinyCloseIcon"
-      @update:json-editor-open="handleMobileJsonEditorOpen"
-      @update:schema-editor="applySchemaEditorTextToPreview"
-      @mask-click="onMobileSheetMaskClick"
-      @grab-touch-start="onMobileSheetGrabTouchStart"
-      @close="closeSchemaEditorView"
-      @toggle-history="toggleSchemaHistoryPanel"
-      @close-history="closeSchemaHistoryPanel"
-      @history-select="handleHistoryEntrySelect"
-      :schema-editor-dirty="schemaEditorDirty"
-      :schema-editor-save-loading="schemaEditorSaveLoading"
-      @apply-current-version="applyCurrentVersion"
-      @reset-to-latest-version="resetToLatestVersion"
-      @save-schema-editor="handleSaveSchemaEditor"
-    />
-    <template v-else>
-      <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && rendererPanelVisible">
-        <GenuiConfigProvider :theme="theme" style="height: 100%; width: 100%">
-          <div class="renderer-container-wrapper">
+  </div>
+  <genui-template-mobile-sheet
+    v-if="isMobile"
+    :visible="isMobile && schemaEditorVisible"
+    :json-editor-open="mobileSchemaJsonEditorOpen"
+    :panel-style="mobileSheetPanelStyle"
+    :show-return-latest-button="showReturnLatestButton"
+    :show-apply-version-button="showApplyVersionButton"
+    :current-preview-schema="currentPreviewSchema"
+    :current-preview-schema-complete="currentPreviewSchemaComplete"
+    :schema-editor="schemaEditorText"
+    :schema-editor-diff-mode="schemaEditorShowDiffView"
+    :schema-editor-mount-key="currentCardId"
+    :schema-editor-diff-original="schemaEditorDiffOriginal"
+    :schema-editor-diff-modified="schemaEditorDiffModified"
+    :editor-options="editorOptions"
+    :playground-theme="theme"
+    :view-schema-icon="viewSchemaIcon"
+    :history-icon="TinyIconTime"
+    :history-visible="schemaHistoryVisible"
+    :history-groups="schemaVersionHistoryGroups"
+    :close-icon="TinyCloseIcon"
+    @update:json-editor-open="handleMobileJsonEditorOpen"
+    @update:schema-editor="applySchemaEditorTextToPreview"
+    @mask-click="onMobileSheetMaskClick"
+    @grab-touch-start="onMobileSheetGrabTouchStart"
+    @close="closeSchemaEditorView"
+    @toggle-history="toggleSchemaHistoryPanel"
+    @close-history="closeSchemaHistoryPanel"
+    @history-select="handleHistoryEntrySelect"
+    :schema-editor-dirty="schemaEditorDirty"
+    :schema-editor-save-loading="schemaEditorSaveLoading"
+    @apply-current-version="applyCurrentVersion"
+    @reset-to-latest-version="resetToLatestVersion"
+    @save-schema-editor="handleSaveSchemaEditor"
+  />
+  <template v-else>
+    <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && rendererPanelVisible">
+      <GenuiConfigProvider :theme="theme" style="height: 100%; width: 100%">
+        <div class="renderer-container-wrapper">
           <div class="top-button-group">
             <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
               <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
@@ -809,27 +796,26 @@ onUnmounted(() => {
               />
             </div>
           </div>
-            <div class="schema-renderer-body">
-              <schema-renderer
-                :key="rendererSchemaKey"
-                class="schema-renderer"
-                :content="rendererSchema"
-                :generating="false"
-                :is-json-complete="true"
-              />
-              <schema-version-history-panel
-                :visible="schemaHistoryVisible"
-                :groups="schemaVersionHistoryGroups"
-                :theme="theme"
-                @close="closeSchemaHistoryPanel"
-                @select="handleHistoryEntrySelect"
-              />
-            </div>
+          <div class="schema-renderer-body">
+            <schema-renderer
+              :key="rendererSchemaKey"
+              class="schema-renderer"
+              :content="rendererSchema"
+              :generating="false"
+              :is-json-complete="true"
+            />
+            <schema-version-history-panel
+              :visible="schemaHistoryVisible"
+              :groups="schemaVersionHistoryGroups"
+              :theme="theme"
+              @close="closeSchemaHistoryPanel"
+              @select="handleHistoryEntrySelect"
+            />
           </div>
-        </GenuiConfigProvider>
-      </div>
-    </template>
-  </div>
+        </div>
+      </GenuiConfigProvider>
+    </div>
+  </template>
 </template>
 
 <style scoped lang="less">
