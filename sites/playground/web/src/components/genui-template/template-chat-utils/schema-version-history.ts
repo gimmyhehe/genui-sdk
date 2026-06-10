@@ -1,6 +1,7 @@
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { ISchemaCardLikeMessage } from './conversation-schema';
-import { getManualEdits, manualEditToCardSnapshot } from './manual-schema';
+import { findSchemaCardByCardId } from './conversation-schema';
+import { findManualCardInMessages, getManualEdits, manualEditToCardSnapshot } from './manual-schema';
 import type { ISchemaManualMessageItem } from '../chat.types';
 
 export interface ISchemaVersionHistoryEntry {
@@ -267,4 +268,90 @@ export function groupSchemaVersionHistory(
     label,
     items: buckets.get(label) ?? [],
   }));
+}
+
+/**
+ * 将 cardId / editId 解析为聊天气泡级卡片 id（手动合并卡 cardId 或 AI 卡 cardId）
+ * @param messages 当前会话消息列表
+ * @param cardOrEditId 当前预览的 cardId 或手动编辑 editId
+ * @returns 气泡级卡片 id，无法解析时返回空字符串
+ */
+export function resolveSchemaCardScopeId(
+  messages: ChatMessage[] | undefined,
+  cardOrEditId: string | undefined,
+): string {
+  if (!messages?.length || !cardOrEditId) {
+    return '';
+  }
+
+  const manualCard = findManualCardInMessages(messages, cardOrEditId);
+  if (manualCard) {
+    return manualCard.cardId;
+  }
+
+  const aiCard = findSchemaCardByCardId(messages, cardOrEditId);
+  if (aiCard) {
+    return aiCard.cardId;
+  }
+
+  return cardOrEditId;
+}
+
+/**
+ * 从全量历史条目中筛出与当前选中卡片相关的版本记录
+ * - 手动合并卡：展示该卡内全部 edits
+ * - schema-card / json-patch：仅展示当前这一条卡片
+ * @param entries collectSchemaVersionHistory 的全量结果
+ * @param messages 当前会话消息列表
+ * @param scopeCardId 气泡级卡片 cardId
+ * @param currentCardOrEditId 当前预览的 cardId 或手动编辑 editId
+ * @returns 当前卡片范围内的历史条目
+ */
+export function filterSchemaVersionHistoryForCard(
+  entries: ISchemaVersionHistoryEntry[],
+  messages: ChatMessage[] | undefined,
+  scopeCardId: string,
+  currentCardOrEditId?: string,
+): ISchemaVersionHistoryEntry[] {
+  const lookupId = currentCardOrEditId || scopeCardId;
+  if (!lookupId || !entries.length) {
+    return [];
+  }
+
+  const manualCard = findManualCardInMessages(messages, lookupId);
+  if (manualCard) {
+    const editIds = new Set(getManualEdits(manualCard).map((edit) => edit.editId));
+    const scoped = entries.filter((entry) => editIds.has(entry.cardId));
+    if (!scoped.length) {
+      return [];
+    }
+
+    const latestInScopeId = [...scoped]
+      .sort((a, b) => a.sequenceIndex - b.sequenceIndex)
+      .at(-1)
+      ?.cardId;
+
+    return scoped.map((entry) => {
+      const isLatestInScope = entry.cardId === latestInScopeId;
+      return {
+        ...entry,
+        isLatest: isLatestInScope,
+        description: buildDescription(entry.cardMessage, {
+          isLatest: isLatestInScope,
+          isPending: entry.isPending,
+        }),
+      };
+    });
+  }
+
+  const aiCardId = scopeCardId || lookupId;
+  return entries
+    .filter((entry) => entry.cardId === aiCardId || entry.cardId === lookupId)
+    .map((entry) => ({
+      ...entry,
+      description: buildDescription(entry.cardMessage, {
+        isLatest: entry.isLatest,
+        isPending: entry.isPending,
+      }),
+    }));
 }

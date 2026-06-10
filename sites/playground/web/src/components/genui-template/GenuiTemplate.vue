@@ -17,6 +17,8 @@ import {
   rebuildSchemaFromCard,
   collectSchemaVersionHistory,
   groupSchemaVersionHistory,
+  filterSchemaVersionHistoryForCard,
+  resolveSchemaCardScopeId,
   resolveSchemaVersionDiffOriginal,
   resolveSchemaVersionDiffModified,
   hasUnifiedDiffChanges,
@@ -36,9 +38,10 @@ const {
   setCurrentPreviewSchema,
   currentPreviewSchema,
   currentPreviewSchemaComplete,
-  templateConversationState,
   currentCardId,
   currentConversationId,
+  messages,
+  templateConversationState,
   applySchemaFromMessages,
   appendManualSchemaVersion,
 } = useTemplate();
@@ -70,16 +73,32 @@ const mobileSheetHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
 const mobileSheetDragStartY = ref(0);
 const mobileSheetDragStartHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
 const mobileSheetDragging = ref(false);
-const currentConversationMessages = computed(() => {
-  const conversationState = templateConversationState.value;
-  return (
-    conversationState?.conversations?.find((item: Conversation) => item.id === conversationState.currentId)?.messages ??
-    []
-  );
+const latestSchemaCardId = computed(() => {
+  return findLatestSchemaCardInConversation(messages.value)?.cardId ?? '';
 });
 
-const latestSchemaCardId = computed(() => {
-  return findLatestSchemaCardInConversation(currentConversationMessages.value)?.cardId ?? '';
+/** 会话内全部 schema 版本（供最新版本判断等全局逻辑使用） */
+const allSchemaVersionHistoryEntries = computed(() =>
+  collectSchemaVersionHistory(messages.value, {
+    currentCardId: currentCardId.value,
+    latestCardId: latestSchemaCardId.value,
+  }),
+);
+
+/** 当前预览对应聊天气泡卡片的 cardId（手动合并卡 / AI 卡） */
+const currentHistoryScopeCardId = computed(() => {
+  const cardOrEditId = currentCardId.value || latestSchemaCardId.value;
+  return resolveSchemaCardScopeId(messages.value, cardOrEditId);
+});
+
+const schemaVersionHistoryGroups = computed(() => {
+  const scopedEntries = filterSchemaVersionHistoryForCard(
+    allSchemaVersionHistoryEntries.value,
+    messages.value,
+    currentHistoryScopeCardId.value,
+    currentCardId.value,
+  );
+  return groupSchemaVersionHistory(scopedEntries);
 });
 
 /**
@@ -95,17 +114,8 @@ const isLatestSchemaVersionCard = (cardId: string) => {
   if (cardId === latestSchemaCardId.value) {
     return true;
   }
-  return flatSchemaVersionHistoryEntries.value.some((entry) => entry.isLatest && entry.cardId === cardId);
+  return allSchemaVersionHistoryEntries.value.some((entry) => entry.isLatest && entry.cardId === cardId);
 };
-
-const schemaVersionHistoryGroups = computed(() => {
-  // 从会话消息收集 schema 版本，按日期分组供历史面板展示
-  const entries = collectSchemaVersionHistory(currentConversationMessages.value, {
-    currentCardId: currentCardId.value,
-    latestCardId: latestSchemaCardId.value,
-  });
-  return groupSchemaVersionHistory(entries);
-});
 
 /**
  * 扁平化历史分组，便于按 cardId 查找当前选中条目
