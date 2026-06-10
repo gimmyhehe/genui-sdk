@@ -23,6 +23,7 @@ import {
 } from './template-chat-utils';
 import type { ISchemaVersionHistoryEntry } from './template-chat-utils/schema-version-history';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
+import { locale, t } from '../../i18n';
 
 const { isMobile } = useIsMobile();
 
@@ -678,7 +679,12 @@ onUnmounted(() => {
   <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">
     <div class="genui-schema-template-item chat-container">
       <!-- 桌面：打开内联编辑器时隐藏聊天；移动端：底部抽屉叠在聊天上，聊天保持挂载以便背后仍可见 -->
-      <GenuiConfigProvider v-show="!schemaEditorVisible || isMobile" :theme="theme" style="width: 100%; height: 100%">
+      <GenuiConfigProvider
+        v-show="!schemaEditorVisible || isMobile"
+        :theme="theme"
+        :locale="locale"
+        style="width: 100%; height: 100%"
+      >
         <genui-template-chat
           class="genui-template-chat"
           @schema-version-toggle="toggleSchemaVersion"
@@ -705,10 +711,11 @@ onUnmounted(() => {
               type="text"
               class="genui-schema-toolbar-close-btn"
               :icon="TinyCloseIcon"
-              aria-label="关闭"
+              :aria-label="t('templateEditor.close')"
               @click="closeSchemaEditorView"
             />
           </div>
+        </div>
         </div>
         <div class="schema-version-container__editor">
           <!-- diff 需 DiffEditor；可编辑/只读共用 CodeEditor，通过 options.readOnly 切换 -->
@@ -775,29 +782,29 @@ onUnmounted(() => {
           <div class="top-button-group">
             <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
               <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
-              {{ schemaEditorShowDiffView ? '查看变更' : '查看 JSON' }}
+              {{ schemaEditorShowDiffView ? t('templateEditor.viewChanges') : t('templateEditor.viewJson') }}
             </button>
             <div class="top-button-group-right">
               <tiny-button v-if="showReturnLatestButton" type="primary" round @click="resetToLatestVersion">
-                返回最新版本
+                {{ t('templateEditor.returnLatest') }}
               </tiny-button>
               <tiny-button v-if="showApplyVersionButton" round @click="applyCurrentVersion">
-                应用此版本
+                {{ t('templateEditor.applyVersion') }}
               </tiny-button>
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
                 :class="{ 'is-active': schemaHistoryVisible }"
                 :icon="TinyIconTime"
-                aria-label="历史记录"
-                title="历史记录"
+                :aria-label="t('templateEditor.history')"
+                :title="t('templateEditor.history')"
                 @click="toggleSchemaHistoryPanel"
               />
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
                 :icon="TinyCloseIcon"
-                aria-label="关闭预览区"
+                :aria-label="t('templateEditor.closePreview')"
                 @click="closeRendererPanel"
               />
             </div>

@@ -11,6 +11,7 @@ import {
   useMonacoPlaygroundTheme,
   type PlaygroundColorTheme,
 } from './use-monaco-playground-theme';
+import { t } from '../../i18n';
 
 const props = defineProps<{
   visible: boolean;
@@ -76,7 +77,13 @@ const toggleJsonEditor = () => {
         class="schema-mobile-sheet"
         role="dialog"
         aria-modal="true"
-        :aria-label="jsonEditorOpen ? (schemaEditorDiffMode ? 'Schema 变更对比' : 'Schema JSON 编辑器') : 'Schema 渲染预览'"
+        :aria-label="
+          jsonEditorOpen
+            ? schemaEditorDiffMode
+              ? t('templateEditor.jsonEditorAria')
+              : t('templateEditor.jsonPreviewAria')
+            : t('templateEditor.jsonPreviewAria')
+        "
       >
         <div class="schema-mobile-sheet__mask" @click="emit('mask-click')" />
         <div class="schema-mobile-sheet__panel" :style="props.panelStyle">
@@ -92,23 +99,23 @@ const toggleJsonEditor = () => {
                 :loading="schemaEditorSaveLoading"
                 @click="emit('save-schema-editor')"
               >
-                保存
+                {{ t('templateEditor.save') }}
               </tiny-button>
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
                 :class="{ 'is-active': historyVisible }"
                 :icon="historyIcon"
-                aria-label="历史记录"
-                title="历史记录"
+                :aria-label="t('templateEditor.history')"
+                :title="t('templateEditor.history')"
                 @click="emit('toggle-history')"
               />
               <button
                 type="button"
                 class="schema-mobile-sheet__icon-btn"
                 :class="{ 'is-active': jsonEditorOpen }"
-                aria-label="查看 JSON"
-                title="查看 JSON"
+                :aria-label="t('templateEditor.viewJson')"
+                :title="t('templateEditor.viewJson')"
                 @click="toggleJsonEditor"
               >
                 <img class="schema-mobile-sheet__icon-btn-image" :src="viewSchemaIcon" alt="" />
@@ -117,7 +124,7 @@ const toggleJsonEditor = () => {
                 type="text"
                 class="genui-schema-toolbar-close-btn"
                 :icon="closeIcon"
-                aria-label="关闭"
+                :aria-label="t('templateEditor.close')"
                 @click="emit('close')"
               />
             </div>
@@ -141,7 +148,9 @@ const toggleJsonEditor = () => {
               <div v-show="jsonEditorOpen" class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer">
                 <diff-editor
                   v-if="schemaEditorDiffMode"
-                  :key="schemaEditorMountKey || `${schemaEditorDiffOriginal?.length}-${schemaEditorDiffModified?.length}`"
+                  :key="
+                    schemaEditorMountKey || `${schemaEditorDiffOriginal?.length}-${schemaEditorDiffModified?.length}`
+                  "
                   :original="schemaEditorDiffOriginal || '{}'"
                   :value="schemaEditorDiffModified || schemaEditor"
                   language="json"
@@ -174,7 +183,7 @@ const toggleJsonEditor = () => {
               class="schema-mobile-sheet__latest-btn"
               @click="emit('apply-current-version')"
             >
-              应用此版本
+              {{ t('templateEditor.applyVersion') }}
             </tiny-button>
             <tiny-button
               type="primary"
@@ -182,7 +191,7 @@ const toggleJsonEditor = () => {
               class="schema-mobile-sheet__latest-btn"
               @click="emit('reset-to-latest-version')"
             >
-              返回最新版本
+              {{ t('templateEditor.returnLatest') }}
             </tiny-button>
           </div>
         </div>
