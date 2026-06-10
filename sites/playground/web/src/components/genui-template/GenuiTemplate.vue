@@ -87,8 +87,10 @@ const allSchemaVersionHistoryEntries = computed(() =>
 
 /** 当前预览对应聊天气泡卡片的 cardId（手动合并卡 / AI 卡） */
 const currentHistoryScopeCardId = computed(() => {
-  const cardOrEditId = currentCardId.value || latestSchemaCardId.value;
-  return resolveSchemaCardScopeId(messages.value, cardOrEditId);
+  if (!currentCardId.value) {
+    return '';
+  }
+  return resolveSchemaCardScopeId(messages.value, currentCardId.value) || currentCardId.value;
 });
 
 const schemaVersionHistoryGroups = computed(() => {
@@ -481,6 +483,18 @@ const toggleSchemaVersion = (
 };
 
 /**
+ * 选中版本卡片但无法还原 schema 时，仅切换 currentCardId 与历史面板 scope
+ * @param cardId 版本卡片 id 或手动编辑 editId
+ */
+const selectSchemaVersionCard = (cardId: string) => {
+  if (!cardId) {
+    return;
+  }
+  currentCardId.value = cardId;
+  schemaEditorDiffFromHistory.value = false;
+};
+
+/**
  * 将当前预览的历史版本应用为生效 schema，写入 schema-manual 卡片并退出 diff / 只读态
  */
 const applyCurrentVersion = () => {
@@ -504,7 +518,10 @@ const applyCurrentVersion = () => {
     prevSchema = effectiveSchema as Record<string, unknown>;
   }
 
-  const saved = appendManualSchemaVersion(schema, { prevSchema });
+  const saved = appendManualSchemaVersion(schema, {
+    prevSchema,
+    sourceCardId: currentCardId.value,
+  });
   if (!saved) {
     return;
   }
@@ -548,7 +565,10 @@ const handleSaveSchemaEditor = async () => {
       prevSchema = undefined;
     }
 
-    const saved = appendManualSchemaVersion(schema, { prevSchema });
+    const saved = appendManualSchemaVersion(schema, {
+      prevSchema,
+      sourceCardId: currentCardId.value,
+    });
     if (saved) {
       isViewingHistoryVersion.value = false;
       isHistoryVersionApplied.value = true;
@@ -685,6 +705,7 @@ onUnmounted(() => {
         <genui-template-chat
           class="genui-template-chat"
           @schema-version-toggle="toggleSchemaVersion"
+          @schema-version-select="selectSchemaVersionCard"
           @schema-refresh="onSchemaRefresh"
         />
       </GenuiConfigProvider>

@@ -2,7 +2,7 @@ import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { IJsonPatchMessageItem, ISchemaCardMessageItem, ISchemaManualMessageItem } from '../chat.types';
 import { formatDate } from '../../../utils';
 import { applyJsonPatchOperations } from './json-patch-format';
-import { getManualEdits } from './manual-schema';
+import { getManualEdits, manualEditToCardSnapshot } from './manual-schema';
 
 export type ISchemaCardLikeMessage =
   | ISchemaCardMessageItem
@@ -72,24 +72,60 @@ export function parseSchemaJson(schemaString: string): Record<string, unknown> |
 }
 
 /**
+ * 解析 json-patch 卡片的 prevSchema，缺省时从会话推断
+ * @param card json-patch 卡片
+ * @param messages 当前会话消息
+ * @returns prevSchema JSON 文本
+ */
+export function resolveJsonPatchPrevSchemaString(
+  card: IJsonPatchMessageItem,
+  messages?: ChatMessage[],
+): string {
+  return card.prevSchema?.trim()
+    || findPreviousSchemaStringBeforeCard(messages, card.cardId)
+    || '';
+}
+
+/**
+ * 解析 json-patch content 为操作数组
+ * @param content patch JSON 文本
+ * @returns 非空操作数组，失败时返回 null
+ */
+export function parseJsonPatchOperations(content: string): unknown[] | null {
+  if (!content?.trim()) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(content);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * 从 schema-card / json-patch / schema-manual 卡片还原可渲染 schema 对象
  * @param card 版本卡片消息
+ * @param options.messages 会话消息，json-patch 缺 prevSchema 时用于推断基准 schema
  * @returns 可渲染 schema，无法还原时返回 null
  */
-export function rebuildSchemaFromCard(card: ISchemaCardLikeMessage): Record<string, unknown> | null {
+export function rebuildSchemaFromCard(
+  card: ISchemaCardLikeMessage,
+  options: { messages?: ChatMessage[] } = {},
+): Record<string, unknown> | null {
   // json-patch 以 prevSchema + patch 为准，避免 card.schema 缓存滞后
-  if (card.type === 'json-patch' && card.prevSchema?.trim() && card.content?.trim()) {
-    try {
-      const baseline = JSON.parse(card.prevSchema);
-      const operations = JSON.parse(card.content);
-      if (Array.isArray(operations) && operations.length > 0) {
-        const fromPatch = applyJsonPatchOperations(baseline, operations);
-        if (fromPatch && isRenderableSchema(fromPatch)) {
-          return fromPatch;
-        }
+  if (card.type === 'json-patch' && card.content?.trim()) {
+    const prevSchemaStr = resolveJsonPatchPrevSchemaString(card, options.messages);
+    const baseline = parseSchemaJson(prevSchemaStr);
+    const operations = parseJsonPatchOperations(card.content);
+    if (baseline && operations) {
+      const fromPatch = applyJsonPatchOperations(baseline, operations);
+      if (fromPatch && isRenderableSchema(fromPatch)) {
+        return fromPatch;
       }
-    } catch {
-      // 解析失败时回退到 schema 字段
+      if (fromPatch && typeof fromPatch === 'object') {
+        return fromPatch as Record<string, unknown>;
+      }
     }
   }
 
@@ -99,12 +135,96 @@ export function rebuildSchemaFromCard(card: ISchemaCardLikeMessage): Record<stri
     if (parsed && isRenderableSchema(parsed)) {
       return parsed;
     }
-    if (parsed && (card.type === 'schema-manual' || card.type === 'schema-card')) {
+    if (parsed && (card.type === 'schema-manual' || card.type === 'schema-card' || card.type === 'json-patch')) {
       return parsed;
     }
   }
 
   return null;
+}
+
+/**
+ * 查找目标卡片之前最近一条可还原的 schema JSON 文本（供 json-patch 补 prevSchema）
+ * @param messages 当前会话消息列表
+ * @param targetCardId 目标 AI 卡片 cardId
+ * @returns 上一版 schema JSON 文本，未找到时返回 null
+ */
+export function findPreviousSchemaStringBeforeCard(
+  messages: ChatMessage[] | undefined,
+  targetCardId: string,
+): string | null {
+  if (!messages?.length || !targetCardId) {
+    return null;
+  }
+
+  let previousSchema: string | null = null;
+
+  for (const chatMessage of messages) {
+    const items = (chatMessage as { messages?: ISchemaCardLikeMessage[] }).messages;
+    if (!Array.isArray(items)) {
+      continue;
+    }
+
+    for (const item of items) {
+      const isAiCard = item.type === 'schema-card' || item.type === 'json-patch';
+      const isManualCard = item.type === 'schema-manual';
+      if (!isAiCard && !isManualCard) {
+        continue;
+      }
+
+      if (isManualCard) {
+        const manualCard = item as ISchemaManualMessageItem;
+        if (manualCard.cardId === targetCardId) {
+          return previousSchema;
+        }
+        for (const edit of getManualEdits(manualCard)) {
+          if (edit.editId === targetCardId) {
+            return previousSchema;
+          }
+          const snapshot = manualEditToCardSnapshot(manualCard, edit);
+          const rebuilt = rebuildSchemaFromCard(snapshot, { messages });
+          if (rebuilt) {
+            previousSchema = JSON.stringify(rebuilt);
+          } else if (edit.schema?.trim()) {
+            previousSchema = edit.schema;
+          }
+        }
+        continue;
+      }
+
+      if (item.cardId === targetCardId) {
+        return previousSchema;
+      }
+
+      const rebuilt = rebuildSchemaFromCard(item, { messages });
+      if (rebuilt) {
+        previousSchema = JSON.stringify(rebuilt);
+      } else if (item.schema?.trim()) {
+        previousSchema = item.schema;
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * 版本卡片是否可纳入历史记录（已完成且无法还原 schema 的卡片不展示）
+ * @param card 版本卡片消息
+ * @param messages 当前会话消息列表
+ * @returns 是否可收集/展示
+ */
+export function isSchemaVersionHistoryCollectible(
+  card: ISchemaCardLikeMessage,
+  messages?: ChatMessage[],
+): boolean {
+  if (!card.cardId?.trim()) {
+    return false;
+  }
+  if (!card.generatedTime?.trim()) {
+    return true;
+  }
+  return rebuildSchemaFromCard(card, { messages }) !== null;
 }
 
 /**

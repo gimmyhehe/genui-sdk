@@ -39,6 +39,12 @@ export interface ISchemaManualEditRecord {
   prevSchema: string;
   generatedTime: string;
   input: string;
+  /** 该手动卡片的首次保存：基准 schema 来源版本（cardId 或 editId） */
+  sourceCardId?: string;
+  /** 来源版本标题快照（兼容旧数据） */
+  sourceCardInput?: string;
+  /** 来源版本创建时间快照，历史面板用时间指向版本 */
+  sourceCardGeneratedTime?: string;
 }
 
 /** 用户在 SchemaJSON 编辑器中手动保存的版本（连续保存合并为一张卡片） */

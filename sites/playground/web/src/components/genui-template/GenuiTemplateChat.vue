@@ -49,7 +49,7 @@ const props = defineProps<{
   messages?: IMessage[];
 }>();
 
-const emit = defineEmits(['schema-version-toggle', 'schema-refresh']);
+const emit = defineEmits(['schema-version-toggle', 'schema-version-select', 'schema-refresh']);
 
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
@@ -330,6 +330,7 @@ const messageRenderers = {
       errorMessagesMap: errorMessagesMap.value,
       onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
         emit('schema-version-toggle', schema, cardId),
+      onSchemaVersionSelect: (cardId: string) => emit('schema-version-select', cardId),
     });
   },
   'schema-card': (props) => {
@@ -340,6 +341,7 @@ const messageRenderers = {
       errorMessagesMap: errorMessagesMap.value,
       onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
         emit('schema-version-toggle', schema, cardId),
+      onSchemaVersionSelect: (cardId: string) => emit('schema-version-select', cardId),
     });
   },
   'schema-manual': (props) => {
@@ -350,6 +352,7 @@ const messageRenderers = {
       errorMessagesMap: errorMessagesMap.value,
       onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
         emit('schema-version-toggle', schema, cardId),
+      onSchemaVersionSelect: (cardId: string) => emit('schema-version-select', cardId),
     });
   },
 };

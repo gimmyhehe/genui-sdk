@@ -2,7 +2,7 @@ import { ref, shallowRef, computed } from 'vue';
 import { useConversation, IndexedDBStrategy } from '@opentiny/genui-sdk-vue';
 import { AIClient, type ChatMessage } from '@opentiny/tiny-robot-kit';
 import { CustomModelProvider } from './template-provider';
-import type { LLMConfig, ISchemaManualMessageItem } from './chat.types';
+import type { LLMConfig, ISchemaManualMessageItem, ISchemaManualEditRecord } from './chat.types';
 import { formatDate, generateId } from '../../utils';
 import {
   findLatestSchemaInConversation,
@@ -314,7 +314,12 @@ export default function useTemplate(options?: UseTemplateOptions) {
    */
   const appendManualSchemaVersion = (
     schema: Record<string, unknown>,
-    options: { prevSchema?: Record<string, unknown>; input?: string } = {},
+    options: {
+      prevSchema?: Record<string, unknown>;
+      input?: string;
+      /** 首次创建手动卡时，记录基准 schema 来源版本 id */
+      sourceCardId?: string;
+    } = {},
   ) => {
     if (!conversation.value) {
       return null;
@@ -325,7 +330,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
     const schemaStr = JSON.stringify(schema);
     const generatedTime = formatDate(new Date());
     const input = options.input ?? MANUAL_SCHEMA_SAVE_INPUT;
-    const editRecord = {
+    const editRecord: ISchemaManualEditRecord = {
       editId: generateId(),
       schema: schemaStr,
       prevSchema: prevSchemaStr,
@@ -351,6 +356,19 @@ export default function useTemplate(options?: UseTemplateOptions) {
       cardId = card.cardId;
       lastMessage.messageId = cardId;
     } else {
+      const sourceCardId = options.sourceCardId ?? currentCardId.value;
+      if (sourceCardId) {
+        editRecord.sourceCardId = sourceCardId;
+        const sourceCard = getMessageByCardId(sourceCardId);
+        const sourceLabel = sourceCard?.input?.trim();
+        if (sourceLabel) {
+          editRecord.sourceCardInput = sourceLabel;
+        }
+        if (sourceCard?.generatedTime?.trim()) {
+          editRecord.sourceCardGeneratedTime = sourceCard.generatedTime;
+        }
+      }
+
       cardId = generateId();
       const cardMessage: ISchemaManualMessageItem = {
         type: 'schema-manual',

@@ -1,8 +1,8 @@
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { ISchemaCardLikeMessage } from './conversation-schema';
-import { findSchemaCardByCardId } from './conversation-schema';
+import { findSchemaCardByCardId, rebuildSchemaFromCard, isSchemaVersionHistoryCollectible } from './conversation-schema';
 import { findManualCardInMessages, getManualEdits, manualEditToCardSnapshot } from './manual-schema';
-import type { ISchemaManualMessageItem } from '../chat.types';
+import type { ISchemaManualEditRecord, ISchemaManualMessageItem } from '../chat.types';
 
 export interface ISchemaVersionHistoryEntry {
   cardId: string;
@@ -35,6 +35,18 @@ const startOfLocalDay = (timeMs: number) => {
 };
 
 /**
+ * 取本地时区某时刻所在自然周（周一为起点）的 0 点毫秒时间戳
+ * @param timeMs 毫秒时间戳
+ * @returns 当周周一 0 点的毫秒时间戳
+ */
+const startOfLocalWeek = (timeMs: number) => {
+  const dayStart = startOfLocalDay(timeMs);
+  const day = new Date(dayStart).getDay();
+  const daysFromMonday = day === 0 ? 6 : day - 1;
+  return dayStart - daysFromMonday * MS_PER_DAY;
+};
+
+/**
  * 数字补零为两位字符串
  * @param n 待格式化的数字
  * @returns 两位字符串
@@ -58,18 +70,39 @@ export function parseGeneratedTimeMs(generatedTime: string): number {
   return Number.isNaN(parsed) ? Date.now() : parsed;
 }
 
+const WEEKDAY_LABELS = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
 /**
- * 格式化历史条目展示用的时间标签（如「2026/06/01 20:33」）
+ * 历史面板时间点格式（如「6月8日 19:32」；跨年显示年份）
+ * @param createdAtMs 创建时间毫秒戳
+ * @param nowMs 当前时间毫秒戳，默认 Date.now()
+ * @returns 展示用时间文本
+ */
+export function formatHistoryPointTimeLabel(createdAtMs: number, nowMs: number = Date.now()): string {
+  const d = new Date(createdAtMs);
+  const now = new Date(nowMs);
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const timePart = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+  if (d.getFullYear() === now.getFullYear()) {
+    return `${month}月${day}日 ${timePart}`;
+  }
+
+  return `${d.getFullYear()}年${month}月${day}日 ${timePart}`;
+}
+
+/**
+ * 格式化历史条目主时间
  * @param createdAtMs 创建时间毫秒戳
  * @returns 展示用时间标签
  */
 export function formatHistoryTimeLabel(createdAtMs: number): string {
-  const d = new Date(createdAtMs);
-  return `${d.getFullYear()}/${pad2(d.getMonth() + 1)}/${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  return formatHistoryPointTimeLabel(createdAtMs);
 }
 
 /**
- * 根据创建时间返回历史面板分组标签（今天 / 昨天 / 本月 / 更早）
+ * 根据创建时间返回历史面板分组标签（今天 / 昨天 / 本周星期 / 上周 / 月份）
  * @param createdAtMs 创建时间毫秒戳
  * @param nowMs 当前时间毫秒戳，默认 Date.now()
  * @returns 分组标签
@@ -86,13 +119,24 @@ export function getHistoryTimeGroupLabel(createdAtMs: number, nowMs: number = Da
     return '昨天';
   }
 
-  const created = new Date(createdAtMs);
-  const now = new Date(nowMs);
-  if (created.getFullYear() === now.getFullYear() && created.getMonth() === now.getMonth()) {
-    return '本月';
+  const currentWeekStart = startOfLocalWeek(nowMs);
+  const createdWeekStart = startOfLocalWeek(createdAtMs);
+
+  if (createdWeekStart === currentWeekStart) {
+    return WEEKDAY_LABELS[new Date(createdAtMs).getDay()];
   }
 
-  return '更早';
+  if (createdWeekStart === currentWeekStart - 7 * MS_PER_DAY) {
+    return '上周';
+  }
+
+  const created = new Date(createdAtMs);
+  const now = new Date(nowMs);
+  if (created.getFullYear() === now.getFullYear()) {
+    return `${created.getMonth() + 1}月`;
+  }
+
+  return `${created.getFullYear()}年${created.getMonth() + 1}月`;
 }
 
 /**
@@ -119,6 +163,106 @@ function buildDescription(
     return card.input?.trim() || '增量更新';
   }
   return card.input?.trim() || 'AI 生成版本';
+}
+
+/**
+ * 解析来源版本的时间标签
+ * @param entries 全量历史条目
+ * @param messages 当前会话消息列表
+ * @param cardOrEditId 来源版本 id
+ * @returns 来源版本时间文本，无法解析时返回 null
+ */
+function resolveCardVersionTimeLabel(
+  entries: ISchemaVersionHistoryEntry[],
+  messages: ChatMessage[] | undefined,
+  cardOrEditId: string,
+): string | null {
+  const historyEntry = entries.find((entry) => entry.cardId === cardOrEditId);
+  if (historyEntry && !historyEntry.isPending) {
+    return formatHistoryPointTimeLabel(historyEntry.createdAtMs);
+  }
+
+  const aiCard = findSchemaCardByCardId(messages, cardOrEditId);
+  if (aiCard?.generatedTime?.trim()) {
+    return formatHistoryPointTimeLabel(parseGeneratedTimeMs(aiCard.generatedTime));
+  }
+
+  const manualCard = findManualCardInMessages(messages, cardOrEditId);
+  if (manualCard) {
+    const matchedEdit = getManualEdits(manualCard).find((edit) => edit.editId === cardOrEditId);
+    const generatedTime = matchedEdit?.generatedTime ?? manualCard.generatedTime;
+    if (generatedTime?.trim()) {
+      return formatHistoryPointTimeLabel(parseGeneratedTimeMs(generatedTime));
+    }
+  }
+
+  return null;
+}
+
+/**
+ * 通过 prevSchema 与历史条目比对，推断旧数据首条手动保存的来源时间
+ * @param edit 手动保存的首条编辑记录
+ * @param entries 全量历史条目
+ * @returns 推断出的来源时间文本，无法推断时返回 null
+ */
+function inferSourceTimeFromPrevSchema(
+  edit: ISchemaManualEditRecord,
+  entries: ISchemaVersionHistoryEntry[],
+): string | null {
+  const prevSchema = edit.prevSchema?.trim();
+  if (!prevSchema) {
+    return null;
+  }
+
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const entry = entries[i];
+    const schema = rebuildSchemaFromCard(entry.cardMessage);
+    if (!schema) {
+      continue;
+    }
+    if (JSON.stringify(schema) === prevSchema) {
+      return formatHistoryPointTimeLabel(entry.createdAtMs);
+    }
+  }
+
+  return null;
+}
+
+/**
+ * 手动合并卡首条 edit 的历史描述：用时间指向来源版本（如「还原自 x 的版本」）
+ * @param edit 首条编辑记录
+ * @param entries 全量历史条目
+ * @param messages 当前会话消息列表
+ * @param options.isLatest 是否为该手动卡内最新 edit
+ * @param options.isPending 是否仍在生成中
+ * @returns 展示用描述
+ */
+function buildManualFirstEditDescription(
+  edit: ISchemaManualEditRecord,
+  entries: ISchemaVersionHistoryEntry[],
+  messages: ChatMessage[] | undefined,
+  options: { isLatest: boolean; isPending: boolean },
+): string {
+  if (options.isPending) {
+    return '生成中...';
+  }
+
+  const sourceTime =
+    (edit.sourceCardGeneratedTime?.trim()
+      ? formatHistoryPointTimeLabel(parseGeneratedTimeMs(edit.sourceCardGeneratedTime))
+      : null)
+    || (edit.sourceCardId ? resolveCardVersionTimeLabel(entries, messages, edit.sourceCardId) : null)
+    || inferSourceTimeFromPrevSchema(edit, entries);
+
+  if (sourceTime) {
+    return `还原自 ${sourceTime} 的版本`;
+  }
+
+  if (options.isLatest) {
+    return '最近更新';
+  }
+
+  return edit.input?.trim() || '手动编辑保存';
 }
 
 /**
@@ -169,6 +313,10 @@ export function collectSchemaVersionHistory(
         const edits = getManualEdits(manualCard);
         edits.forEach((edit, editIndex) => {
           const isPending = !edit.generatedTime?.trim();
+          const snapshot = manualEditToCardSnapshot(manualCard, edit);
+          if (!isPending && !isSchemaVersionHistoryCollectible(snapshot, messages)) {
+            return;
+          }
           const createdAtMs = parseGeneratedTimeMs(edit.generatedTime);
           const { authorLabel, authorType } = buildAuthor(manualCard);
           const isLastEdit = editIndex === edits.length - 1;
@@ -189,13 +337,16 @@ export function collectSchemaVersionHistory(
               options.currentCardId === edit.editId
               || (options.currentCardId === manualCard.cardId && isLastEdit),
             isPending,
-            cardMessage: manualEditToCardSnapshot(manualCard, edit),
+            cardMessage: snapshot,
           });
         });
         continue;
       }
 
       const isPending = !item.generatedTime?.trim();
+      if (!isPending && !isSchemaVersionHistoryCollectible(item, messages)) {
+        continue;
+      }
       const createdAtMs = parseGeneratedTimeMs(item.generatedTime);
       const { authorLabel, authorType } = buildAuthor(item);
 
@@ -320,34 +471,62 @@ export function filterSchemaVersionHistoryForCard(
 
   const manualCard = findManualCardInMessages(messages, lookupId);
   if (manualCard) {
-    const editIds = new Set(getManualEdits(manualCard).map((edit) => edit.editId));
+    const edits = getManualEdits(manualCard);
+    const editIds = new Set(edits.map((edit) => edit.editId));
     const scoped = entries.filter((entry) => editIds.has(entry.cardId));
     if (!scoped.length) {
       return [];
     }
 
-    const latestInScopeId = [...scoped]
+    const collectible = scoped.filter((entry) =>
+      entry.isPending || isSchemaVersionHistoryCollectible(entry.cardMessage, messages),
+    );
+    if (!collectible.length) {
+      return [];
+    }
+
+    const latestInScopeId = [...collectible]
       .sort((a, b) => a.sequenceIndex - b.sequenceIndex)
       .at(-1)
       ?.cardId;
+    const firstEditId = edits[0]?.editId;
 
-    return scoped.map((entry) => {
+    return collectible.map((entry) => {
       const isLatestInScope = entry.cardId === latestInScopeId;
+      const matchedEdit = edits.find((edit) => edit.editId === entry.cardId);
+      const isFirstEdit = entry.cardId === firstEditId;
+      const description = isFirstEdit && matchedEdit
+        ? buildManualFirstEditDescription(matchedEdit, entries, messages, {
+          isLatest: isLatestInScope,
+          isPending: entry.isPending,
+        })
+        : buildDescription(entry.cardMessage, {
+          isLatest: isLatestInScope,
+          isPending: entry.isPending,
+        });
+
       return {
         ...entry,
         isLatest: isLatestInScope,
-        description: buildDescription(entry.cardMessage, {
-          isLatest: isLatestInScope,
-          isPending: entry.isPending,
-        }),
+        description,
       };
     });
   }
 
   const aiCardId = scopeCardId || lookupId;
-  return entries
-    .filter((entry) => entry.cardId === aiCardId || entry.cardId === lookupId)
-    .map((entry) => ({
+  const scoped = entries.filter((entry) => entry.cardId === aiCardId || entry.cardId === lookupId);
+  if (!scoped.length) {
+    return [];
+  }
+
+  const collectible = scoped.filter((entry) =>
+    entry.isPending || isSchemaVersionHistoryCollectible(entry.cardMessage, messages),
+  );
+  if (!collectible.length) {
+    return [];
+  }
+
+  return collectible.map((entry) => ({
       ...entry,
       description: buildDescription(entry.cardMessage, {
         isLatest: entry.isLatest,

@@ -2,7 +2,12 @@
 import { ref, computed } from 'vue';
 import { iconRichTextCodeView } from '@opentiny/vue-icon';
 import JsonPatchDev from './JsonPatchDev.vue';
-import { formatJsonPatch } from './template-chat-utils';
+import {
+  formatJsonPatch,
+  parseSchemaJson,
+  parseJsonPatchOperations,
+  resolveJsonPatchPrevSchemaString,
+} from './template-chat-utils';
 import useTemplate from './useTemplate';
 import { useIsMobile } from '../../use-mobile';
 import docCardIcon from '../../assets/images/card.svg';
@@ -28,7 +33,7 @@ defineOptions({ inheritAttrs: false });
 const props = defineProps<IRendererProps>();
 const emit = defineEmits(['card-select']);
 
-const { getMessageByCardId } = useTemplate();
+const { getMessageByCardId, messages } = useTemplate();
 
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
@@ -64,11 +69,20 @@ const handleClick = () => {
 
 const handleDev = () => {
   const cardMessage = getMessageByCardId(props.cardId);
-  const { prevSchema: prevSchemaStr, content: contentStr, schema: schemaStr } = cardMessage;
-  const formattedJsonPatch = formatJsonPatch(JSON.parse(prevSchemaStr), JSON.parse(contentStr));
-  jsonPatch.value = JSON.stringify(formattedJsonPatch, null, 2);
+  if (!cardMessage || cardMessage.type !== 'json-patch') {
+    return;
+  }
+
+  const prevSchemaStr = resolveJsonPatchPrevSchemaString(cardMessage, messages.value);
+  const baseline = parseSchemaJson(prevSchemaStr);
+  const operations = parseJsonPatchOperations(cardMessage.content);
+  if (!baseline || !operations) {
+    return;
+  }
+
+  jsonPatch.value = JSON.stringify(formatJsonPatch(baseline, operations), null, 2);
   prevSchema.value = prevSchemaStr;
-  currentSchema.value = schemaStr;
+  currentSchema.value = cardMessage.schema ?? '';
   visible.value = true;
 };
 </script>

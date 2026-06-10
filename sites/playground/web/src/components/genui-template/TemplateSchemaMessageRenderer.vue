@@ -17,10 +17,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (event: 'schema-version-toggle', schema: Record<string, unknown>, cardId: string): void;
+  (event: 'schema-version-select', cardId: string): void;
 }>();
 
 const { isMobile } = useIsMobile();
-const { getMessageByCardId } = useTemplate();
+const { getMessageByCardId, messages } = useTemplate();
 
 const generating = computed(() => !props.itemProps?.generatedTime);
 
@@ -51,16 +52,13 @@ const handleSchemaVersionCardClick = (cardId: string) => {
   }
 
   const card = getMessageByCardId(cardId);
-  if (!card) {
+  const schema = card ? rebuildSchemaFromCard(card, { messages: messages.value }) : null;
+  if (schema && card) {
+    emit('schema-version-toggle', schema, cardId);
     return;
   }
 
-  const schema = rebuildSchemaFromCard(card);
-  if (!schema) {
-    return;
-  }
-
-  emit('schema-version-toggle', schema, cardId);
+  emit('schema-version-select', cardId);
 };
 </script>
 
