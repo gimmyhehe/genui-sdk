@@ -79,7 +79,7 @@ function onToolCall(toolCalls: any[], delta: IStreamDelta, toolCallIdMap: Record
     emitter.emit('notification', {
       type: 'tool',
       delta,
-      toolCallData: toolCallItem,
+      toolCallData: readonly(toolCallItem),
       chatMessage: readonly(chatMessage),
     });
 

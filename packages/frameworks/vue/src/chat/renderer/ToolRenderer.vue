@@ -7,23 +7,58 @@
   const MAX_HIGHLIGHT_JSON_FIELD_COUNT = 100;
 
   /**
-   * 递归统计 JSON 对象中的字段总数（含嵌套 object 的 key 与 array 内 object 的 key）。
-   * 非 object（含 null、原始类型）返回 0。
+   * 判断 JSON 对象的字段总数是否超过指定阈值（含嵌套 object 的 key 与 array 内 object 的 key）。
+   * 超过阈值时提前终止递归，避免对大 payload 做全量遍历。
    *
    * @param value - 待统计的值
-   * @returns 字段总数
+   * @param limit - 字段数上限
+   * @returns 字段总数是否超过 limit
    */
-  const countObjectFields = (value: unknown): number => {
-    if (!value || typeof value !== 'object') {
-      return 0
+  const exceedsFieldCountLimit = (value: unknown, limit: number): boolean => {
+    let count = 0
+
+    const traverse = (val: unknown): boolean => {
+      if (!val || typeof val !== 'object') {
+        return false
+      }
+
+      if (Array.isArray(val)) {
+        for (const item of val) {
+          if (traverse(item)) {
+            return true
+          }
+        }
+        return false
+      }
+
+      for (const item of Object.values(val)) {
+        count += 1
+        if (count > limit) {
+          return true
+        }
+        if (traverse(item)) {
+          return true
+        }
+      }
+      return false
     }
 
-    if (Array.isArray(value)) {
-      return value.reduce((sum, item) => sum + countObjectFields(item), 0)
-    }
-
-    return Object.values(value).reduce((sum, item) => sum + 1 + countObjectFields(item), 0)
+    return traverse(value)
   }
+
+  /**
+   * 转义 HTML 特殊字符，防止 v-html 注入 XSS。
+   *
+   * @param text - 待转义的文本
+   * @returns 转义后的安全 HTML 文本
+   */
+  const escapeHtml = (text: string): string =>
+    text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
   
   const props = defineProps<{
     name: string
@@ -69,11 +104,13 @@
       console.warn(error)
     }
 
-    const shouldSkipHighlight =
-      countObjectFields(parsedValue) > MAX_HIGHLIGHT_JSON_FIELD_COUNT
+    const shouldSkipHighlight = exceedsFieldCountLimit(
+      parsedValue,
+      MAX_HIGHLIGHT_JSON_FIELD_COUNT,
+    )
 
     if (shouldSkipHighlight) {
-      return prettyJson
+      return escapeHtml(prettyJson)
     }
   
     prettyJson = prettyJson.replace(
@@ -87,7 +124,7 @@
         } else if (/null/.test(match)) {
           className = 'null'
         }
-        return `<span class="${classes[className]}">${match}</span>`
+        return `<span class="${classes[className]}">${escapeHtml(match)}</span>`
       },
     )
   
