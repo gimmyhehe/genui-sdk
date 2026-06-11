@@ -1,3 +1,5 @@
+import type { IRendererConfig } from '../protocols/render-config';
+
 type DefaultValueMap = Record<string, any>;
 
 export type MaterialDefaultValueMap = Record<string, DefaultValueMap>;
@@ -40,18 +42,19 @@ const collectPropertyDefaults = (
 };
 
 /**
- * 从物料配置中提取各组件的默认 props 映射表，供 renderer 在初始化 schema 时使用。
+ * 从渲染物料配置中提取各组件的默认 props 映射表
  *
- * @param materialsList - 物料列表
+ * @param rendererConfig - 渲染器配置，从中读取 materialsList
  * @returns 组件名到默认 props 的映射对象
  */
 export const buildMaterialDefaultValueMap = (
-  materialsList: IMaterialLike[],
+  rendererConfig: Partial<IRendererConfig> = {},
 ): MaterialDefaultValueMap => {
   const result: MaterialDefaultValueMap = {};
+  const materialsList = rendererConfig.materialsList ?? [];
 
-  materialsList.forEach((material) => {
-    material?.data?.materials?.components?.forEach((component) => {
+  materialsList.forEach((material: IMaterialLike) => {
+    material?.data?.materials?.components?.forEach((component: IComponentLike) => {
       const componentName = component?.component;
       if (typeof componentName !== 'string') {
         return;
