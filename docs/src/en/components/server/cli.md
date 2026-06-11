@@ -32,7 +32,7 @@ genui-sdk-server
 
 On success, the server address is printed, for example:
 
-```
+```text
 genui-sdk-server is running on http://localhost:3100
 ```
 

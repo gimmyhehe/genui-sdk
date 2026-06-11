@@ -13,8 +13,8 @@ Configure message footer toolbars for assistant and user roles via the `roles` p
 
 <script setup lang="ts">
 import { GenuiChat } from '@opentiny/genui-sdk-vue';
-import AssistantFooter from './components/assistant-footer.vue';
-import UserFooter from './components/user-footer.vue';
+import AssistantFooter from './components/assistant-footer_en.vue';
+import UserFooter from './components/user-footer_en.vue';
 
 const url = 'https://your-chat-backend/api';
 
@@ -57,11 +57,11 @@ See [UseMessageReturn](https://docs.opentiny.design/tiny-robot/guide/message.htm
 
 ## Creating the User Footer Toolbar Component
 
-See `user-footer.vue` in the full example for detailed code.
+See `user-footer_en.vue` in the full example for detailed code.
 
 ## Creating the Assistant Footer Toolbar Component
 
-See `assistant-footer.vue` in the full example for detailed code.
+See `assistant-footer_en.vue` in the full example for detailed code.
 
 ## Full Example
 

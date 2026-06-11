@@ -108,7 +108,7 @@ app.listen(3000);
 
 **Request format** (OpenAI-compatible):
 
-```json
+```jsonc
 {
   "model": "gpt-4",
   "messages": [
@@ -131,7 +131,7 @@ app.listen(3000);
 
 **Response format** (Server-Sent Events):
 
-```
+```text
 data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1694268190,"model":"gpt-4","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
 
 data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1694268190,"model":"gpt-4","choices":[{"index":0,"delta":{"content":"!"},"finish_reason":null}]}

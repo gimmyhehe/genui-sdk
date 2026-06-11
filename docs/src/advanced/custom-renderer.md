@@ -120,7 +120,7 @@ tiny-schema-renderer-element-ng {
   font-family: var(--ti-common-font-family);
   color: var(--ti-common-color-text-primary);
   background-color: var(--ti-common-color-bg-white-normal);
-  @import (less) 'tiny-schema-renderer-ng/dist/renderer-element/browser/main.css';
+  @import (less) 'tiny-schema-renderer-ng/dist/renderer-element/browser/styles.css';
 }
 </style>
 ```

@@ -110,7 +110,7 @@ Next, implement the `customFetch` function to handle tool calls and multi-turn c
 
 ```typescript
 import OpenAI from 'openai';
-import type { CustomRequest } from '@opentiny/genui-sdk-vue';
+import type { CustomFetch } from '@opentiny/genui-sdk-vue';
 import { availableTools } from './tools';
 
 /**
@@ -184,9 +184,9 @@ async function executeSingleToolCall(toolCall: any, currentMessages: any[]): Pro
  * Create a customRequest function using the OpenAI SDK (handles tool calls and multi-turn conversations)
  *
  * @param config OpenAI configuration
- * @returns CustomRequest function
+ * @returns CustomFetch function
  */
-export function createOpenAICustomFetch(config: OpenAIConfig): CustomRequest {
+export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
   return async (
     url: string,
     options: {

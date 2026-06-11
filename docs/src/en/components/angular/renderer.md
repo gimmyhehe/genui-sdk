@@ -198,7 +198,7 @@ import { MyCustomDirective } from './my-custom-directive';
 @Component({
   imports: [GenuiRenderer],
   template: `
-    <genui-renderer [content]="schemaContent" [customComponents]="customComponents"> </genui-renderer>
+    <genui-renderer [content]="schemaContent" [customDirectives]="customDirectives"> </genui-renderer>
   `,
 })
 export class GenuiExample {
@@ -237,7 +237,7 @@ import { GenuiRenderer } from '@opentiny/genui-sdk-angular';
 @Component({
   imports: [GenuiRenderer],
   template: `
-    <genui-renderer [content]="schemaContent" [customActions]="customAction"> </genui-renderer>
+    <genui-renderer [content]="schemaContent" [customActions]="customActions"> </genui-renderer>
   `,
 })
 export class GenuiExample {
@@ -263,7 +263,7 @@ export class GenuiExample {
       },
     },
     showNotification: {
-      execute: (params，context) => {
+      execute: (params, context) => {
         console.log('Notification:', params.message);
       },
     },
@@ -385,8 +385,8 @@ import { GenuiRenderer } from '@opentiny/genui-sdk-angular';
   ],
   template: `
     <genui-renderer [content]="schemaContent">
-      <ng-template #header let-schema="schema" let-isError="isError" let-generating=“generating”>
-        <span *ngIf="generating"> Generating... </span>
+      <ng-template #header let-schema="schema" let-isError="isError" let-isFinished="isFinished">
+        <span *ngIf="!isFinished"> Generating... </span>
         <span *ngIf="isError"> Error! </span>
         <span>Card title: {{ schema.componentName }}</span>
       </ng-template>
