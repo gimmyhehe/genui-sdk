@@ -368,7 +368,7 @@ onUnmounted(() => {
         </div>
       </template>
       <div v-show="!ENABLE_TEMPLATE || activeName !== 'template'" class="chat-container">
-        <GenuiConfigProvider :theme="theme" :locale="locale" :materials="materials.components" style="height: 100%">
+        <GenuiConfigProvider :theme="theme" :locale="locale" :materials="materials" style="height: 100%">
           <GenuiChat
             :url="url"
             ref="chat"

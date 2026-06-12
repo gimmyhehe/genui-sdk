@@ -276,7 +276,7 @@ onUnmounted(() => {
   <GenuiConfigProvider
     :theme="theme"
     :locale="locale"
-    :materials="materials.components"
+    :materials="materials"
     style="width: 100%; height: 100%"
   >
     <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">
