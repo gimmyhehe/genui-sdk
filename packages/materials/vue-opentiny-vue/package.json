@@ -63,10 +63,10 @@
       "types": "./dist/render-config.d.ts",
       "require": "./dist/render-config.js"
     },
-    "./components": {
-      "import": "./dist/components.js",
-      "types": "./dist/components.d.ts",
-      "require": "./dist/components.js"
+    "./materials": {
+      "import": "./dist/materials.js",
+      "types": "./dist/materials.d.ts",
+      "require": "./dist/materials.js"
     }
   }
 }

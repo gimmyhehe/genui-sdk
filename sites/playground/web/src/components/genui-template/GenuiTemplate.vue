@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { CodeEditor } from 'monaco-editor-vue3';
 import { GenuiConfigProvider, GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
-import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 import { TinyButton } from '@opentiny/vue';
 import { iconClose } from '@opentiny/vue-icon';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
@@ -276,7 +276,7 @@ onUnmounted(() => {
   <GenuiConfigProvider
     :theme="theme"
     :locale="locale"
-    :materials="{ ...vueMaterials }"
+    :materials="materials.components"
     style="width: 100%; height: 100%"
   >
     <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">

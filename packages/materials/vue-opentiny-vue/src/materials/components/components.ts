@@ -16,7 +16,6 @@ import TinyCol from '@opentiny/vue-col';
 import TinyDatePicker from '@opentiny/vue-date-picker';
 import TinyForm from '@opentiny/vue-form';
 import TinyFormItem from '@opentiny/vue-form-item';
-import TinyGrid from '@opentiny/vue-grid';
 import TinyInput from '@opentiny/vue-input';
 import TinyLayout from '@opentiny/vue-layout';
 import TinyNumeric from '@opentiny/vue-numeric';
@@ -30,10 +29,18 @@ import TinyTabItem from '@opentiny/vue-tab-item';
 import TinyTransfer from '@opentiny/vue-transfer';
 import TinyTree from '@opentiny/vue-tree';
 
+import ActionButton from './ActionButton.vue';
+import GridStack from './GridStack.vue';
+import GridStackItem from './GridStackItem.vue';
+import TinyGridWrap from './TinyGridWrap.vue';
 import TinySelectWrap from './TinySelectWrap.vue';
 import TinyTabsWrap from './TinyTabsWrap.vue';
 
-export const vueMaterials: Record<string, Component> = {
+export interface IComponents {
+  [key: string]: Component;
+}
+
+export const components: IComponents = {
   TinyCarouselItem: TinyCarouselItem,
   TinyCarousel: TinyCarousel,
   TinyRow: TinyRow,
@@ -51,8 +58,11 @@ export const vueMaterials: Record<string, Component> = {
   TinyCheckboxButton: TinyCheckboxButton,
   TinyCheckboxGroup: TinyCheckboxGroup,
   TinyTabItem: TinyTabItem,
-  TinyGrid: TinyGrid,
+  TinyGrid: TinyGridWrap,
   TinyCard: TinyCard,
+  ActionButton: ActionButton,
+  GridStack: GridStack,
+  GridStackItem: GridStackItem,
   TinyTree: TinyTree,
   TinyDatePicker: TinyDatePicker,
   TinyNumeric: TinyNumeric,
