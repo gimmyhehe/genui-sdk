@@ -48,41 +48,19 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
   }
 
   /**
-   * 按扩展配置合并 section 列表。
-   * @param baseSections 基础块列表
-   * @param extensions 扩展声明列表
-   * @returns 合并后的块列表
+   * 生成 script setup 的 state accessor（computed）片段。
+   * @param ctx script setup 构建上下文
+   * @returns computed 声明代码片段
    */
-  protected composeSections<T extends { id: string }>(
-    baseSections: readonly T[],
-    extensions: readonly { section: T; position: 'before' | 'after' | 'replace'; targetId?: string }[] = [],
-  ): T[] {
-    const result = [...baseSections];
-
-    extensions.forEach((ext) => {
-      const { section, position } = ext;
-      const targetId = ext.targetId ?? section.id;
-      const targetIndex = result.findIndex((item) => item.id === targetId);
-
-      if (position === 'replace') {
-        if (targetIndex >= 0) {
-          result[targetIndex] = section;
-        } else {
-          result.push(section);
+  protected buildScriptSetupStateAccessors(ctx: IScriptSetupBuildContext): string {
+    return ctx.description.stateAccessors
+      .map(({ name, getterExpr, setterExpr }) => {
+        if (setterExpr) {
+          return `const ${name} = computed({ get: ${getterExpr}, set: ${setterExpr} })`;
         }
-        return;
-      }
-
-      if (targetIndex < 0) {
-        result.push(section);
-        return;
-      }
-
-      const insertIndex = position === 'before' ? targetIndex : targetIndex + 1;
-      result.splice(insertIndex, 0, section);
-    });
-
-    return result;
+        return `const ${name} = computed(${getterExpr})`;
+      })
+      .join('\n\n');
   }
 
   /**
@@ -223,45 +201,6 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
   }
 
   /**
-   * 返回默认 script setup 块表。
-   * @returns 默认块表
-   */
-  protected getDefaultScriptSetupSections(): readonly IScriptSetupSectionDefinition[] {
-    return [
-      {
-        id: 'imports',
-        group: 'imports',
-        build: (ctx) => this.buildScriptSetupImports(ctx),
-      },
-      {
-        id: 'defineProps',
-        group: 'macro',
-        build: (ctx) => this.buildScriptSetupDefineProps(ctx),
-      },
-      {
-        id: 'defineEmits',
-        group: 'macro',
-        build: (ctx) => this.buildScriptSetupDefineEmits(ctx),
-      },
-      {
-        id: 'icons',
-        group: 'icons',
-        build: (ctx) => this.buildScriptSetupIconStatement(ctx),
-      },
-      {
-        id: 'reactive',
-        group: 'state',
-        build: (ctx) => this.buildScriptSetupReactiveState(ctx),
-      },
-      {
-        id: 'methods',
-        group: 'methods',
-        build: (ctx) => this.buildScriptSetupMethods(ctx),
-      },
-    ];
-  }
-
-  /**
    * 生成 SFC 的 template 区块。
    * @param template 模板文本
    * @returns template 区块文本
@@ -295,26 +234,119 @@ ${scriptSetup}
   }
 
   /**
-   * 获取 script setup 块表，并按扩展配置完成编排。
+   * 返回 script setup 块表。
    * @returns script setup 块表
    */
   protected getScriptSetupSections(): readonly IScriptSetupSectionDefinition[] {
-    const baseSections = this.generatorOptions.scriptSetupSections ?? this.getDefaultScriptSetupSections();
-    return this.composeSections(baseSections, this.generatorOptions.scriptSetupSectionExtensions);
+    return [
+      {
+        id: 'imports',
+        group: 'imports',
+        build: (ctx) => this.buildScriptSetupImports(ctx),
+      },
+      {
+        id: 'defineProps',
+        group: 'macro',
+        build: (ctx) => this.buildScriptSetupDefineProps(ctx),
+      },
+      {
+        id: 'defineEmits',
+        group: 'macro',
+        build: (ctx) => this.buildScriptSetupDefineEmits(ctx),
+      },
+      {
+        id: 'icons',
+        group: 'icons',
+        build: (ctx) => this.buildScriptSetupIconStatement(ctx),
+      },
+      {
+        id: 'reactive',
+        group: 'state',
+        build: (ctx) => this.buildScriptSetupReactiveState(ctx),
+      },
+      {
+        id: 'stateAccessors',
+        group: 'state',
+        build: (ctx) => this.buildScriptSetupStateAccessors(ctx),
+      },
+      {
+        id: 'methods',
+        group: 'methods',
+        build: (ctx) => this.buildScriptSetupMethods(ctx),
+      },
+    ];
   }
 
   /**
-   * 创建 codegen 描述对象。
-   * @returns codegen 描述对象
+   * 创建 codegen 收集器（模板生成阶段写入，script 生成阶段读取）。
+   * @returns codegen 收集器
    */
-  protected createDescription(): ICodegenDescription {
+  protected createCodegenMeta(): ICodegenDescription {
     return {
       componentSet: new Set(),
       iconComponents: { componentNames: [], exportNames: [] },
-      stateAccessor: [],
       internalTypes: new Set(),
-      jsResource: { utils: false, bridge: false },
+      stateAccessors: [],
     };
+  }
+
+  /**
+   * 解析 props 值类型，与 `transformStateType` 白名单对齐：仅内置协议 type 才视为协议值，
+   * 普通对象字面量中的 `type` 字段（如按钮 `type: 'primary'`）仍视为字面量。
+   * @param value 属性值
+   * @returns 协议类型名或 'literal'
+   */
+  protected resolvePropValueType(value: unknown): string {
+    const builtInTypes = [JS_EXPRESSION, JS_FUNCTION, JS_I18N, JS_RESOURCE, JS_SLOT];
+    if (value && typeof value === 'object' && 'type' in value) {
+      const protocolType = (value as { type?: string }).type;
+      if (typeof protocolType === 'string' && builtInTypes.includes(protocolType)) {
+        return protocolType;
+      }
+    }
+    return 'literal';
+  }
+
+  /**
+   * 将 JSFunction 协议值转换为可嵌入 Vue 模板的函数表达式。
+   * @param value 函数字符串
+   * @returns 箭头函数表达式
+   */
+  protected buildJSFunctionExpression(value: string): string {
+    const info = this.getFunctionInfo(value);
+    if (!info) {
+      return this.replaceThis(value);
+    }
+    const asyncPrefix = info.type ? `${info.type} ` : '';
+    return `${asyncPrefix}(${info.params.join(',')}) => { ${info.body.replace(/this\.(props\.)?/g, '')} }`;
+  }
+
+  /**
+   * 将 prop 协议值提升到 schema.state，模板侧只绑定 `state.xxx`。
+   *
+   * 普通 prop 上的 JSFunction 不内联进模板，原因：
+   * 1. 常嵌套在对象/数组中（如 columnsConfig.formatter），JSON 字面量无法表达函数，只能整包 hoist；
+   * 2. 函数体经 traverseState → transformStateType 在 script 的 reactive(...) 里还原为真实函数（#QUOTES_START# 占位）；
+   * 3. 模板属性引号与多行函数体易冲突，出码 fragile；
+   * 4. 顶层与嵌套 JSFunction 共用同一路径，避免形态不同却出码不一致。
+   *
+   * 为何写入 state 而非 methods：
+   * - schema 语义不同：methods 是页面级可复用动作（this.hello()）；prop 上的 JSFunction 是传给子组件的配置/回调（rowKey、formatter），属于 prop 值；
+   * - 需保持 prop 结构：嵌套对象须整包保留（:columnsConfig="state.columnsConfig"），methods 是扁平 Record，无法承载嵌套形态；
+   * - 复用现有管线：traverseState 已递归处理 state 内的 JSFunction/JSResource/JSSlot；methods 仅 replaceThis 直出函数字符串，无协议 transform；
+   * - 与运行时一致：RenderMain 中 props 回调走 parseData 进 state/属性值，methods 单独挂载到 context。
+   *
+   * 对比：onXxx 事件上的 JSFunction 由 handleEventBinding 内联为 @click="..."，因绑定点单一且体量通常较短。
+   *
+   * @param key 属性名
+   * @param item 属性值（协议对象或含协议类型的嵌套结构）
+   * @param attrsArr 属性语句数组
+   * @param state 根 state 对象（出码过程中临时写入，最终进入 reactive）
+   */
+  protected hoistPropToState(key: string, item: unknown, attrsArr: string[], state: Record<string, unknown>): void {
+    const valueKey = this.avoidDuplicateString(Object.keys(state), key);
+    state[valueKey] = item;
+    attrsArr.push(`:${key}="state.${valueKey}"`);
   }
 
   /**
@@ -328,6 +360,7 @@ ${scriptSetup}
 
   /**
    * 处理 slot 协议并生成 Vue 插槽绑定语法。
+   * 用于 componentName 为 Template（渲染为 `<template>`）的节点，声明 #slotName 插槽内容。
    * @param item slot 配置
    * @returns 插槽绑定语法
    */
@@ -344,13 +377,24 @@ ${scriptSetup}
 
   /**
    * 处理事件绑定并生成模板语法。
+   * 事件上的 JSFunction 可内联：绑定点单一（@click），handler 通常较短，buildJSFunctionExpression 即可安全出码。
+   * 普通 prop 上的 JSFunction 见 hoistPropToState。
    * @param key 事件键名
    * @param item 事件配置
    * @returns 事件绑定语法
    */
   protected handleEventBinding(key: string, item: { type?: string; value?: string; params?: string[] }): string {
     const eventKey = toEventKey(key);
-    if (item?.type !== 'JSExpression') {
+
+    if (item?.type === JS_FUNCTION) {
+      const handler = this.buildJSFunctionExpression(item.value ?? '');
+      if (item.params?.length) {
+        return `@${eventKey}="(...eventArgs) => (${handler})(...eventArgs, ${item.params.join(',')})"`;
+      }
+      return `@${eventKey}="${handler}"`;
+    }
+
+    if (item?.type !== JS_EXPRESSION) {
       return '';
     }
     const eventHandler = (item.value ?? '').replace(/this\.(props\.)?/g, '');
@@ -403,16 +447,15 @@ ${scriptSetup}
       description.internalTypes = localInternalTypes;
 
       this.traverseState(item as Record<string, unknown>, description);
-      const cannotBind =
+      // 嵌套 JSFunction/JSResource/JSSlot 无法 JSON 内联，整包 hoist（同顶层 JSFunction prop，见 hoistPropToState）
+      const requiresStateHoist =
         localInternalTypes.has('JSFunction') ||
         localInternalTypes.has('JSResource') ||
         localInternalTypes.has('JSSlot');
 
-      if (cannotBind) {
+      if (requiresStateHoist) {
         description.internalTypes = prevInternalTypes;
-        const valueKey = this.avoidDuplicateString(Object.keys(state), key);
-        state[valueKey] = item;
-        attrsArr.push(`:${key}="state.${valueKey}"`);
+        this.hoistPropToState(key, item, attrsArr, state);
         return;
       }
 
@@ -448,7 +491,7 @@ ${scriptSetup}
       }
 
       const item = rawItem as { type?: string; value?: string; model?: { prop?: string }; params?: string[] };
-      const propType = item?.type || 'literal';
+      const propType = this.resolvePropValueType(rawItem);
 
       if (this.isOnEventKey(key)) {
         const eventBinding = this.handleEventBinding(key, item);
@@ -463,7 +506,13 @@ ${scriptSetup}
         return;
       }
 
-      if (propType === 'JSExpression') {
+      if (propType === JS_FUNCTION) {
+        // 普通 prop：不内联函数体，提升到 state 后由 transformStateType 在 reactive 中还原
+        this.hoistPropToState(key, rawItem, attrsArr, state);
+        return;
+      }
+
+      if (propType === JS_EXPRESSION) {
         if (item.model) {
           const modelArgs = item.model?.prop ? `:${item.model.prop}` : '';
           attrsArr.push(`v-model${modelArgs}="${(item.value ?? '').replace(/this\.(props\.)?/g, '')}"`);
@@ -655,6 +704,31 @@ ${scriptSetup}
     description: ICodegenDescription,
     rootState: Record<string, any>,
   ): void {
+    const stateEntry = current[prop];
+    if (stateEntry?.accessor) {
+      const getterValue = stateEntry.accessor.getter?.value ?? 'function() {}';
+      const setterValue = stateEntry.accessor.setter?.value;
+      const getterInfo = this.getFunctionInfo(getterValue);
+      const setterInfo = setterValue ? this.getFunctionInfo(setterValue) : null;
+
+      description.stateAccessors.push({
+        name: prop,
+        getterExpr: getterInfo
+          ? `() => { ${getterInfo.body.replace(/this\.(props\.)?/g, '')} }`
+          : `() => (${this.replaceThis(getterValue)})()`,
+        setterExpr: setterInfo
+          ? `(${setterInfo.params.join(',')}) => { ${setterInfo.body.replace(/this\.(props\.)?/g, '')} }`
+          : undefined,
+      });
+
+      if (stateEntry.defaultValue !== undefined) {
+        current[prop] = stateEntry.defaultValue;
+      } else {
+        delete current[prop];
+      }
+      return;
+    }
+
     const builtInTypes = [JS_EXPRESSION, JS_FUNCTION, JS_I18N, JS_RESOURCE, JS_SLOT];
     const { type } = current[prop] || {};
     if (!builtInTypes.includes(type)) {
@@ -692,16 +766,11 @@ ${scriptSetup}
 
     if (type === JS_RESOURCE) {
       const { value = '' } = current[prop] || {};
-      const resourceType = value.split('.')[1];
-      if (Object.prototype.hasOwnProperty.call(description.jsResource, resourceType)) {
-        description.jsResource[resourceType] = true;
-      }
       current[prop] = `${start}${value.replace(/this\./g, '')}${end}`;
       return;
     }
 
     const { value = [], params = ['row'] } = current[prop] || {};
-    description.hasJSX = true;
     const slotValues = (value as any[]).map((item) => this.generateSlotTemplate(item, description, rootState)).join('');
     current[prop] = `${start}({ ${params.join(',')} }, h) => ${slotValues}${end}`;
   }
@@ -745,10 +814,10 @@ ${scriptSetup}
     name?: string;
     componentsMap: IComponentMapItem[];
   }): string {
-    const description = this.createDescription();
-    const scriptSetupCtx: IScriptSetupBuildContext = { schema, componentsMap, description };
+    const codegenMeta = this.createCodegenMeta();
+    const scriptSetupCtx: IScriptSetupBuildContext = { schema, componentsMap, description: codegenMeta };
     const rootState = schema.state as Record<string, any>;
-    const template = this.generateTemplate(schema, rootState, description);
+    const template = this.generateTemplate(schema, rootState, codegenMeta);
     const script = this.buildScriptSetupBody(scriptSetupCtx, this.getScriptSetupSections());
 
     return [
@@ -850,7 +919,7 @@ ${scriptSetup}
           import('prettier/plugins/estree'),
         ]);
 
-      return format(source, {
+      return await format(source, {
         ...prettierOpts,
         plugins: [htmlPlugin, babelPlugin, estreePlugin],
       });

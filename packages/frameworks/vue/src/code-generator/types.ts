@@ -6,13 +6,19 @@ export interface IComponentMapItem {
   exportName?: string;
 }
 
+/** state.accessor getter/setter 出码为 computed 的声明信息。 */
+export interface IStateAccessorDefinition {
+  name: string;
+  getterExpr: string;
+  setterExpr?: string;
+}
+
 export interface ICodegenDescription {
   componentSet: Set<string>;
   iconComponents: { componentNames: string[]; exportNames: string[] };
-  stateAccessor: string[];
   internalTypes: Set<string>;
-  jsResource: Record<string, boolean>;
-  hasJSX?: boolean;
+  /** 含 accessor 的 state 字段，出码为独立 computed，不放入 reactive。 */
+  stateAccessors: IStateAccessorDefinition[];
 }
 
 export interface ICodePanel {
@@ -43,22 +49,11 @@ export interface IScriptSetupBuildContext {
   description: ICodegenDescription;
 }
 
-// script setup 扩展块：同 `group` 内多块按 `\n` 拼接，不同 group 之间按 `\n\n` 拼接。
-// 新增能力时向数组追加或替换同名 `id` 的块即可（也可通过 `VueCodeGenerator` 注入整表）。
+// script setup 块：同 `group` 内多块按 `\n` 拼接，不同 group 之间按 `\n\n` 拼接。
 export interface IScriptSetupSectionDefinition {
   id: string;
   group: string;
   build: (ctx: IScriptSetupBuildContext) => string;
-}
-
-export type SectionInsertPosition = 'before' | 'after' | 'replace';
-
-// script setup 扩展声明：支持 before/after/replace 三种策略。
-export interface IScriptSetupSectionExtension {
-  section: IScriptSetupSectionDefinition;
-  position: SectionInsertPosition;
-  // before/after 需要锚点；replace 可省略（默认替换同 id）。
-  targetId?: string;
 }
 
 export type CodegenFramework = 'vue' | 'react' | 'angular' | (string & {});
@@ -68,10 +63,8 @@ export interface IFrameworkCodeGenerator<TParams, TResult> {
   generate(params: TParams): Promise<TResult>;
 }
 
-// Vue 出码器配置（script setup 块扩展、Prettier 等）。
+// Vue 出码器配置（Prettier、编译校验等）。
 export interface IVueCodeGeneratorOptions {
-  scriptSetupSections?: readonly IScriptSetupSectionDefinition[];
-  scriptSetupSectionExtensions?: readonly IScriptSetupSectionExtension[];
   // Prettier 配置，未传则使用内置默认。
   prettierOpts?: Record<string, unknown>;
   // 生成后是否用 @vue/compiler-sfc 做编译校验。默认 true；设为 false 可关闭（如减轻浏览器端开销）。
