@@ -29,8 +29,8 @@ import TinySwitch from '@opentiny/vue-switch';
 import TinyTabItem from '@opentiny/vue-tab-item';
 import TinyTransfer from '@opentiny/vue-transfer';
 import TinyTree from '@opentiny/vue-tree';
+import TinySelect from '@opentiny/vue-select';
 
-import TinySelectWrap from './TinySelectWrap.vue';
 import TinyTabsWrap from './TinyTabsWrap.vue';
 
 export interface IComponents {
@@ -69,5 +69,5 @@ export const components: IComponents = {
   TinyChartRadar: TinyChartRadar,
   TinyChartRing: TinyChartRing,
   TinyTabs: TinyTabsWrap,
-  TinySelect: TinySelectWrap,
+  TinySelect: TinySelect,
 };

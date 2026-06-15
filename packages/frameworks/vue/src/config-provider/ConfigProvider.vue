@@ -4,8 +4,9 @@ import { ThemeProvider } from '@opentiny/tiny-robot';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
 import { watch, provide, computed, onMounted, ref } from 'vue';
 import type { IMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { IRendererConfig, buildMaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
 import { I18nMessages, useI18n } from '../chat/i18n';
-import { GENUI_I18N, GENUI_CONFIG, GENUI_MATERIALS } from '../chat/injection-tokens';
+import { GENUI_I18N, GENUI_CONFIG, GENUI_MATERIALS, GENUI_DEFAULT_PROPS_MAP } from '../chat/injection-tokens';
 import { useMediaTheme } from './use-media-theme';
 
 export interface ConfigProviderProps {
@@ -14,6 +15,7 @@ export interface ConfigProviderProps {
   locale?: string;
   i18n?: I18nMessages;
   materials?: IMaterials;
+  rendererConfig?: IRendererConfig;
 }
 
 interface IRobotProviderProps {
@@ -64,6 +66,8 @@ provide(GENUI_CONFIG, genuiConfig);
 provide(GENUI_MATERIALS, {
   ...(props.materials?.components ?? {}),
 });
+
+provide(GENUI_DEFAULT_PROPS_MAP, buildMaterialDefaultValueMap(props.rendererConfig ?? {}));
 
 watch(
   () => [props.locale, props.i18n] as const,
