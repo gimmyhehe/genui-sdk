@@ -83,6 +83,8 @@
   "common": {
     "edit": "编辑",
     "remove": "移除",
+    "cancel": "取消",
+    "save": "保存",
     "confirm": "确认",
     "name": "名称",
     "description": "描述",

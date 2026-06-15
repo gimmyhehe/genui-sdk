@@ -83,6 +83,8 @@
   "common": {
     "edit": "Edit",
     "remove": "Remove",
+    "cancel": "Cancel",
+    "save": "Save",
     "confirm": "Confirm",
     "name": "Name",
     "description": "Description",

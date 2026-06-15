@@ -19,7 +19,7 @@
   },
   "placeholder": {
     "thinking": "正在思考中...",
-    "input": "请输入您的问题～"
+    "input": "给 GenUI 发送消息"
   },
   "footer": {
     "aiGenerated": "内容由AI生成，仅供参考"
