@@ -16,7 +16,7 @@ import { openaiCompatibleTransformChunk, type IOpenaiCompatibleChunk } from '@op
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
-import { buildAgentTools, isAllowedAgentUrlResolved } from './a2a-tools/index.js';
+import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
 import { resolveAgentApiUrl } from './a2a-tools/resolve-agent-api-url.js';
 import type { PlaygroundAgentConfig } from './a2a-tools/agent-tools.js';
 import { buildSkillTools } from './skills/index.js';
@@ -196,9 +196,7 @@ export async function generateLlmConfig(llmConfigParams: LLMConfigParams | undef
   };
 }
 
-async function filterAllowedPlaygroundAgents(
-  rawAgents: PlaygroundAgentConfig[],
-): Promise<PlaygroundAgentConfig[]> {
+function filterAllowedPlaygroundAgents(rawAgents: PlaygroundAgentConfig[]): PlaygroundAgentConfig[] {
   const agents: PlaygroundAgentConfig[] = [];
 
   for (const agent of rawAgents) {
@@ -206,7 +204,7 @@ async function filterAllowedPlaygroundAgents(
     if (!url) {
       continue;
     }
-    if (isDevelopment || (await isAllowedAgentUrlResolved(url))) {
+    if (isDevelopment || isAllowedAgentUrl(url)) {
       agents.push(agent);
     }
   }
@@ -214,7 +212,7 @@ async function filterAllowedPlaygroundAgents(
   return agents;
 }
 
-const getPlaygroundConfig = async (playgroundStr: string) => {
+const getPlaygroundConfig = (playgroundStr: string) => {
   let playgroundConfig: Partial<IPlaygroundConfig> = {};
 
   try {
@@ -226,7 +224,7 @@ const getPlaygroundConfig = async (playgroundStr: string) => {
     console.error('Failed to parse playground from metadata:', error);
   }
 
-  const agents = await filterAllowedPlaygroundAgents(playgroundConfig.agents || []);
+  const agents = filterAllowedPlaygroundAgents(playgroundConfig.agents || []);
 
   return {
     mcpServers: playgroundConfig.mcpServers || [],
@@ -268,7 +266,7 @@ export function createChatGenui() {
       }
     }
 
-    const playgroundConfig = await getPlaygroundConfig(playgroundStr);
+    const playgroundConfig = getPlaygroundConfig(playgroundStr);
     const { mcpServers, framework, userAppendPrompt, agents, skills } = playgroundConfig;
 
     const llmConfigParams: LLMConfigParams = {

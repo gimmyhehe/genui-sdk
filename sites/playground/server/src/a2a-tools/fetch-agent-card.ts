@@ -1,15 +1,12 @@
 import type { Request, Response as ExpressResponse } from 'express';
 import getRawBody from 'raw-body';
-import { isAllowedAgentUrlResolved } from './agent-url-validation.js';
+import { isAllowedAgentUrl } from './agent-url-validation.js';
 import { normalizeAgentCard } from './resolve-agent-api-url.js';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 /** 拉取远程 Agent Card 的单次请求超时（毫秒）。 */
 const UPSTREAM_FETCH_TIMEOUT_MS = 10_000;
-
-/** 允许跟随的重定向最大跳数。 */
-const MAX_REDIRECT_HOPS = 5;
 
 function sendAgentCardResponse(
   res: ExpressResponse,
@@ -20,52 +17,23 @@ function sendAgentCardResponse(
 }
 
 /**
- * 在 SSRF 防护下拉取 URL，手动处理重定向并对每一跳重新校验。
+ * 拉取远程 Agent Card URL。
  *
- * @param startUrl - 初始 URL
- * @param allowPrivate - 开发态是否允许内网地址
- * @returns 非重定向的最终 HTTP 响应
+ * @param url - Agent Card 地址
+ * @returns 上游 HTTP 响应
  */
-async function fetchUrlWithRedirectGuard(
-  startUrl: string,
-  allowPrivate: boolean,
-): Promise<globalThis.Response> {
-  let currentUrl = startUrl;
+async function fetchAgentCardUpstream(url: string): Promise<globalThis.Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), UPSTREAM_FETCH_TIMEOUT_MS);
 
-  for (let hop = 0; hop < MAX_REDIRECT_HOPS; hop += 1) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), UPSTREAM_FETCH_TIMEOUT_MS);
-
-    let response: globalThis.Response;
-    try {
-      response = await fetch(currentUrl, {
-        headers: { Accept: 'application/json' },
-        redirect: 'manual',
-        signal: controller.signal,
-      });
-    } finally {
-      clearTimeout(timeoutId);
-    }
-
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get('location');
-      if (!location) {
-        throw new Error('重定向响应缺少 Location');
-      }
-
-      const nextUrl = new URL(location, currentUrl).toString();
-      if (!allowPrivate && !(await isAllowedAgentUrlResolved(nextUrl))) {
-        throw new Error('重定向到不允许访问的地址');
-      }
-
-      currentUrl = nextUrl;
-      continue;
-    }
-
-    return response;
+  try {
+    return await fetch(url, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  throw new Error('重定向次数过多');
 }
 
 /**
@@ -98,14 +66,14 @@ export const fetchAgentCardHandler = async (req: Request, res: ExpressResponse):
       return;
     }
 
-    if (!isDevelopment && !(await isAllowedAgentUrlResolved(requestedUrl))) {
+    if (!isDevelopment && !isAllowedAgentUrl(requestedUrl)) {
       sendAgentCardResponse(res, 403, { message: '不允许访问本地或内网地址' });
       return;
     }
 
     let fetchRes: globalThis.Response;
     try {
-      fetchRes = await fetchUrlWithRedirectGuard(requestedUrl, isDevelopment);
+      fetchRes = await fetchAgentCardUpstream(requestedUrl);
     } catch (error: any) {
       const message = error?.name === 'AbortError' ? '获取 Agent Card 超时' : error?.message || String(error);
       sendAgentCardResponse(res, 502, { message });

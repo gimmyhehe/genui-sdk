@@ -1,4 +1,3 @@
-import dns from 'node:dns/promises';
 import net from 'node:net';
 
 /**
@@ -106,7 +105,6 @@ function isPrivateIpv6(host: string): boolean {
     return true;
   }
 
-  // IPv4-mapped IPv6（如 ::ffff:127.0.0.1 或 URL 规范化后的 ::ffff:7f00:1）
   const mappedIpv4 = extractMappedIpv4(host);
   if (mappedIpv4 && isPrivateIpv4(mappedIpv4)) {
     return true;
@@ -142,44 +140,10 @@ export function isPrivateOrLocalHost(host: string): boolean {
 }
 
 /**
- * 解析 hostname 对应的 A/AAAA 记录；字面量 IP 直接返回自身。
- *
- * @param hostname - 已规范化的 hostname
- * @returns 解析到的 IP 列表，无记录时返回空数组
- */
-async function resolveHostAddresses(hostname: string): Promise<string[]> {
-  const normalized = normalizeHostname(hostname);
-
-  if (net.isIP(normalized)) {
-    return [normalized];
-  }
-
-  const addresses: string[] = [];
-
-  try {
-    addresses.push(...(await dns.resolve4(normalized)));
-  } catch (error: any) {
-    if (error?.code !== 'ENOTFOUND' && error?.code !== 'ENODATA') {
-      throw error;
-    }
-  }
-
-  try {
-    addresses.push(...(await dns.resolve6(normalized)));
-  } catch (error: any) {
-    if (error?.code !== 'ENOTFOUND' && error?.code !== 'ENODATA') {
-      throw error;
-    }
-  }
-
-  return addresses;
-}
-
-/**
- * 校验 Agent URL 的字面量 hostname（同步，不含 DNS 解析）。
+ * 校验 Agent URL（Playground 演练场：仅字面量 hostname，不做 DNS 解析）。
  *
  * @param urlStr - 待校验 URL
- * @returns 是否通过字面量校验
+ * @returns 是否允许访问
  */
 export function isAllowedAgentUrl(urlStr: string): boolean {
   try {
@@ -194,34 +158,6 @@ export function isAllowedAgentUrl(urlStr: string): boolean {
     }
 
     return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * 校验 Agent URL：字面量 hostname 校验 + DNS 解析结果不得为内网/本地地址。
- *
- * @param urlStr - 待校验 URL
- * @returns 是否允许访问
- */
-export async function isAllowedAgentUrlResolved(urlStr: string): Promise<boolean> {
-  try {
-    if (!isAllowedAgentUrl(urlStr)) {
-      return false;
-    }
-
-    const hostname = normalizeHostname(new URL(urlStr).hostname);
-    if (net.isIP(hostname)) {
-      return true;
-    }
-
-    const addresses = await resolveHostAddresses(hostname);
-    if (addresses.length === 0) {
-      return false;
-    }
-
-    return addresses.every((address) => !isPrivateOrLocalHost(address));
   } catch {
     return false;
   }
