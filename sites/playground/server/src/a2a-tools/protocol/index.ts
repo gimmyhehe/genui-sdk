@@ -1,23 +1,6 @@
-export { A2A_PROTOCOL_CONFIG } from './config.js';
-export { extractA2aResponseText } from './extract-response-text.js';
-export {
-  getA2aProtocolAdapter,
-  enabledA2aProtocolAdapters,
-} from './adapters/index.js';
-export {
-  getA2aBindingTransport,
-  jsonRpcBindingTransport,
-  httpJsonBindingTransport,
-} from './bindings/index.js';
-export {
-  joinAgentEndpointPath,
-  parseA2aProtocolBinding,
-  resolveAgentProtocolBinding,
-} from './resolve-protocol-binding.js';
-export {
-  parseA2aProtocolVersion,
-  resolveAgentProtocolVersion,
-} from './resolve-protocol-version.js';
+export { getA2aProtocolAdapter } from './adapters/index.js';
+export { getA2aBindingTransport } from './bindings/index.js';
+export { parseA2aProtocolBinding, parseA2aProtocolVersion } from './parse-protocol.js';
 export {
   AgentCardProtocolError,
   resolveAgentInterface,

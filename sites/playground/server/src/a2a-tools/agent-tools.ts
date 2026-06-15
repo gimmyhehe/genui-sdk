@@ -1,6 +1,5 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { isAllowedAgentUrl } from './agent-url-validation.js';
 import { invokeA2aAgent } from './invoke-a2a-agent.js';
 
 export type PlaygroundAgentConfig = {

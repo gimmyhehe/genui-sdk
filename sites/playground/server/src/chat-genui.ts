@@ -16,9 +16,8 @@ import { openaiCompatibleTransformChunk, type IOpenaiCompatibleChunk } from '@op
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
-import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
-import { resolveAgentApiUrl } from './a2a-tools/resolve-agent-api-url.js';
-import type { PlaygroundAgentConfig } from './a2a-tools/agent-tools.js';
+import { buildAgentTools, isAllowedAgentUrl, resolveAgentApiUrl } from './a2a-tools/index.js';
+import type { PlaygroundAgentConfig } from './a2a-tools/index.js';
 import { buildSkillTools } from './skills/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 

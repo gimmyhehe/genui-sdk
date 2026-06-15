@@ -1,5 +1,6 @@
+import { extractA2aInvokeResponseText } from '../extract-response-text.js';
+import { readJsonResponse } from './read-json-response.js';
 import type { A2aBindingInvokeOptions, A2aInvokeAttemptResult, A2aProtocolBindingTransport } from './types.js';
-import { extractA2aInvokeResponseText } from './parse-response.js';
 
 /**
  * JSON-RPC binding：向接口 url 发送 JSON-RPC 2.0 POST。
@@ -13,39 +14,25 @@ export const jsonRpcBindingTransport: A2aProtocolBindingTransport = {
       ...headers,
       'Content-Type': 'application/json',
     });
-    const body = adapter.buildJsonRpcSendMessageRequest(input);
 
     const res = await fetch(baseUrl, {
       method: 'POST',
       headers: requestHeaders,
       signal: abortSignal,
-      body: JSON.stringify(body),
+      body: JSON.stringify(adapter.buildJsonRpcSendMessageRequest(input)),
     });
 
-    const rawText = await res.text();
-    let payload: Record<string, unknown> | null = null;
-
-    try {
-      payload = rawText.trim() ? (JSON.parse(rawText) as Record<string, unknown>) : null;
-    } catch {
+    const parsed = await readJsonResponse(res);
+    if (!parsed.ok) {
       return {
         ok: false,
-        message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
-        status: res.status,
-        statusText: res.statusText,
+        message: parsed.message,
+        status: parsed.status,
+        statusText: parsed.statusText,
       };
     }
 
-    if (!res.ok) {
-      return {
-        ok: false,
-        message: rawText.trim() || `HTTP ${res.status} ${res.statusText}`.trim(),
-        status: res.status,
-        statusText: res.statusText,
-      };
-    }
-
-    const rpcError = payload?.error as { code?: number; message?: string } | undefined;
+    const rpcError = parsed.payload.error as { message?: string } | undefined;
     if (rpcError) {
       return {
         ok: false,
@@ -53,8 +40,8 @@ export const jsonRpcBindingTransport: A2aProtocolBindingTransport = {
       };
     }
 
-    if ('result' in (payload || {})) {
-      return { ok: true, text: extractA2aInvokeResponseText(payload) };
+    if ('result' in parsed.payload) {
+      return { ok: true, text: extractA2aInvokeResponseText(parsed.payload) };
     }
 
     return {

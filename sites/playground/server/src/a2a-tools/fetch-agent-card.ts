@@ -17,26 +17,6 @@ function sendAgentCardResponse(
 }
 
 /**
- * 拉取远程 Agent Card URL。
- *
- * @param url - Agent Card 地址
- * @returns 上游 HTTP 响应
- */
-async function fetchAgentCardUpstream(url: string): Promise<globalThis.Response> {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), UPSTREAM_FETCH_TIMEOUT_MS);
-
-  try {
-    return await fetch(url, {
-      headers: { Accept: 'application/json' },
-      signal: controller.signal,
-    });
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
-/**
  * 服务端代理拉取 Agent Card，规避浏览器跨域限制，并规范化 api.url 字段。
  *
  * @param req - Express 请求，body 为 `{ url: string }`
@@ -53,16 +33,10 @@ export const fetchAgentCardHandler = async (req: Request, res: ExpressResponse):
       return;
     }
 
-    let parsedUrl: URL;
     try {
-      parsedUrl = new URL(requestedUrl);
+      new URL(requestedUrl);
     } catch {
       sendAgentCardResponse(res, 400, { message: 'Agent Card URL 无效' });
-      return;
-    }
-
-    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-      sendAgentCardResponse(res, 400, { message: '仅支持 http/https 协议' });
       return;
     }
 
@@ -71,13 +45,21 @@ export const fetchAgentCardHandler = async (req: Request, res: ExpressResponse):
       return;
     }
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), UPSTREAM_FETCH_TIMEOUT_MS);
+
     let fetchRes: globalThis.Response;
     try {
-      fetchRes = await fetchAgentCardUpstream(requestedUrl);
+      fetchRes = await fetch(requestedUrl, {
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
     } catch (error: any) {
       const message = error?.name === 'AbortError' ? '获取 Agent Card 超时' : error?.message || String(error);
       sendAgentCardResponse(res, 502, { message });
       return;
+    } finally {
+      clearTimeout(timeoutId);
     }
 
     const rawText = await fetchRes.text();

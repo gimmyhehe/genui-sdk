@@ -3,15 +3,10 @@ import { httpJsonBindingTransport } from './http-json.js';
 import { jsonRpcBindingTransport } from './json-rpc.js';
 import type { A2aProtocolBindingTransport } from './types.js';
 
-/** 全部已知 binding 传输层。新增 binding 在此注册。 */
-const ALL_BINDING_TRANSPORTS: A2aProtocolBindingTransport[] = [
-  jsonRpcBindingTransport,
-  httpJsonBindingTransport,
-];
-
-const transportMap = new Map<A2aProtocolBinding, A2aProtocolBindingTransport>(
-  ALL_BINDING_TRANSPORTS.map((transport) => [transport.binding, transport]),
-);
+const transportMap = new Map<A2aProtocolBinding, A2aProtocolBindingTransport>([
+  [jsonRpcBindingTransport.binding, jsonRpcBindingTransport],
+  [httpJsonBindingTransport.binding, httpJsonBindingTransport],
+]);
 
 /**
  * 获取指定 binding 的传输层实现。
@@ -24,5 +19,3 @@ export function getA2aBindingTransport(
 ): A2aProtocolBindingTransport | undefined {
   return transportMap.get(binding);
 }
-
-export { jsonRpcBindingTransport, httpJsonBindingTransport };

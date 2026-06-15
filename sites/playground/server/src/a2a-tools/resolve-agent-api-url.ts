@@ -9,8 +9,6 @@ import {
 } from './protocol/supported-interfaces.js';
 import type { AgentProtocolSource } from './protocol/types.js';
 
-export type AgentUrlSource = AgentProtocolSource;
-
 export { AgentCardProtocolError };
 
 /**
@@ -19,7 +17,7 @@ export { AgentCardProtocolError };
  * @param source - Agent Card JSON 或 Playground Agent 配置
  * @returns 可用于 HTTP 调用的绝对 URL，无法解析时返回空字符串
  */
-export function resolveAgentApiUrl(source: AgentUrlSource | null | undefined): string {
+export function resolveAgentApiUrl(source: AgentProtocolSource | null | undefined): string {
   return tryResolveAgentInterface(source)?.url ?? '';
 }
 
@@ -33,7 +31,7 @@ export function resolveAgentApiUrl(source: AgentUrlSource | null | undefined): s
 export function normalizeAgentCard<T extends Record<string, unknown>>(
   card: T,
 ): T & { api: { url: string; type: string; version: string } } {
-  const resolved = resolveAgentInterface(card as AgentUrlSource);
+  const resolved = resolveAgentInterface(card as AgentProtocolSource);
   const existingApi =
     card.api && typeof card.api === 'object' && !Array.isArray(card.api)
       ? (card.api as Record<string, unknown>)
