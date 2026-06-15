@@ -2,6 +2,8 @@
 
 `GenuiRenderer` 是 GenUI SDK 的核心渲染组件（Renderer），用于将大模型返回的结构化 JSON Schema 渲染为可交互的 UI 界面。
 
+仅使用 Renderer 时可从 `@opentiny/genui-sdk-vue/renderer` 按需引入，见 [快速开始 - 按需引入](../guide/quick-start#按需引入)。
+
 ## Props
 
 ### content
