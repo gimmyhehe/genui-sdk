@@ -27,38 +27,9 @@ function extractTextFromPart(part: unknown): string {
 }
 
 /**
- * 当 result 中无可读文本 part 时返回固定摘要。
+ * 从 A2A SendMessage 响应中提取 agent 回复文本（兼容 Task / Message 等多种返回结构）。
  *
- * @returns 兜底说明
- */
-export function summarizeUnresolvedA2aResult(): string {
-  return UNRESOLVED_RESPONSE_SUMMARY;
-}
-
-/**
- * 从 JSON-RPC 或 HTTP+JSON 响应体中提取业务结果文本。
- *
- * @param payload - 已解析的 JSON 响应
- * @returns 可读文本
- */
-export function extractA2aInvokeResponseText(payload: Record<string, unknown> | null): string {
-  if (!payload) {
-    return '';
-  }
-
-  if ('result' in payload) {
-    const text = extractA2aResponseText(payload.result);
-    return text || summarizeUnresolvedA2aResult();
-  }
-
-  const text = extractA2aResponseText(payload);
-  return text || summarizeUnresolvedA2aResult();
-}
-
-/**
- * 从 A2A JSON-RPC result 中提取 agent 回复文本（兼容 Task / Message 等多种返回结构）。
- *
- * @param result - JSON-RPC result 字段
+ * @param result - SDK sendMessage 返回值
  * @returns 可读文本；无法提取时返回固定摘要
  */
 export function extractA2aResponseText(result: unknown): string {
@@ -109,9 +80,5 @@ export function extractA2aResponseText(result: unknown): string {
     }
   }
 
-  if (textParts.length) {
-    return textParts.join('\n');
-  }
-
-  return summarizeUnresolvedA2aResult();
+  return textParts.length ? textParts.join('\n') : UNRESOLVED_RESPONSE_SUMMARY;
 }

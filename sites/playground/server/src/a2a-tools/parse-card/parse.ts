@@ -81,18 +81,22 @@ function trimUrlString(value: unknown): string {
 }
 
 /**
- * 判断 Client 是否支持该 binding 与 protocolVersion 组合。
+ * 按协议版本解析 Client 实际使用的 binding。
+ * 0.3 固定 JSONRPC；1.0 使用 Card 声明的 JSONRPC / HTTP+JSON。
  *
- * @param binding - 标准 protocolBinding
- * @param version - 标准 protocolVersion
- * @returns 是否支持
+ * @param version - 协议主版本
+ * @param parsedBinding - Card 中声明的 binding，未声明时为 `null`
+ * @returns Client 将使用的 binding，该版本不支持时返回 `null`
  */
-function isClientSupportedTransport(
-  binding: A2aProtocolBinding,
+function resolveClientBinding(
   version: A2aProtocolVersion,
-): boolean {
-  const { supportedBindings, supportedVersions } = A2A_PROTOCOL_CONFIG;
-  return supportedBindings.includes(binding) && supportedVersions.includes(version);
+  parsedBinding: A2aProtocolBinding | null,
+): A2aProtocolBinding | null {
+  if (version === '0.3') {
+    return 'JSONRPC';
+  }
+
+  return parsedBinding;
 }
 
 /**
@@ -107,13 +111,14 @@ function parseClientSupportedInterface(item: AgentInterfaceLike): ResolvedAgentI
     return null;
   }
 
-  const binding = parseA2aProtocolBinding(item.protocolBinding || item.protocol_binding);
   const version = parseA2aProtocolVersion(item.protocolVersion || item.protocol_version);
-  if (!binding || !version) {
+  if (!version || !A2A_PROTOCOL_CONFIG.supportedVersions.includes(version)) {
     return null;
   }
 
-  if (!isClientSupportedTransport(binding, version)) {
+  const parsedBinding = parseA2aProtocolBinding(item.protocolBinding || item.protocol_binding);
+  const binding = resolveClientBinding(version, parsedBinding);
+  if (!binding) {
     return null;
   }
 
@@ -154,25 +159,12 @@ function resolveLegacyAgentInterface(source: AgentProtocolSource): ResolvedAgent
   }
 
   const rawBinding = source.api?.type ?? source.preferredTransport;
-  let binding = parseA2aProtocolBinding(
+  const parsedBinding = parseA2aProtocolBinding(
     typeof rawBinding === 'string' ? rawBinding : undefined,
   );
+  const binding = resolveClientBinding(version, parsedBinding);
   if (!binding) {
-    const hasExplicitBinding =
-      rawBinding !== undefined &&
-      rawBinding !== null &&
-      String(rawBinding).trim() !== '';
-    if (hasExplicitBinding) {
-      throw new AgentCardProtocolError('缺少 protocolBinding 或 preferredTransport');
-    }
-    // 升级兼容：0.3 时代常见仅含 api.url 的配置，默认 JSONRPC
-    binding = 'JSONRPC';
-  }
-
-  if (!isClientSupportedTransport(binding, version)) {
-    throw new AgentCardProtocolError(
-      `protocolBinding "${binding}" 与 protocolVersion "${version}" 不在 Client 支持范围内`,
-    );
+    throw new AgentCardProtocolError('缺少 protocolBinding 或 preferredTransport');
   }
 
   return { url: legacyUrl, binding, version };
@@ -217,32 +209,20 @@ export function resolveAgentInterface(
 }
 
 /**
- * 尝试解析 Agent 调用接口；不符合协议时返回 `null` 而不抛错。
- *
- * @param source - Agent Card JSON 或 Playground Agent 配置
- * @returns 解析成功返回接口，否则 `null`
- */
-export function tryResolveAgentInterface(
-  source: AgentProtocolSource | null | undefined,
-): ResolvedAgentInterface | null {
-  try {
-    return resolveAgentInterface(source);
-  } catch (error) {
-    if (error instanceof AgentCardProtocolError) {
-      return null;
-    }
-    throw error;
-  }
-}
-
-/**
  * 从 Agent Card 或已保存的 Agent 配置中解析用于服务端调用的 API 基址。
  *
  * @param source - Agent Card JSON 或 Playground Agent 配置
  * @returns 可用于 HTTP 调用的绝对 URL，无法解析时返回空字符串
  */
 export function resolveAgentApiUrl(source: AgentProtocolSource | null | undefined): string {
-  return tryResolveAgentInterface(source)?.url ?? '';
+  try {
+    return resolveAgentInterface(source).url;
+  } catch (error) {
+    if (error instanceof AgentCardProtocolError) {
+      return '';
+    }
+    throw error;
+  }
 }
 
 /**

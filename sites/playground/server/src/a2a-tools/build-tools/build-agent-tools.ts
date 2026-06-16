@@ -1,42 +1,31 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { invokeA2aAgent } from './invoke-a2a-agent.js';
+import { invokeA2aAgent } from '../invoke-agent/invoke-a2a-agent.js';
+import type { PlaygroundAgentConfig } from '../types.js';
 
-export type PlaygroundAgentConfig = {
-  // 前端字段（从 metadata.playground.agents 获取）
-  name: string;
-  agentCardUrl: string;
-  description?: string;
-  enabled?: boolean;
-
-  // Agent Card 解析后在服务端扩展的字段（可选）
-  version?: string;
-  api?: {
-    type?: string;
-    url?: string;
-    version?: string;
-  };
-  auth?: {
-    type?: string;
-    instructions?: string;
-  };
-  authentication?: { schemes?: string[] };
-  securitySchemes?: Record<string, { httpAuthSecurityScheme?: { scheme?: string } }>;
-  capabilities?: string[];
-};
-
-export { isAllowedAgentUrl, isPlaygroundDevelopment } from './agent-url-validation.js';
-
-/** 为 Agent 生成稳定的 ASCII tool 名称，只包含 [a-zA-Z0-9_-]。 */
-const slugifyAgentName = (name: string, index: number): string => {
+/**
+ * 为 Agent 生成稳定的 ASCII tool 名称，只包含 [a-zA-Z0-9_-]。
+ *
+ * @param name - Agent 展示名称
+ * @param index - 在 agents 列表中的索引
+ * @returns 可用于 AI SDK 的 tool 名称
+ */
+function slugifyAgentName(name: string, index: number): string {
   const base = (name || '')
     .trim()
     .replace(/[^a-zA-Z0-9_-]+/g, '_')
     .replace(/^_+|_+$/g, '') || 'agent';
 
   return `agent_${base}_${index}`;
-};
+}
 
+/**
+ * 将 Playground Agent 列表转换为 AI SDK 可调用的 tool 集合。
+ *
+ * @param agents - 已启用的 Agent 配置列表
+ * @param abortSignal - 可选取消信号，传递给底层 A2A 调用
+ * @returns tool 名称到 tool 定义的映射
+ */
 export const buildAgentTools = (
   agents: PlaygroundAgentConfig[] | undefined,
   abortSignal?: AbortSignal,

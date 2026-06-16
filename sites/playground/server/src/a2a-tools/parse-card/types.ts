@@ -4,10 +4,9 @@ export type A2aProtocolBinding = 'JSONRPC' | 'HTTP+JSON';
 /** Playground 可识别的 A2A 协议主版本。 */
 export type A2aProtocolVersion = '0.3' | '1.0';
 
-/** Playground Client 支持的 A2A 协议组合。 */
+/** Playground Client 支持的 A2A 协议主版本（0.3 → JSONRPC；1.0 → Card 声明的 JSONRPC / HTTP+JSON）。 */
 export const A2A_PROTOCOL_CONFIG = {
   supportedVersions: ['1.0', '0.3'] as A2aProtocolVersion[],
-  supportedBindings: ['JSONRPC', 'HTTP+JSON'] as A2aProtocolBinding[],
 } as const;
 
 /** Agent Card / Playground Agent 中用于推断协议版本的字段。 */
