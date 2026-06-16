@@ -1,8 +1,7 @@
 import type { PlaygroundAgentConfig } from './agent-tools.js';
-import { isAllowedAgentUrl } from './agent-url-validation.js';
-import { AgentCardProtocolError, resolveAgentInterface } from './protocol/index.js';
-
-const isDevelopment = process.env.NODE_ENV === 'development';
+import { isAllowedAgentUrl, isPlaygroundDevelopment } from './agent-url-validation.js';
+import { invokeAgentWithOfficialSdk } from './a2a-sdk-invoke.js';
+import { AgentCardProtocolError, resolveAgentInterface } from './protocol/supported-interfaces.js';
 
 type AgentInvokeResult =
   | { type: 'text'; text: string }
@@ -22,7 +21,7 @@ function inferAuthType(
   agent: PlaygroundAgentConfig,
   metadata?: Record<string, unknown>,
 ): 'bearer' | 'api_key' | null {
-  const explicit = (agent.auth?.type || (metadata?.authType as string) || '').toLowerCase();
+  const explicit = String(agent.auth?.type || metadata?.authType || '').toLowerCase();
   if (explicit === 'bearer') {
     return 'bearer';
   }
@@ -38,7 +37,7 @@ function inferAuthType(
   const securitySchemes = agent.securitySchemes;
   if (securitySchemes && typeof securitySchemes === 'object') {
     for (const schemeDef of Object.values(securitySchemes)) {
-      const scheme = schemeDef?.httpAuthSecurityScheme?.scheme?.toLowerCase();
+      const scheme = String(schemeDef?.httpAuthSecurityScheme?.scheme || '').toLowerCase();
       if (scheme === 'bearer') {
         return 'bearer';
       }
@@ -59,7 +58,9 @@ function buildBaseA2aRequestHeaders(
     Accept: 'application/json',
   };
 
-  const token = (metadata?.token || metadata?.apiKey) as string | undefined;
+  // 与旧实现一致：apiKey 优先于 token
+  const rawToken = metadata?.apiKey ?? metadata?.token;
+  const token = typeof rawToken === 'string' && rawToken ? rawToken : undefined;
   if (!token) {
     return headers;
   }
@@ -75,7 +76,7 @@ function buildBaseA2aRequestHeaders(
 }
 
 /**
- * 调用 A2A Agent：解析唯一接口，经 binding 传输层 + 版本适配层发起单次请求。
+ * 调用 A2A Agent：解析接口后按版本选用官方 SDK Client 发起 SendMessage。
  *
  * @param agent - Playground Agent 配置
  * @param input - 要转交的自然语言任务
@@ -105,9 +106,9 @@ export async function invokeA2aAgent(
     };
   }
 
-  const { url, adapter, transport } = resolved;
+  const { url, version } = resolved;
 
-  if (!isDevelopment && !isAllowedAgentUrl(url)) {
+  if (!isPlaygroundDevelopment && !isAllowedAgentUrl(url)) {
     return {
       type: 'a2a-agent-error',
       message: `Agent "${agent.name}" 的 url 不允许访问（已拦截本地或内网地址）`,
@@ -117,25 +118,14 @@ export async function invokeA2aAgent(
   const baseHeaders = buildBaseA2aRequestHeaders(agent, metadata);
 
   try {
-    const attempt = await transport.invoke({
-      baseUrl: url,
-      adapter,
+    const text = await invokeAgentWithOfficialSdk(
+      agent,
+      version,
       input,
-      headers: baseHeaders,
+      baseHeaders,
       abortSignal,
-    });
-
-    if (attempt.ok === false) {
-      return {
-        type: 'agent-function-call-error',
-        agent: { name: agent.name },
-        status: attempt.status,
-        statusText: attempt.statusText,
-        message: attempt.message,
-      };
-    }
-
-    return { type: 'text', text: attempt.text };
+    );
+    return { type: 'text', text };
   } catch (error: any) {
     const aborted = error?.name === 'AbortError' || abortSignal?.aborted;
     return {

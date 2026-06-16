@@ -1,15 +1,12 @@
-export { getA2aProtocolAdapter } from './adapters/index.js';
-export { getA2aBindingTransport } from './bindings/index.js';
-export { parseA2aProtocolBinding, parseA2aProtocolVersion } from './parse-protocol.js';
+export { toAgentCard } from './adapters/index.js';
+export type { A2aInvokeAdapterContext, A2aProtocolInvokeAdapter } from './adapters/index.js';
 export {
   AgentCardProtocolError,
+  normalizeAgentCard,
+  resolveAgentApiUrl,
   resolveAgentInterface,
   tryResolveAgentInterface,
   type ResolvedAgentInterface,
 } from './supported-interfaces.js';
-export type {
-  A2aProtocolAdapter,
-  A2aProtocolBinding,
-  A2aProtocolVersion,
-  AgentProtocolSource,
-} from './types.js';
+export { A2A_PROTOCOL_CONFIG } from './types.js';
+export type { A2aProtocolBinding, A2aProtocolVersion, AgentProtocolSource } from './types.js';

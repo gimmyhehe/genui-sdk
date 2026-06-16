@@ -1,23 +1,16 @@
-import { getA2aProtocolAdapter } from './adapters/index.js';
-import type {
-  AgentInterfaceLike,
-  AgentProtocolSource,
-  A2aProtocolAdapter,
-  A2aProtocolBinding,
-  A2aProtocolVersion,
+import {
+  A2A_PROTOCOL_CONFIG,
+  type AgentInterfaceLike,
+  type AgentProtocolSource,
+  type A2aProtocolBinding,
+  type A2aProtocolVersion,
 } from './types.js';
-import { getA2aBindingTransport } from './bindings/index.js';
-import type { A2aProtocolBindingTransport } from './bindings/types.js';
-import { A2A_PROTOCOL_CONFIG } from './config.js';
-import { parseA2aProtocolBinding, parseA2aProtocolVersion } from './parse-protocol.js';
 
 /** 解析后的 Agent 调用上下文。 */
 export type ResolvedAgentInterface = {
   url: string;
   binding: A2aProtocolBinding;
   version: A2aProtocolVersion;
-  adapter: A2aProtocolAdapter;
-  transport: A2aProtocolBindingTransport;
 };
 
 /** Agent Card 不符合 A2A 协议规范时抛出。 */
@@ -29,6 +22,55 @@ export class AgentCardProtocolError extends Error {
 }
 
 /**
+ * 将 Agent Card 中的 protocolBinding 字符串规范化为 Playground 支持的标准 binding。
+ *
+ * @param raw - 原始 binding 字符串
+ * @returns 规范化后的 binding，无法识别时返回 `null`
+ */
+function parseA2aProtocolBinding(raw: string | undefined | null): A2aProtocolBinding | null {
+  if (!raw || typeof raw !== 'string') {
+    return null;
+  }
+
+  const normalized = raw.trim().toUpperCase().replace(/[\s_-]+/g, '');
+  if (normalized === 'JSONRPC') {
+    return 'JSONRPC';
+  }
+  if (normalized === 'HTTP+JSON') {
+    return 'HTTP+JSON';
+  }
+
+  return null;
+}
+
+/**
+ * 将 Agent Card 中的协议版本字符串解析为 Playground 支持的版本号。
+ *
+ * @param raw - 原始版本字符串（如 `0.3.0`、`1.0`）
+ * @returns 解析成功返回 `'0.3'` 或 `'1.0'`，无法识别时返回 `null`
+ */
+function parseA2aProtocolVersion(raw: string | undefined | null): A2aProtocolVersion | null {
+  if (!raw || typeof raw !== 'string') {
+    return null;
+  }
+
+  const normalized = raw.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  if (normalized === '1.0' || normalized.startsWith('1.0.') || normalized === '1') {
+    return '1.0';
+  }
+
+  if (normalized === '0.3' || normalized.startsWith('0.3.')) {
+    return '0.3';
+  }
+
+  return null;
+}
+
+/**
  * 安全地将未知值转为 trim 后的 URL 字符串。
  *
  * @param value - 原始字段值
@@ -36,35 +78,6 @@ export class AgentCardProtocolError extends Error {
  */
 function trimUrlString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
-}
-
-/**
- * 绑定协议适配层与 binding 传输层。
- *
- * @param url - 接口 url
- * @param binding - protocolBinding
- * @param version - protocolVersion
- * @returns 完整调用上下文
- * @throws {AgentCardProtocolError} 无法映射适配层或传输层
- */
-function attachProtocolRuntime(
-  url: string,
-  binding: A2aProtocolBinding,
-  version: A2aProtocolVersion,
-): ResolvedAgentInterface {
-  const adapter = getA2aProtocolAdapter(version);
-  if (!adapter) {
-    throw new AgentCardProtocolError(
-      `protocolVersion "${version}" 无法映射到 A2A 协议适配层`,
-    );
-  }
-
-  const transport = getA2aBindingTransport(binding);
-  if (!transport) {
-    throw new AgentCardProtocolError(`protocolBinding "${binding}" 无法映射到 A2A 传输层`);
-  }
-
-  return { url, binding, version, adapter, transport };
 }
 
 /**
@@ -86,7 +99,7 @@ function isClientSupportedTransport(
  * 校验单个 supportedInterface 是否为 Client 支持的传输组合（§8.3.2）。
  *
  * @param item - AgentInterface 条目
- * @returns 解析成功返回调用上下文，否则 `null`（Client 不支持或必填字段无效）
+ * @returns 解析成功返回调用上下文，否则 `null`
  */
 function parseClientSupportedInterface(item: AgentInterfaceLike): ResolvedAgentInterface | null {
   const url = trimUrlString(item?.url);
@@ -104,7 +117,7 @@ function parseClientSupportedInterface(item: AgentInterfaceLike): ResolvedAgentI
     return null;
   }
 
-  return attachProtocolRuntime(url, binding, version);
+  return { url, binding, version };
 }
 
 /**
@@ -120,18 +133,40 @@ function resolveLegacyAgentInterface(source: AgentProtocolSource): ResolvedAgent
     throw new AgentCardProtocolError('缺少 supportedInterfaces 或可调用的 url');
   }
 
-  const version = parseA2aProtocolVersion(source.api?.version || source.protocolVersion);
+  const rawVersion = source.api?.version ?? source.protocolVersion;
+  let version = parseA2aProtocolVersion(
+    typeof rawVersion === 'string' ? rawVersion : undefined,
+  );
   if (!version) {
-    throw new AgentCardProtocolError('缺少有效的 protocolVersion');
+    const hasExplicitVersion =
+      rawVersion !== undefined &&
+      rawVersion !== null &&
+      String(rawVersion).trim() !== '';
+    if (hasExplicitVersion) {
+      throw new AgentCardProtocolError('缺少有效的 protocolVersion');
+    }
+    // 升级兼容：旧 Playground 仅保存 api.url 时按 A2A 0.3 处理
+    version = '0.3';
   }
 
   if (version === '1.0') {
     throw new AgentCardProtocolError('A2A 1.0 Card 缺少 supportedInterfaces');
   }
 
-  const binding = parseA2aProtocolBinding(source.api?.type || source.preferredTransport);
+  const rawBinding = source.api?.type ?? source.preferredTransport;
+  let binding = parseA2aProtocolBinding(
+    typeof rawBinding === 'string' ? rawBinding : undefined,
+  );
   if (!binding) {
-    throw new AgentCardProtocolError('缺少 protocolBinding 或 preferredTransport');
+    const hasExplicitBinding =
+      rawBinding !== undefined &&
+      rawBinding !== null &&
+      String(rawBinding).trim() !== '';
+    if (hasExplicitBinding) {
+      throw new AgentCardProtocolError('缺少 protocolBinding 或 preferredTransport');
+    }
+    // 升级兼容：0.3 时代常见仅含 api.url 的配置，默认 JSONRPC
+    binding = 'JSONRPC';
   }
 
   if (!isClientSupportedTransport(binding, version)) {
@@ -140,12 +175,11 @@ function resolveLegacyAgentInterface(source: AgentProtocolSource): ResolvedAgent
     );
   }
 
-  return attachProtocolRuntime(legacyUrl, binding, version);
+  return { url: legacyUrl, binding, version };
 }
 
 /**
- * 解析 Agent 调用接口（§8.3.2：按 supportedInterfaces 顺序取第一个 Client 支持的项；
- * 规范允许多条声明，Client 应优先选用列表中靠前的可支持项）。
+ * 解析 Agent 调用接口（§8.3.2：按 supportedInterfaces 顺序取第一个 Client 支持的项）。
  *
  * @param source - Agent Card JSON 或 Playground Agent 配置
  * @returns 调用上下文
@@ -199,4 +233,41 @@ export function tryResolveAgentInterface(
     }
     throw error;
   }
+}
+
+/**
+ * 从 Agent Card 或已保存的 Agent 配置中解析用于服务端调用的 API 基址。
+ *
+ * @param source - Agent Card JSON 或 Playground Agent 配置
+ * @returns 可用于 HTTP 调用的绝对 URL，无法解析时返回空字符串
+ */
+export function resolveAgentApiUrl(source: AgentProtocolSource | null | undefined): string {
+  return tryResolveAgentInterface(source)?.url ?? '';
+}
+
+/**
+ * 将 Agent Card 规范化为 Playground 使用的结构，确保 api.url 已填充。
+ *
+ * @param card - 原始 Agent Card JSON
+ * @returns 带 api 字段的 Agent Card 副本
+ * @throws {AgentCardProtocolError} Card 不符合 A2A 协议
+ */
+export function normalizeAgentCard<T extends Record<string, unknown>>(
+  card: T,
+): T & { api: { url: string; type: string; version: string } } {
+  const resolved = resolveAgentInterface(card as AgentProtocolSource);
+  const existingApi =
+    card.api && typeof card.api === 'object' && !Array.isArray(card.api)
+      ? (card.api as Record<string, unknown>)
+      : {};
+
+  return {
+    ...card,
+    api: {
+      ...existingApi,
+      url: resolved.url,
+      type: resolved.binding,
+      version: resolved.version,
+    },
+  };
 }

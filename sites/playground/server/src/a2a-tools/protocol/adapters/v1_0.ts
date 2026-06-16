@@ -1,48 +1,61 @@
 import { randomUUID } from 'node:crypto';
-import type { A2aProtocolAdapter } from '../types.js';
-
-/** A2A 1.0 规范要求的 HTTP 版本头取值。 */
-const A2A_VERSION_HEADER = '1.0';
+import {
+  ClientFactory,
+  ServiceParameters,
+  type RequestOptions,
+} from '@a2a-js/sdk-v1/client';
+import { extractA2aResponseText } from '../extract-response-text.js';
+import type { A2aInvokeAdapterContext, A2aProtocolInvokeAdapter } from './types.js';
 
 /**
- * A2A 1.0 JSON-RPC / HTTP+JSON 适配器。
+ * 构造 A2A 1.0 SendMessage 请求体。
+ *
+ * @param input - 用户自然语言输入
+ * @returns 1.0 SDK sendMessage 参数
  */
-export const a2aProtocolAdapterV10: A2aProtocolAdapter = {
+function buildSendMessageParams(input: string): Record<string, unknown> {
+  return {
+    message: {
+      messageId: randomUUID(),
+      role: 'ROLE_USER',
+      parts: [{ text: input, mediaType: 'text/plain' }],
+    },
+  };
+}
+
+/**
+ * 构造 1.0 SDK RequestOptions（认证头 + 取消信号）。
+ *
+ * @param headers - HTTP 头
+ * @param abortSignal - 可选取消信号
+ * @returns RequestOptions
+ */
+function buildRequestOptions(
+  headers: Record<string, string>,
+  abortSignal?: AbortSignal,
+): RequestOptions {
+  const serviceParameters =
+    Object.keys(headers).length > 0
+      ? ServiceParameters.createFrom(undefined, (params) => ({ ...params, ...headers }))
+      : undefined;
+
+  return {
+    signal: abortSignal,
+    serviceParameters,
+  };
+}
+
+/** A2A 1.0 官方 SDK 适配层（@a2a-js/sdk-v1 / alpha）。 */
+export const a2aProtocolInvokeAdapterV10: A2aProtocolInvokeAdapter = {
   version: '1.0',
 
-  buildJsonRpcSendMessageRequest(input: string): Record<string, unknown> {
-    return {
-      jsonrpc: '2.0',
-      id: randomUUID(),
-      method: 'SendMessage',
-      params: {
-        message: {
-          messageId: randomUUID(),
-          role: 'ROLE_USER',
-          parts: [{ text: input, mediaType: 'text/plain' }],
-        },
-      },
-    };
-  },
-
-  buildHttpJsonSendMessageBody(input: string): Record<string, unknown> {
-    return {
-      message: {
-        messageId: randomUUID(),
-        role: 'ROLE_USER',
-        parts: [{ text: input, mediaType: 'text/plain' }],
-      },
-    };
-  },
-
-  resolveHttpSendMessagePath(_baseUrl: string): string {
-    return 'message:send';
-  },
-
-  applyProtocolHeaders(headers: Record<string, string>): Record<string, string> {
-    return {
-      ...headers,
-      'A2A-Version': A2A_VERSION_HEADER,
-    };
+  async sendMessage(context: A2aInvokeAdapterContext): Promise<string> {
+    const factory = new ClientFactory();
+    const client = await factory.createFromAgentCard(context.agentCard as never);
+    const result = await client.sendMessage(
+      buildSendMessageParams(context.input) as never,
+      buildRequestOptions(context.headers, context.abortSignal),
+    );
+    return extractA2aResponseText(result as Record<string, unknown>);
   },
 };

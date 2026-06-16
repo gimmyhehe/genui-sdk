@@ -1,9 +1,7 @@
 import type { Request, Response as ExpressResponse } from 'express';
 import getRawBody from 'raw-body';
-import { isAllowedAgentUrl } from './agent-url-validation.js';
-import { normalizeAgentCard } from './resolve-agent-api-url.js';
-
-const isDevelopment = process.env.NODE_ENV === 'development';
+import { isAllowedAgentUrl, isPlaygroundDevelopment } from './agent-url-validation.js';
+import { normalizeAgentCard } from './protocol/supported-interfaces.js';
 
 /** 拉取远程 Agent Card 的单次请求超时（毫秒）。 */
 const UPSTREAM_FETCH_TIMEOUT_MS = 10_000;
@@ -40,7 +38,7 @@ export const fetchAgentCardHandler = async (req: Request, res: ExpressResponse):
       return;
     }
 
-    if (!isDevelopment && !isAllowedAgentUrl(requestedUrl)) {
+    if (!isPlaygroundDevelopment && !isAllowedAgentUrl(requestedUrl)) {
       sendAgentCardResponse(res, 403, { message: '不允许访问本地或内网地址' });
       return;
     }
@@ -53,6 +51,7 @@ export const fetchAgentCardHandler = async (req: Request, res: ExpressResponse):
       fetchRes = await fetch(requestedUrl, {
         headers: { Accept: 'application/json' },
         signal: controller.signal,
+        redirect: 'error',
       });
     } catch (error: any) {
       const message = error?.name === 'AbortError' ? '获取 Agent Card 超时' : error?.message || String(error);

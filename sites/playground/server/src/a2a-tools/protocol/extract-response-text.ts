@@ -17,6 +17,12 @@ function extractTextFromPart(part: unknown): string {
   if (typeof record.content === 'string' && record.content.trim()) {
     return record.content;
   }
+  if (record.content && typeof record.content === 'object') {
+    const content = record.content as Record<string, unknown>;
+    if (content.$case === 'text' && typeof content.value === 'string' && content.value.trim()) {
+      return content.value;
+    }
+  }
   return '';
 }
 

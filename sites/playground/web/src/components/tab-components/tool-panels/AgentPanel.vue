@@ -254,8 +254,8 @@ const updateAgentEnabled = (agent, enabled) => {
     <template #title-right>
       <tiny-button type="text" :icon="IconPlus" @click.stop="addAgent"> </tiny-button>
     </template>
-    <div class="mcp-server-list">
-      <div class="mcp-server-item" v-for="(agent, index) in llmConfig.agents || []" :key="agent.name">
+    <div class="mcp-server-list" v-if="llmConfig.agents && llmConfig.agents.length > 0">
+      <div class="mcp-server-item" v-for="(agent, index) in llmConfig.agents" :key="agent.name">
         <div class="mcp-server-item-header">
           <div class="mcp-server-item-name">{{ agent.name }}</div>
           <div>
@@ -291,7 +291,7 @@ const updateAgentEnabled = (agent, enabled) => {
         <div class="mcp-server-item-description" v-if="agent.description">{{ agent.description }}</div>
       </div>
     </div>
-    <div v-if="!llmConfig.agents || llmConfig.agents.length === 0" class="mcp-server-list-empty">
+    <div v-else class="mcp-server-list-empty">
       <div class="mcp-server-item-empty">
         <div class="mcp-server-item-empty-icon">
           点击右上角

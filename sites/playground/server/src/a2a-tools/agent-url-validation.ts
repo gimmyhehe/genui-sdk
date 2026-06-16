@@ -1,5 +1,8 @@
 import net from 'node:net';
 
+/** Playground 是否处于开发模式（开发环境跳过 Agent URL SSRF 校验）。 */
+export const isPlaygroundDevelopment = process.env.NODE_ENV === 'development';
+
 /**
  * 规范化 URL hostname：去掉 IPv6 方括号与末尾根域点。
  *

@@ -1,54 +1,57 @@
 import { randomUUID } from 'node:crypto';
-import type { A2aProtocolAdapter } from '../types.js';
+import { ClientFactory, ServiceParameters, type RequestOptions } from '@a2a-js/sdk/client';
+import { extractA2aResponseText } from '../extract-response-text.js';
+import type { A2aInvokeAdapterContext, A2aProtocolInvokeAdapter } from './types.js';
 
 /**
- * A2A 0.3 JSON-RPC / HTTP+JSON 适配器。
+ * 构造 A2A 0.3 SendMessage 请求体。
  *
- * 弃用 0.3 支持时：删除本文件，并从 `adapters/index.ts` 移除注册即可。
+ * @param input - 用户自然语言输入
+ * @returns 0.3 SDK sendMessage 参数
  */
-export const a2aProtocolAdapterV03: A2aProtocolAdapter = {
+function buildSendMessageParams(input: string): Record<string, unknown> {
+  return {
+    message: {
+      messageId: randomUUID(),
+      role: 'user',
+      parts: [{ kind: 'text', text: input }],
+    },
+  };
+}
+
+/**
+ * 构造 0.3 SDK RequestOptions（认证头 + 取消信号）。
+ *
+ * @param headers - HTTP 头
+ * @param abortSignal - 可选取消信号
+ * @returns RequestOptions
+ */
+function buildRequestOptions(
+  headers: Record<string, string>,
+  abortSignal?: AbortSignal,
+): RequestOptions {
+  const serviceParameters =
+    Object.keys(headers).length > 0
+      ? ServiceParameters.createFrom(undefined, (params) => ({ ...params, ...headers }))
+      : undefined;
+
+  return {
+    signal: abortSignal,
+    serviceParameters,
+  };
+}
+
+/** A2A 0.3 官方 SDK 适配层（@a2a-js/sdk 稳定版）。 */
+export const a2aProtocolInvokeAdapterV03: A2aProtocolInvokeAdapter = {
   version: '0.3',
 
-  buildJsonRpcSendMessageRequest(input: string): Record<string, unknown> {
-    return {
-      jsonrpc: '2.0',
-      id: randomUUID(),
-      method: 'message/send',
-      params: {
-        message: {
-          messageId: randomUUID(),
-          role: 'user',
-          parts: [{ kind: 'text', text: input }],
-        },
-      },
-    };
-  },
-
-  buildHttpJsonSendMessageBody(input: string): Record<string, unknown> {
-    return {
-      message: {
-        messageId: randomUUID(),
-        role: 'user',
-        parts: [{ kind: 'text', text: input }],
-      },
-    };
-  },
-
-  /**
-   * A2A 0.3 HTTP+JSON SendMessage 路径。
-   * 0.3 规范使用 `/v1/message:send`；若 `url` 已含版本段则仅追加 `message:send`。
-   *
-   * @param baseUrl - Agent Card 中的接口基址
-   * @returns 相对路径
-   */
-  resolveHttpSendMessagePath(baseUrl: string): string {
-    if (/\/v\d+(?:\.\d+)*\/?$/i.test(baseUrl)) {
-      return 'message:send';
-    }
-    return 'v1/message:send';
-  },
-
-  applyProtocolHeaders(headers: Record<string, string>): Record<string, string> {
-    return headers;
+  async sendMessage(context: A2aInvokeAdapterContext): Promise<string> {
+    const factory = new ClientFactory();
+    const client = await factory.createFromAgentCard(context.agentCard as never);
+    const result = await client.sendMessage(
+      buildSendMessageParams(context.input) as never,
+      buildRequestOptions(context.headers, context.abortSignal),
+    );
+    return extractA2aResponseText(result as Record<string, unknown>);
   },
 };

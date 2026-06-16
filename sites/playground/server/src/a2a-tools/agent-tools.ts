@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { invokeA2aAgent } from './invoke-a2a-agent.js';
 
 export type PlaygroundAgentConfig = {
-  // 前端 IAgentConfig 字段（从 playground.metadata 直接透传）
+  // 前端字段（从 metadata.playground.agents 获取）
   name: string;
   agentCardUrl: string;
   description?: string;
@@ -25,7 +25,7 @@ export type PlaygroundAgentConfig = {
   capabilities?: string[];
 };
 
-export { isAllowedAgentUrl } from './agent-url-validation.js';
+export { isAllowedAgentUrl, isPlaygroundDevelopment } from './agent-url-validation.js';
 
 /** 为 Agent 生成稳定的 ASCII tool 名称，只包含 [a-zA-Z0-9_-]。 */
 const slugifyAgentName = (name: string, index: number): string => {
