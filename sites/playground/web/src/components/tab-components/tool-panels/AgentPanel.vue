@@ -3,6 +3,7 @@ import { ref, inject } from 'vue';
 import { TinyButton, TinySwitch, TinyPopover, TinyCollapseItem, TinyNotify } from '@opentiny/vue';
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
 import AgentDialog from './AgentDialog.vue';
+import { t } from '../../../i18n';
 
 const playgroundContext = inject('playgroundContext');
 const { llmConfig = {} } = playgroundContext || {};
@@ -120,7 +121,7 @@ const queryAgentCard = async () => {
   if (!requestedUrl) {
     TinyNotify({
       type: 'warning',
-      message: '请填写 Agent Card URL',
+      message: t('agent.cardUrlRequired'),
       position: 'top-right',
     });
     return;
@@ -168,7 +169,9 @@ const queryAgentCard = async () => {
       return;
     }
     agentCardStatus.value = 'error';
-    agentCardError.value = error?.message ? `获取 Agent Card 失败：${error.message}` : '获取 Agent Card 失败';
+    agentCardError.value = error?.message
+      ? t('agent.fetchFailed', { message: error.message })
+      : t('agent.fetchFailedGeneric');
   } finally {
     agentQueryLoading.value = false;
     agentQueryController.value = null;
@@ -183,7 +186,7 @@ const confirmAgent = () => {
   if (!nameTrimmed || !urlTrimmed) {
     TinyNotify({
       type: 'warning',
-      message: '请填写名称和 Agent Card URL',
+      message: t('agent.nameAndUrlRequired'),
       position: 'top-right',
     });
     return;
@@ -192,7 +195,7 @@ const confirmAgent = () => {
   if (!agentCard.value || agentCardStatus.value !== 'success' || urlTrimmed !== lastQueriedAgentCardUrl.value) {
     TinyNotify({
       type: 'warning',
-      message: '请先查询并确认 Agent Card 信息',
+      message: t('agent.queryFirst'),
       position: 'top-right',
     });
     return;
@@ -203,7 +206,7 @@ const confirmAgent = () => {
   if (!apiUrl) {
     TinyNotify({
       type: 'warning',
-      message: 'Agent Card 中缺少可调用的 url，服务端无法调用该 Agent',
+      message: t('agent.missingApiUrl'),
       position: 'top-right',
     });
     return;
@@ -214,7 +217,7 @@ const confirmAgent = () => {
   if (nameCollision) {
     TinyNotify({
       type: 'warning',
-      message: `已存在名为「${nameTrimmed}」的 Agent，名称不可重复`,
+      message: t('agent.duplicateName', { name: nameTrimmed }),
       position: 'top-right',
     });
     return;
@@ -250,7 +253,7 @@ const updateAgentEnabled = (agent, enabled) => {
 </script>
 
 <template>
-  <tiny-collapse-item name="agent" title="Agent（A2A 协议）">
+  <tiny-collapse-item name="agent" :title="t('agent.title')">
     <template #title-right>
       <tiny-button type="text" :icon="IconPlus" @click.stop="addAgent"> </tiny-button>
     </template>
@@ -274,11 +277,11 @@ const updateAgentEnabled = (agent, enabled) => {
                 <div class="mcp-server-item-actions">
                   <div @click="editAgent(agent, index)">
                     <component :is="IconEdit" />
-                    <span>编辑</span>
+                    <span>{{ t('common.edit') }}</span>
                   </div>
                   <div @click="deleteAgent(agent)">
                     <component :is="IconDel" />
-                    <span>移除</span>
+                    <span>{{ t('common.remove') }}</span>
                   </div>
                 </div>
               </template>
@@ -294,9 +297,9 @@ const updateAgentEnabled = (agent, enabled) => {
     <div v-else class="mcp-server-list-empty">
       <div class="mcp-server-item-empty">
         <div class="mcp-server-item-empty-icon">
-          点击右上角
+          {{ t('common.emptyHintPrefix') }}
           <component :is="IconPlus" class="mcp-server-item-empty-plus-icon" />
-          添加 Agent
+          {{ t('agent.add') }}
         </div>
       </div>
     </div>
