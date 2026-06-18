@@ -9,6 +9,7 @@ import { PropsFilterPipe } from './props-filter.pipe';
 import { GetDirectivesPipe } from './get-directive.pipe';
 import { ComponentOutlet } from './component-outlet';
 import { ParseDataPipe } from './parse-data.pipe';
+import { BindPropsPipe } from './bind-props.pipe';
 import { MergeObjectPipe } from './merge-object.pipe';
 import { AutoApplyDirectivesPipe } from './auto-apply-directives.pipe';
 import { getComponent, getModuleRef } from './parser/material-getter';
@@ -71,6 +72,7 @@ export class IsStringPipe implements PipeTransform {
     GetDirectivesPipe,
     ComponentOutlet,
     ParseDataPipe,
+    BindPropsPipe,
     MergeObjectPipe,
     AutoApplyDirectivesPipe,
   ],
