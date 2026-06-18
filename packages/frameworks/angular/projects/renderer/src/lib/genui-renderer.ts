@@ -122,6 +122,10 @@ export class GenuiRenderer implements OnInit {
     } else {
       isCompleted = this.isJsonComplete ?? true;
     }
+    if (!isCompleted && json && 'lifeCycles' in json) {
+      const { lifeCycles, ...rest } = json;
+      json = rest;
+    }
     if (this.deltaPatcher) {
       this.deltaPatcher.patchWithDelta(this.schema, json, isCompleted);
     } else {
