@@ -65,4 +65,4 @@ Or edit [base variables in vars.less](https://github.com/opentiny/tiny-vue/blob/
 
 ## Full Example
 
-<demo vue="../../../../demos/config-provider/custom-theme_en.vue" />
+<demo vue="../../../../demos/en/config-provider/custom-theme.vue" />

@@ -14,7 +14,7 @@
 
   <script setup lang="ts">
   import { ref } from 'vue';
-  import GenuiRenderer from './adapter.vue';
+  import GenuiRenderer from '../../../angular/renderer/adapter.vue';
 
   const generating = ref(false);
 

@@ -54,4 +54,4 @@ After upload, the data structure follows the OpenAI-compatible format. The messa
 
 ## Full Example
 
-<demo vue="../../../../demos/chat/image-upload_en.vue" />
+<demo vue="../../../../demos/en/chat/image-upload.vue" />

@@ -30,4 +30,3 @@ const content = ref({
 // Specify field paths that need to be complete
 const selectors = ['props.items', 'children[0].props'];
 </script>
-

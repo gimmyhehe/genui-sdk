@@ -59,7 +59,7 @@ const customActions = {
 
 #### Full Example
 
-<demo vue="../../../../demos/renderer/custom-actions-open-page_en.vue" />
+<demo vue="../../../../demos/en/renderer/custom-actions-open-page.vue" />
 
 ### Example 2: Show Live Form Binding
 
@@ -102,7 +102,7 @@ const customActions = {
 
 #### Full Example
 
-<demo vue="../../../../demos/renderer/custom-actions-form_en.vue" />
+<demo vue="../../../../demos/en/renderer/custom-actions-form.vue" />
 
 ## Send Custom Actions to the Server
 

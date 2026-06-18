@@ -1,5 +1,5 @@
 <template>
-  <GenuiRenderer :content="content" :generating="generating" :state="historyState" :customActions="customActions" />
+  <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
 </template>
 
 <script setup lang="ts">
@@ -7,16 +7,14 @@ import { ref } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
 
 const generating = ref(false);
-
-// Schema restored from history
 const content = ref({
-  componentName: 'Page',
   state: {
     formData: {
       name: '',
-      age: null,
+      age: '',
     },
   },
+  componentName: 'Page',
   children: [
     {
       componentName: 'TinyForm',
@@ -25,7 +23,7 @@ const content = ref({
           type: 'JSExpression',
           value: 'this.state.formData',
         },
-        'label-position': 'top',
+        labelPosition: 'top',
       },
       children: [
         {
@@ -38,6 +36,7 @@ const content = ref({
             {
               componentName: 'TinyInput',
               props: {
+                placeholder: 'Enter name',
                 modelValue: {
                   type: 'JSExpression',
                   model: true,
@@ -57,6 +56,7 @@ const content = ref({
             {
               componentName: 'TinyInput',
               props: {
+                placeholder: 'Enter age',
                 modelValue: {
                   type: 'JSExpression',
                   model: true,
@@ -66,34 +66,49 @@ const content = ref({
             },
           ],
         },
-      ],
-    },
-    {
-      componentName: 'TinyButton',
-      props: {
-        text: 'View State',
-        onClick: {
-          type: 'JSFunction',
-          value: "function() { this.callAction('getState'); }",
+        {
+          componentName: 'TinyFormItem',
+          props: {
+            label: '',
+          },
+          children: [
+            {
+              componentName: 'TinyButton',
+              props: {
+                type: 'primary',
+                text: 'Show Form Content',
+                onClick: {
+                  type: 'JSFunction',
+                  value: "function() { this.callAction('showNotification', { title: 'Form Content' }); }",
+                },
+              },
+            },
+          ],
         },
-      },
+      ],
     },
   ],
 });
 
-// State restored from history (merged into global state on initialization)
-const historyState = {
-  formData: {
-    name: 'John Doe',
-    age: 30,
-  },
-};
-
 const customActions = {
-  getState: {
+  showNotification: {
+    name: 'showNotification',
+    description: 'Display a notification with the form content',
     execute: (params: any, context: Record<string, any>) => {
       const state = context.state;
-      alert(`History State:\n${JSON.stringify(state, null, 2)}`);
+      const message = JSON.stringify(state);
+
+      alert(`${params.title}: ${message}`);
+    },
+    parameters: {
+      type: 'object',
+      properties: {
+        title: {
+          type: 'string',
+          description: 'Notification title',
+        },
+      },
+      required: ['title'],
     },
   },
 };

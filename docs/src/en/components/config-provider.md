@@ -78,7 +78,7 @@ import { ref } from 'vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 import type { I18nMessages } from '@opentiny/genui-sdk-vue';
 
-const locale = ref('zh_CN');
+const locale = ref('en_US');
 
 const customI18n: I18nMessages = {
   zh_CN: {

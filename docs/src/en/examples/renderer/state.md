@@ -52,7 +52,7 @@ const customActions = {
 
 #### Full Example
 
-<demo vue="../../../../demos/renderer/state_en.vue" />
+<demo vue="../../../../demos/en/renderer/state.vue" />
 
 ## Notes
 

@@ -49,6 +49,6 @@ tiny-schema-renderer-element-ng {
   color:var(--ti-common-color-text-primary);
   background-color:var(--ti-common-color-bg-white-normal);
   // TODO: body上的css需要处理成:host伪类，上面是临时解决方案
-  @import (less) '@opentiny/tiny-schema-renderer-ng/dist/renderer-element/browser/styles.css';
+  @import (less) '@opentiny/tiny-schema-renderer-ng/dist/renderer-element/browser/main.css';
 }
 </style>

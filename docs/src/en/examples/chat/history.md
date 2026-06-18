@@ -128,4 +128,4 @@ const handleDeleteConversation = (id: string) => {
 
 ## Full Example
 
-<demo vue="../../../../demos/chat/history_en.vue" />
+<demo vue="../../../../demos/en/chat/history.vue" />
