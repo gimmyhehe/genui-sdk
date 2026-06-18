@@ -3,8 +3,8 @@ import { TinyConfigProvider } from '@opentiny/vue';
 import { ThemeProvider } from '@opentiny/tiny-robot';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
 import { watch, provide, computed, onMounted, ref } from 'vue';
-import {  buildMaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
-import type { GenuiMaterials, IRendererConfig } from '@opentiny/genui-sdk-core';
+import { buildMaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
+import type { GenuiMaterialRegistry, IRendererConfig } from '@opentiny/genui-sdk-core';
 import { I18nMessages, useI18n } from '../chat/i18n';
 import { GENUI_I18N, GENUI_CONFIG, GENUI_MATERIALS, GENUI_DEFAULT_PROPS_MAP } from '../chat/injection-tokens';
 import { useMediaTheme } from './use-media-theme';
@@ -14,7 +14,7 @@ export interface ConfigProviderProps {
   id?: string;
   locale?: string;
   i18n?: I18nMessages;
-  materials?: GenuiMaterials;
+  materials?: GenuiMaterialRegistry;
   rendererConfig?: IRendererConfig;
 }
 

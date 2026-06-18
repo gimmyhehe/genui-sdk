@@ -11,6 +11,6 @@ export type GenuiMaterialsMap = Record<string, GenuiMaterialComponent>;
 /**
  * ConfigProvider 接收的物料注册表结构。
  */
-export interface GenuiMaterials {
+export interface GenuiMaterialRegistry {
   components?: GenuiMaterialsMap;
 }

@@ -1,2 +1,1 @@
-export * from './materials';
-export * from './components';
+export { materials, type IMaterials } from './materials';
