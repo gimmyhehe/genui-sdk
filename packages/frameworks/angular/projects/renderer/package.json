@@ -35,8 +35,7 @@
     "postcss-selector-parser": "^7.1.0"
   },
   "dependencies": {
-    "tslib": "^2.3.0",
-    "@opentiny/genui-sdk-core": "workspace:*"
+    "tslib": "^2.3.0"
   },
   "sideEffects": false
 }
