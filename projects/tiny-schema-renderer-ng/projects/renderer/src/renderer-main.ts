@@ -81,7 +81,8 @@ export class RendererMain implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.invokePageOnUnmounted();
+    // Angular 不会等待 Promise 完成，异步 onUnmounted 回调可能无法在销毁前执行完毕
+    void this.invokePageOnUnmounted();
   }
 
   /**
@@ -177,7 +178,6 @@ export class RendererMain implements OnDestroy {
       newSchema.lifeCycles,
       () => this.contextService.getContext(),
     );
-    this.pageOnUnmounted = onUnmountedFn;
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     if (this.isStaleSchemaVersion(version)) {
@@ -198,6 +198,7 @@ export class RendererMain implements OnDestroy {
       if (this.isStaleSchemaVersion(version)) {
         return;
       }
+      this.pageOnUnmounted = onUnmountedFn;
       this.ngZone.run(() => this.cdr.detectChanges());
     } catch (error) {
       console.error('RendererMain onMounted error:', error);

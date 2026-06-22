@@ -123,7 +123,7 @@ export class GenuiRenderer implements OnInit {
       isCompleted = this.isJsonComplete ?? true;
     }
     if (!isCompleted && json && 'lifeCycles' in json) {
-      const { lifeCycles, ...rest } = json;
+      const { lifeCycles: _lifeCycles, ...rest } = json;
       json = rest;
     }
     if (this.deltaPatcher) {

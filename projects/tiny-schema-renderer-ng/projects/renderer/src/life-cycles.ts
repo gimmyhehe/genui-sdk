@@ -1,8 +1,14 @@
 import { parseData } from './parser/schema-parser';
 
+export interface JSFunctionDescriptor {
+  type: 'JSFunction';
+  value: string;
+  params?: string[];
+}
+
 export interface LifeCycles {
-  onMounted?: unknown;
-  onUnmounted?: unknown;
+  onMounted?: JSFunctionDescriptor;
+  onUnmounted?: JSFunctionDescriptor;
 }
 
 /**
@@ -20,25 +26,29 @@ const normalizeLifeCycles = (lifeCycles: unknown): LifeCycles => {
 
 /**
  * 将生命周期配置解析为可执行的函数。
+ * 在回调执行时重新解析，确保使用最新的渲染上下文。
  *
  * @param source - 生命周期函数描述（通常为 JSFunction）
  * @param getContext - 获取当前渲染上下文的函数
  * @returns 解析成功时返回可执行函数，否则返回 null
  */
 const parseLifeCycleFn = (
-  source: unknown,
+  source: JSFunctionDescriptor | undefined,
   getContext: () => Record<string, unknown>,
 ): (() => void | Promise<void>) | null => {
   if (source == null) {
     return null;
   }
-  try {
-    const parsed = parseData(source, {}, getContext());
-    return typeof parsed === 'function' ? parsed : null;
-  } catch (error) {
-    console.error('LifeCycle parse error:', error);
-    return null;
-  }
+  return () => {
+    try {
+      const parsed = parseData(source, {}, getContext());
+      if (typeof parsed === 'function') {
+        return parsed();
+      }
+    } catch (error) {
+      console.error('LifeCycle parse error:', error);
+    }
+  };
 };
 
 /**
