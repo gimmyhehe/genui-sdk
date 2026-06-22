@@ -1,31 +1,28 @@
 import zhCN from './zh.json';
 import enUS from './en.json';
 import { useI18n } from '@opentiny/genui-sdk-vue';
+import { isSupportedLocale, Locale } from './locale';
 
-export const STORAGE_KEY = 'GENUI_SDK_VUE_PLAYGROUND_CONFIG';
+const LOCALE_STORAGE_KEY = 'GENUI_SDK_VUE_PLAYGROUND_LOCALE';
 
 const globalI18n = useI18n();
 
 globalI18n.mergeMessages({
-  zh_CN: zhCN,
-  en_US: enUS,
+  [Locale.ZhCN]: zhCN,
+  [Locale.EnUS]: enUS,
 });
 
-try {
-  const { locale: saved } = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  if (saved === 'zh_CN' || saved === 'en_US') {
-    globalI18n.setLocale(saved);
-  }
-} catch {}
+const savedLocale = localStorage.getItem(LOCALE_STORAGE_KEY)?.trim();
+if (savedLocale && isSupportedLocale(savedLocale)) {
+  globalI18n.setLocale(savedLocale);
+}
 
 const { setLocale: setLocaleInternal, t, locale, mergeMessages, messages } = globalI18n;
 
 function setLocale(lang: string): void {
-  setLocaleInternal(lang);
-  try {
-    const config = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...config, locale: lang.trim() }));
-  } catch {}
+  const trimLang = lang.trim();
+  setLocaleInternal(trimLang);
+  localStorage.setItem(LOCALE_STORAGE_KEY, trimLang);
 }
 
-export { t, locale, setLocale, mergeMessages, messages, useI18n };
+export { t, locale, setLocale, mergeMessages, messages, useI18n, Locale };

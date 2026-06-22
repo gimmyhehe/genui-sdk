@@ -31,7 +31,7 @@ import {
   movePartialSchemaJsonToLastMessage,
 } from './continue-writing';
 import useIcon from './use-icon';
-import { locale, t, STORAGE_KEY } from './i18n';
+import { locale, t } from './i18n';
 
 const { topRenderer, addIcons } = useIcon();
 const TopIconsRenderer = topRenderer();
@@ -59,6 +59,7 @@ if (location.search.includes('framework=angular')) {
   framework = 'Angular';
 }
 
+const STORAGE_KEY = 'GENUI_SDK_VUE_PLAYGROUND_CONFIG';
 const {
   llmConfig: cacheLLmConfig,
   theme: cacheTheme,
