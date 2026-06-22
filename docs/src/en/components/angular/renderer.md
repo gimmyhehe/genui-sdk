@@ -1,14 +1,14 @@
-# GenuiRenderer 组件
+# GenuiRenderer Component
 
-`GenuiRenderer` 是 GenUI SDK 的核心渲染组件（Renderer），用于将大模型返回的结构化 JSON Schema 渲染为可交互的 UI 界面。
+`GenuiRenderer` is the core rendering component (Renderer) of GenUI SDK. It renders structured JSON Schema returned by large language models into interactive UI.
 
 ## Input
 
 ### content
 
-- **类型**: `string | object`
-- **必填**: 是
-- **说明**: Schema 内容，可以是字符串或对象。当传入字符串时，组件会尝试解析"部分 JSON"并自动补全，支持流式更新。
+- **Type**: `string | object`
+- **Required**: Yes
+- **Description**: Schema content as a string or object. When a string is passed, the component attempts to parse "partial JSON" and auto-complete it, supporting streaming updates.
 
 ```ts
 import { Component } from '@angular/core';
@@ -37,9 +37,9 @@ export class GenuiExample {
 
 ### isJsonComplete
 
-- **类型**: `boolean`
-- **必填**: 否
-- **说明**: 仅当content类型为json对象时生效，标记当前json是否完整，用于辅助缓冲判断是否值完整。
+- **Type**: `boolean`
+- **Required**: No
+- **Description**: Applies only when `content` is a JSON object. Marks whether the current JSON is complete, helping the buffer logic determine whether values are complete.
 
 ```ts
 import { Component } from '@angular/core';
@@ -70,9 +70,9 @@ export class GenuiExample {
 
 ### generating
 
-- **类型**: `boolean`
-- **必填**: 否
-- **说明**: 标记当前对话是否正在生成中。用于控制 UI 的加载状态。
+- **Type**: `boolean`
+- **Required**: No
+- **Description**: Indicates whether the current conversation is still generating. Used to control UI loading state.
 
 ```ts
 
@@ -103,9 +103,9 @@ export class GenuiExample {
 
 ### customComponents
 
-- **类型**: `Record<string, Type<any>>`
-- **必填**: 否
-- **说明**: 自定义组件映射表，用于扩展可用的组件列表。
+- **Type**: `Record<string, Type<any>>`
+- **Required**: No
+- **Description**: Custom component map for extending the available component list.
 
 ```ts
 import { Component } from '@angular/core';
@@ -132,23 +132,23 @@ export class GenuiExample {
   };
   customComponents = {
     MyCustomComponent: MyCustomComponent,
-    // 。。。
+    // ...
   };
 }
 ```
 
-#### 说明
+#### Notes
 
-- 如果使用非`standalone`组件需要搭配`customComponentsModule`使用.
-- 组件相关描述信息需要调用接口时候传给后台服务，大模型能配套僧成该组件的协议JSON数据
-- ⚠️ 限制：动态渲染技术目前不支持使用`@ContentChild`、`@ContentChildren`查询的组件
+- Non-`standalone` components must be used together with `customComponentsModule`.
+- Component metadata must be sent to the backend service when calling the API so the model can generate matching protocol JSON for the component.
+- ⚠️ Limitation: Dynamic rendering does not currently support components queried via `@ContentChild` or `@ContentChildren`.
 
 
 ### customComponentsModule
 
-- **类型**: `Record<string, Type<any>>`
-- **必填**: 否
-- **说明**: 自定义组件归属模块映射表，用于扩展非`standalone`组件需要配置模块映射列表。
+- **Type**: `Record<string, Type<any>>`
+- **Required**: No
+- **Description**: Module map for custom components. Required when using non-`standalone` components.
 
 ```ts
 import { Component } from '@angular/core';
@@ -175,20 +175,20 @@ export class GenuiExample {
   };
   customComponents = {
     MyCustomComponent: MyCustomComponent,
-    // 。。。
+    // ...
   };
   customComponentsModule = {
     MyCustomComponent: MyCustomModule,
-    // 。。。
+    // ...
   }
 }
 ```
 
 ### customDirectives
 
-- **类型**: `Record<string, Type<any>>`
-- **必填**: 否
-- **说明**: 自定义指令归属模块映射表，用于扩展指令列表。
+- **Type**: `Record<string, Type<any>>`
+- **Required**: No
+- **Description**: Directive map for extending the available directive list.
 
 ```ts
 import { Component } from '@angular/core';
@@ -217,18 +217,18 @@ export class GenuiExample {
   };
   customDirectives = {
     MyCustomDirective: MyCustomDirective,
-    // 。。。
+    // ...
   };
 }
 ```
 
-⚠️ 限制说明： 受限于 `ViewContainerRef.createComponent` API，目前只支持 `standalone` 的指令
+⚠️ Limitation: Due to the `ViewContainerRef.createComponent` API, only `standalone` directives are currently supported.
 
 ### customActions
 
-- **类型**: `Record<string, { execute: (params: any, context: any) => void }>`
-- **必填**: 否
-- **说明**: 自定义动作映射表，用于定义可在组件中调用的动作。
+- **Type**: `Record<string, { execute: (params: any, context: any) => void }>`
+- **Required**: No
+- **Description**: Custom action map defining actions that can be invoked from components.
 
 ```ts
 import { Component } from '@angular/core';
@@ -250,7 +250,7 @@ export class GenuiExample {
           text: 'Hello World',
           onClick: {
             type: 'JSFunction',
-            value: 'function() { this.callAction(\'showNotification\', { message: \'用户点击了 HelloWorld\'})}'
+            value: 'function() { this.callAction(\'showNotification\', { message: \'User clicked HelloWorld\'})}'
           }
         },
       },
@@ -264,7 +264,7 @@ export class GenuiExample {
     },
     showNotification: {
       execute: (params, context) => {
-        console.log('通知:', params.message);
+        console.log('Notification:', params.message);
       },
     },
   };
@@ -273,13 +273,13 @@ export class GenuiExample {
 ```
 
 
-查看 [Renderer 自定义 Actions](../../examples/angular/renderer/custom-actions) 了解详细用法
+See [Renderer - Custom Actions](../../examples/angular/renderer/custom-actions) for detailed usage.
 
 ### requiredCompleteFieldSelectors
 
-- **类型**: `string[]`
-- **必填**: 否
-- **说明**: 指定哪些字段路径需要完整后才能更新。用于控制流式更新时的缓冲策略。
+- **Type**: `string[]`
+- **Required**: No
+- **Description**: Specifies which field paths must be complete before updates are applied. Used to control buffering strategy during streaming updates.
 
 ```ts
 import { Component } from '@angular/core';
@@ -301,7 +301,7 @@ export class GenuiExample {
           text: 'Hello World',
           onClick: {
             type: 'JSFunction',
-            value: 'function() { this.callAction(\'showNotification\', { message: \'用户点击了 HelloWorld\'})}'
+            value: 'function() { this.callAction(\'showNotification\', { message: \'User clicked HelloWorld\'})}'
           }
         },
       },
@@ -314,13 +314,13 @@ export class GenuiExample {
 }
 ```
 
-查看 [Renderer 配置缓冲字段](../../examples/angular/renderer/required-complete-field-selectors) 了解详细用法
+See [Renderer - Buffer Field Configuration](../../examples/angular/renderer/required-complete-field-selectors) for detailed usage.
 
 ### state
 
-- **类型**: `Record<string, any>`
-- **必填**: 否
-- **说明**: 传递给渲染器的全局状态，可以在组件中通过上下文访问。
+- **Type**: `Record<string, any>`
+- **Required**: No
+- **Description**: Global state passed to the renderer, accessible in components via context.
 
 ```ts
 import { Component } from '@angular/core';
@@ -352,7 +352,7 @@ export class GenuiExample {
     ],
   };
 
-  // 从某种历史记录恢复
+  // Restore from some history record
   state = this.getFromCache();
   getFromCache() {
     return {
@@ -364,14 +364,14 @@ export class GenuiExample {
 
 ```
 
-查看 [Renderer 传递合并 State](../../examples/angular/renderer/state) 了解详细用法
+See [Renderer - Passing and Merging State](../../examples/angular/renderer/state) for detailed usage.
 
 ## Template
 
 ### header
 
-- **上下文**: `{ schema: CardSchema, isError: boolean, isFinished: boolean }`
-- **说明**: 自定义渲染器头部内容
+- **Context**: `{ schema: CardSchema, isError: boolean, isFinished: boolean }`
+- **Description**: Custom renderer header content
 
 ```ts
 import { Component } from '@angular/core';
@@ -386,9 +386,9 @@ import { GenuiRenderer } from '@opentiny/genui-sdk-angular';
   template: `
     <genui-renderer [content]="schemaContent">
       <ng-template #header let-schema="schema" let-isError="isError" let-isFinished="isFinished">
-        <span *ngIf="!isFinished"> 生成中 …… </span>
-        <span *ngIf="isError"> 出错了！</span>
-        <span>卡片标题：{{ schema.componentName }}</span>
+        <span *ngIf="!isFinished"> Generating... </span>
+        <span *ngIf="isError"> Error! </span>
+        <span>Card title: {{ schema.componentName }}</span>
       </ng-template>
     </genui-renderer>
   `,
@@ -410,8 +410,8 @@ export class GenuiExample {
 
 ### footer
 
-- **参数**: `{ schema: CardSchema, isError: boolean, isFinished: boolean }`
-- **说明**: 自定义渲染器底部内容
+- **Parameters**: `{ schema: CardSchema, isError: boolean, isFinished: boolean }`
+- **Description**: Custom renderer footer content
 
 ```ts
 import { Component } from '@angular/core';
@@ -426,7 +426,7 @@ import { GenuiRenderer } from '@opentiny/genui-sdk-angular';
   template: `
     <genui-renderer [content]="schemaContent">
       <ng-template #footer let-schema="schema">
-        <button (click)="handlePrint(schema)">打印schema</button>
+        <button (click)="handlePrint(schema)">Print schema</button>
       </ng-template>
     </genui-renderer>
   `,
@@ -448,5 +448,4 @@ export class GenuiExample {
   }
 }
 ```
-
 

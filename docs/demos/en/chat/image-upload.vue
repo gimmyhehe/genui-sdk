@@ -14,7 +14,7 @@ const messages = [
     role: 'user',
     content: [
       { type: 'image', filename: 'circle.png', image: 'data:image/png;base64,XXXXXXXXXXX' },
-      { type: 'text', text: '分析一下这张图片' },
+      { type: 'text', text: 'Analyze this image' },
     ],
     messages: [
       {
@@ -28,7 +28,7 @@ const messages = [
           {
             'id': '7ctwci3stwj',
             'type': 'text',
-            'content': '帮我分析一下这张图片',
+            'content': 'Please analyze this image for me',
           },
         ],
         'attachments': [
@@ -46,7 +46,7 @@ const messages = [
   },
   {
     role: 'assistant',
-    content: '这张图片是一个红色的圆形',
+    content: 'This image shows a red circle',
   },
 ];
 

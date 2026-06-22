@@ -1,12 +1,12 @@
-# GenUI SDK Server 使用文档
+# GenUI SDK Server Usage
 
-GenUI SDK 对话服务，提供 OpenAI 兼容的 HTTP 接口，支持流式响应和多种 AI 服务提供商。
+The GenUI SDK chat server provides OpenAI-compatible HTTP endpoints with streaming responses and support for multiple AI providers.
 
-## 启动服务
+## Start the server
 
-### 安装
+### Installation
 
-全局安装
+Global installation:
 
 :::: tabs
 == npm
@@ -23,7 +23,7 @@ yarn global add @opentiny/genui-sdk-server
 ```
 ::::
 
-安装到项目
+Project installation:
 
 :::: tabs
 == npm
@@ -40,9 +40,9 @@ yarn add @opentiny/genui-sdk-server
 ```
 ::::
 
-### 环境配置
+### Environment configuration
 
-创建 `.env` 文件：
+Create a `.env` file:
 
 ```env
 BASE_URL=https://api.openai.com/v1
@@ -50,25 +50,25 @@ API_KEY=
 PORT=3100
 ```
 
-### 启动方式
+### Startup options
 
-#### 方式一：使用 CLI 命令
+#### Option 1: CLI command
 
 ```bash
-# 使用默认配置
+# Use default configuration
 npx genui-sdk-server
 
-# 指定环境变量文件 简写为-e
+# Specify env file (shorthand: -e)
 npx genui-sdk-server --envFile .env.production
 
-# 指定端口 简写为-p
+# Specify port (shorthand: -p)
 npx genui-sdk-server --port 3000
 
-# 通过设置环境变量启动(git bash)
+# Start with environment variables (git bash)
 export API_KEY= BASE_URL=https://your-llm-server.com/api && npx genui-sdk-server
 ```
 
-#### 方式二：编程方式
+#### Option 2: Programmatic startup
 
 ```typescript
 import { startServer } from '@opentiny/genui-sdk-server';
@@ -77,11 +77,11 @@ startServer({
   port: 3100,
   baseURL: 'https://api.openai.com/v1',
   apiKey: '',
-  maxAttempts: 10, // 端口冲突时最大尝试次数
+  maxAttempts: 10, // Max retries when port is in use
 });
 ```
 
-#### 方式三：集成到现有 Express 应用
+#### Option 3: Integrate into an existing Express app
 
 ```typescript
 import express from 'express';
@@ -100,13 +100,13 @@ equipChatCompletions(app, {
 app.listen(3000);
 ```
 
-## 请求发起端使用
+## Client usage
 
-### 聊天补全接口
+### Chat completions endpoint
 
-**端点**: `POST /chat/completions`
+**Endpoint**: `POST /chat/completions`
 
-**请求格式**（OpenAI 兼容）：
+**Request format** (OpenAI-compatible):
 
 ```jsonc
 {
@@ -124,12 +124,12 @@ app.listen(3000);
   "stream": true,
   "temperature": 0.7,
   "metadata": {
-    "tinygenui": "{}" // 详情参考 tinygenui 配置
+    "tinygenui": "{}" // See tinygenui configuration below
   }
 }
 ```
 
-**响应格式**（Server-Sent Events）：
+**Response format** (Server-Sent Events):
 
 ```text
 data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1694268190,"model":"gpt-4","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
@@ -139,46 +139,46 @@ data: {"id":"chatcmpl-123","object":"chat.completion.chunk","created":1694268190
 data: [DONE]
 ```
 
-### tinygenui 配置
+### tinygenui configuration
 
-通过 `metadata.tinygenui` 字段传递 GenUI 配置以增强大模型生成效果（JSON 字符串）：
+Pass GenUI configuration via `metadata.tinygenui` to improve LLM generation (JSON string):
 
 ```json
 {
-  "framework": "Vue", // 或 "Angular"
+  "framework": "Vue", // or "Angular"
   "strategy": "append", // "append" | "prepend" | "override"
-  "customComponents": [], // 自定义组件 schema 数组
-  "customExamples": [], // 自定义组件使用示例
-  "customSnippets": [], // 自定义组件片段 schema 数组
-  "customActions": [] // 自定义动作定义数组
+  "customComponents": [], // Custom component schema array
+  "customExamples": [], // Custom component usage examples
+  "customSnippets": [], // Custom component snippet schema array
+  "customActions": [] // Custom action definition array
 }
 ```
 
-- `framework`: 指定前端框架（Vue 或 Angular），用于生成对应的渲染器配置
-- `strategy`: 提示词合并策略
-  - `append`: 追加到现有 system message（默认）
-  - `prepend`: 前置到现有 system message
-  - `override`: 覆盖现有 system message
-- `customComponents`: 自定义组件 schema 数组，用于扩展可用的组件列表
-- `customExamples`: 自定义组件使用示例，用于指导 LLM 生成正确的组件用法
-- `customSnippets`: 自定义组件片段 schema 数组，用于提供常用的组件组合模式
-- `customActions`: 自定义动作定义数组，用于定义可在组件中调用的动作（如提交表单、打开新页面等）
+- `framework`: Target frontend framework (Vue or Angular) for renderer configuration
+- `strategy`: Prompt merge strategy
+  - `append`: Append to the existing system message (default)
+  - `prepend`: Prepend to the existing system message
+  - `override`: Replace the existing system message
+- `customComponents`: Custom component schema array to extend the available component list
+- `customExamples`: Custom component usage examples to guide the LLM in generating correct component usage
+- `customSnippets`: Custom component snippet schema array for common component composition patterns
+- `customActions`: Custom action definition array for actions callable from components (e.g. submit form, open a new page)
 
-#### 自定义组件配置示例
+#### Custom component configuration examples
 
-**customComponents** 配置示例：
+**customComponents** example:
 
 ```js
 const customComponents = [
   {
-    name: '选择用户组件',
-    description: '选择用户组件，用于选择用户，支持模糊搜索',
+    name: 'User Selector',
+    description: 'Select a user with fuzzy search by name',
     component: 'TinyUser',
     schema: {
       properties: [
         {
           property: 'name',
-          description: '搜索用户名称，支持模糊搜索',
+          description: 'User name to search; supports fuzzy search',
           type: 'string',
           required: true,
         },
@@ -188,24 +188,24 @@ const customComponents = [
 ];
 ```
 
-**customExamples** 配置示例：
+**customExamples** example:
 
 ```js
 const customExamples = [
   {
-    name: '选择用户示例',
+    name: 'User selection example',
     schema: {
       componentName: 'Page',
       children: [
         {
           componentName: 'h3',
           props: {},
-          children: '输入用户名搜索工号并选择用户',
+          children: 'Enter a username to search and select a user',
         },
         {
           componentName: 'TinyUser',
           props: {
-            name: '张三',
+            name: 'Zhang San',
           },
         },
       ],
@@ -214,10 +214,10 @@ const customExamples = [
 ];
 ```
 
-**customSnippets** 配置示例：
+**customSnippets** example:
 
 ```js
-// 表单组合示例
+// Form composition example
 const customSnippets = [
   {
     componentName: 'TinyForm',
@@ -229,7 +229,7 @@ const customSnippets = [
       {
         componentName: 'TinyFormItem',
         props: {
-          label: '姓名',
+          label: 'Name',
           prop: 'name',
           required: true,
         },
@@ -237,7 +237,7 @@ const customSnippets = [
           {
             componentName: 'TinyInput',
             props: {
-              placeholder: '请输入姓名',
+              placeholder: 'Enter your name',
             },
           },
         ],
@@ -245,14 +245,14 @@ const customSnippets = [
       {
         componentName: 'TinyFormItem',
         props: {
-          label: '邮箱',
+          label: 'Email',
           prop: 'email',
         },
         children: [
           {
             componentName: 'TinyInput',
             props: {
-              placeholder: '请输入邮箱',
+              placeholder: 'Enter your email',
             },
           },
         ],
@@ -267,7 +267,7 @@ const customSnippets = [
             componentName: 'TinyButton',
             props: {
               type: 'primary',
-              children: '提交',
+              children: 'Submit',
             },
           },
         ],
@@ -277,23 +277,23 @@ const customSnippets = [
 ];
 ```
 
-**customActions** 配置示例：
+**customActions** example:
 
 ```js
 const customActions = [
   {
     name: 'openPage',
-    description: '打开新页面，用于页面跳转',
+    description: 'Open a new page for navigation',
     parameters: {
       type: 'object',
       properties: {
         url: {
           type: 'string',
-          description: '目标页面URL或路径',
+          description: 'Target page URL or path',
         },
         target: {
           type: 'string',
-          description: '打开方式，可选值：_self（当前窗口）、_blank（新窗口）',
+          description: 'Open mode: _self (current window) or _blank (new window)',
         },
       },
       required: ['url', 'target'],
@@ -302,7 +302,7 @@ const customActions = [
 ];
 ```
 
-**完整配置示例**：
+**Full configuration example**:
 
 ```js
 const requestParams = {

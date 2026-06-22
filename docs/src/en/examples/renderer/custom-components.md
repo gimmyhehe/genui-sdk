@@ -1,12 +1,12 @@
-# Renderer 组件 - 自定义 Components
+# Renderer - Custom Components
 
-自定义 Components 允许您注册自己的组件，配合相关提示词，LLM 可以在 schemaJson 输出对应组件后交由 Renderer（`GenuiRenderer`）渲染。
+Custom components let you register your own components. With the right prompts, the LLM can output matching `componentName` values in schema JSON for `GenuiRenderer` to render.
 
-## 给组件传递自定义 Components
+## Passing customComponents to the Renderer
 
-通过 `customComponents` 向 `GenuiRenderer` 组件传递自定义组件映射表。
+Pass a component map via `customComponents` on `GenuiRenderer`.
 
-### 示例：注册自定义组件
+### Example: Register a Custom Component
 
 ```vue {8,13-15}
 <template>
@@ -27,9 +27,9 @@ const customComponents = {
 </script>
 ```
 
-### 创建自定义组件
+### Create the Custom Component
 
-自定义组件需要是一个标准的 Vue 组件：
+Use a standard Vue component:
 
 ```vue
 <!-- user-profile.vue -->
@@ -109,9 +109,9 @@ defineProps<{
 </style>
 ```
 
-### 在 Schema 中使用自定义组件
+### Use Custom Components in Schema
 
-AI 生成的 Schema 可以直接使用你注册的自定义组件：
+Generated schema can reference registered components:
 
 ```json
 {
@@ -124,6 +124,6 @@ AI 生成的 Schema 可以直接使用你注册的自定义组件：
 }
 ```
 
-#### 完整示例：
+#### Full Example
 
-<demo vue="../../../demos/renderer/custom-components.vue" :vueFiles="['../../../demos/renderer/custom-components.vue', '../../../demos/renderer/components/user-profile.vue']" />
+<demo vue="../../../../demos/renderer/custom-components.vue" :vueFiles="['../../../../demos/renderer/custom-components.vue', '../../../../demos/renderer/components/user-profile.vue']" />

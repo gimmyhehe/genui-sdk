@@ -1,24 +1,24 @@
-# Chat 组件 - 自定义 Fetch
+# Chat Component - Custom Fetch
 
-`GenuiChat` 组件支持自定义 fetch 函数，允许你完全自定义 HTTP 请求的实现方式。这对于需要集成第三方 SDK、添加认证、处理工具调用、实现自定义流式响应等场景非常有用。
+The `GenuiChat` component supports a custom fetch function, allowing you to fully customize HTTP request behavior. This is useful for integrating third-party SDKs, adding authentication, handling tool calls, implementing custom streaming responses, and more.
 
-## 参数说明
+## Parameters
 
-- `url`: 请求地址
-- `options.method`: HTTP 方法（通常为 'POST'）
-- `options.headers`: 请求头对象
-- `options.body`: 请求体（JSON 字符串），包含 `messages`、`model`、`temperature`、`metadata` (带有处理好的`customComponents`、`customSnippets`、`customExamples`、`customActions`信息)
-- `options.signal`: AbortSignal，用于取消请求
+- `url`: Request URL
+- `options.method`: HTTP method (usually `'POST'`)
+- `options.headers`: Request headers object
+- `options.body`: Request body (JSON string) containing `messages`, `model`, `temperature`, and `metadata` (with processed `customComponents`, `customSnippets`, `customExamples`, and `customActions` information)
+- `options.signal`: AbortSignal used to cancel the request
 
-## 返回值
+## Return Value
 
-必须返回 `Response` 对象或 `Promise<Response>`。响应需要符合 OpenAI 兼容的流式格式（SSE），或者返回标准的 JSON 响应。
+Must return a `Response` object or `Promise<Response>`. The response should follow the OpenAI-compatible streaming format (SSE), or return a standard JSON response.
 
-## 使用场景
+## Use Cases
 
-### 添加认证头
+### Adding Authentication Headers
 
-通过 `customFetch` prop 传递自定义的 fetch 函数：
+Pass a custom fetch function via the `customFetch` prop:
 
 ```vue
 <template>
@@ -32,7 +32,7 @@ import type { CustomFetch } from '@opentiny/genui-sdk-vue';
 const url = 'https://your-chat-backend/api';
 
 const customFetch: CustomFetch = async (url, options) => {
-  // 添加认证头
+  // Add authentication header
   const headers = {
     ...options.headers,
     'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -48,19 +48,19 @@ const customFetch: CustomFetch = async (url, options) => {
 </script>
 ```
 
-### 处理工具调用和多轮对话
+### Handling Tool Calls and Multi-turn Conversations
 
-使用 `customFetch` 可以实现工具调用（Function Calling）和多轮对话功能。下面通过一个完整的示例来演示如何实现。
+Use `customFetch` to implement tool calling (Function Calling) and multi-turn conversations. The following complete example demonstrates how to do this.
 
-#### 1. 定义工具（Tools）
+#### 1. Define Tools
 
-首先，我们需要定义可用的工具。每个工具包含两个部分：`definition`（工具定义，符合 OpenAI 工具格式）和 `execute`（执行函数）。
+First, define the available tools. Each tool has two parts: `definition` (tool definition in OpenAI tool format) and `execute` (execution function).
 
 ```typescript
 import OpenAI from 'openai';
 
 /**
- * 计算两个数字的和的工具
+ * Tool to add two numbers
  */
 export const addTwoNumbersTool = {
   definition: {
@@ -68,17 +68,17 @@ export const addTwoNumbersTool = {
     function: {
       name: 'add_two_numbers',
       description:
-        '计算两个数字的和。这是一个数学计算工具，用于将两个数字相加。调用时必须提供两个数字参数 a 和 b。示例：如果 a=5, b=3，则返回 8。',
+        'Adds two numbers. This is a math tool for summing two numbers. You must provide parameters a and b. Example: if a=5, b=3, returns 8.',
       parameters: {
         type: 'object',
         properties: {
           a: {
             type: 'number',
-            description: '第一个要相加的数字，必填，必须是数字类型。例如：5',
+            description: 'First number to add. Required. Must be a number. Example: 5',
           },
           b: {
             type: 'number',
-            description: '第二个要相加的数字，必填，必须是数字类型。例如：3',
+            description: 'Second number to add. Required. Must be a number. Example: 3',
           },
         },
         required: ['a', 'b'],
@@ -91,7 +91,7 @@ export const addTwoNumbersTool = {
 };
 
 /**
- * 所有可用的工具列表
+ * List of all available tools
  */
 export const availableTools: Record<
   string,
@@ -104,9 +104,9 @@ export const availableTools: Record<
 };
 ```
 
-#### 2. 实现 CustomFetch 处理工具调用
+#### 2. Implement CustomFetch for Tool Calls
 
-接下来，我们实现 `customFetch` 函数来处理工具调用和多轮对话：
+Next, implement the `customFetch` function to handle tool calls and multi-turn conversations:
 
 ```typescript
 import OpenAI from 'openai';
@@ -114,7 +114,7 @@ import type { CustomFetch } from '@opentiny/genui-sdk-vue';
 import { availableTools } from './tools';
 
 /**
- * OpenAI SDK 配置
+ * OpenAI SDK configuration
  */
 export interface OpenAIConfig {
   apiKey: string;
@@ -123,7 +123,7 @@ export interface OpenAIConfig {
 }
 
 /**
- * 执行工具调用
+ * Execute a tool call
  */
 async function executeToolCall(toolName: string, args: any): Promise<string> {
   const tool = availableTools[toolName];
@@ -142,8 +142,8 @@ async function executeToolCall(toolName: string, args: any): Promise<string> {
 }
 
 /**
- * 累积工具调用数据
- * 将流式返回的工具调用增量数据累积成完整的工具调用对象
+ * Accumulate tool call data
+ * Accumulates incremental tool call deltas from streaming into complete tool call objects
  */
 function accumulateToolCalls(toolCalls: any[], toolCallDeltas: any[]): void {
   for (const delta of toolCallDeltas) {
@@ -160,7 +160,7 @@ function accumulateToolCalls(toolCalls: any[], toolCallDeltas: any[]): void {
 }
 
 /**
- * 执行单个工具调用并返回结果
+ * Execute a single tool call and return the result
  */
 async function executeSingleToolCall(toolCall: any, currentMessages: any[]): Promise<any> {
   const createResult = (result: string) => {
@@ -181,10 +181,10 @@ async function executeSingleToolCall(toolCall: any, currentMessages: any[]): Pro
 }
 
 /**
- * 使用 OpenAI SDK 创建 customRequest 函数（处理工具调用和多轮对话）
+ * Create a customRequest function using the OpenAI SDK (handles tool calls and multi-turn conversations)
  *
- * @param config OpenAI 配置
- * @returns CustomFetch 函数
+ * @param config OpenAI configuration
+ * @returns CustomFetch function
  */
 export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
   return async (
@@ -196,7 +196,7 @@ export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
       signal?: AbortSignal;
     },
   ): Promise<Response> => {
-    // 解析请求体
+    // Parse request body
     const requestBody = JSON.parse(options.body);
     const { messages, model, temperature } = requestBody;
 
@@ -208,9 +208,9 @@ export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
       });
 
       const tools = Object.values(availableTools).map((tool) => tool.definition);
-      const maxSteps = 20; // 最大工具调用步骤数
+      const maxSteps = 20; // Maximum number of tool call steps
 
-      // 将流转换为 SSE 格式的 Response
+      // Convert stream to SSE-format Response
       const encoder = new TextEncoder();
       const readableStream = new ReadableStream<Uint8Array>({
         async start(controller) {
@@ -219,7 +219,7 @@ export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
             let stepCount = 0;
 
             while (stepCount < maxSteps) {
-              // 创建流式请求
+              // Create streaming request
               const stream = await openai.chat.completions.create(
                 {
                   model,
@@ -237,25 +237,25 @@ export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
               let toolCalls: any[] = [];
               let hasToolCalls = false;
 
-              // 处理流式响应
+              // Process streaming response
               for await (const chunk of stream) {
                 const choice = chunk.choices?.[0];
                 if (!choice) continue;
 
                 const delta = choice.delta;
 
-                // 累积工具调用数据
+                // Accumulate tool call data
                 if (delta.tool_calls) {
                   hasToolCalls = true;
                   accumulateToolCalls(toolCalls, delta.tool_calls);
                 }
 
-                // 透传原始 chunk
+                // Pass through original chunk
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
 
-                // 处理完成原因
+                // Handle finish reason
                 if (choice.finish_reason === 'tool_calls' && toolCalls.length > 0) {
-                  // 执行工具调用
+                  // Execute tool calls
                   currentMessages.push({ role: 'assistant', content: null, tool_calls: toolCalls });
                   const toolResults = await Promise.all(
                     toolCalls.map((toolCall, i) =>
@@ -263,7 +263,7 @@ export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
                     ),
                   );
 
-                  // 发送工具调用结果
+                  // Send tool call results
                   if (toolResults.length > 0) {
                     const toolResultChunk = {
                       id: chunk.id,
@@ -280,18 +280,18 @@ export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
                 }
 
                 if (choice.finish_reason) {
-                  // 正常完成，退出外层循环
+                  // Normal completion, exit outer loop
                   break;
                 }
               }
 
-              // 如果没有工具调用，退出循环
+              // Exit loop if there are no tool calls
               if (!hasToolCalls) {
                 break;
               }
             }
 
-            // 发送结束标记
+            // Send end marker
             controller.enqueue(encoder.encode('data: [DONE]\n\n'));
             controller.close();
           } catch (error) {
@@ -321,7 +321,7 @@ export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
         error: error.message,
       });
 
-      // 返回错误响应
+      // Return error response
       return new Response(
         JSON.stringify({
           error: {
@@ -342,7 +342,7 @@ export function createOpenAICustomFetch(config: OpenAIConfig): CustomFetch {
 }
 
 /**
- * 默认的 customFetch 实现（使用环境变量配置）
+ * Default customFetch implementation (configured via environment variables)
  */
 export const defaultCustomFetch = createOpenAICustomFetch({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -350,19 +350,19 @@ export const defaultCustomFetch = createOpenAICustomFetch({
 });
 ```
 
-关键实现点：
+Key implementation points:
 
-1. **多轮对话循环**：使用 `while` 循环处理多轮工具调用，最多执行 `maxSteps` 次
-2. **消息历史管理**：维护 `currentMessages` 数组，包含用户消息、助手消息和工具调用结果
-3. **工具调用处理**：
-   - 当 `finish_reason` 为 `tool_calls` 时，执行所有工具调用
-   - 将工具调用结果添加到`currentMessages`中，继续下一轮对话
-4. **流式响应转换**：将 OpenAI SDK 的流式响应转换为 SSE 格式，否则组件无法正常处理，
-5. **工具调用结果发送**：通过 `tool_calls_result` delta 字段发送工具执行结果，让组件能够正确更新工具调用状态并显示调用结果。
+1. **Multi-turn conversation loop**: Use a `while` loop to handle multiple rounds of tool calls, up to `maxSteps` times
+2. **Message history management**: Maintain a `currentMessages` array containing user messages, assistant messages, and tool call results
+3. **Tool call handling**:
+   - When `finish_reason` is `tool_calls`, execute all tool calls
+   - Add tool call results to `currentMessages` and continue the next round of conversation
+4. **Streaming response conversion**: Convert the OpenAI SDK streaming response to SSE format; otherwise the component cannot process it correctly
+5. **Tool call result delivery**: Send tool execution results via the `tool_calls_result` delta field so the component can update tool call status and display results correctly
 
-#### 3. 在应用中使用
+#### 3. Use in the Application
 
-最后，在 Vue 组件中使用自定义的 `customFetch`：
+Finally, use the custom `customFetch` in a Vue component:
 
 ```vue
 <template>
@@ -391,8 +391,8 @@ const chatConfig = {
 </style>
 ```
 
-## 体验工具调用
+## Try Tool Calling
 
-完成以上步骤后，就可以体验工具调用了，能够在对话中查看工具调用参数和结果：
+After completing the steps above, you can try tool calling and view tool call arguments and results in the conversation:
 
-![自定义fetch](../../public/custom-fetch.png)
+![Custom fetch](../../../public/custom-fetch.png)
