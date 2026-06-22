@@ -7,8 +7,8 @@ export type JSFunction = { type: 'JSFunction'; value: string; params?: string[] 
 export type Methods = Record<string, JSFunction>;
 
 export type LifeCycles = {
-  onMounted?: unknown;
-  onUnmounted?: unknown;
+  onMounted?: JSFunction;
+  onUnmounted?: JSFunction;
 };
 
 export interface Node {
@@ -86,12 +86,12 @@ const propValueSchema: z.ZodType<any> = z.lazy(() =>
 
 export const lifeCyclesSchema = z
   .object({
-    onMounted: propValueSchema
+    onMounted: jsFunctionSchema
       .optional()
-      .describe('页面挂载钩子：schema 渲染完成后执行，值通常为 JSFunction'),
-    onUnmounted: propValueSchema
+      .describe('页面挂载钩子：schema 渲染完成后执行'),
+    onUnmounted: jsFunctionSchema
       .optional()
-      .describe('页面卸载钩子：schema 变更或页面销毁前执行，值通常为 JSFunction'),
+      .describe('页面卸载钩子：schema 变更或页面销毁前执行'),
   })
   .describe('页面生命周期配置，支持 onMounted、onUnmounted 两种钩子') as z.ZodType<LifeCycles>;
 
