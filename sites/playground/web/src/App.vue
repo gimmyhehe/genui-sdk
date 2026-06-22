@@ -171,7 +171,6 @@ watch(
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
-        ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'),
         theme: theme.value,
         llmConfig,
         chatConfig,
