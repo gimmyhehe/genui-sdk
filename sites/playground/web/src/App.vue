@@ -14,7 +14,7 @@ import {
   h,
   shallowRef,
 } from 'vue';
-import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
@@ -372,7 +372,7 @@ onUnmounted(() => {
         <GenuiConfigProvider
           :theme="theme"
           :locale="locale"
-          :materials="{ ...vueMaterials }"
+          :materials="materials"
           :renderer-config="rendererConfig"
           style="height: 100%"
         >
