@@ -160,8 +160,6 @@ export class RendererMain implements OnDestroy {
       () => this.contextService.getContext(),
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
     setPageCss(newSchema.css || '', this.cssScopeId);
     delete newSchema.lifeCycles;
     Object.assign(this.pageSchema, newSchema);
