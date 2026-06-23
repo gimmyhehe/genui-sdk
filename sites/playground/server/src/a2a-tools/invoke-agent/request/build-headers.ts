@@ -1,12 +1,5 @@
 import type { PlaygroundAgentConfig } from '../../types.js';
 
-/**
- * 从 Agent Card 或 metadata 推断认证方式（Bearer / API Key）。
- *
- * @param agent - Playground Agent 配置
- * @param metadata - 工具 execute 传入的可选 metadata
- * @returns 推断出的认证类型，无法识别时返回 `null`
- */
 function inferAuthType(
   agent: PlaygroundAgentConfig,
   metadata?: Record<string, unknown>,
@@ -37,13 +30,6 @@ function inferAuthType(
   return null;
 }
 
-/**
- * 构造 A2A SendMessage 所需的 HTTP 请求头（含可选 Bearer / API Key）。
- *
- * @param agent - Playground Agent 配置
- * @param metadata - 工具 execute 传入的可选 metadata（apiKey / token）
- * @returns 传递给官方 SDK 的 HTTP 头
- */
 export function buildA2aRequestHeaders(
   agent: PlaygroundAgentConfig,
   metadata?: Record<string, unknown>,

@@ -1,14 +1,7 @@
 import net from 'node:net';
 
-/** Playground 是否处于开发模式（开发环境跳过 Agent URL SSRF 校验）。 */
 export const isPlaygroundDevelopment = process.env.NODE_ENV === 'development';
 
-/**
- * 判断 host 是否为本地/内网地址（只做显式阻断，非完整 RFC 覆盖）。
- *
- * @param host - URL hostname
- * @returns 是否为本地或内网地址
- */
 function isPrivateOrLocalHost(host: string): boolean {
   const lower = host.toLowerCase().replace(/\.$/, '');
 
@@ -39,12 +32,6 @@ function isPrivateOrLocalHost(host: string): boolean {
   return false;
 }
 
-/**
- * 校验 Agent URL（Playground 演练场：仅字面量 hostname，不做 DNS 解析）。
- *
- * @param urlStr - 待校验 URL
- * @returns 是否允许访问
- */
 export function isAllowedAgentUrl(urlStr: string): boolean {
   try {
     const u = new URL(urlStr);

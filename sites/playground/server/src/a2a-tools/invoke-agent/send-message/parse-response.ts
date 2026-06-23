@@ -1,11 +1,5 @@
 const UNRESOLVED_RESPONSE_SUMMARY = 'Agent 返回了无法解析为文本的结构化结果';
 
-/**
- * 从 A2A Part 对象中提取可读文本（兼容 0.3 kind 与 1.0 统一 Part）。
- *
- * @param part - A2A Part 对象
- * @returns 提取到的文本，无则返回空字符串
- */
 function extractTextFromPart(part: unknown): string {
   if (!part || typeof part !== 'object') {
     return '';
@@ -26,12 +20,6 @@ function extractTextFromPart(part: unknown): string {
   return '';
 }
 
-/**
- * 从 A2A SendMessage 响应中提取 agent 回复文本（兼容 Task / Message 等多种返回结构）。
- *
- * @param result - SDK sendMessage 返回值
- * @returns 可读文本；无法提取时返回固定摘要
- */
 export function extractA2aResponseText(result: unknown): string {
   if (result == null) {
     return '';

@@ -4,7 +4,6 @@ import { isAllowedAgentUrl, isPlaygroundDevelopment } from '../guard-agent-url/g
 import { buildA2aRequestHeaders } from './request/build-headers.js';
 import { invokeAgentWithOfficialSdk } from './send-message/invoke.js';
 
-/** Agent tool execute 的统一返回结构。 */
 export type AgentInvokeResult =
   | { type: 'text'; text: string }
   | { type: 'a2a-agent-error'; message: string }
@@ -14,15 +13,6 @@ export type AgentInvokeResult =
       message: string;
     };
 
-/**
- * 调用 A2A Agent：解析接口 → 校验 URL → 构造请求头 → 经官方 SDK 发起 SendMessage。
- *
- * @param agent - Playground Agent 配置
- * @param input - 要转交的自然语言任务
- * @param metadata - 可选 metadata（token、apiKey 等）
- * @param abortSignal - 可选取消信号
- * @returns 工具 execute 统一的返回结构
- */
 export async function invokeA2aAgent(
   agent: PlaygroundAgentConfig,
   input: string,

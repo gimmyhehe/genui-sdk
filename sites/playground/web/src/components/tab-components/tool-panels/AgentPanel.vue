@@ -47,7 +47,6 @@ function formatAgentCardErrorBody(rawText) {
       }
     }
   } catch {
-    /* 非 JSON，走下方原文 */
   }
   return truncateRaw(trimmed);
 }

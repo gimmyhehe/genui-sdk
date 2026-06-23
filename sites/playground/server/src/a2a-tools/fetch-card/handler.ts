@@ -3,15 +3,8 @@ import getRawBody from 'raw-body';
 import { normalizeAgentCard } from '../parse-card/parse.js';
 import { isAllowedAgentUrl, isPlaygroundDevelopment } from '../guard-agent-url/guard.js';
 
-/** 拉取远程 Agent Card 的单次请求超时（毫秒）。 */
 const UPSTREAM_FETCH_TIMEOUT_MS = 10_000;
 
-/**
- * 服务端代理拉取 Agent Card，规避浏览器跨域限制，并规范化 api.url 字段。
- *
- * @param req - Express 请求，body 为 `{ url: string }`
- * @param res - Express 响应，`{ data?, message? }`
- */
 export const fetchAgentCardHandler = async (req: Request, res: ExpressResponse): Promise<void> => {
   try {
     const rawBody = await getRawBody(req, { encoding: 'utf-8', limit: '16kb' });

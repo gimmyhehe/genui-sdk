@@ -44,7 +44,6 @@ const updateField = (field: keyof typeof props.agentData, value: any) => {
 
 interface AgentCapabilityViewItem {
   title: string;
-  /** Card 为对象且含 description / summary 等时才有 */
   description?: string;
 }
 
@@ -58,7 +57,6 @@ function pickString(obj: Record<string, unknown>, keys: string[]): string | unde
   return undefined;
 }
 
-/** fallbackTitle：capabilities 为 Record 时传入外层 key，作为无 name/id 时的展示名 */
 function normalizeCapabilityEntry(item: unknown, fallbackTitle?: string): AgentCapabilityViewItem {
   if (typeof item === 'string') {
     return { title: item };

@@ -3,13 +3,6 @@ import { z } from 'zod';
 import { invokeA2aAgent } from '../invoke-agent/invoke-a2a-agent.js';
 import type { PlaygroundAgentConfig } from '../types.js';
 
-/**
- * 为 Agent 生成稳定的 ASCII tool 名称，只包含 [a-zA-Z0-9_-]。
- *
- * @param name - Agent 展示名称
- * @param index - 在 agents 列表中的索引
- * @returns 可用于 AI SDK 的 tool 名称
- */
 function slugifyAgentName(name: string, index: number): string {
   const base = (name || '')
     .trim()
@@ -19,13 +12,6 @@ function slugifyAgentName(name: string, index: number): string {
   return `agent_${base}_${index}`;
 }
 
-/**
- * 将 Playground Agent 列表转换为 AI SDK 可调用的 tool 集合。
- *
- * @param agents - 已启用的 Agent 配置列表
- * @param abortSignal - 可选取消信号，传递给底层 A2A 调用
- * @returns tool 名称到 tool 定义的映射
- */
 export const buildAgentTools = (
   agents: PlaygroundAgentConfig[] | undefined,
   abortSignal?: AbortSignal,
