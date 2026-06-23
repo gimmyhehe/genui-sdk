@@ -6,10 +6,10 @@ export const zhThemeConfig: DefaultTheme.Config = {
     label: '目录',
   },
   nav: [
-    { text: '快速开始', link: '/guide/quick-start' },
-    { text: '组件文档', link: '/components/renderer' },
-    { text: '特性示例', link: '/examples/renderer/custom-actions' },
-    { text: '协议规范', link: '/schema/protocol' },
+    { text: '快速开始', link: '/guide/quick-start', activeMatch: '/guide/' },
+    { text: '组件文档', link: '/components/renderer', activeMatch: '/components/' },
+    { text: '特性示例', link: '/examples/renderer/custom-actions', activeMatch: '/examples/' },
+    { text: '协议规范', link: '/schema/protocol', activeMatch: '/schema/' },
   ],
   sidebar: {
     '/guide/': [
