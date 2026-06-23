@@ -283,7 +283,6 @@ onUnmounted(() => {
   >
     <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">
       <div class="genui-schema-template-item chat-container">
-        <!-- 桌面：打开内联编辑器时隐藏聊天；移动端：底部抽屉叠在聊天上，聊天保持挂载以便背后仍可见 -->
         <genui-template-chat
           v-show="!schemaEditorVisible || isMobile"
           class="genui-template-chat"
