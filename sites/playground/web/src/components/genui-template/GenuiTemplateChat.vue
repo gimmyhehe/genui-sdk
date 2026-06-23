@@ -174,11 +174,6 @@ const isStreamOperation = (operation: any) => {
   );
 };
 
-/**
- * Applies streamed JSON Patch operations to the current schema.
- * Path resolution is formatted against the immutable pre-request
- * snapshot to avoid drift when payloads replay prior operations.
- */
 const jsonPatchRenderer = async (props: any) => {
   try {
     const { content, cardId, newMessage } = props;
