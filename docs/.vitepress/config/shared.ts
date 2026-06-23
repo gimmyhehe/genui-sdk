@@ -16,17 +16,15 @@ export const sharedConfig: UserConfig = {
       return;
     }
 
-    const filePath = path.join(srcDir, pageData.filePath);
-    if (!fs.existsSync(filePath)) {
+    try {
+      const content = fs.readFileSync(path.join(srcDir, pageData.filePath), 'utf-8');
+      return {
+        // Base64 避免 Markdown 中的 </template> 等字符破坏 VitePress 生成的 SFC
+        markdownSource: Buffer.from(content, 'utf-8').toString('base64'),
+      };
+    } catch {
       return;
     }
-
-    const content = fs.readFileSync(filePath, 'utf-8');
-
-    return {
-      // Base64 避免 Markdown 中的 </template> 等字符破坏 VitePress 生成的 SFC
-      markdownSource: Buffer.from(content, 'utf-8').toString('base64'),
-    };
   },
   markdown: {
     config(md) {
