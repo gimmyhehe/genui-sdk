@@ -83,7 +83,6 @@ watch(
 
 const { messageManager } = conversation;
 
-// 当前会话的 messages 代理
 const messages = computed(() => messageManager.value.messages.value);
 
 const generating = computed(() => GeneratingStatus.includes(conversation.messageManager.value.messageState.status));
@@ -138,7 +137,6 @@ onUnmounted(() => {
 });
 
 const lastPreviewSchema = ref<any>(null);
-// const lastOperationIndex = ref<number>(-1); // TODO: 追踪已执行的index，减少重复执行
 
 const deltaPatcher = new DeltaPatcher({
   requiredCompleteFieldSelectors,
@@ -164,7 +162,6 @@ const schemaCardRenderer = async (props: any) => {
       json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
     }
     deltaPatcher.patchWithDelta(target, json, isCompleted);
-    // 给每个组件添加 id
     const schemaWithId = generateIdForComponents(target); // TODO: 流式渲染过程中，ID一直在刷新，会影响到渲染diff性能，需要设计稳定的方案
     setCurrentPreviewSchema(schemaWithId);
   } catch (error) {
@@ -173,11 +170,6 @@ const schemaCardRenderer = async (props: any) => {
   }
 };
 
-/**
- * 判断 patch 操作是否为流式未完成的 add/replace（含 id、path、value）
- * @param operation jsonPatch 单条操作
- * @returns 是否为可流式处理的 incomplete 操作
- */
 const isStreamOperation = (operation: any) => {
   return (
     (operation.op === 'add' || operation.op === 'replace')
@@ -187,11 +179,6 @@ const isStreamOperation = (operation: any) => {
   );
 };
 
-/**
- * Applies streamed JSON Patch operations to the current schema.
- * Path resolution is formatted against the immutable pre-request
- * snapshot to avoid drift when payloads replay prior operations.
- */
 const jsonPatchRenderer = async (props: any) => {
   try {
     const { content, cardId, newMessage } = props;
@@ -201,7 +188,6 @@ const jsonPatchRenderer = async (props: any) => {
     }
     if (newMessage) {
       lastPreviewSchema.value = JSON.parse(JSON.stringify(currentPreviewSchema.value));
-      // lastOperationIndex.value = -1; // TODO: 追踪已执行的index，减少重复执行，但需要把lastPreviewSchema同步更新到已操作的最新内容
     }
 
     const { value, state } = await textToJson(content);
@@ -248,11 +234,6 @@ const jsonPatchRenderer = async (props: any) => {
   }
 };
 
-/**
- * 按消息索引获取其中的 schema 版本卡片（含 schema-manual）
- * @param index 消息在列表中的索引
- * @returns 匹配的版本卡片，未找到时返回空对象占位
- */
 const getCardMessageByIndex = (index: number) => {
   return (
     (messages.value[index]?.messages as IMessageItem[] | undefined)?.find(
@@ -266,10 +247,6 @@ const getCardMessageByIndex = (index: number) => {
   );
 };
 
-/**
- * 重新生成：截断消息至指定卡片，重置 schema 状态并对齐 cardId
- * @param index 目标卡片所在消息索引
- */
 const handleRefresh = ({ index }: { index: number }) => {
   const { messages, send } = messageManager.value;
   const cardMessage = getCardMessageByIndex(index);
@@ -357,7 +334,6 @@ const messageRenderers = {
   },
 };
 
-// 当前会话的 inputMessage 代理，给 v-model 使用
 const inputMessage = computed({
   get: () => messageManager.value.inputMessage.value,
   set: (v: string) => {
@@ -418,7 +394,6 @@ const clearInputMessage = () => {
   inputMessage.value = '';
 };
 
-// 发送消息
 const handleSendMessage = async () => {
   const messageContent = inputMessage.value;
   const cardId = generateId();
@@ -431,7 +406,6 @@ const handleSendMessage = async () => {
   };
   messages.value.push(userMessage);
 
-  // 如果是第一条 user 消息，更新当前 title
   if (messages.value.length === 1 && messages.value[0].role === 'user') {
     const currentConversationId = templateConversationState.value?.currentId;
     if (currentConversationId) {
@@ -445,9 +419,6 @@ const handleSendMessage = async () => {
   scrollToBottom();
 };
 
-/**
- * 流式生成结束时，将 preview schema 写入对应 AI 卡片并补全 generatedTime
- */
 const finalizeStreamingSchemaCard = () => {
   finalizePendingSchemaCard(messages.value, {
     cardId: currentCardId.value,

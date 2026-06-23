@@ -32,7 +32,6 @@ const genuiRendererProps = computed(() => ({
   key: props.itemProps?.cardId,
 }));
 
-/** 仅传递 SchemaVersionCard 声明的 props，避免 edits 等字段触发 extraneous attrs 警告 */
 const schemaVersionCardProps = computed(() => ({
   cardId: props.itemProps?.cardId ?? '',
   input: props.itemProps?.input ?? '',
@@ -42,10 +41,6 @@ const schemaVersionCardProps = computed(() => ({
   prevSchema: props.prevSchema || props.itemProps?.prevSchema || '',
 }));
 
-/**
- * 点击版本卡片：还原 schema 并通知父组件切换预览
- * @param cardId 版本卡片 id 或手动编辑 editId
- */
 const handleSchemaVersionCardClick = (cardId: string) => {
   if (!cardId) {
     return;

@@ -8,21 +8,11 @@ export type IFormattedJsonPatchOperation = JsonPatchOp & {
   relativePath?: string;
 };
 
-/**
- * 剥离领域扩展字段，转为 RFC 6902 标准 patch 操作
- * @param item 带 id / relativePath 的格式化 patch 操作
- * @returns 标准 JsonPatchOp
- */
 function toStandardPatchOp(item: IFormattedJsonPatchOperation): JsonPatchOp {
   const { id, idToPath, relativePath, ...standardOp } = item;
   return standardOp as JsonPatchOp;
 }
 
-/**
- * schema / patch 均为纯 JSON，用 JSON 深拷贝避免 structuredClone 无法克隆 Vue Proxy 等对象
- * @param value 待拷贝的值
- * @returns 深拷贝后的纯 JSON 对象
- */
 export function clonePlainJson<T>(value: T | null | undefined): T | null {
   if (value === undefined || value === null) {
     return null;
@@ -30,12 +20,6 @@ export function clonePlainJson<T>(value: T | null | undefined): T | null {
   return JSON.parse(JSON.stringify(value)) as T;
 }
 
-/**
- * 格式化 jsonPatch：将带 id 的领域扩展操作转为 RFC 6902 绝对路径
- * @param currentSchema 当前 schema 基准对象
- * @param value 原始 patch 操作数组
- * @returns 含 idToPath 等扩展字段的格式化操作列表
- */
 export const formatJsonPatch = (
   currentSchema: any,
   value: any[],
@@ -86,12 +70,6 @@ export const formatJsonPatch = (
   });
 };
 
-/**
- * 将 jsonPatch 操作应用到 baseline，返回新 schema；无法解析 id 的操作会被跳过
- * @param baseline 应用 patch 前的 schema 对象
- * @param operations 原始 patch 操作数组
- * @returns 应用后的 schema，失败时返回 null
- */
 export function applyJsonPatchOperations(
   baseline: unknown,
   operations: unknown[],

@@ -32,17 +32,8 @@ watch(
   { immediate: true },
 );
 
-/**
- * 判断历史分组是否处于折叠状态
- * @param label 分组标签（今天 / 昨天等）
- * @returns 是否折叠
- */
 const isGroupCollapsed = (label: string) => collapsedGroups.value[label] ?? false;
 
-/**
- * 切换历史分组的折叠 / 展开状态
- * @param label 分组标签
- */
 const toggleGroup = (label: string) => {
   collapsedGroups.value[label] = !isGroupCollapsed(label);
 };

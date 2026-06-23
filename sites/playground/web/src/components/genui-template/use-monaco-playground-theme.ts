@@ -3,10 +3,6 @@ import { GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
 
 export type PlaygroundColorTheme = 'light' | 'dark' | 'lite' | 'auto';
 
-/**
- * 监听系统深色模式偏好，供 Monaco theme 的 auto 模式使用
- * @returns 系统是否偏好深色主题的 ref
- */
 function useSystemPrefersDark() {
   const prefersDark = ref(false);
   let mql: MediaQueryList | null = null;
@@ -26,11 +22,6 @@ function useSystemPrefersDark() {
   return prefersDark;
 }
 
-/**
- * 根据 playground 主题返回 Monaco 编辑器主题（vs / vs-dark）
- * @param fallbackTheme 未注入 GENUI_CONFIG 时的主题回退函数
- * @returns Monaco 主题 computed ref
- */
 export function useMonacoPlaygroundTheme(
   fallbackTheme?: () => PlaygroundColorTheme | undefined,
 ): ComputedRef<'vs' | 'vs-dark'> {
@@ -44,7 +35,6 @@ export function useMonacoPlaygroundTheme(
   });
 }
 
-/** Monaco DiffEditor 共用配置（inline diff，只读） */
 export const SCHEMA_JSON_DIFF_EDITOR_OPTIONS = {
   fontSize: 14,
   minimap: { enabled: false },

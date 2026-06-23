@@ -53,7 +53,6 @@ const docIcon = computed(() => {
   return docEditIcon;
 });
 
-// 判断当前为开发环境
 const isDev = import.meta.env.MODE === 'development';
 const { isMobile } = useIsMobile();
 
@@ -134,7 +133,7 @@ const handleDev = () => {
   border-radius: 12px;
   position: relative;
   cursor: pointer;
-  /* 与主 chat 助手气泡等内容区一致（由 GenuiConfigProvider / ThemeProvider 注入 --tr-*） */
+
   background-color: var(--tr-bubble-content-bg, #fff);
   display: flex;
   flex-direction: column;

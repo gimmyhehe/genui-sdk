@@ -103,9 +103,7 @@ export class CustomModelProvider extends BaseModelProvider {
         });
       };
 
-      /**
-       * 处理 schema/jsonPatch 和 markdown 流式内容
-       */
+
       const onHandledContent = (
         content: string,
         delta: IStreamDelta,

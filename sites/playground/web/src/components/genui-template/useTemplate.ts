@@ -22,22 +22,12 @@ const conversation = shallowRef<ReturnType<typeof useConversation> | null>(null)
 let templateProvider: CustomModelProvider | null = null;
 let templateChatUrl = '';
 let templateLlmConfig: LLMConfig = { model: '', temperature: 0.3 };
-// 判断模板会话是否初始化完成。
 const isTemplateInit = ref(false);
-// 当前 schema。 可能是：AI 生成的 schemaJson、AI 生成的 jsonPatch 更新后的 schema、切换到历史版本的 schema、编辑器中手动修改的 schema。
 const currentSchema = shallowRef<any>(null);
-// 当前预览 schema。用于编辑器显示。
 const currentPreviewSchema = shallowRef<any>(null);
 const currentPreviewSchemaComplete = ref(true);
-// 当前卡片 id，用于记录卡片 id，避免重复执行 patch 操作
 const currentCardId = ref<string>('');
 
-/**
- * 从会话消息还原当前生效 schema 与 preview 状态
- * @param messages 当前会话消息列表
- * @param options.clearIfMissing 无可用 schema 时是否清空 currentSchema / preview
- * @returns 是否成功还原 schema
- */
 function applySchemaFromMessages(
   messages: ChatMessage[] | undefined,
   options: { clearIfMissing?: boolean } = {},
@@ -77,19 +67,16 @@ export default function useTemplate(options?: UseTemplateOptions) {
     templateChatUrl = url;
     templateLlmConfig = llmConfig || templateLlmConfig;
 
-    // 创建 provider 实例
     templateProvider = new CustomModelProvider({
       url,
       llmConfig: llmConfig || { model: '', temperature: 0.3 },
     });
 
-    // 创建 client 实例
     const clientInstance = new AIClient({
       provider: 'custom',
       providerImplementation: templateProvider,
     });
 
-    // 创建 conversation 实例
     conversation.value = useConversation({
       client: clientInstance,
       autoSave: false,
@@ -101,7 +88,6 @@ export default function useTemplate(options?: UseTemplateOptions) {
           preventDefault();
         },
         onLoaded(conversations) {
-          // 如果历史会话为空，则创建一个默认会话
           if (!conversations.length) {
             conversation.value!.createConversation(t('template.defaultTitle'));
             conversation.value!.saveConversations();
@@ -136,18 +122,12 @@ export default function useTemplate(options?: UseTemplateOptions) {
   const templateConversationState = computed(() => conversation.value?.state);
   const currentConversationId = computed(() => conversation.value?.state.currentId);
 
-  /**
-   * 修改 LLM 配置
-   * @param llmConfig LLM 配置
-   */
+
   const changeLlmConfig = (llmConfig: LLMConfig) => {
     templateProvider.changeLlmConfig(llmConfig);
   };
 
-  /**
-   * 设置当前预览 schema，编辑器使用。
-   * @param schema 模板 schema
-   */
+
   const setCurrentPreviewSchema = (schema: any, isComplete: boolean = true) => {
     currentPreviewSchema.value = schema;
     if (isComplete !== currentPreviewSchemaComplete.value) {
@@ -155,18 +135,13 @@ export default function useTemplate(options?: UseTemplateOptions) {
     }
   };
 
-  /**
-   * 设置当前 schema，供服务端组装 prompt 时使用。
-   * @param schema 模板 schema
-   */
+
   const setCurrentSchema = (schema: any) => {
     currentSchema.value = schema;
     templateProvider.setTemplateSchema(schema);
   };
 
-  /**
-   * 创建模板
-   */
+
   const createTemplate = () => {
     if (!conversation.value) {
       return;
@@ -179,10 +154,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
     setCurrentPreviewSchema(null);
   };
 
-  /**
-   * 切换模板
-   * @param id 模板 id
-   */
+
   const switchTemplate = (id: string) => {
     if (!conversation.value) {
       return;
@@ -202,10 +174,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
     applySchemaFromMessages(currentConversation.messages);
   };
 
-  /**
-   * 删除模板
-   * @param id 模板 id
-   */
+
   const deleteTemplate = (id: string) => {
     if (!conversation.value) {
       return;
@@ -216,17 +185,12 @@ export default function useTemplate(options?: UseTemplateOptions) {
     deleteConversation(id);
     saveConversations();
 
-    // 保证至少有一个会话
     if (state.conversations.length === 0) {
       createTemplate();
     }
   };
 
-  /**
-   * 更新模板标题
-   * @param id 模板 id
-   * @param title 模板标题
-   */
+
   const updateTemplateTitle = (id: string, title: string) => {
     if (!conversation.value) {
       return;
@@ -237,11 +201,7 @@ export default function useTemplate(options?: UseTemplateOptions) {
     saveConversations();
   };
 
-  /**
-   * 根据卡片 id 获取对应的卡片消息
-   * @param cardId 卡片 id
-   * @returns 卡片消息
-   */
+
   const getMessageByCardId = (cardId: string) => {
     if (!conversation.value || !cardId) {
       return;
@@ -270,7 +230,6 @@ export default function useTemplate(options?: UseTemplateOptions) {
     return currentCardId.value;
   };
 
-  // 从对话中提取示例 schema 列表
   const templateSchemaList = computed(() => {
     if (!conversation.value) {
       return [];
@@ -286,35 +245,21 @@ export default function useTemplate(options?: UseTemplateOptions) {
     });
   });
 
-  /**
-   * 获取模板聊天 API 配置（url、llm、当前 schema）
-   * @returns 模板聊天请求配置
-   */
+
   const getTemplateChatConfig = () => ({
     url: templateChatUrl,
     llmConfig: templateLlmConfig,
     templateSchema: currentSchema.value,
   });
 
-  /**
-   * 持久化当前会话列表到 IndexedDB
-   */
+
   const saveConversations = () => {
     conversation.value?.saveConversations();
   };
 
   const MANUAL_SCHEMA_SAVE_INPUT = '手动编辑保存';
 
-  /**
-   * 将编辑器中的 schema 保存为版本卡片（schema-manual 类型消息）
-   * @param schema 保存后的 schema 对象
-   * @param options.prevSchema 保存前的基准 schema，缺省时取 currentSchema
-   * @param options.input 版本卡片标题，缺省为「手动编辑保存」
-   * @param options.sourceCardId 来源版本 id（应用历史版本时传入）
-   * @param options.sourceCardGeneratedTime 来源版本创建时间快照
-   * @param options.sourceCardInput 来源版本标题快照
-   * @returns 新建或合并后的卡片 cardId，失败时返回 null
-   */
+
   const appendManualSchemaVersion = (
     schema: Record<string, unknown>,
     options: {

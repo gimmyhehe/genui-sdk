@@ -10,7 +10,7 @@ export interface ISchemaVersionHistoryEntry {
   input: string;
   generatedTime: string;
   createdAtMs: number;
-  /** 会话中的出现顺序，越大越新 */
+
   sequenceIndex: number;
   timeLabel: string;
   description: string;
@@ -24,21 +24,11 @@ export interface ISchemaVersionHistoryEntry {
 
 const MS_PER_DAY = 86400000;
 
-/**
- * 取本地时区某时刻所在日的 0 点毫秒时间戳
- * @param timeMs 毫秒时间戳
- * @returns 当日 0 点的毫秒时间戳
- */
 const startOfLocalDay = (timeMs: number) => {
   const d = new Date(timeMs);
   return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 };
 
-/**
- * 取本地时区某时刻所在自然周（周一为起点）的 0 点毫秒时间戳
- * @param timeMs 毫秒时间戳
- * @returns 当周周一 0 点的毫秒时间戳
- */
 const startOfLocalWeek = (timeMs: number) => {
   const dayStart = startOfLocalDay(timeMs);
   const day = new Date(dayStart).getDay();
@@ -46,18 +36,8 @@ const startOfLocalWeek = (timeMs: number) => {
   return dayStart - daysFromMonday * MS_PER_DAY;
 };
 
-/**
- * 数字补零为两位字符串
- * @param n 待格式化的数字
- * @returns 两位字符串
- */
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
-/**
- * 将 generatedTime 字符串解析为毫秒时间戳
- * @param generatedTime 卡片上的创建时间字符串
- * @returns 毫秒时间戳
- */
 export function parseGeneratedTimeMs(generatedTime: string): number {
   const text = generatedTime?.trim();
   if (!text) {
@@ -72,12 +52,6 @@ export function parseGeneratedTimeMs(generatedTime: string): number {
 
 const WEEKDAY_LABELS = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
-/**
- * 历史面板时间点格式（如「6月8日 19:32」；跨年显示年份）
- * @param createdAtMs 创建时间毫秒戳
- * @param nowMs 当前时间毫秒戳，默认 Date.now()
- * @returns 展示用时间文本
- */
 export function formatHistoryPointTimeLabel(createdAtMs: number, nowMs: number = Date.now()): string {
   const d = new Date(createdAtMs);
   const now = new Date(nowMs);
@@ -92,12 +66,6 @@ export function formatHistoryPointTimeLabel(createdAtMs: number, nowMs: number =
   return `${d.getFullYear()}年${month}月${day}日 ${timePart}`;
 }
 
-/**
- * 根据创建时间返回历史面板分组标签（今天 / 昨天 / 本周星期 / 上周 / 月份）
- * @param createdAtMs 创建时间毫秒戳
- * @param nowMs 当前时间毫秒戳，默认 Date.now()
- * @returns 分组标签
- */
 export function getHistoryTimeGroupLabel(createdAtMs: number, nowMs: number = Date.now()): string {
   const todayStart = startOfLocalDay(nowMs);
   const dayStart = startOfLocalDay(createdAtMs);
@@ -130,13 +98,6 @@ export function getHistoryTimeGroupLabel(createdAtMs: number, nowMs: number = Da
   return `${created.getFullYear()}年${created.getMonth() + 1}月`;
 }
 
-/**
- * 生成历史条目副标题描述
- * @param card 版本卡片消息
- * @param options.isLatest 是否为会话最新版本
- * @param options.isPending 是否仍在流式生成中
- * @returns 展示用描述文本
- */
 function buildDescription(
   card: ISchemaCardLikeMessage,
   options: { isLatest: boolean; isPending: boolean },
@@ -156,9 +117,6 @@ function buildDescription(
   return card.input?.trim() || 'AI 生成版本';
 }
 
-/**
- * 筛出可展示的历史条目（pending 或 schema 可还原）
- */
 function filterCollectibleHistoryEntries(
   entries: ISchemaVersionHistoryEntry[],
   messages: ChatMessage[] | undefined,
@@ -168,13 +126,6 @@ function filterCollectibleHistoryEntries(
   );
 }
 
-/**
- * 解析来源版本的时间标签
- * @param entries 全量历史条目
- * @param messages 当前会话消息列表
- * @param cardOrEditId 来源版本 id
- * @returns 来源版本时间文本，无法解析时返回 null
- */
 function resolveCardVersionTimeLabel(
   entries: ISchemaVersionHistoryEntry[],
   messages: ChatMessage[] | undefined,
@@ -202,9 +153,6 @@ function resolveCardVersionTimeLabel(
   return null;
 }
 
-/**
- * 通过 prevSchema 与历史条目比对，推断旧数据首条手动保存的来源时间
- */
 function inferSourceTimeFromPrevSchema(
   edit: ISchemaManualEditRecord,
   entries: ISchemaVersionHistoryEntry[],
@@ -229,9 +177,6 @@ function inferSourceTimeFromPrevSchema(
   return null;
 }
 
-/**
- * 手动 edit 的历史描述：应用历史版本时用时间指向来源（如「应用自 x 的版本」）
- */
 function buildManualRestoreDescription(
   edit: ISchemaManualEditRecord,
   entries: ISchemaVersionHistoryEntry[],
@@ -267,11 +212,6 @@ function buildManualRestoreDescription(
   return edit.input?.trim() || '手动编辑保存';
 }
 
-/**
- * 根据卡片类型推断历史条目作者信息
- * @param card 版本卡片消息
- * @returns 作者标签与类型（用户 / AI）
- */
 function buildAuthor(card: ISchemaCardLikeMessage): { authorLabel: string; authorType: 'user' | 'ai' } {
   if (card.type === 'schema-manual') {
     return { authorLabel: '用户', authorType: 'user' };
@@ -279,13 +219,6 @@ function buildAuthor(card: ISchemaCardLikeMessage): { authorLabel: string; autho
   return { authorLabel: 'AI', authorType: 'ai' };
 }
 
-/**
- * 从会话消息收集全部 schema 版本记录（时间正序收集，展示时按时间倒序）
- * @param messages 当前会话消息列表
- * @param options.currentCardId 当前预览对应的 cardId 或手动编辑 editId
- * @param options.latestCardId 会话中最新版本的 cardId
- * @returns 历史版本条目列表
- */
 export function collectSchemaVersionHistory(
   messages: ChatMessage[] | undefined,
   options: { currentCardId?: string; latestCardId?: string } = {},
@@ -392,12 +325,6 @@ export function collectSchemaVersionHistory(
   });
 }
 
-/**
- * 将历史条目按时间分组，供历史面板展示
- * @param entries collectSchemaVersionHistory 的返回结果
- * @param nowMs 当前时间毫秒戳，默认 Date.now()
- * @returns 按时间分组的历史条目
- */
 export function groupSchemaVersionHistory(
   entries: ISchemaVersionHistoryEntry[],
   nowMs: number = Date.now(),
@@ -423,12 +350,6 @@ export function groupSchemaVersionHistory(
   }));
 }
 
-/**
- * 将 cardId / editId 解析为聊天气泡级卡片 id（手动合并卡 cardId 或 AI 卡 cardId）
- * @param messages 当前会话消息列表
- * @param cardOrEditId 当前预览的 cardId 或手动编辑 editId
- * @returns 气泡级卡片 id，无法解析时返回空字符串
- */
 export function resolveSchemaCardScopeId(
   messages: ChatMessage[] | undefined,
   cardOrEditId: string | undefined,
@@ -450,16 +371,6 @@ export function resolveSchemaCardScopeId(
   return cardOrEditId;
 }
 
-/**
- * 从全量历史条目中筛出与当前选中卡片相关的版本记录
- * - 手动合并卡：展示该卡内全部 edits
- * - schema-card / json-patch：仅展示当前这一条卡片
- * @param entries collectSchemaVersionHistory 的全量结果
- * @param messages 当前会话消息列表
- * @param scopeCardId 气泡级卡片 cardId
- * @param currentCardOrEditId 当前预览的 cardId 或手动编辑 editId
- * @returns 当前卡片范围内的历史条目
- */
 export function filterSchemaVersionHistoryForCard(
   entries: ISchemaVersionHistoryEntry[],
   messages: ChatMessage[] | undefined,
