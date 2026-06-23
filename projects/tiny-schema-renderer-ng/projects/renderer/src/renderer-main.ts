@@ -81,13 +81,9 @@ export class RendererMain implements OnDestroy {
   }
 
   ngOnDestroy() {
-    // Angular 不会等待 Promise 完成，异步 onUnmounted 回调可能无法在销毁前执行完毕
     void this.invokePageOnUnmounted();
   }
 
-  /**
-   * 执行并清理当前页面 onUnmounted 生命周期回调。
-   */
   private async invokePageOnUnmounted() {
     const fn = this.pageOnUnmounted;
     this.pageOnUnmounted = null;
