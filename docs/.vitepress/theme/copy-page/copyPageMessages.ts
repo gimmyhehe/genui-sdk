@@ -1,9 +1,9 @@
 export const copyPageMessages = {
-  'zh_CN': {
+  'zh-CN': {
     copy: '复制页面',
     copied: '已复制',
   },
-  'en_US': {
+  'en-US': {
     copy: 'Copy page',
     copied: 'Copied',
   },
@@ -16,5 +16,5 @@ export function getCopyPageMessages(lang: string) {
     return copyPageMessages[lang as CopyPageLocale];
   }
 
-  return copyPageMessages['zh_CN'];
+  return copyPageMessages['zh-CN'];
 }

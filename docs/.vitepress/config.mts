@@ -10,14 +10,14 @@ export default defineConfig({
   locales: {
     root: {
       label: '中文',
-      lang: 'zh_CN',
+      lang: 'zh-CN',
       title: 'GenUI SDK',
       description: 'GenUI SDK 文档',
       themeConfig: zhThemeConfig,
     },
     en: {
       label: 'English',
-      lang: 'en_US',
+      lang: 'en-US',
       link: '/en/',
       title: 'GenUI SDK',
       description: 'GenUI SDK Documentation',
