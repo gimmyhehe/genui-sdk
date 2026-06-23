@@ -6,10 +6,14 @@ export const enThemeConfig: DefaultTheme.Config = {
     label: 'On this page',
   },
   nav: [
-    { text: 'Quick Start', link: '/en/guide/quick-start' },
-    { text: 'Components', link: '/en/components/renderer' },
-    { text: 'Examples', link: '/en/examples/renderer/custom-actions' },
-    { text: 'Protocol', link: '/en/schema/protocol' },
+    { text: 'Quick Start', link: '/en/guide/quick-start', activeMatch: '/en/guide/' },
+    { text: 'Reference', link: '/en/components/renderer', activeMatch: '/en/components/' },
+    {
+      text: 'Examples',
+      link: '/en/examples/renderer/custom-actions',
+      activeMatch: '/en/examples/',
+    },
+    { text: 'Protocol', link: '/en/schema/protocol', activeMatch: '/en/schema/' },
   ],
   sidebar: {
     '/en/guide/': [
