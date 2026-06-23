@@ -56,7 +56,6 @@ export class RendererMain implements OnDestroy {
   state: any = {};
   cssScopeId: string = '';
   private pageOnUnmounted: (() => void | Promise<void>) | null = null;
-  private schemaVersion = 0;
   constructor(
     private contextService: RendererContextService,
     private el: ElementRef,
@@ -141,21 +140,10 @@ export class RendererMain implements OnDestroy {
     });
   }
 
-  /**
-   * 判断当前 setSchema 调用是否仍为最新版本，用于忽略过期的并发调用。
-   *
-   * @param version - 本次 setSchema 的版本号
-   * @returns 若已被更新的 schema 取代则返回 true
-   */
-  private isStaleSchemaVersion(version: number): boolean {
-    return version !== this.schemaVersion;
-  }
-
   private async setSchema(data: any) {
     if (!data || !Object.keys(data).length) {
       return;
     }
-    const version = ++this.schemaVersion;
     const newSchema = JSON.parse(JSON.stringify(data));
     const context = {
       state: this.state,
@@ -166,9 +154,6 @@ export class RendererMain implements OnDestroy {
     this._setState(newSchema.state || {}, true);
 
     await this.invokePageOnUnmounted();
-    if (this.isStaleSchemaVersion(version)) {
-      return;
-    }
 
     const { onMounted: onMountedFn, onUnmounted: onUnmountedFn } = getPageLifeCycleFns(
       newSchema.lifeCycles,
@@ -176,24 +161,15 @@ export class RendererMain implements OnDestroy {
     );
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    if (this.isStaleSchemaVersion(version)) {
-      return;
-    }
 
     setPageCss(newSchema.css || '', this.cssScopeId);
     delete newSchema.lifeCycles;
     Object.assign(this.pageSchema, newSchema);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    if (this.isStaleSchemaVersion(version)) {
-      return;
-    }
 
     try {
       await onMountedFn?.();
-      if (this.isStaleSchemaVersion(version)) {
-        return;
-      }
       this.pageOnUnmounted = onUnmountedFn;
       this.ngZone.run(() => this.cdr.detectChanges());
     } catch (error) {
