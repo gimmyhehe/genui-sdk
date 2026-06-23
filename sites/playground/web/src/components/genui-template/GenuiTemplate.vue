@@ -2,6 +2,7 @@
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { CodeEditor, DiffEditor } from 'monaco-editor-vue3';
 import { GenuiConfigProvider, GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 import { TinyButton } from '@opentiny/vue';
 import { iconClose, iconTime } from '@opentiny/vue-icon';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
@@ -26,6 +27,7 @@ import {
 import type { ISchemaVersionHistoryEntry } from './template-chat-utils/schema-version-history';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 import { locale, t } from '../../i18n';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const { isMobile } = useIsMobile();
 
@@ -559,160 +561,158 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">
-    <div class="genui-schema-template-item chat-container">
-      <!-- 桌面：打开内联编辑器时隐藏聊天；移动端：底部抽屉叠在聊天上，聊天保持挂载以便背后仍可见 -->
-      <GenuiConfigProvider
-        v-show="!schemaEditorVisible || isMobile"
-        :theme="theme"
-        :locale="locale"
-        style="width: 100%; height: 100%"
-      >
+  <GenuiConfigProvider
+    :theme="theme"
+    :locale="locale"
+    :materials="materials"
+    :renderer-config="rendererConfig"
+    style="width: 100%; height: 100%"
+  >
+    <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">
+      <div class="genui-schema-template-item chat-container">
         <genui-template-chat
+          v-show="!schemaEditorVisible || isMobile"
           class="genui-template-chat"
           @schema-version-toggle="toggleSchemaVersion"
           @schema-version-select="selectSchemaVersionCard"
           @schema-refresh="onSchemaRefresh"
         />
-      </GenuiConfigProvider>
-      <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
-        <div class="schema-version-container__header">
-          <span class="schema-version-container__title">
-            {{ schemaEditorShowDiffView ? 'Schema 变更对比' : 'SchemaJSON' }}
-          </span>
-          <div class="schema-version-container__header-actions">
-            <tiny-button
-              v-if="schemaEditorDirty && !isSchemaEditorReadOnly"
-              type="primary"
-              size="small"
-              round
-              :loading="schemaEditorSaveLoading"
-              @click="handleSaveSchemaEditor"
-            >
-              保存
-            </tiny-button>
-            <tiny-button
-              type="text"
-              class="genui-schema-toolbar-close-btn"
-              :icon="TinyCloseIcon"
-              :aria-label="t('templateEditor.close')"
-              @click="closeSchemaEditorView"
-            />
-          </div>
-        </div>
-        <div class="schema-version-container__editor">
-          <!-- diff 需 DiffEditor；可编辑/只读共用 CodeEditor，通过 options.readOnly 切换 -->
-          <diff-editor
-            v-if="schemaEditorShowDiffView"
-            :key="currentCardId"
-            :original="schemaEditorDiffOriginal"
-            :value="schemaEditorDiffModified"
-            language="json"
-            :theme="monacoTheme"
-            :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
-          />
-          <code-editor
-            v-else
-            :key="`${currentCardId}-${isSchemaEditorReadOnly}`"
-            :value="schemaEditorText"
-            language="json"
-            :theme="monacoTheme"
-            :options="editorOptions"
-            @update:value="applySchemaEditorTextToPreview"
-          />
-        </div>
-      </div>
-    </div>
-    <genui-template-mobile-sheet
-    v-if="isMobile"
-    :visible="isMobile && schemaEditorVisible"
-    :json-editor-open="mobileSchemaJsonEditorOpen"
-    :panel-style="mobileSheetPanelStyle"
-    :show-return-latest-button="showReturnLatestButton"
-    :show-apply-version-button="showApplyVersionButton"
-    :current-preview-schema="currentPreviewSchema"
-    :current-preview-schema-complete="currentPreviewSchemaComplete"
-    :schema-editor="schemaEditorText"
-    :schema-editor-diff-mode="schemaEditorShowDiffView"
-    :schema-editor-mount-key="currentCardId"
-    :schema-editor-diff-original="schemaEditorDiffOriginal"
-    :schema-editor-diff-modified="schemaEditorDiffModified"
-    :editor-options="editorOptions"
-    :playground-theme="theme"
-    :view-schema-icon="viewSchemaIcon"
-    :history-icon="TinyIconTime"
-    :history-visible="schemaHistoryVisible"
-    :history-groups="schemaVersionHistoryGroups"
-    :close-icon="TinyCloseIcon"
-    @update:json-editor-open="handleMobileJsonEditorOpen"
-    @update:schema-editor="applySchemaEditorTextToPreview"
-    @mask-click="onMobileSheetMaskClick"
-    @grab-touch-start="onMobileSheetGrabTouchStart"
-    @close="closeSchemaEditorView"
-    @toggle-history="toggleSchemaHistoryPanel"
-    @close-history="closeSchemaHistoryPanel"
-    @history-select="handleHistoryEntrySelect"
-    :schema-editor-dirty="schemaEditorDirty"
-    :schema-editor-save-loading="schemaEditorSaveLoading"
-    @apply-current-version="applyCurrentVersion"
-    @reset-to-latest-version="resetToLatestVersion"
-    @save-schema-editor="handleSaveSchemaEditor"
-  />
-  <template v-else>
-    <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && rendererPanelVisible">
-      <GenuiConfigProvider :theme="theme" style="height: 100%; width: 100%">
-        <div class="renderer-container-wrapper">
-          <div class="top-button-group">
-            <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
-              <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
-              {{ schemaEditorShowDiffView ? t('templateEditor.viewChanges') : t('templateEditor.viewJson') }}
-            </button>
-            <div class="top-button-group-right">
-              <tiny-button v-if="showReturnLatestButton" type="primary" round @click="resetToLatestVersion">
-                {{ t('templateEditor.returnLatest') }}
-              </tiny-button>
-              <tiny-button v-if="showApplyVersionButton" round @click="applyCurrentVersion">
-                {{ t('templateEditor.applyVersion') }}
-              </tiny-button>
+        <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
+          <div class="schema-version-container__header">
+            <span class="schema-version-container__title">
+              {{ schemaEditorShowDiffView ? 'Schema 变更对比' : 'SchemaJSON' }}
+            </span>
+            <div class="schema-version-container__header-actions">
               <tiny-button
-                type="text"
-                class="genui-schema-toolbar-close-btn"
-                :class="{ 'is-active': schemaHistoryVisible }"
-                :icon="TinyIconTime"
-                :aria-label="t('templateEditor.history')"
-                :title="t('templateEditor.history')"
-                @click="toggleSchemaHistoryPanel"
-              />
+                v-if="schemaEditorDirty && !isSchemaEditorReadOnly"
+                type="primary"
+                size="small"
+                round
+                :loading="schemaEditorSaveLoading"
+                @click="handleSaveSchemaEditor"
+              >
+                保存
+              </tiny-button>
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
                 :icon="TinyCloseIcon"
-                :aria-label="t('templateEditor.closePreview')"
-                @click="closeRendererPanel"
+                :aria-label="t('templateEditor.close')"
+                @click="closeSchemaEditorView"
               />
             </div>
           </div>
-          <div class="schema-renderer-body">
-            <schema-renderer
-              :key="rendererSchemaKey"
-              class="schema-renderer"
-              :content="rendererSchema"
-              :generating="false"
-              :is-json-complete="true"
+          <div class="schema-version-container__editor">
+            <diff-editor
+              v-if="schemaEditorShowDiffView"
+              :key="currentCardId"
+              :original="schemaEditorDiffOriginal"
+              :value="schemaEditorDiffModified"
+              language="json"
+              :theme="monacoTheme"
+              :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
             />
-            <schema-version-history-panel
-              :visible="schemaHistoryVisible"
-              :groups="schemaVersionHistoryGroups"
-              :theme="theme"
-              @close="closeSchemaHistoryPanel"
-              @select="handleHistoryEntrySelect"
+            <code-editor
+              v-else
+              :key="`${currentCardId}-${isSchemaEditorReadOnly}`"
+              :value="schemaEditorText"
+              language="json"
+              :theme="monacoTheme"
+              :options="editorOptions"
+              @update:value="applySchemaEditorTextToPreview"
             />
           </div>
         </div>
-      </GenuiConfigProvider>
+      </div>
+      <genui-template-mobile-sheet
+        v-if="isMobile"
+        :visible="isMobile && schemaEditorVisible"
+        :json-editor-open="mobileSchemaJsonEditorOpen"
+        :panel-style="mobileSheetPanelStyle"
+        :show-return-latest-button="showReturnLatestButton"
+        :show-apply-version-button="showApplyVersionButton"
+        :current-preview-schema="currentPreviewSchema"
+        :current-preview-schema-complete="currentPreviewSchemaComplete"
+        :schema-editor="schemaEditorText"
+        :schema-editor-diff-mode="schemaEditorShowDiffView"
+        :schema-editor-mount-key="currentCardId"
+        :schema-editor-diff-original="schemaEditorDiffOriginal"
+        :schema-editor-diff-modified="schemaEditorDiffModified"
+        :editor-options="editorOptions"
+        :playground-theme="theme"
+        :view-schema-icon="viewSchemaIcon"
+        :history-icon="TinyIconTime"
+        :history-visible="schemaHistoryVisible"
+        :history-groups="schemaVersionHistoryGroups"
+        :close-icon="TinyCloseIcon"
+        :schema-editor-dirty="schemaEditorDirty"
+        :schema-editor-save-loading="schemaEditorSaveLoading"
+        @update:json-editor-open="handleMobileJsonEditorOpen"
+        @update:schema-editor="applySchemaEditorTextToPreview"
+        @mask-click="onMobileSheetMaskClick"
+        @grab-touch-start="onMobileSheetGrabTouchStart"
+        @close="closeSchemaEditorView"
+        @toggle-history="toggleSchemaHistoryPanel"
+        @close-history="closeSchemaHistoryPanel"
+        @history-select="handleHistoryEntrySelect"
+        @apply-current-version="applyCurrentVersion"
+        @reset-to-latest-version="resetToLatestVersion"
+        @save-schema-editor="handleSaveSchemaEditor"
+      />
+      <template v-else>
+        <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && rendererPanelVisible">
+          <div class="renderer-container-wrapper">
+            <div class="top-button-group">
+              <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
+                <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
+                {{ schemaEditorShowDiffView ? t('templateEditor.viewChanges') : t('templateEditor.viewJson') }}
+              </button>
+              <div class="top-button-group-right">
+                <tiny-button v-if="showReturnLatestButton" type="primary" round @click="resetToLatestVersion">
+                  {{ t('templateEditor.returnLatest') }}
+                </tiny-button>
+                <tiny-button v-if="showApplyVersionButton" round @click="applyCurrentVersion">
+                  {{ t('templateEditor.applyVersion') }}
+                </tiny-button>
+                <tiny-button
+                  type="text"
+                  class="genui-schema-toolbar-close-btn"
+                  :class="{ 'is-active': schemaHistoryVisible }"
+                  :icon="TinyIconTime"
+                  :aria-label="t('templateEditor.history')"
+                  :title="t('templateEditor.history')"
+                  @click="toggleSchemaHistoryPanel"
+                />
+                <tiny-button
+                  type="text"
+                  class="genui-schema-toolbar-close-btn"
+                  :icon="TinyCloseIcon"
+                  :aria-label="t('templateEditor.closePreview')"
+                  @click="closeRendererPanel"
+                />
+              </div>
+            </div>
+            <div class="schema-renderer-body">
+              <schema-renderer
+                :key="rendererSchemaKey"
+                class="schema-renderer"
+                :content="rendererSchema"
+                :generating="false"
+                :is-json-complete="true"
+              />
+              <schema-version-history-panel
+                :visible="schemaHistoryVisible"
+                :groups="schemaVersionHistoryGroups"
+                :theme="theme"
+                @close="closeSchemaHistoryPanel"
+                @select="handleHistoryEntrySelect"
+              />
+            </div>
+          </div>
+        </div>
+      </template>
     </div>
-  </template>
-  </div>
+  </GenuiConfigProvider>
 </template>
 
 <style scoped lang="less">

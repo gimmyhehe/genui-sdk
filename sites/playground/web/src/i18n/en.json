@@ -78,11 +78,14 @@
     "new": "New template",
     "defaultTitle": "New template",
     "confirmDeleteOne": "Delete this template?",
-    "confirmBatchDelete": "Delete {count} selected template(s)?"
+    "confirmBatchDelete": "Delete {count} selected template(s)?",
+    "inputPlaceholder": "Describe what to build"
   },
   "common": {
     "edit": "Edit",
     "remove": "Remove",
+    "cancel": "Cancel",
+    "save": "Save",
     "confirm": "Confirm",
     "name": "Name",
     "description": "Description",
