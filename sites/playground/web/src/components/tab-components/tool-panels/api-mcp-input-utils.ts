@@ -50,18 +50,16 @@ export function readOpenApiFile(file: File): Promise<string> {
 export function formatOpenApiSourceLabel(service: {
   openapi?: string;
   openapiFileName?: string;
-  swagger?: string;
-  swaggerFileName?: string;
   description?: string;
 }): string {
   if (service.description?.trim()) {
     return service.description.trim();
   }
-  const fileName = (service.openapiFileName ?? service.swaggerFileName)?.trim();
+  const fileName = service.openapiFileName?.trim();
   if (fileName) {
     return `文件：${fileName}`;
   }
-  const openApiDocument = (service.openapi ?? service.swagger ?? '').trim();
+  const openApiDocument = (service.openapi ?? '').trim();
   if (!openApiDocument) {
     return '';
   }

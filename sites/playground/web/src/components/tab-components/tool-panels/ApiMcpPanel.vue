@@ -20,6 +20,7 @@ const previewData = ref(null);
 const previewStatus = ref('idle');
 const previewError = ref('');
 const lastParsedOpenApi = ref('');
+const lastParsedToolNamePrefix = ref('');
 
 const emptyApiMcpData = () => ({
   name: '',
@@ -41,11 +42,11 @@ function slugifyName(name) {
 }
 
 function resolveOpenApiDocument(service) {
-  return (service?.openapi ?? service?.swagger ?? '').trim();
+  return (service?.openapi ?? '').trim();
 }
 
 function resolveOpenApiFileName(service) {
-  return service?.openapiFileName ?? service?.swaggerFileName ?? '';
+  return service?.openapiFileName ?? '';
 }
 
 const invalidatePreview = () => {
@@ -53,6 +54,7 @@ const invalidatePreview = () => {
   previewStatus.value = 'idle';
   previewError.value = '';
   lastParsedOpenApi.value = '';
+  lastParsedToolNamePrefix.value = '';
 };
 
 const closeApiMcpDialog = () => {
@@ -87,13 +89,18 @@ const editApiMcpService = (service, index) => {
     tools: service.tools || [],
   };
   lastParsedOpenApi.value = openApiDocument;
+  lastParsedToolNamePrefix.value = service.toolNamePrefix || slugifyName(service.name || '');
   showApiMcpFormDialog.value = true;
 };
 
 const onUpdateApiMcpData = (val) => {
   apiMcpData.value = val;
   const openApiDocument = (val.openapi || '').trim();
-  if (lastParsedOpenApi.value !== '' && openApiDocument !== lastParsedOpenApi.value) {
+  const prefix = (val.name || '').trim() ? slugifyName(val.name) : '';
+  if (
+    lastParsedOpenApi.value !== '' &&
+    (openApiDocument !== lastParsedOpenApi.value || prefix !== lastParsedToolNamePrefix.value)
+  ) {
     invalidatePreview();
   }
 };
@@ -143,6 +150,7 @@ const parseOpenApi = async () => {
     previewData.value = data.data;
     previewStatus.value = 'success';
     lastParsedOpenApi.value = openApiDocument;
+    lastParsedToolNamePrefix.value = name ? slugifyName(name) : '';
     return true;
   } catch (error) {
     previewStatus.value = 'error';
@@ -169,10 +177,12 @@ const confirmApiMcp = async () => {
 
   confirmLoading.value = true;
   try {
+    const currentPrefix = slugifyName(nameTrimmed);
     const needsParse =
       !previewData.value ||
       previewStatus.value !== 'success' ||
-      openApiTrimmed !== lastParsedOpenApi.value;
+      openApiTrimmed !== lastParsedOpenApi.value ||
+      currentPrefix !== lastParsedToolNamePrefix.value;
 
     if (needsParse) {
       const parsed = await parseOpenApi();

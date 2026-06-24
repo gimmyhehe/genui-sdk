@@ -93,17 +93,6 @@ const llmConfig = reactive({
 });
 if (!Array.isArray(llmConfig.apiMcpServices)) {
   llmConfig.apiMcpServices = [];
-} else {
-  llmConfig.apiMcpServices = llmConfig.apiMcpServices.map((service) => {
-    if (!service || typeof service !== 'object') {
-      return service;
-    }
-    return {
-      ...service,
-      openapi: service.openapi ?? service.swagger ?? '',
-      openapiFileName: service.openapiFileName ?? service.swaggerFileName,
-    };
-  });
 }
 const customExamples = ref(normalizeCustomExamples(cacheCustomExamples));
 

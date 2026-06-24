@@ -2,32 +2,20 @@ import {
   extractOperations,
   parseOpenApiInput,
   resolveBaseUrl,
-  type OpenApiMcpConfig,
 } from 'openapi-mcp-server';
 import type { ApiMcpPreviewResult } from './types.js';
 
 export type PreviewOpenApiInput = {
   openapi: string;
-  baseUrl?: string;
-  apiHeaders?: Record<string, string>;
   toolNamePrefix?: string;
-  excludeMethods?: string[];
-  excludePathPrefixes?: string[];
 };
 
 export async function previewOpenApiMcpRegistration(
   input: PreviewOpenApiInput,
 ): Promise<ApiMcpPreviewResult> {
   const spec = await parseOpenApiInput(input.openapi);
-  const config: OpenApiMcpConfig = {
-    baseUrl: input.baseUrl,
-    apiHeaders: input.apiHeaders,
-    toolNamePrefix: input.toolNamePrefix,
-    excludeMethods: input.excludeMethods,
-    excludePathPrefixes: input.excludePathPrefixes,
-  };
-  const baseUrl = resolveBaseUrl(spec, config.baseUrl);
-  const operations = extractOperations(spec, config);
+  const baseUrl = resolveBaseUrl(spec);
+  const operations = extractOperations(spec, { toolNamePrefix: input.toolNamePrefix });
 
   const tools = operations.map((op) => ({
     name: op.toolName,

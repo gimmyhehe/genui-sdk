@@ -16,6 +16,10 @@ export {
   type OpenApiMcpToolCatalogEntry,
 } from './server/mcp-tool-catalog.js';
 export { buildOpenApiAiSdkTools } from './build-ai-sdk-tools.js';
+export {
+  buildOpenApiAiSdkToolsForSpec,
+  buildOpenApiAiSdkToolsFromDocuments,
+} from './build-ai-sdk-tools-from-spec.js';
 export { loadServerConfigFromEnv, type ServerConfig } from './config.js';
 export type { OpenApiMcpConfig, ApiOperation, ApiParameter } from './types.js';
 export { parseOpenApiInput, resolveBaseUrl, extractOperations } from './openapi/index.js';

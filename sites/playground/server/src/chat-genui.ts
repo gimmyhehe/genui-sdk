@@ -18,7 +18,7 @@ import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
 import { buildSkillTools } from './skills/index.js';
-import { buildApiMcpTools, previewOpenApiMcpRegistration, registerApiMcpServices } from './api-mcp/index.js';
+import { buildApiMcpTools, previewOpenApiMcpRegistration } from './api-mcp/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
@@ -273,8 +273,7 @@ export function createChatGenui() {
       externalMcpServers,
       abort.signal,
     );
-    await registerApiMcpServices(apiMcpServices);
-    const apiMcpTools = buildApiMcpTools();
+    const apiMcpTools = await buildApiMcpTools(apiMcpServices);
     const agentTools = buildAgentTools(agents, abort.signal);
     const { tools: skillTools, systemPrompt: skillPrompt } = buildSkillTools(skills);
     const duplicateToolNames = new Set<string>();
@@ -432,8 +431,8 @@ export function createChatGenui() {
 export const checkApiMcpHandler = async (req: Request, res: Response) => {
   try {
     const body = JSON.parse(await getRawBody(req, { encoding: 'utf-8' }));
-    const { openapi, swagger, baseUrl, apiHeaders, toolNamePrefix, excludeMethods, excludePathPrefixes } = body;
-    const openApiDocument = (openapi ?? swagger)?.trim();
+    const { openapi, toolNamePrefix } = body;
+    const openApiDocument = openapi?.trim();
 
     if (!openApiDocument || typeof openApiDocument !== 'string') {
       res.send({
@@ -445,11 +444,7 @@ export const checkApiMcpHandler = async (req: Request, res: Response) => {
 
     const data = await previewOpenApiMcpRegistration({
       openapi: openApiDocument,
-      baseUrl,
-      apiHeaders,
       toolNamePrefix,
-      excludeMethods,
-      excludePathPrefixes,
     });
 
     res.send({

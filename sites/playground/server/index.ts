@@ -9,7 +9,6 @@ import { loadProviderModelsDataFromFile, mergeProviderModelsData } from './src/p
 import { fetchOpenTinyProviderModelsData } from './src/opentiny-models.js';
 import { createChatGenui, checkApiMcpHandler, checkMcpHandler } from './src/chat-genui.js';
 import { createChatTemplate } from './src/chat-template.js';
-import { registerOpenApiMcp } from './src/openapi-mcp/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,31 +20,12 @@ const envPath = path.resolve(__dirname, envFileName);
 dotenv.config({ path: envPath });
 dotenv.config();
 
-/**
- * Playground 本地开发默认允许拉取 localhost OpenAPI，便于 API服务 URL 模式验证。
- * 生产环境请通过环境变量显式配置 MCP_SWAGGER_* 策略。
- */
-function applyPlaygroundDevOpenApiDefaults(): void {
-  if (process.env.NODE_ENV === 'production') {
-    return;
-  }
-  if (!process.env.MCP_OPENAPI_ALLOW_URL_FETCH && !process.env.MCP_SWAGGER_ALLOW_URL_FETCH) {
-    process.env.MCP_OPENAPI_ALLOW_URL_FETCH = 'true';
-  }
-  if (!process.env.MCP_OPENAPI_ALLOW_LOCALHOST_URL && !process.env.MCP_SWAGGER_ALLOW_LOCALHOST_URL) {
-    process.env.MCP_OPENAPI_ALLOW_LOCALHOST_URL = 'true';
-  }
-}
-applyPlaygroundDevOpenApiDefaults();
-
 const { chatGenuiHandler } = createChatGenui();
 const { chatTemplateHandler } = createChatTemplate();
 
 const app = express();
 
 app.use(cors());
-
-registerOpenApiMcp(app);
 
 const providerModelsEnvPath = process.env.providerModelsPath;
 
@@ -124,7 +104,10 @@ app.post('/check-mcp', checkMcpHandler);
 app.post('/check-api-mcp', checkApiMcpHandler);
 app.post('/chat-template', chatTemplateHandler);
 
-const port = process.env.PORT || 3008;
+const port = Number(process.env.PORT);
+if (!Number.isFinite(port) || port <= 0) {
+  throw new Error('PORT is required. Set it in .env (see .env.example).');
+}
 
 // 启动时先做一次刷新，避免在首次请求前 mapper 为空
 updateProviderModels().finally(() => {

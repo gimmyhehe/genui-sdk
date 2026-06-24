@@ -1,13 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { DynamicToolInfo, OpenApiMcpConfig } from '../types.js';
-import {
-  extractOperations,
-  executeApiOperation,
-  loadApiRequestTimeoutMs,
-  parametersToZodShape,
-  requestBodyToZodField,
-} from '../openapi/index.js';
+import { listOpenApiOperationToolDefinitions } from '../openapi/operation-tool-definitions.js';
 import type { OpenApiMcpToolCatalog } from './mcp-tool-catalog.js';
 
 export function registerOpenApiTools(
@@ -20,80 +14,23 @@ export function registerOpenApiTools(
   toolNames: string[];
   toolInfos: DynamicToolInfo[];
 } {
-  const operations = extractOperations(spec, config);
-  const apiHeaders = config.apiHeaders ?? {};
-  const requestTimeoutMs = config.requestTimeoutMs ?? loadApiRequestTimeoutMs();
+  const definitions = listOpenApiOperationToolDefinitions(spec, config, baseUrl);
   const toolNames: string[] = [];
   const toolInfos: DynamicToolInfo[] = [];
 
-  for (const operation of operations) {
-    const paramShape = parametersToZodShape(
-      operation.parameters.map((p) => ({
-        name: p.name,
-        schema: p.schema,
-        required: p.required,
-        description: p.description,
-      })),
-    );
-
-    const bodyShape = requestBodyToZodField(
-      operation.requestBodySchema,
-      Boolean(operation.requestBodyRequired),
-    );
-
-    const inputSchema = { ...paramShape, ...bodyShape };
-    const description =
-      operation.description ??
-      `${operation.method} ${operation.path}`;
-
+  for (const definition of definitions) {
     catalog.register(
       server,
-      operation.toolName,
+      definition.toolName,
       {
-        description: `[${operation.method} ${operation.path}] ${description}`,
-        inputSchema,
+        description: definition.description,
+        inputSchema: definition.inputSchema,
       },
-      async (args) => {
-        try {
-          const result = await executeApiOperation(
-            operation,
-            baseUrl,
-            args,
-            apiHeaders,
-            requestTimeoutMs,
-          );
-
-          const text = JSON.stringify(
-            {
-              status: result.status,
-              statusText: result.statusText,
-              data: result.body,
-            },
-            null,
-            2,
-          );
-
-          return {
-            content: [{ type: 'text' as const, text }],
-            isError: result.status >= 400,
-          };
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
-          return {
-            content: [{ type: 'text' as const, text: `API call failed: ${message}` }],
-            isError: true,
-          };
-        }
-      },
+      definition.execute,
     );
 
-    toolNames.push(operation.toolName);
-    toolInfos.push({
-      name: operation.toolName,
-      method: operation.method,
-      path: operation.path,
-      description: `[${operation.method} ${operation.path}] ${description}`,
-    });
+    toolNames.push(definition.toolName);
+    toolInfos.push(definition.toolInfo);
   }
 
   return { toolNames, toolInfos };

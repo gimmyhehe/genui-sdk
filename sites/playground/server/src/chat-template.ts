@@ -9,7 +9,7 @@ import getRawBody from 'raw-body';
 import { openaiCompatibleTransformChunk } from '@opentiny/genui-sdk-chat-completions';
 import type { IOpenaiCompatibleChunk } from '@opentiny/genui-sdk-chat-completions';
 import { generateLlmConfig, generateAiSdkTools } from './chat-genui.js';
-import { buildApiMcpTools, registerApiMcpServices } from './api-mcp/index.js';
+import { buildApiMcpTools } from './api-mcp/index.js';
 import { generateJsonPatchPrompt } from './json-patch-prompt.js';
 import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
 
@@ -92,8 +92,7 @@ export const createChatTemplate = () => {
         mcpServers.filter((s) => s.enabled),
         abort.signal,
       );
-      await registerApiMcpServices(apiMcpServices);
-      const apiMcpTools = buildApiMcpTools();
+      const apiMcpTools = await buildApiMcpTools(apiMcpServices);
       const tools = { ...apiMcpTools, ...mcpTools };
       const maxSteps = 30;
       const systemPrompt = `${genPrompt(rendererConfig, tgCustomConfig)}

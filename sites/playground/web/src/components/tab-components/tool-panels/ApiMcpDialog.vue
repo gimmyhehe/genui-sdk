@@ -83,8 +83,8 @@ const onModeChange = (mode: OpenApiInputMode) => {
   }
   patchFormData({
     openapiInputMode: mode,
-    openapi: mode === 'url' ? '' : props.apiMcpData.openapi,
-    openapiFileName: mode === 'file' ? props.apiMcpData.openapiFileName : '',
+    openapi: '',
+    openapiFileName: '',
   });
 };
 

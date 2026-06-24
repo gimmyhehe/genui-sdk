@@ -1,18 +1,34 @@
-import {
-  OPENAPI_MCP_META_TOOL_NAMES,
-  buildOpenApiAiSdkTools,
-} from 'openapi-mcp-server';
+import { buildOpenApiAiSdkToolsFromDocuments } from 'openapi-mcp-server';
+import type { ApiMcpServiceConfig } from './types.js';
 
-export function buildApiMcpTools(): ReturnType<typeof buildOpenApiAiSdkTools> {
-  const allTools = buildOpenApiAiSdkTools();
-  const apiTools: ReturnType<typeof buildOpenApiAiSdkTools> = {};
+function slugifyName(name: string): string {
+  const slug = name
+    .trim()
+    .replace(/[^a-zA-Z0-9_]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '');
+  return /^[0-9]/.test(slug) ? `_${slug}` : slug;
+}
 
-  for (const [name, sdkTool] of Object.entries(allTools)) {
-    if (OPENAPI_MCP_META_TOOL_NAMES.has(name)) {
-      continue;
-    }
-    apiTools[name] = sdkTool;
+export async function buildApiMcpTools(services: ApiMcpServiceConfig[] | undefined) {
+  const enabled = (services ?? []).filter(
+    (service) => service.enabled !== false && service.openapi?.trim(),
+  );
+
+  if (!enabled.length) {
+    return {};
   }
 
-  return apiTools;
+  return buildOpenApiAiSdkToolsFromDocuments(
+    enabled.map((service) => ({
+      openapi: service.openapi.trim(),
+      config: {
+        baseUrl: service.baseUrl,
+        apiHeaders: service.apiHeaders,
+        toolNamePrefix: service.toolNamePrefix?.trim() || slugifyName(service.name),
+        excludeMethods: service.excludeMethods,
+        excludePathPrefixes: service.excludePathPrefixes,
+      },
+    })),
+  );
 }
