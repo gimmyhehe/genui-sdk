@@ -1,7 +1,6 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import type { IRendererConfig } from '@opentiny/genui-sdk-core';
+import { Component, forwardRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { buildMaterialDefaultValueMap, type IRendererConfig, type MaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
 import { GENUI_DEFAULT_PROPS_MAP } from '../injection-tokens';
-import { GenuiDefaultPropsMapHolder } from './genui-default-props-map.holder';
 
 export interface GenuiConfigProviderProps {
   id?: string;
@@ -20,11 +19,10 @@ export interface GenuiConfigProviderProps {
     `,
   ],
   providers: [
-    GenuiDefaultPropsMapHolder,
     {
       provide: GENUI_DEFAULT_PROPS_MAP,
-      useFactory: (holder: GenuiDefaultPropsMapHolder) => holder.defaultPropsMap,
-      deps: [GenuiDefaultPropsMapHolder],
+      useFactory: (provider: GenuiConfigProvider) => provider.defaultPropsMap,
+      deps: [forwardRef(() => GenuiConfigProvider)],
     },
   ],
 })
@@ -32,7 +30,9 @@ export class GenuiConfigProvider implements OnChanges {
   @Input() id = 'tiny-genui-config-provider';
   @Input() rendererConfig?: Partial<IRendererConfig>;
 
-  constructor(private readonly defaultPropsMapHolder: GenuiDefaultPropsMapHolder) {
+  readonly defaultPropsMap: MaterialDefaultValueMap = {};
+
+  constructor() {
     this.syncConfig();
   }
 
@@ -43,6 +43,8 @@ export class GenuiConfigProvider implements OnChanges {
   }
 
   private syncConfig(): void {
-    this.defaultPropsMapHolder.update(this.rendererConfig ?? {});
+    const newMap = buildMaterialDefaultValueMap(this.rendererConfig ?? {});
+    Object.keys(this.defaultPropsMap).forEach((key) => delete this.defaultPropsMap[key]);
+    Object.assign(this.defaultPropsMap, newMap);
   }
 }
