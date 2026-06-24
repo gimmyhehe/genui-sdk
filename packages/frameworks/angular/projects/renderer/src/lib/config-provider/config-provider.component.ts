@@ -8,10 +8,6 @@ export interface GenuiConfigProviderProps {
   rendererConfig?: Partial<IRendererConfig>;
 }
 
-/**
- * Genui Angular 全局配置提供者，向子树注入默认 props 映射。
- * 对齐 Vue 版 GenuiConfigProvider 中 defaultPropsMap 的 provide 语义。
- */
 @Component({
   selector: 'genui-config-provider',
   standalone: true,
@@ -19,8 +15,7 @@ export interface GenuiConfigProviderProps {
   styles: [
     `
       :host {
-        display: block;
-        height: 100%;
+        display: contents;
       }
     `,
   ],
@@ -47,9 +42,6 @@ export class GenuiConfigProvider implements OnChanges {
     }
   }
 
-  /**
-   * 将当前 rendererConfig 同步到 holder，触发默认 props 映射更新。
-   */
   private syncConfig(): void {
     this.defaultPropsMapHolder.update(this.rendererConfig ?? {});
   }

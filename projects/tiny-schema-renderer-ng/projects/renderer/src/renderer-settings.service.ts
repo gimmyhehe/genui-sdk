@@ -1,27 +1,23 @@
-import { Injectable } from '@angular/core';
-import type { DefaultPropsMap } from './apply-default-props';
+import { Injectable, InjectionToken } from '@angular/core';
 
-/**
- * 渲染器运行时配置服务，用于在组件树内共享 defaultPropsMap 等设置。
- */
+type DefaultValueMap = Record<string, unknown>;
+
+export type DefaultPropsMap = Record<string, DefaultValueMap>;
+
+export interface IRendererSettings {
+  defaultPropsMap?: DefaultPropsMap;
+}
+
+export const RENDERER_SETTINGS_KEY = new InjectionToken<IRendererSettings>('RENDERER_SETTINGS_KEY');
+
 @Injectable()
 export class RendererSettingsService {
   private _defaultPropsMap: DefaultPropsMap = {};
 
-  /**
-   * 获取当前组件默认 props 映射表。
-   *
-   * @returns 组件名到默认 props 的映射
-   */
   get defaultPropsMap(): DefaultPropsMap {
     return this._defaultPropsMap;
   }
 
-  /**
-   * 更新组件默认 props 映射表。
-   *
-   * @param map - 新的默认 props 映射，传空则重置为空对象
-   */
   setDefaultPropsMap(map: DefaultPropsMap | null | undefined): void {
     this._defaultPropsMap = map ?? {};
   }

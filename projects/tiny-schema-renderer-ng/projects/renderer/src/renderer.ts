@@ -9,7 +9,7 @@ import { LoopScopePipe } from './loop-scope.pipe';
 import { PropsFilterPipe } from './props-filter.pipe';
 import { ComponentOutlet } from './component-outlet';
 import { GetDirectivesPipe } from './get-directive.pipe';
-import { BindPropsPipe } from './bind-props.pipe';
+import { ApplyDefaultPropsPipe } from './apply-default-props.pipe';
 import { ParseDataPipe } from './parse-data.pipe';
 import { MergeObjectPipe } from './merge-object.pipe';
 import { AutoApplyDirectivesPipe } from './auto-apply-directives.pipe';
@@ -25,7 +25,7 @@ import { AutoApplyDirectivesPipe } from './auto-apply-directives.pipe';
     GetDirectivesPipe,
     ComponentOutlet,
     ParseDataPipe,
-    BindPropsPipe,
+    ApplyDefaultPropsPipe,
     MergeObjectPipe,
     AutoApplyDirectivesPipe,
   ],

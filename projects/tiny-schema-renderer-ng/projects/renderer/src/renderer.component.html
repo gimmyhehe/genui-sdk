@@ -29,7 +29,7 @@
   <ng-template
     [componentOutlet]="component"
     [componentOutletNgModule]="moduleRef"
-    [componentOutletProps]="context | bindProps: schema : mergeScope"
+    [componentOutletProps]="context | parseData: props : mergeScope | applyDefaultProps: componentName"
     [componentOutletDirectives]="directives | autoApplyDirectives: schema | getDirectives "
     [componentOutletContent]="
       {

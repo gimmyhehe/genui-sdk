@@ -1,8 +1,7 @@
 import { Component, ElementRef, Inject, Input, NgZone, Optional, SimpleChanges } from '@angular/core';
 // import { Renderer } from './renderer';
 import { RendererContextService } from './context.service';
-import { RendererSettingsService } from './renderer-settings.service';
-import { RENDERER_SETTINGS_KEY, type IRendererSettings } from './renderer-settings.token';
+import { RendererSettingsService, RENDERER_SETTINGS_KEY, type IRendererSettings } from './renderer-settings.service';
 import { parseData } from './parser/schema-parser';
 import { setPageCss } from './css/page-css';
 import { CommonModule } from '@angular/common';
@@ -73,11 +72,6 @@ export class RendererMain {
     }
   }
 
-  /**
-   * 将注入的渲染器设置同步到 RendererSettingsService。
-   *
-   * @param settings - 框架层 provide 的渲染器设置
-   */
   private applyRendererSettings(settings: IRendererSettings | null): void {
     this.rendererSettingsService.setDefaultPropsMap(settings?.defaultPropsMap);
   }

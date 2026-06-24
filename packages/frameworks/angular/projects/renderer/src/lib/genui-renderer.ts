@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, ContentChild, inject, Input, OnInit, SimpleChanges, TemplateRef, Type, ViewChild } from '@angular/core';
-import { DeltaPatcher, repairJson, RepairJsonState } from '@opentiny/genui-sdk-core';
+import { Component, ContentChild, Input, OnInit, Optional, SimpleChanges, SkipSelf, TemplateRef, Type, ViewChild } from '@angular/core';
+import { DeltaPatcher, repairJson, RepairJsonState, type MaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
 import {
   RendererMain as Renderer,
   Mapper,
@@ -28,20 +28,6 @@ const errorSchema = {
   ],
 };
 
-/**
- * 合并父级与子级渲染器设置，将 ConfigProvider 注入的 defaultPropsMap 下发给基础渲染器。
- *
- * @returns 合并后的渲染器设置
- */
-const createRendererSettings = (): IRendererSettings => {
-  const parentSettings = inject(RENDERER_SETTINGS_KEY, { optional: true, skipSelf: true });
-  const defaultPropsMap = inject(GENUI_DEFAULT_PROPS_MAP, { optional: true });
-  return {
-    ...(parentSettings ?? {}),
-    defaultPropsMap: defaultPropsMap ?? parentSettings?.defaultPropsMap ?? {},
-  };
-};
-
 @Component({
   selector: 'genui-renderer',
   standalone: true,
@@ -52,7 +38,17 @@ const createRendererSettings = (): IRendererSettings => {
   providers: [
     {
       provide: RENDERER_SETTINGS_KEY,
-      useFactory: createRendererSettings,
+      useFactory: (
+        parentSettings: IRendererSettings | null,
+        defaultPropsMap: MaterialDefaultValueMap | null,
+      ): IRendererSettings => ({
+        ...(parentSettings ?? {}),
+        defaultPropsMap: defaultPropsMap ?? parentSettings?.defaultPropsMap ?? {},
+      }),
+      deps: [
+        [new Optional(), new SkipSelf(), RENDERER_SETTINGS_KEY],
+        [new Optional(), GENUI_DEFAULT_PROPS_MAP],
+      ],
     },
   ],
   templateUrl: './genui-renderer.html',
@@ -94,7 +90,7 @@ export class GenuiRenderer implements OnInit {
   }
 
   ngOnInit() {
-        // TODO：待优化成provide inject
+    // TODO：待优化成provide inject
     this.deltaPatcher = new DeltaPatcher({
       requiredCompleteFieldSelectors: [
         ...requiredCompleteFieldSelectors,
