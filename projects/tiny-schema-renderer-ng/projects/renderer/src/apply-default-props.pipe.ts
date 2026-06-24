@@ -6,43 +6,32 @@ const isArrayIndex = (key: string): boolean => /^\d+$/.test(key);
 const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const cloneDefaultValue = (value: unknown): unknown => {
-  if (!isObjectRecord(value) && !Array.isArray(value)) {
-    return value;
-  }
-  return JSON.parse(JSON.stringify(value));
-};
-
 const fillMissingValue = (
   target: Record<string, unknown>,
   propertyPath: string,
   defaultValue: unknown,
 ): void => {
-  const keys = propertyPath.split('.');
-  let current: Record<string, unknown> | unknown[] = target;
+  const keys = propertyPath.split('.')
+  let current: Record<string, unknown> = target
 
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i];
-    const nextKey = keys[i + 1];
-    const container = current as Record<string, unknown>;
-    const nextValue = container[key];
+  for (const key of keys.slice(0, -1)) {
+    const nextValue = current[key]
     if (nextValue == null) {
-      container[key] = isArrayIndex(nextKey) ? [] : {};
-      current = container[key] as Record<string, unknown> | unknown[];
-      continue;
+      current[key] = {}
+      current = current[key] as Record<string, unknown>
+      continue
     }
 
-    if (!isObjectRecord(nextValue) && !Array.isArray(nextValue)) {
-      return;
+    if (!isObjectRecord(nextValue)) {
+      return
     }
 
-    current = nextValue;
+    current = nextValue
   }
 
-  const leafKey = keys[keys.length - 1];
-  const leafContainer = current as Record<string, unknown>;
-  if (leafContainer[leafKey] == null) {
-    leafContainer[leafKey] = cloneDefaultValue(defaultValue);
+  const leafKey = keys[keys.length - 1]
+  if (current[leafKey] == null) {
+    current[leafKey] = structuredClone(defaultValue)
   }
 };
 
