@@ -1,9 +1,7 @@
-import { nextTick, onUnmounted, ref, watch } from 'vue';
-import { useRoute } from 'vitepress';
+import { onUnmounted, ref } from 'vue';
+import { inBrowser, onContentUpdated } from 'vitepress';
 
 const COPY_ANCHOR_ID = 'vp-doc-copy-anchor';
-const MAX_MOUNT_RETRIES = 30;
-const MOUNT_RETRY_INTERVAL = 100;
 
 function cleanupTitleRow(): void {
   const row = document.querySelector('.vp-doc-title-row');
@@ -43,41 +41,21 @@ function mountTitleActions(): HTMLElement | null {
 
 export function useTitleAnchor() {
   const anchor = ref<HTMLElement | null>(null);
-  const route = useRoute();
-  let retryTimer: ReturnType<typeof setTimeout> | undefined;
 
-  function clearRetryTimer(): void {
-    if (retryTimer) {
-      clearTimeout(retryTimer);
-      retryTimer = undefined;
+  function refreshAnchor(): void {
+    if (!inBrowser) {
+      return;
     }
-  }
 
-  async function refreshAnchor(retries = MAX_MOUNT_RETRIES): Promise<void> {
-    await nextTick();
     anchor.value = mountTitleActions();
-
-    if (!anchor.value && retries > 0) {
-      clearRetryTimer();
-      retryTimer = setTimeout(() => {
-        refreshAnchor(retries - 1);
-      }, MOUNT_RETRY_INTERVAL);
-    }
   }
 
-  watch(
-    () => route.path,
-    () => {
-      clearRetryTimer();
-      anchor.value = null;
-      refreshAnchor();
-    },
-    { immediate: true },
-  );
+  onContentUpdated(refreshAnchor);
 
   onUnmounted(() => {
-    clearRetryTimer();
-    cleanupTitleRow();
+    if (inBrowser) {
+      cleanupTitleRow();
+    }
     anchor.value = null;
   });
 
