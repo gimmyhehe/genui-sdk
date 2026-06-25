@@ -6419,6 +6419,7 @@
                     "readOnly": false,
                     "disabled": false,
                     "cols": 12,
+                    "defaultValue": [],
                     "widget": {
                       "component": "CodeConfigurator",
                       "props": {
@@ -6429,6 +6430,16 @@
                       "zh_CN": "配置 Select 下拉数据项"
                     },
                     "labelPosition": "top"
+                  },
+                  {
+                    "property": "tooltipConfig",
+                    "defaultValue": { "always": false },
+                    "label": {
+                      "text": {
+                        "zh_CN": "悬浮提示配置，默认不显示"
+                      }
+                    },
+                    "required": false
                   },
                   {
                     "property": "multiple",
