@@ -1,24 +1,25 @@
 import { inject, Pipe, PipeTransform } from '@angular/core';
 import { RendererSettingsService } from './renderer-settings.service';
 
-const isArrayIndex = (key: string): boolean => /^\d+$/.test(key);
+export type PropsValue = any;
+export type DefaultValue = any;
 
-const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+const isObjectRecord = (value: PropsValue): value is Record<string, PropsValue> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const fillMissingValue = (
-  target: Record<string, unknown>,
+  target: Record<string, PropsValue>,
   propertyPath: string,
-  defaultValue: unknown,
+  defaultValue: DefaultValue,
 ): void => {
   const keys = propertyPath.split('.')
-  let current: Record<string, unknown> = target
+  let current: Record<string, PropsValue> = target
 
   for (const key of keys.slice(0, -1)) {
     const nextValue = current[key]
     if (nextValue == null) {
       current[key] = {}
-      current = current[key] as Record<string, unknown>
+      current = current[key]
       continue
     }
 

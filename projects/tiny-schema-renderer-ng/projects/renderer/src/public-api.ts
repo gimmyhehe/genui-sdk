@@ -4,5 +4,5 @@
 
 export * from './renderer-main';
 export * from './parser/material-getter';
-export * from './renderer-settings.service';
+export { RENDERER_SETTINGS_KEY } from './renderer-settings.service';
 export type { IRendererSettings, DefaultPropsMap } from './renderer-settings.service';
