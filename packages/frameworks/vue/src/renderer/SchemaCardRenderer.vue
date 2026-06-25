@@ -80,8 +80,6 @@ const displaySchema = computed(() => {
 
 let updateActionTimer: any | null = null;
 
-provide(APPLY_DEFAULT_PROPS_KEY, applyMaterialDefaultsToNode);
-
 function updateContextAndState() {
   rendererInstance.value?.setContext({
     callAction,
