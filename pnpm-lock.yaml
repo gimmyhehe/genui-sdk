@@ -339,24 +339,6 @@ importers:
       '@opentiny/vue-carousel-item':
         specifier: ^3.28.0
         version: 3.28.0
-      '@opentiny/vue-chart-bar':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-histogram':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-line':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-pie':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-radar':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-ring':
-        specifier: 3.14.0
-        version: 3.14.0
       '@opentiny/vue-checkbox':
         specifier: ^3.28.0
         version: 3.28.0
@@ -381,6 +363,42 @@ importers:
       '@opentiny/vue-grid':
         specifier: ^3.28.0
         version: 3.28.0
+      '@opentiny/vue-huicharts-bar':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-funnel':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-gauge':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-graph':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-histogram':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-line':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-pie':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-process':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-radar':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-ring':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-scatter':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-waterfall':
+        specifier: ^3.28.0
+        version: 3.29.0
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
@@ -505,24 +523,6 @@ importers:
       '@opentiny/vue-carousel-item':
         specifier: ^3.28.0
         version: 3.28.0
-      '@opentiny/vue-chart-bar':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-histogram':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-line':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-pie':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-radar':
-        specifier: ~3.14.0
-        version: 3.14.0
-      '@opentiny/vue-chart-ring':
-        specifier: 3.14.0
-        version: 3.14.0
       '@opentiny/vue-checkbox':
         specifier: ^3.28.0
         version: 3.28.0
@@ -547,6 +547,42 @@ importers:
       '@opentiny/vue-grid':
         specifier: ^3.28.0
         version: 3.28.0
+      '@opentiny/vue-huicharts-bar':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-funnel':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-gauge':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-graph':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-histogram':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-line':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-pie':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-process':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-radar':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-ring':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-scatter':
+        specifier: ^3.28.0
+        version: 3.29.0
+      '@opentiny/vue-huicharts-waterfall':
+        specifier: ^3.28.0
+        version: 3.29.0
       '@opentiny/vue-input':
         specifier: ^3.28.0
         version: 3.28.0
