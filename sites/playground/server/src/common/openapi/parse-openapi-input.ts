@@ -9,12 +9,6 @@ import {
   type OpenApiInputPolicy,
 } from './openapi-input-security.js';
 
-type Swagger2HostFields = {
-  host?: string;
-  basePath?: string;
-  schemes?: string[];
-};
-
 function parseRawSpec(content: string): unknown {
   const trimmed = content.trim();
   if (trimmed.startsWith('{')) {
@@ -28,8 +22,7 @@ function isInlineOpenApiContent(source: string): boolean {
   return (
     trimmed.startsWith('{') ||
     trimmed.startsWith('---') ||
-    /^openapi\s*:/im.test(trimmed) ||
-    /^swagger\s*:/im.test(trimmed)
+    /^openapi\s*:/im.test(trimmed)
   );
 }
 
@@ -74,16 +67,9 @@ export function resolveBaseUrl(spec: OpenAPIV3.Document, override?: string): str
     return normalizeBaseUrl(serverUrl);
   }
 
-  const swagger2 = spec as OpenAPIV3.Document & Swagger2HostFields;
-  if (swagger2.host) {
-    const scheme = swagger2.schemes?.[0] ?? 'https';
-    const basePath = (swagger2.basePath ?? '').replace(/\/$/, '');
-    return normalizeBaseUrl(`${scheme}://${swagger2.host}${basePath}`);
-  }
-
   if (serverUrl?.startsWith('/')) {
     throw new Error(`Relative server URL "${serverUrl}" requires baseUrl parameter`);
   }
 
-  throw new Error('No base URL: provide baseUrl or define servers/host in the OpenAPI spec');
+  throw new Error('No base URL: provide baseUrl or define servers in the OpenAPI spec');
 }
