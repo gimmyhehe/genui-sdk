@@ -2,6 +2,8 @@
 
 `GenuiChat` 是一个集成的 TinyRobot 对话组件，内部封装了会话管理、流式返回、生成状态等功能，提供了开箱即用的对话体验。
 
+仅使用 Chat 时可从 `@opentiny/genui-sdk-vue/chat` 按需引入，见 [快速开始 - 按需引入](../guide/quick-start#按需引入)。
+
 ## Props
 
 ### url
@@ -480,7 +482,29 @@ interface IChatConfig {
 interface ICustomComponentItem extends IGenPromptComponent {
   ref?: Component; // 组件引用，用于传给 GenuiRenderer
 }
+```
 
+### ICustomActionItem
+
+```typescript
+interface ICustomActionItem extends IGenPromptAction {
+  execute: (params: any, context: Record<string, any>) => any;
+}
+
+interface IGenPromptAction {
+  name: string;
+  description?: string;
+  parameters?: JSONSchema;
+  /** 返回值 JSON Schema 描述（可选，无返回值时可省略） */
+  return?: JSONSchema;
+  /** 是否为异步 Action（可选，默认为 false） */
+  async?: boolean;
+}
+```
+
+### IGenPromptComponent
+
+```typescript
 interface IGenPromptComponent {
   component: string; // 组件名
   schema: {

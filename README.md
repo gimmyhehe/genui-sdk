@@ -13,7 +13,7 @@ Whether you are building an AI chat application from scratch or adding generativ
 
 ### Try It Now
 
-You can visit the [Playground](https://playground.opentiny.design/genui-sdk) to experience Generative UI capabilities in action.  
+You can visit the [Playground](https://opentiny.github.io/genui-sdk/playground/) to experience Generative UI capabilities in action.  
 The playground itself is built using GenUI SDK.
 
 ### Getting Started

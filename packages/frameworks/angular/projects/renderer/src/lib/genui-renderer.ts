@@ -6,7 +6,7 @@ import { requiredCompleteFieldSelectors } from './config';
 
 export const CARD_ID = Symbol('schema-card-id');
 export interface ICustomAction {
-  execute: (params: any, context: Record<string, any>) => void;
+  execute: (params: any, context: Record<string, any>) => any;
   [key: string]: any;
 }
 
@@ -44,6 +44,7 @@ export class GenuiRenderer implements OnInit {
   @Input() customComponentsModule?: Record<string, Type<any>> = {};
   @Input() customActions?: Record<string, ICustomAction> = {};
   @Input() requiredCompleteFieldSelectors?: string[];
+  @Input() isJsonComplete?: boolean;
   public isError = false;
   protected deltaPatcher: DeltaPatcher | null = null;
   protected schema: any = {};
@@ -59,8 +60,9 @@ export class GenuiRenderer implements OnInit {
   callAction(actionName: string, params: any) {
     if (!this.customActions?.[actionName]) {
       console.warn(`Action ${actionName} not found`);
+      return;
     }
-    this.customActions?.[actionName]?.execute(params, this.instance?.getContext() || {});
+    return this.customActions[actionName]?.execute(params, this.instance?.getContext() || {});
   }
 
   ngOnInit() {
@@ -74,7 +76,7 @@ export class GenuiRenderer implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['content']) {
+    if (changes['content'] || changes['isJsonComplete']) {
       this.processNewContent(changes['content'].currentValue);
       // 异步等待渲染器初始化context后再设置
       Promise.resolve().then(() => {
@@ -117,6 +119,8 @@ export class GenuiRenderer implements OnInit {
       } else {
         json = {};
       }
+    } else {
+      isCompleted = this.isJsonComplete ?? true;
     }
     if (this.deltaPatcher) {
       this.deltaPatcher.patchWithDelta(this.schema, json, isCompleted);

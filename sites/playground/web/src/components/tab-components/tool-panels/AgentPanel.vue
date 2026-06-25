@@ -3,6 +3,7 @@ import { ref, inject } from 'vue';
 import { TinyButton, TinySwitch, TinyPopover, TinyCollapseItem, TinyNotify } from '@opentiny/vue';
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
 import AgentDialog from './AgentDialog.vue';
+import { t } from '../../../i18n';
 
 const playgroundContext = inject('playgroundContext');
 const { llmConfig = {} } = playgroundContext || {};
@@ -115,7 +116,7 @@ const queryAgentCard = async () => {
   if (!requestedUrl) {
     TinyNotify({
       type: 'warning',
-      message: '请填写 Agent Card URL',
+      message: t('agent.cardUrlRequired'),
       position: 'top-right',
     });
     return;
@@ -152,7 +153,9 @@ const queryAgentCard = async () => {
     lastQueriedAgentCardUrl.value = requestedUrl;
   } catch (error) {
     agentCardStatus.value = 'error';
-    agentCardError.value = error?.message ? `获取 Agent Card 失败：${error.message}` : '获取 Agent Card 失败';
+    agentCardError.value = error?.message
+      ? t('agent.fetchFailed', { message: error.message })
+      : t('agent.fetchFailedGeneric');
   } finally {
     agentQueryLoading.value = false;
   }
@@ -166,7 +169,7 @@ const confirmAgent = () => {
   if (!nameTrimmed || !urlTrimmed) {
     TinyNotify({
       type: 'warning',
-      message: '请填写名称和 Agent Card URL',
+      message: t('agent.nameAndUrlRequired'),
       position: 'top-right',
     });
     return;
@@ -179,7 +182,7 @@ const confirmAgent = () => {
   ) {
     TinyNotify({
       type: 'warning',
-      message: '请先查询并确认 Agent Card 信息',
+      message: t('agent.queryFirst'),
       position: 'top-right',
     });
     return;
@@ -190,7 +193,7 @@ const confirmAgent = () => {
   if (!apiUrl) {
     TinyNotify({
       type: 'warning',
-      message: 'Agent Card 中缺少 api.url，服务端无法调用该 Agent',
+      message: t('agent.missingApiUrl'),
       position: 'top-right',
     });
     return;
@@ -201,7 +204,7 @@ const confirmAgent = () => {
   if (nameCollision) {
     TinyNotify({
       type: 'warning',
-      message: `已存在名为「${nameTrimmed}」的 Agent，名称不可重复`,
+      message: t('agent.duplicateName', { name: nameTrimmed }),
       position: 'top-right',
     });
     return;
@@ -233,11 +236,11 @@ const updateAgentEnabled = (agent, enabled) => {
 </script>
 
 <template>
-  <tiny-collapse-item name="agent" title="Agent（a2a）">
+  <tiny-collapse-item name="agent" :title="t('agent.title')">
     <template #title-right>
       <tiny-button type="text" :icon="IconPlus" @click.stop="addAgent"> </tiny-button>
     </template>
-    <div class="mcp-server-list">
+    <div class="mcp-server-list" v-if="llmConfig.agents && llmConfig.agents.length > 0">
       <div class="mcp-server-item" v-for="(agent, index) in llmConfig.agents || []" :key="agent.name">
         <div class="mcp-server-item-header">
           <div class="mcp-server-item-name">{{ agent.name }}</div>
@@ -250,11 +253,11 @@ const updateAgentEnabled = (agent, enabled) => {
                 <div class="mcp-server-item-actions">
                   <div @click="editAgent(agent, index)">
                     <component :is="IconEdit" />
-                    <span>编辑</span>
+                    <span>{{ t('common.edit') }}</span>
                   </div>
                   <div @click="deleteAgent(agent)">
                     <component :is="IconDel" />
-                    <span>移除</span>
+                    <span>{{ t('common.remove') }}</span>
                   </div>
                 </div>
               </template>
@@ -264,7 +267,16 @@ const updateAgentEnabled = (agent, enabled) => {
             </tiny-popover>
           </div>
         </div>
-        <div class="mcp-server-item-description">{{ agent.description }}</div>
+        <div class="mcp-server-item-description" v-if="agent.description">{{ agent.description }}</div>
+      </div>
+    </div>
+    <div v-else class="mcp-server-list-empty">
+      <div class="mcp-server-item-empty">
+        <div class="mcp-server-item-empty-icon">
+          {{ t('common.emptyHintPrefix') }}
+          <component :is="IconPlus" class="mcp-server-item-empty-plus-icon" />
+          {{ t('agent.add') }}
+        </div>
       </div>
     </div>
     <AgentDialog :visible="showAgentFormDialog" :agent-data="agentData" :agent-card="agentCard"
@@ -315,6 +327,37 @@ const updateAgentEnabled = (agent, enabled) => {
       margin-left: 4px;
     }
   }
+}
+
+.mcp-server-list-empty {
+  margin-top: 12px;
+}
+
+.mcp-server-item-empty {
+  border: 1px dashed #d9d9d9;
+  border-radius: 8px;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+}
+
+.mcp-server-item-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #8c8c8c;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+.mcp-server-item-empty-plus-icon {
+  width: 12px;
+  height: 12px;
+  color: #595959;
 }
 
 :deep(.mcp-server-item-actions-popover) {

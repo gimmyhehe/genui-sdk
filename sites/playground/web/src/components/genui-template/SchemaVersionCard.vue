@@ -7,6 +7,7 @@ import useTemplate from './useTemplate';
 import { useIsMobile } from '../../use-mobile';
 import docCardIcon from '../../assets/images/card.svg';
 import docEditIcon from '../../assets/images/card-edit.svg';
+import { t } from '../../i18n';
 
 const TinyIconRichTextCodeView = iconRichTextCodeView();
 
@@ -67,18 +68,18 @@ const handleDev = () => {
           {{ props.input.substring(0, 20) }}{{ props.input.length > 20 ? '...' : '' }}
         </div>
         <div class="schema-version-card-content-time">
-          <template v-if="generating">生成中...</template>
-          <template v-else>创建时间：{{ generatedTime }}</template>
+          <template v-if="generating">{{ t('templateEditor.generating') }}</template>
+          <template v-else>{{ t('templateEditor.createdAt', { time: generatedTime }) }}</template>
         </div>
       </div>
     </div>
     <div class="schema-version-card-footer">
       <div v-if="isDev && props.type === 'json-patch' && !generating && !isMobile" class="icons-wrap">
-        <div class="icon-item" title="调试 jsonPatch" @click.stop="handleDev">
+        <div class="icon-item" :title="t('templateEditor.debugJsonPatch')" @click.stop="handleDev">
           <TinyIconRichTextCodeView />
         </div>
       </div>
-      <div v-if="errorMessage" class="error-message">解析失败</div>
+      <div v-if="errorMessage" class="error-message">{{ t('templateEditor.parseFailed') }}</div>
     </div>
   </div>
   <JsonPatchDev
@@ -97,7 +98,8 @@ const handleDev = () => {
   border-radius: 12px;
   position: relative;
   cursor: pointer;
-  background-color: #fff;
+  /* 与主 chat 助手气泡等内容区一致（由 GenuiConfigProvider / ThemeProvider 注入 --tr-*） */
+  background-color: var(--tr-bubble-content-bg, #fff);
   display: flex;
   flex-direction: column;
   padding: 16px;
@@ -137,7 +139,7 @@ const handleDev = () => {
       font-size: 14px;
       font-weight: 600;
       line-height: 22px;
-      color: rgb(25, 25, 25);
+      color: var(--tr-text-primary, rgb(25, 25, 25));
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -146,7 +148,7 @@ const handleDev = () => {
     &-time {
       font-size: 12px;
       line-height: 18px;
-      color: rgb(128, 128, 128);
+      color: var(--tr-text-secondary, rgb(128, 128, 128));
     }
   }
 
@@ -170,11 +172,22 @@ const handleDev = () => {
     }
 
     .icon-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 12px;
       text-align: right;
+      cursor: pointer;
+      color: var(--tr-text-secondary, rgb(128, 128, 128));
+
+      :deep(svg),
+      :deep(svg path) {
+        fill: currentColor;
+      }
 
       &:hover {
-        background-color: #f0f0f0;
+        color: var(--tr-text-primary, rgb(25, 25, 25));
+        background-color: var(--tr-container-bg-default-2, #f0f0f0);
       }
     }
   }

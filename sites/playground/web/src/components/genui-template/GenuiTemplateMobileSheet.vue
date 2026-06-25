@@ -3,6 +3,8 @@ import { CodeEditor } from 'monaco-editor-vue3';
 import { GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
 import type { CSSProperties } from 'vue';
+import { useMonacoPlaygroundTheme, type PlaygroundColorTheme } from './use-monaco-playground-theme';
+import { t } from '../../i18n';
 
 const props = defineProps<{
   visible: boolean;
@@ -10,11 +12,15 @@ const props = defineProps<{
   panelStyle: CSSProperties;
   showReturnLatestButton: boolean;
   currentPreviewSchema: Record<string, unknown> | null;
+  currentPreviewSchemaComplete?: boolean | undefined;
   schemaEditor: string;
   editorOptions: Record<string, unknown>;
+  playgroundTheme: PlaygroundColorTheme;
   viewSchemaIcon: string;
   closeIcon: unknown;
 }>();
+
+const monacoTheme = useMonacoPlaygroundTheme(() => props.playgroundTheme);
 
 const emit = defineEmits<{
   (event: 'update:jsonEditorOpen', value: boolean): void;
@@ -39,7 +45,7 @@ const handleJsonEditorChange = (value: string) => {
         class="schema-mobile-sheet"
         role="dialog"
         aria-modal="true"
-        :aria-label="jsonEditorOpen ? 'Schema JSON 编辑器' : 'Schema JSON 预览'"
+        :aria-label="jsonEditorOpen ? t('templateEditor.jsonEditorAria') : t('templateEditor.jsonPreviewAria')"
       >
         <div class="schema-mobile-sheet__mask" @click="emit('mask-click')" />
         <div class="schema-mobile-sheet__panel" :style="props.panelStyle">
@@ -53,7 +59,7 @@ const handleJsonEditorChange = (value: string) => {
                 @click="emit('update:jsonEditorOpen', true)"
               >
                 <img class="schema-mobile-sheet__entry-icon" :src="viewSchemaIcon" alt="" />
-                查看 JSON
+                {{ t('templateEditor.viewJson') }}
               </button>
               <button
                 v-else
@@ -61,7 +67,7 @@ const handleJsonEditorChange = (value: string) => {
                 class="schema-mobile-sheet__back"
                 @click="emit('update:jsonEditorOpen', false)"
               >
-                返回预览
+                {{ t('templateEditor.backToPreview') }}
               </button>
             </div>
             <div class="schema-mobile-sheet__header-end">
@@ -69,7 +75,7 @@ const handleJsonEditorChange = (value: string) => {
                 type="text"
                 class="genui-schema-toolbar-close-btn"
                 :icon="closeIcon"
-                aria-label="关闭"
+                :aria-label="t('templateEditor.close')"
                 @click="emit('close')"
               />
             </div>
@@ -86,6 +92,7 @@ const handleJsonEditorChange = (value: string) => {
                 class="schema-mobile-sheet-renderer"
                 :content="currentPreviewSchema"
                 :generating="false"
+                :isJsonComplete="currentPreviewSchemaComplete"
               />
             </div>
             <Transition name="schema-mobile-json">
@@ -93,7 +100,7 @@ const handleJsonEditorChange = (value: string) => {
                 <code-editor
                   :value="schemaEditor"
                   language="json"
-                  theme="vs"
+                  :theme="monacoTheme"
                   :options="editorOptions"
                   @update:value="handleJsonEditorChange"
                 />
@@ -102,7 +109,7 @@ const handleJsonEditorChange = (value: string) => {
           </div>
           <div v-if="showReturnLatestButton" class="schema-mobile-sheet__footer">
             <tiny-button round class="schema-mobile-sheet__latest-btn" @click="emit('apply-current-version')">
-              应用此版本
+              {{ t('templateEditor.applyVersion') }}
             </tiny-button>
             <tiny-button
               type="primary"
@@ -110,7 +117,7 @@ const handleJsonEditorChange = (value: string) => {
               class="schema-mobile-sheet__latest-btn"
               @click="emit('reset-to-latest-version')"
             >
-              返回最新版本
+              {{ t('templateEditor.returnLatest') }}
             </tiny-button>
           </div>
         </div>
@@ -263,11 +270,18 @@ const handleJsonEditorChange = (value: string) => {
     color: #191919;
     font-size: 14px;
     line-height: 22px;
+    text-decoration: none;
     cursor: pointer;
     user-select: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    &:hover {
+      color: #191919;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
 
     &:focus-visible {
       outline: 2px solid #1890ff;
@@ -287,11 +301,15 @@ const handleJsonEditorChange = (value: string) => {
     padding: 6px 4px;
     border: none;
     background: transparent;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 22px;
-    color: #1890ff;
+    color: #191919;
     cursor: pointer;
     white-space: nowrap;
+
+    &:hover {
+      color: #191919;
+    }
   }
 
   &__body {
