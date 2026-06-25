@@ -1,5 +1,5 @@
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ApiOperation, ApiParameter, OpenApiMcpConfig } from '../types.js';
+import type { ApiOperation, ApiParameter, OpenApiMcpConfig } from './types.js';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const;
 

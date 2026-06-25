@@ -1,8 +1,8 @@
 import { tool } from 'ai';
 import { z } from 'zod';
 import type { OpenAPIV3 } from 'openapi-types';
-import { listOpenApiOperationToolDefinitions } from './openapi/operation-tool-definitions.js';
-import { parseOpenApiInput, resolveBaseUrl } from './openapi/parse-openapi-input.js';
+import { listOpenApiOperationToolDefinitions } from './operation-tool-definitions.js';
+import { parseOpenApiInput, resolveBaseUrl } from './parse-openapi-input.js';
 import type { OpenApiMcpConfig } from './types.js';
 
 export function buildOpenApiAiSdkToolsForSpec(

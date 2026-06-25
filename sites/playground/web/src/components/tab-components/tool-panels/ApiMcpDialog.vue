@@ -11,30 +11,11 @@ import {
 } from '@opentiny/vue';
 import {
   readOpenApiFile,
+  type ApiMcpFormData,
+  type ApiMcpPreviewData,
+  type ApiMcpPreviewTool,
   type OpenApiInputMode,
-} from './api-mcp-input-utils';
-
-export interface ApiMcpFormData {
-  name: string;
-  openapi: string;
-  openapiInputMode: OpenApiInputMode;
-  openapiFileName?: string;
-  index: number;
-}
-
-export interface ApiMcpPreviewTool {
-  name: string;
-  summary?: string;
-  method: string;
-  path: string;
-}
-
-export interface ApiMcpPreviewData {
-  baseUrl: string;
-  toolCount: number;
-  toolNames: string[];
-  tools?: ApiMcpPreviewTool[];
-}
+} from '../../../common';
 
 const props = defineProps<{
   visible: boolean;

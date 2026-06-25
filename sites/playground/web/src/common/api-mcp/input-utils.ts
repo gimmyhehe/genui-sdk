@@ -1,4 +1,4 @@
-export type OpenApiInputMode = 'url' | 'inline' | 'file';
+import type { OpenApiInputMode } from './types';
 
 const OPENAPI_FILE_EXTENSIONS = new Set(['.json', '.yaml', '.yml']);
 const LARGE_FILE_WARNING_BYTES = 512 * 1024;

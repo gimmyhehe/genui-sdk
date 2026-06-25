@@ -8,4 +8,4 @@ export {
   isSupportedOpenApiFile,
   readOpenApiFile,
   type OpenApiInputMode,
-} from './api-mcp-input-utils';
+} from '../../../common';

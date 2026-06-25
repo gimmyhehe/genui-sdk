@@ -1,4 +1,4 @@
-import type { ApiOperation, ToolCallArgs } from '../types.js';
+import type { ApiOperation, ToolCallArgs } from './types.js';
 
 const DEFAULT_API_REQUEST_TIMEOUT_MS = 60_000;
 

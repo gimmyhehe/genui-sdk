@@ -2,7 +2,7 @@ import {
   extractOperations,
   parseOpenApiInput,
   resolveBaseUrl,
-} from 'openapi-mcp-server';
+} from '../openapi/index.js';
 import type { ApiMcpPreviewResult } from './types.js';
 
 export type PreviewOpenApiInput = {
