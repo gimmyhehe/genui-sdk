@@ -12,27 +12,27 @@ const fillMissingValue = (
   propertyPath: string,
   defaultValue: DefaultValue,
 ): void => {
-  const keys = propertyPath.split('.')
-  let current: Record<string, PropsValue> = target
+  const keys = propertyPath.split('.');
+  let current: Record<string, PropsValue> = target;
 
   for (const key of keys.slice(0, -1)) {
-    const nextValue = current[key]
+    const nextValue = current[key];
     if (nextValue == null) {
-      current[key] = {}
-      current = current[key]
-      continue
+      current[key] = {};
+      current = current[key];
+      continue;
     }
 
     if (!isObjectRecord(nextValue)) {
-      return
+      return;
     }
 
-    current = nextValue
+    current = nextValue;
   }
 
-  const leafKey = keys[keys.length - 1]
+  const leafKey = keys[keys.length - 1];
   if (current[leafKey] == null) {
-    current[leafKey] = structuredClone(defaultValue)
+    current[leafKey] = structuredClone(defaultValue);
   }
 };
 
