@@ -33,7 +33,11 @@ import TinySelect from '@opentiny/vue-select';
 
 import TinyTabsWrap from './TinyTabsWrap.vue';
 
-export const vueMaterials: Record<string, Component> = {
+export interface IComponents {
+  [key: string]: Component;
+}
+
+export const components: IComponents = {
   TinyCarouselItem: TinyCarouselItem,
   TinyCarousel: TinyCarousel,
   TinyRow: TinyRow,
