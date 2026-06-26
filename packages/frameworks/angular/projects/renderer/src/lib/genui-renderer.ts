@@ -6,7 +6,7 @@ import {
   Mapper,
   directiveMap,
   ModuleRef,
-  RENDERER_SETTINGS_KEY,
+  RENDERER_SETTINGS,
   type IRendererSettings,
 } from '@opentiny/tiny-schema-renderer-ng';
 import { GENUI_DEFAULT_PROPS_MAP } from './injection-tokens';
@@ -37,7 +37,7 @@ const errorSchema = {
   ],
   providers: [
     {
-      provide: RENDERER_SETTINGS_KEY,
+      provide: RENDERER_SETTINGS,
       useFactory: (
         parentSettings: IRendererSettings | null,
         defaultPropsMap: MaterialDefaultValueMap | null,
@@ -46,7 +46,7 @@ const errorSchema = {
         defaultPropsMap: defaultPropsMap ?? parentSettings?.defaultPropsMap ?? {},
       }),
       deps: [
-        [new Optional(), new SkipSelf(), RENDERER_SETTINGS_KEY],
+        [new Optional(), new SkipSelf(), RENDERER_SETTINGS],
         [new Optional(), GENUI_DEFAULT_PROPS_MAP],
       ],
     },

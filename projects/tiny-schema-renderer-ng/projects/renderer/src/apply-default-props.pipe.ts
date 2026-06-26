@@ -1,5 +1,5 @@
 import { inject, Pipe, PipeTransform } from '@angular/core';
-import { RendererSettingsService } from './renderer-settings.service';
+import { RENDERER_SETTINGS } from './renderer-settings';
 
 export type PropsValue = any;
 export type DefaultValue = any;
@@ -42,7 +42,7 @@ const fillMissingValue = (
   pure: false,
 })
 export class ApplyDefaultPropsPipe implements PipeTransform {
-  private readonly rendererSettings = inject(RendererSettingsService, { optional: true });
+  private readonly rendererSettings = inject(RENDERER_SETTINGS, { optional: true });
 
   transform(
     props: Record<string, unknown> | null | undefined,

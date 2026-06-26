@@ -1,7 +1,6 @@
-import { Component, ElementRef, Inject, Input, NgZone, Optional, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, Input, NgZone, SimpleChanges } from '@angular/core';
 // import { Renderer } from './renderer';
 import { RendererContextService } from './context.service';
-import { RendererSettingsService, RENDERER_SETTINGS_KEY, type IRendererSettings } from './renderer-settings.service';
 import { parseData } from './parser/schema-parser';
 import { setPageCss } from './css/page-css';
 import { CommonModule } from '@angular/common';
@@ -23,7 +22,7 @@ function reset(obj: any) {
     RendererTemplateComponent,
     RendererDirective,
   ],
-  providers: [RendererContextService, RendererSettingsService],
+  providers: [RendererContextService],
   template: `
     <ng-container *ngIf="pageSchema.children?.length">
       <!-- <schema-renderer [schema]="rootSchema" [parent]="pageSchema"></schema-renderer> -->
@@ -49,13 +48,10 @@ export class RendererMain {
   cssScopeId: string = '';
   constructor(
     private contextService: RendererContextService,
-    private rendererSettingsService: RendererSettingsService,
-    @Optional() @Inject(RENDERER_SETTINGS_KEY) rendererSettings: IRendererSettings | null,
     private el: ElementRef,
     private ngZone: NgZone,
   ) {
     this.cssScopeId = `data-schema-${Math.random().toString(36).slice(2, 8)}`;
-    this.applyRendererSettings(rendererSettings);
   }
 
   ngAfterViewInit() {
@@ -70,10 +66,6 @@ export class RendererMain {
     if (changes['schema']) {
       this.setSchema(changes['schema'].currentValue);
     }
-  }
-
-  private applyRendererSettings(settings: IRendererSettings | null): void {
-    this.rendererSettingsService.setDefaultPropsMap(settings?.defaultPropsMap);
   }
 
   get rootSchema() {
