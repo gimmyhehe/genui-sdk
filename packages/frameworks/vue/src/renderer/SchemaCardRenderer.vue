@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide } from 'vue';
 // @ts-ignore
-import defaultSchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
+import defaultSchemaRenderer, { RENDERER_SETTINGS } from '@opentiny/tiny-schema-renderer';
 import { DeltaPatcher, repairJson, RepairJsonState, type MaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
 import { requiredCompleteFieldSelectors as internalRequiredCompleteFieldSelectors } from './config';
 import {
@@ -37,9 +37,9 @@ const callAction = (actionName: string, params: any) => {
 const SchemaRenderer = inject(GENUI_RENDERER, defaultSchemaRenderer);
 const vueMaterials = inject<GenuiMaterials>(GENUI_MATERIALS, {});
 const defaultPropsMap = inject<MaterialDefaultValueMap>(GENUI_DEFAULT_PROPS_MAP, {});
-const customSettings = inject(RENDERER_SETTINGS_KEY, {});
+const customSettings = inject(RENDERER_SETTINGS, {});
 
-provide(RENDERER_SETTINGS_KEY, {
+provide(RENDERER_SETTINGS, {
   ...customSettings,
   materials: {
     ...vueMaterials,
