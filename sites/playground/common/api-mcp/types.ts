@@ -1,5 +1,3 @@
-export type OpenApiInputMode = 'url' | 'inline' | 'file';
-
 export type ApiMcpPreviewTool = {
   name: string;
   summary?: string;
@@ -15,14 +13,6 @@ export type ApiMcpPreviewData = {
 };
 
 export type ApiMcpPreviewResult = ApiMcpPreviewData;
-
-export interface OpenApiMcpToolFormData {
-  name: string;
-  openapi: string;
-  openapiInputMode: OpenApiInputMode;
-  openapiFileName?: string;
-  index: number;
-}
 
 export type OpenApiMcpToolConfig = {
   name: string;
