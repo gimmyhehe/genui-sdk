@@ -5,10 +5,10 @@ export {
   readOpenApiFile,
 } from './api-mcp/input-utils.js';
 export type {
-  ApiMcpFormData,
+  OpenApiMcpToolFormData,
   ApiMcpPreviewData,
   ApiMcpPreviewResult,
   ApiMcpPreviewTool,
-  ApiMcpServiceConfig,
+  OpenApiMcpToolConfig,
   OpenApiInputMode,
 } from './api-mcp/types.js';

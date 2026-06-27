@@ -45,7 +45,7 @@ export default defineConfig(({ command }) => {
       fileName: 'version.json',
     }),
     tsconfigPaths({
-      projects: ['./tsconfig.app.json'],
+      projects: [command === 'serve' ? './tsconfig.dev.json' : './tsconfig.app.json'],
     }),
   ];
 

@@ -1,5 +1,5 @@
 import type { PlaygroundAgentConfig } from '../a2a-tools/index.js';
-import type { ApiMcpServiceConfig } from '../common/index.js';
+import type { OpenApiMcpToolConfig } from '../common/index.js';
 import type { McpServersConfig } from './mcp-server.js';
 import type { PlaygroundSkillConfig } from '../skills/index.js';
 
@@ -11,5 +11,5 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents?: PlaygroundAgentConfig[];
   skills?: PlaygroundSkillConfig[];
-  apiMcpServices?: ApiMcpServiceConfig[];
+  openApiMcpTools?: OpenApiMcpToolConfig[];
 }

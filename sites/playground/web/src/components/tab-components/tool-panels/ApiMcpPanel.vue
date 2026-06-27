@@ -106,13 +106,13 @@ const onUpdateApiMcpData = (val) => {
 };
 
 const deleteApiMcpService = (service) => {
-  const services = [...(llmConfig.apiMcpServices || [])];
-  llmConfig.apiMcpServices = services.filter((s) => s.name !== service.name);
+  const services = [...(llmConfig.openApiMcpTools || [])];
+  llmConfig.openApiMcpTools = services.filter((s) => s.name !== service.name);
 };
 
 const updateApiMcpEnabled = (service, enabled) => {
-  const services = [...(llmConfig.apiMcpServices || [])];
-  llmConfig.apiMcpServices = services.map((s) => (s.name === service.name ? { ...s, enabled } : s));
+  const services = [...(llmConfig.openApiMcpTools || [])];
+  llmConfig.openApiMcpTools = services.map((s) => (s.name === service.name ? { ...s, enabled } : s));
 };
 
 const parseOpenApi = async () => {
@@ -191,7 +191,7 @@ const confirmApiMcp = async () => {
       }
     }
 
-    const services = [...(llmConfig.apiMcpServices || [])];
+    const services = [...(llmConfig.openApiMcpTools || [])];
     const nameCollision = services.some((s, i) => i !== index && (s.name || '').trim() === nameTrimmed);
     if (nameCollision) {
       TinyNotify({
@@ -221,7 +221,7 @@ const confirmApiMcp = async () => {
       services.push(nextService);
     }
 
-    llmConfig.apiMcpServices = services;
+    llmConfig.openApiMcpTools = services;
     closeApiMcpDialog();
   } finally {
     confirmLoading.value = false;
@@ -237,7 +237,7 @@ const confirmApiMcp = async () => {
     <div class="mcp-server-list">
       <div
         class="mcp-server-item"
-        v-for="(service, index) in llmConfig.apiMcpServices || []"
+        v-for="(service, index) in llmConfig.openApiMcpTools || []"
         :key="service.name"
       >
         <div class="mcp-server-item-header">
@@ -275,7 +275,7 @@ const confirmApiMcp = async () => {
         <div class="mcp-server-item-description">{{ formatOpenApiSourceLabel(service) }}</div>
       </div>
     </div>
-    <div v-show="llmConfig?.apiMcpServices.length === 0" class="mcp-server-list-empty">
+    <div v-show="llmConfig?.openApiMcpTools.length === 0" class="mcp-server-list-empty">
       <div class="mcp-server-item-empty">
         <div class="mcp-server-item-empty-icon">
           点击右上角

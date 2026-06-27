@@ -18,7 +18,7 @@ import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
 import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
 import { buildSkillTools } from './skills/index.js';
-import { buildApiMcpTools, previewOpenApiMcpRegistration } from './common/index.js';
+import { buildOpenApiMcpTools, previewOpenApiMcpRegistration } from './common/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
@@ -223,7 +223,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     temperature: playgroundConfig.temperature || 0.3,
     agents,
     skills: playgroundConfig.skills || [],
-    apiMcpServices: playgroundConfig.apiMcpServices || [],
+    openApiMcpTools: playgroundConfig.openApiMcpTools || [],
   };
 };
 
@@ -257,7 +257,7 @@ export function createChatGenui() {
     }
 
     const playgroundConfig = getPlaygroundConfig(playgroundStr);
-    const { mcpServers, framework, userAppendPrompt, agents, skills, apiMcpServices } = playgroundConfig;
+    const { mcpServers, framework, userAppendPrompt, agents, skills, openApiMcpTools } = playgroundConfig;
 
     const llmConfigParams: LLMConfigParams = {
       model: playgroundConfig.model,
@@ -273,7 +273,7 @@ export function createChatGenui() {
       externalMcpServers,
       abort.signal,
     );
-    const apiMcpTools = await buildApiMcpTools(apiMcpServices);
+    const apiMcpTools = await buildOpenApiMcpTools(openApiMcpTools);
     const agentTools = buildAgentTools(agents, abort.signal);
     const { tools: skillTools, systemPrompt: skillPrompt } = buildSkillTools(skills);
     const duplicateToolNames = new Set<string>();

@@ -1,4 +1,5 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
+import type { OpenApiMcpToolConfig } from '@playground/common';
 
 export interface IMcpServerConfig {
   name: string;
@@ -35,26 +36,7 @@ export interface ISkillConfig {
   enabled?: boolean;
 }
 
-export interface IApiMcpServiceConfig {
-  name: string;
-  openapi: string;
-  description?: string;
-  baseUrl?: string;
-  apiHeaders?: Record<string, string>;
-  toolNamePrefix?: string;
-  openapiFileName?: string;
-  excludeMethods?: string[];
-  excludePathPrefixes?: string[];
-  toolCount?: number;
-  toolNames?: string[];
-  tools?: Array<{
-    name: string;
-    summary?: string;
-    method: string;
-    path: string;
-  }>;
-  enabled?: boolean;
-}
+export type IOpenApiMcpToolConfig = OpenApiMcpToolConfig;
 
 export interface IPlaygroundConfig {
   mcpServers: IMcpServerConfig[];
@@ -64,7 +46,7 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents: IAgentConfig[];
   skills: ISkillConfig[];
-  apiMcpServices: IApiMcpServiceConfig[];
+  openApiMcpTools: IOpenApiMcpToolConfig[];
 }
 
 /** 仅序列化已启用的 Skill，并去掉 enabled 字段以减小 metadata 体积 */
@@ -94,7 +76,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       temperature,
       agents = [],
       skills = [],
-      apiMcpServices = [],
+      openApiMcpTools = [],
     } = config;
 
     const playgroundConfig = {
@@ -105,7 +87,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       temperature,
       agents: agents.filter((agent) => agent.enabled),
       skills: skillsPayloadForChat(skills),
-      apiMcpServices: apiMcpServices.filter((service) => service.enabled !== false),
+      openApiMcpTools: openApiMcpTools.filter((tool) => tool.enabled !== false),
     };
 
     return fetch(url, {

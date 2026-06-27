@@ -11,7 +11,7 @@ import {
 } from '@opentiny/vue';
 import {
   readOpenApiFile,
-  type ApiMcpFormData,
+  type OpenApiMcpToolFormData,
   type ApiMcpPreviewData,
   type ApiMcpPreviewTool,
   type OpenApiInputMode,
@@ -19,7 +19,7 @@ import {
 
 const props = defineProps<{
   visible: boolean;
-  apiMcpData: ApiMcpFormData;
+  apiMcpData: OpenApiMcpToolFormData;
   previewData: ApiMcpPreviewData | null;
   previewStatus: 'idle' | 'loading' | 'success' | 'error';
   previewError: string;
@@ -29,7 +29,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:visible', value: boolean): void;
-  (e: 'update:apiMcpData', value: ApiMcpFormData): void;
+  (e: 'update:apiMcpData', value: OpenApiMcpToolFormData): void;
   (e: 'parseOpenApi'): void;
   (e: 'confirmApiMcp'): void;
 }>();
@@ -47,15 +47,15 @@ const handleClose = () => {
   emit('update:visible', false);
 };
 
-const patchFormData = (patch: Partial<ApiMcpFormData>) => {
+const patchFormData = (patch: Partial<OpenApiMcpToolFormData>) => {
   emit('update:apiMcpData', {
     ...props.apiMcpData,
     ...patch,
   });
 };
 
-const updateField = (field: keyof ApiMcpFormData, value: string) => {
-  patchFormData({ [field]: value } as Partial<ApiMcpFormData>);
+const updateField = (field: keyof OpenApiMcpToolFormData, value: string) => {
+  patchFormData({ [field]: value } as Partial<OpenApiMcpToolFormData>);
 };
 
 const onModeChange = (mode: OpenApiInputMode) => {

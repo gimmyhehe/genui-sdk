@@ -16,7 +16,7 @@ export type ApiMcpPreviewData = {
 
 export type ApiMcpPreviewResult = ApiMcpPreviewData;
 
-export interface ApiMcpFormData {
+export interface OpenApiMcpToolFormData {
   name: string;
   openapi: string;
   openapiInputMode: OpenApiInputMode;
@@ -24,7 +24,7 @@ export interface ApiMcpFormData {
   index: number;
 }
 
-export type ApiMcpServiceConfig = {
+export type OpenApiMcpToolConfig = {
   name: string;
   openapi: string;
   description?: string;
