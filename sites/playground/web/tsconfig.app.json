@@ -2,6 +2,10 @@
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "baseUrl": "./",
+    "paths": {
+      "@playground/common": ["../common/index.ts"]
+    },
     /*Linting*/
     "strict": false,
     "noUnusedLocals": false,
@@ -11,6 +15,7 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "../common/**/*"
   ]
 }

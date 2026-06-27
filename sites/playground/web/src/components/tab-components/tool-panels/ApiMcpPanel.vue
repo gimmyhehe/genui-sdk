@@ -3,7 +3,7 @@ import { ref, inject } from 'vue';
 import { TinyButton, TinySwitch, TinyPopover, TinyCollapseItem, TinyNotify } from '@opentiny/vue';
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
 import ApiMcpDialog from './ApiMcpDialog.vue';
-import { detectOpenApiInputMode, formatOpenApiSourceLabel } from '../../../common';
+import { detectOpenApiInputMode, formatOpenApiSourceLabel } from '@playground/common';
 
 const playgroundContext = inject('playgroundContext');
 const { llmConfig } = playgroundContext;
@@ -241,7 +241,7 @@ const confirmApiMcp = async () => {
         :key="service.name"
       >
         <div class="mcp-server-item-header">
-          <div class="mcp-server-item-name">{{ service.name }}</div>
+          <div class="mcp-server-item-name" :title="service.name">{{ service.name }}</div>
           <div>
             <tiny-switch
               :model-value="service.enabled !== false"
@@ -275,7 +275,7 @@ const confirmApiMcp = async () => {
         <div class="mcp-server-item-description">{{ formatOpenApiSourceLabel(service) }}</div>
       </div>
     </div>
-    <div v-if="!llmConfig.apiMcpServices || llmConfig.apiMcpServices.length === 0" class="mcp-server-list-empty">
+    <div v-show="llmConfig?.apiMcpServices.length === 0" class="mcp-server-list-empty">
       <div class="mcp-server-item-empty">
         <div class="mcp-server-item-empty-icon">
           点击右上角
@@ -325,9 +325,19 @@ const confirmApiMcp = async () => {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
+
+      > div:last-child {
+        flex-shrink: 0;
+      }
     }
 
     &-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       font-size: 14px;
       font-weight: 600;
       color: #191919;

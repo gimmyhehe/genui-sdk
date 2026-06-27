@@ -8,4 +8,4 @@ export {
   isSupportedOpenApiFile,
   readOpenApiFile,
   type OpenApiInputMode,
-} from '../../../common';
+} from '@playground/common';

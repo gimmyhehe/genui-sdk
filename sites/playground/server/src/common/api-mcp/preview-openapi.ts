@@ -3,7 +3,7 @@ import {
   parseOpenApiInput,
   resolveBaseUrl,
 } from '../openapi/index.js';
-import type { ApiMcpPreviewResult } from './types.js';
+import type { ApiMcpPreviewResult } from '../../../../common/api-mcp/types.js';
 
 export type PreviewOpenApiInput = {
   openapi: string;

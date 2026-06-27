@@ -3,10 +3,12 @@ export {
   formatOpenApiSourceLabel,
   isSupportedOpenApiFile,
   readOpenApiFile,
-} from './input-utils';
+} from './api-mcp/input-utils.js';
 export type {
   ApiMcpFormData,
   ApiMcpPreviewData,
+  ApiMcpPreviewResult,
   ApiMcpPreviewTool,
+  ApiMcpServiceConfig,
   OpenApiInputMode,
-} from './types';
+} from './api-mcp/types.js';

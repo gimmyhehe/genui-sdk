@@ -15,7 +15,7 @@ import {
   type ApiMcpPreviewData,
   type ApiMcpPreviewTool,
   type OpenApiInputMode,
-} from '../../../common';
+} from '@playground/common';
 
 const props = defineProps<{
   visible: boolean;

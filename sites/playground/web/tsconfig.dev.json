@@ -15,6 +15,9 @@
       "schema-renderer-ng-adpater": [
         "../schema-renderer-ng-adpater/src/index.ts"
       ],
+      "@playground/common": [
+        "../common/index.ts"
+      ],
       "@opentiny/genui-sdk-materials-vue-opentiny-vue": [
         "../../../packages/materials/vue-opentiny-vue/src/index.ts"
       ],
