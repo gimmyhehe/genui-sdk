@@ -104,6 +104,7 @@ const llmConfig = reactive(
   cacheLLmConfig || {
     temperature: 0.5,
     model: 'qwen3-coder-30b-a3b-instruct',
+    promptTier: 'standard',
     mcpServers: [],
     agents: [],
     skills: [],

@@ -4,7 +4,6 @@ import { genRootSchema } from '../protocols'; // TODO: protocal cannnot contains
 import type {
   IGenPromptComponent,
   IGenPromptSnippet,
-  IGenPromptExample,
   IGenPromptCustomConfig,
 } from './gen-prompt-config';
 import { getComponentsName, getComponentsInfo } from './handle-component';
@@ -170,50 +169,36 @@ const getExtendWhiteList = (whiteList: string[], customComponents: IGenPromptCom
   return [...new Set([...whiteList, ...newWhiteList])];
 };
 
-export const genPrompt = (
-  rendererConfig: IRendererConfig,
-  tgCustomConfig?: IGenPromptCustomConfig,
-  options?: { isSkill?: boolean },
-) => {
-  const { materialsList, examples, whiteList, wrapperComponent = 'TinyCard' } = rendererConfig;
-  const { customComponents, customSnippets, customExamples, customActions } = tgCustomConfig || {};
-  const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
 
+function buildPromptSections(
+  renderConfig: IRendererConfig,
+  tgCustomConfig: IGenPromptCustomConfig | undefined,
+  options?: { isSkill?: boolean },
+) {
+  const { materialsList, examples, whiteList, wrapperComponent = 'TinyCard', prompt } = renderConfig;
+  const { customComponents, customSnippets, customExamples, customActions } = tgCustomConfig || {};
+  const includeJsonSchema = prompt?.includeJsonSchema ?? true;
+  const includeSnippets = prompt?.includeSnippets ?? true;
+  const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
   const additionRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
 
-  const sections = [
+  return [
     options?.isSkill ? skillPromptPrefix : promptPrefix,
     genComponentsPrompt(materialsList, extendWhiteList, customComponents || []),
-    genJsonSchemaPrompt(genJsonSchema(extendWhiteList)),
+    includeJsonSchema ? genJsonSchemaPrompt(genJsonSchema(extendWhiteList)) : null,
     genExamplesPrompt(examples.concat(customExamples || []), wrapperComponent),
-    genSnippetsPrompt(materialsList, extendWhiteList, customSnippets || []),
+    includeSnippets ? genSnippetsPrompt(materialsList, extendWhiteList, customSnippets || []) : null,
     aboutThis.trim(),
     genCustomActionsPrompt(customActions || []),
     genRulesPrompt(additionRules, tgCustomConfig),
   ].filter(Boolean);
+}
 
-  return sections.join('\n\n');
-};
-
-export function genMiniPrompt(
-  rendererConfig: IRendererConfig,
+export function genPrompt(
+  renderConfig: IRendererConfig,
   tgCustomConfig?: IGenPromptCustomConfig,
   options?: { isSkill?: boolean },
 ) {
-  const { materialsList, examples, whiteList, wrapperComponent = 'TinyCard' } = rendererConfig;
-  const { customComponents, customExamples, customActions } = tgCustomConfig || {};
-  const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
-
-  const additionRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
-
-  const sections = [
-    options?.isSkill ? skillPromptPrefix : promptPrefix,
-    genComponentsPrompt(materialsList, extendWhiteList, customComponents || []),
-    genExamplesPrompt(examples.concat(customExamples || []), wrapperComponent),
-    aboutThis.trim(),
-    genCustomActionsPrompt(customActions || []),
-    genRulesPrompt(additionRules, tgCustomConfig),
-  ].filter(Boolean);
-
+  const sections = buildPromptSections(renderConfig, tgCustomConfig, options);
   return sections.join('\n\n');
 }

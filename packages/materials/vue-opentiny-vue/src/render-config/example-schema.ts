@@ -382,8 +382,8 @@ export const tabsSchema = {
 };
 
 export const examples = [
-  { name: '双向绑定的表单', schema: formSchema },
-  { name: '信息展示卡片', schema: infoCardSchema },
-  { name: '表格卡片', schema: gridSchema },
-  { name: 'Tabs卡片', schema: tabsSchema },
+  { id: 'form', name: '双向绑定的表单', schema: formSchema },
+  { id: 'info', name: '信息展示卡片', schema: infoCardSchema },
+  { id: 'grid', name: '表格卡片', schema: gridSchema },
+  { id: 'tabs', name: 'Tabs卡片', schema: tabsSchema },
 ];

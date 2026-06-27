@@ -43,6 +43,7 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents: IAgentConfig[];
   skills: ISkillConfig[];
+  promptTier?: string;
 }
 
 /** 仅序列化已启用的 Skill，并去掉 enabled 字段以减小 metadata 体积 */
@@ -64,7 +65,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
     
     const body = JSON.parse(options.body);
     const config = getConfig();
-    const { mcpServers, framework, promptList, model, temperature, agents = [], skills = [] } = config;
+    const { mcpServers, framework, promptList, model, temperature, agents = [], skills = [], promptTier } = config;
 
     const playgroundConfig = {
       mcpServers,
@@ -74,6 +75,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       temperature,
       agents: agents.filter((agent) => agent.enabled),
       skills: skillsPayloadForChat(skills),
+      promptTier,
     };
 
     return fetch(url, {

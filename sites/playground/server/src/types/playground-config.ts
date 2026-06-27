@@ -10,4 +10,5 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents?: PlaygroundAgentConfig[];
   skills?: PlaygroundSkillConfig[];
+  promptTier?: string;
 }

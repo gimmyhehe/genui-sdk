@@ -1,9 +1,15 @@
 import type { CardSchema } from './schema';
 
 export interface IExample {
+  id?: string;
   name: string;
   description?: string;
   schema: CardSchema;
+}
+
+export interface IPromptSectionConfig {
+  includeJsonSchema?: boolean;
+  includeSnippets?: boolean;
 }
 
 export interface IRendererConfig {
@@ -11,4 +17,5 @@ export interface IRendererConfig {
   examples: IExample[];
   whiteList: string[];
   wrapperComponent?: string;
+  prompt?: IPromptSectionConfig;
 }

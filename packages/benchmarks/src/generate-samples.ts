@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { genPrompt } from '@opentiny/genui-sdk-core';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { getRendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { ngRendererConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
 import type { LlmBenchmarkRunOptions, LlmBenchmarkSample, LlmBenchmarkSampleCase } from './framework/index';
 import { coreLlmBenchmarkSampleCases } from './samples';
@@ -27,7 +27,7 @@ import { streamText } from 'ai';
  */
 function buildSystemPrompt(framework: 'Vue' | 'Angular', promptConfig: LlmBenchmarkRunOptions['promptConfig']) {
   const { tgCustomConfig, specificPrompt, userAppendPrompt } = promptConfig;
-  const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;
+  const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : getRendererConfig();
   return genPrompt(renderConfigForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt;
 }
 /**

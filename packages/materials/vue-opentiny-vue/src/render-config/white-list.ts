@@ -111,6 +111,19 @@ export const miniWhiteList = [
   'TinyCheckbox',
   'TinyCheckboxButton',
   'TinyCheckboxGroup',
+  'TinyDatePicker',
   'TinyGrid',
   'TinyCard',
 ];
+
+const PLUS_ONLY_COMPONENTS = [
+  'TinyCarouselItem',
+  'TinyCarousel',
+  'TinyPager',
+  'TinyTree',
+  'TinyTransfer',
+] as const;
+
+export const standardWhiteList = whiteList.filter(
+  (name) => !PLUS_ONLY_COMPONENTS.includes(name as (typeof PLUS_ONLY_COMPONENTS)[number]),
+);

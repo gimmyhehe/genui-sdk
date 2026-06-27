@@ -3,7 +3,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { getRendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { ngRendererConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
 import { streamText, stepCountIs } from 'ai';
 import getRawBody from 'raw-body';
 import { openaiCompatibleTransformChunk } from '@opentiny/genui-sdk-chat-completions';
@@ -36,6 +37,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     userAppendPrompt: playgroundConfig.promptList?.filter(Boolean).join('\n') || '',
     model: playgroundConfig.model || '',
     temperature: playgroundConfig.temperature || 0.3,
+    promptTier: playgroundConfig.promptTier,
   };
 };
 
@@ -76,7 +78,7 @@ export const createChatTemplate = () => {
       }
 
       const playgroundConfig = getPlaygroundConfig(playgroundStr);
-      const { mcpServers, framework, userAppendPrompt } = playgroundConfig;
+      const { mcpServers, framework, userAppendPrompt, promptTier } = playgroundConfig;
 
       const llmConfigParams: LLMConfigParams = {
         model: playgroundConfig.model,
@@ -90,8 +92,10 @@ export const createChatTemplate = () => {
         mcpServers.filter((s) => s.enabled),
         abort.signal,
       );
+      const renderConfigForFramework =
+        framework === 'Angular' ? ngRendererConfig : getRendererConfig(promptTier);
       const maxSteps = 30;
-      const systemPrompt = `${genPrompt(rendererConfig, tgCustomConfig)}
+      const systemPrompt = `${genPrompt(renderConfigForFramework, tgCustomConfig)}
       ${body.templateSchema ? generateJsonPatchPrompt() : ''}
       ${specificPrompt}
       ${customSystemPrompt}`;

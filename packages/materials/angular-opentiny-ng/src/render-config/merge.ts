@@ -8,6 +8,10 @@ interface IRendererConfig {
   examples: any[];
   whiteList: string[];
   wrapperComponent: string;
+  prompt?: {
+    includeJsonSchema?: boolean;
+    includeSnippets?: boolean;
+  };
 }
 
 export const ngRendererConfig: IRendererConfig = {
@@ -15,4 +19,5 @@ export const ngRendererConfig: IRendererConfig = {
   examples,
   whiteList,
   wrapperComponent: 'TiCard',
+  prompt: { includeJsonSchema: true, includeSnippets: true },
 };

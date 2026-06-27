@@ -30,6 +30,10 @@
   "model": {
     "select": "Model",
     "temperature": "Temperature",
+    "promptTier": "Prompt tier",
+    "promptTierMini": "Mini",
+    "promptTierStandard": "Standard",
+    "promptTierPlus": "Plus",
     "prompt": "Prompts",
     "edit": "Edit",
     "delete": "Delete",
