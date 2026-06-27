@@ -1,8 +1,8 @@
 import type { IMaterials } from '../protocols';
 import type { IWhiteList } from './prompt';
 
-export const extractSnippets = (materialsList: any[]) => {
-  return materialsList
+export const extractSnippets = (materials: any[]) => {
+  return materials
     .map((material) => material.data.materials.snippets)
     .filter((i) => i)
     .flat();
@@ -32,8 +32,8 @@ export const filterSnippets = (snippet: any, whiteList: IWhiteList) => {
   return validList.includes(name);
 };
 
-export const getSnippetsInfo = (materialsList: IMaterials[], whiteList: IWhiteList) => {
-  return flatSnippets(extractSnippets(materialsList))
+export const getSnippetsInfo = (materials: IMaterials[], whiteList: IWhiteList) => {
+  return flatSnippets(extractSnippets(materials))
     .filter((snippet: any) => filterSnippets(snippet, whiteList))
     .map((item: any) => item.schema);
 };

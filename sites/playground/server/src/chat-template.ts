@@ -3,8 +3,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
-import { getRendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
-import { ngRendererConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
+import { MATERIALS_CONFIG_MAP, materialsConfig, type MaterialsConfigKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { ngMaterialsConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
 import { streamText, stepCountIs } from 'ai';
 import getRawBody from 'raw-body';
 import { openaiCompatibleTransformChunk } from '@opentiny/genui-sdk-chat-completions';
@@ -93,7 +93,9 @@ export const createChatTemplate = () => {
         abort.signal,
       );
       const renderConfigForFramework =
-        framework === 'Angular' ? ngRendererConfig : getRendererConfig(promptTier);
+        framework === 'Angular'
+          ? ngMaterialsConfig
+          : MATERIALS_CONFIG_MAP[promptTier as MaterialsConfigKey] ?? materialsConfig;
       const maxSteps = 30;
       const systemPrompt = `${genPrompt(renderConfigForFramework, tgCustomConfig)}
       ${body.templateSchema ? generateJsonPatchPrompt() : ''}

@@ -1,5 +1,5 @@
 import { type JsonSchema7Type, zodToJsonSchema } from 'zod-to-json-schema';
-import type { IMaterials, CardSchema, IRendererConfig, IExample } from '../protocols';
+import type { IMaterials, CardSchema, IMaterialsConfig, IExample } from '../protocols';
 import { genRootSchema } from '../protocols'; // TODO: protocal cannnot contains methods
 import type {
   IGenPromptComponent,
@@ -27,11 +27,11 @@ export const skillPromptPrefix = `# 技能说明
 `;
 
 export const genComponentsPrompt = (
-  materialsList: IMaterials[],
+  materials: IMaterials[],
   whiteList: IWhiteList,
   customComponents: IGenPromptComponent[],
 ) => {
-  const componentsInfo = getComponentsInfo(materialsList, whiteList) as IGenPromptComponent[];
+  const componentsInfo = getComponentsInfo(materials, whiteList) as IGenPromptComponent[];
   return `## 可用组件
 
 必须使用以下支持的 componentName：\`${whiteList.join('`, `')}\`
@@ -76,7 +76,7 @@ ${examplesStr}
 };
 
 export const genSnippetsPrompt = (
-  materialsList: IMaterials[],
+  materials: IMaterials[],
   whiteList: IWhiteList,
   customSnippets: IGenPromptSnippet[],
 ) => {
@@ -85,7 +85,7 @@ export const genSnippetsPrompt = (
 以下是一些组件使用的 schema 片段：
 
 \`\`\`json
-${JSON.stringify(getSnippetsInfo(materialsList, whiteList).concat(customSnippets))}
+${JSON.stringify(getSnippetsInfo(materials, whiteList).concat(customSnippets))}
 \`\`\`
 `;
 };
@@ -171,23 +171,23 @@ const getExtendWhiteList = (whiteList: string[], customComponents: IGenPromptCom
 
 
 function buildPromptSections(
-  renderConfig: IRendererConfig,
+  renderConfig: IMaterialsConfig,
   tgCustomConfig: IGenPromptCustomConfig | undefined,
   options?: { isSkill?: boolean },
 ) {
-  const { materialsList, examples, whiteList, wrapperComponent = 'TinyCard', prompt } = renderConfig;
+  const { materials, examples, whiteList, wrapperComponent = 'TinyCard', promptConfig } = renderConfig;
   const { customComponents, customSnippets, customExamples, customActions } = tgCustomConfig || {};
-  const includeJsonSchema = prompt?.includeJsonSchema ?? true;
-  const includeSnippets = prompt?.includeSnippets ?? true;
+  const includeJsonSchema = promptConfig?.includeJsonSchema ?? true;
+  const includeSnippets = promptConfig?.includeSnippets ?? true;
   const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
   const additionRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
 
   return [
     options?.isSkill ? skillPromptPrefix : promptPrefix,
-    genComponentsPrompt(materialsList, extendWhiteList, customComponents || []),
+    genComponentsPrompt(materials, extendWhiteList, customComponents || []),
     includeJsonSchema ? genJsonSchemaPrompt(genJsonSchema(extendWhiteList)) : null,
     genExamplesPrompt(examples.concat(customExamples || []), wrapperComponent),
-    includeSnippets ? genSnippetsPrompt(materialsList, extendWhiteList, customSnippets || []) : null,
+    includeSnippets ? genSnippetsPrompt(materials, extendWhiteList, customSnippets || []) : null,
     aboutThis.trim(),
     genCustomActionsPrompt(customActions || []),
     genRulesPrompt(additionRules, tgCustomConfig),
@@ -195,7 +195,7 @@ function buildPromptSections(
 }
 
 export function genPrompt(
-  renderConfig: IRendererConfig,
+  renderConfig: IMaterialsConfig,
   tgCustomConfig?: IGenPromptCustomConfig,
   options?: { isSkill?: boolean },
 ) {

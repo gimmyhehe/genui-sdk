@@ -10,56 +10,49 @@ export interface IPromptSectionConfig {
   includeSnippets?: boolean;
 }
 
-export interface IRendererConfig {
-  materialsList: any[];
+export interface IMaterialsConfig {
+  materials: any[];
   examples: any[];
   whiteList: string[];
   wrapperComponent?: string;
-  prompt?: IPromptSectionConfig;
+  promptConfig?: IPromptSectionConfig;
 }
 
 const BASE_CONFIG = {
-  materialsList: [bundleJson, builtinJson, chartJson, extendJson],
+  materials: [bundleJson, builtinJson, chartJson, extendJson],
   wrapperComponent: 'TinyCard',
 };
 
 const filterExamples = (ids: string[]) =>
   allExamples.filter((example) => example.id && ids.includes(example.id));
 
-export const miniRendererConfig: IRendererConfig = {
+export const miniMaterialsConfig: IMaterialsConfig = {
   ...BASE_CONFIG,
   whiteList: miniWhiteList,
   examples: filterExamples(['form', 'grid']),
-  prompt: { includeJsonSchema: false, includeSnippets: false },
+  promptConfig: { includeJsonSchema: false, includeSnippets: false },
 };
 
-export const standardRendererConfig: IRendererConfig = {
+export const standardMaterialsConfig: IMaterialsConfig = {
   ...BASE_CONFIG,
   whiteList: standardWhiteList,
   examples: filterExamples(['form', 'info', 'grid', 'tabs']),
-  prompt: { includeJsonSchema: true, includeSnippets: true },
+  promptConfig: { includeJsonSchema: true, includeSnippets: true },
 };
 
-export const plusRendererConfig: IRendererConfig = {
+export const plusMaterialsConfig: IMaterialsConfig = {
   ...BASE_CONFIG,
   whiteList: whiteList,
   examples: allExamples,
-  prompt: { includeJsonSchema: true, includeSnippets: true },
+  promptConfig: { includeJsonSchema: true, includeSnippets: true },
 };
 
-export const RENDERER_CONFIGS = {
-  mini: miniRendererConfig,
-  standard: standardRendererConfig,
-  plus: plusRendererConfig,
+export const MATERIALS_CONFIG_MAP = {
+  mini: miniMaterialsConfig,
+  standard: standardMaterialsConfig,
+  plus: plusMaterialsConfig,
 } as const;
 
-export type RendererConfigKey = keyof typeof RENDERER_CONFIGS;
+export type MaterialsConfigKey = keyof typeof MATERIALS_CONFIG_MAP;
 
-export function getRendererConfig(key?: string): IRendererConfig {
-  if (key && key in RENDERER_CONFIGS) {
-    return RENDERER_CONFIGS[key as RendererConfigKey];
-  }
-  return standardRendererConfig;
-}
-
-export const rendererConfig = standardRendererConfig;
+export const materialsConfig = standardMaterialsConfig;

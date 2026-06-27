@@ -12,10 +12,10 @@ export interface IPromptSectionConfig {
   includeSnippets?: boolean;
 }
 
-export interface IRendererConfig {
-  materialsList: any[];
+export interface IMaterialsConfig {
+  materials: any[];
   examples: IExample[];
   whiteList: string[];
   wrapperComponent?: string;
-  prompt?: IPromptSectionConfig;
+  promptConfig?: IPromptSectionConfig;
 }

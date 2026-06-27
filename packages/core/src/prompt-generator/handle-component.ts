@@ -4,7 +4,7 @@ import type { IWhiteList } from './prompt';
 export interface IUsefulPropInfo {
   property: string;
   description: string;
-  required: boolean;
+  required?: boolean;
   type: string;
   defaultValue: any;
   properties?: any;
@@ -25,7 +25,6 @@ const getUsefulPropInfo = (propsGroup: any) => {
     const usefulPropInfo: IUsefulPropInfo = {
       property,
       description: getI18n(description) || getI18n(label),
-      required,
       type,
       defaultValue,
     };
@@ -82,18 +81,18 @@ const filterComponent = (component: any, whiteList: IWhiteList) => {
   return false;
 };
 
-const extractComponents = (materialsList: any[], whiteList: IWhiteList) => {
-  return materialsList
+const extractComponents = (materials: any[], whiteList: IWhiteList) => {
+  return materials
     .map((material) => material.data.materials.components)
     .filter((i) => i)
     .flat()
     .filter((component) => filterComponent(component, whiteList));
 };
 
-export const getComponentsName = (materialsList: IMaterials[], whiteList: IWhiteList) => {
-  return extractComponents(materialsList, whiteList).map((component) => component.component);
+export const getComponentsName = (materials: IMaterials[], whiteList: IWhiteList) => {
+  return extractComponents(materials, whiteList).map((component) => component.component);
 };
 
-export const getComponentsInfo = (materialsList: IMaterials[], whiteList: IWhiteList) => {
-  return extractComponents(structuredClone(materialsList), whiteList).map(getUsefulInfo);
+export const getComponentsInfo = (materials: IMaterials[], whiteList: IWhiteList) => {
+  return extractComponents(structuredClone(materials), whiteList).map(getUsefulInfo);
 };

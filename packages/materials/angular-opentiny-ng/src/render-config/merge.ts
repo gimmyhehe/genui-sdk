@@ -3,21 +3,21 @@ import { examples } from './example-schema';
 import { whiteList } from './white-list';
 
 // 定义渲染器配置的类型
-interface IRendererConfig {
-  materialsList: any[];
+interface IMaterialsConfig {
+  materials: any[];
   examples: any[];
   whiteList: string[];
   wrapperComponent: string;
-  prompt?: {
+  promptConfig?: {
     includeJsonSchema?: boolean;
     includeSnippets?: boolean;
   };
 }
 
-export const ngRendererConfig: IRendererConfig = {
-  materialsList: [bundleJson],
+export const ngMaterialsConfig: IMaterialsConfig = {
+  materials: [bundleJson],
   examples,
   whiteList,
   wrapperComponent: 'TiCard',
-  prompt: { includeJsonSchema: true, includeSnippets: true },
+  promptConfig: { includeJsonSchema: true, includeSnippets: true },
 };

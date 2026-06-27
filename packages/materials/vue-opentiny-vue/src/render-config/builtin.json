@@ -42,7 +42,6 @@
                   {
                     "property": "params",
                     "type": "string",
-                    "defaultValue": "",
                     "label": {
                       "text": {
                         "zh_CN": "作用域参数"
@@ -217,7 +216,6 @@
                   {
                     "property": "style",
                     "type": "string",
-                    "defaultValue": "",
                     "label": {
                       "text": {
                         "zh_CN": "样式"
@@ -235,7 +233,6 @@
                   {
                     "property": "dataSource",
                     "type": "string",
-                    "defaultValue": "",
                     "bindState": false,
                     "label": {
                       "text": {
@@ -328,8 +325,7 @@
                   ],
                   "returns": {
                   }
-                },
-                "defaultValue": ""
+                }
               }
             },
             "shortcuts": {
@@ -405,8 +401,7 @@
                   ],
                   "returns": {
                   }
-                },
-                "defaultValue": ""
+                }
               }
             },
             "shortcuts": {
@@ -449,7 +444,6 @@
                   {
                     "property": "src",
                     "type": "string",
-                    "defaultValue": "",
                     "bindState": true,
                     "label": {
                       "text": {
@@ -482,8 +476,7 @@
                   ],
                   "returns": {
                   }
-                },
-                "defaultValue": ""
+                }
               }
             },
             "shortcuts": {

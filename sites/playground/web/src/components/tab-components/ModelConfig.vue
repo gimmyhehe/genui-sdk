@@ -12,7 +12,7 @@ import {
 import { iconPlus, iconEllipsis, iconEdit, iconDel } from '@opentiny/vue-icon';
 import SelectTemplateDialog from './SelectTemplateDialog.vue';
 import { t } from '../../i18n';
-import { RENDERER_CONFIGS } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { MATERIALS_CONFIG_MAP } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 
 const renderConfigLabelMap = {
   mini: 'model.promptTierMini',
@@ -44,7 +44,7 @@ const updateModel = (model) => updateConfig({ model });
 
 const updateTemperature = (temperature) => updateConfig({ temperature });
 
-const promptTierOptions = Object.keys(RENDERER_CONFIGS).map((key) => ({
+const promptTierOptions = Object.keys(MATERIALS_CONFIG_MAP).map((key) => ({
   value: key,
   label: t(renderConfigLabelMap[key] || key),
 }));

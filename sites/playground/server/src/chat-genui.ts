@@ -6,8 +6,8 @@ import path from 'node:path';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
 import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
-import { getRendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
-import { ngRendererConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
+import { MATERIALS_CONFIG_MAP, materialsConfig, type MaterialsConfigKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { ngMaterialsConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
@@ -289,7 +289,9 @@ export function createChatGenui() {
     const tools = { ...mcpTools, ...agentTools, ...skillTools };
 
     const renderConfigForFramework =
-      framework === 'Angular' ? ngRendererConfig : getRendererConfig(promptTier);
+      framework === 'Angular'
+        ? ngMaterialsConfig
+        : MATERIALS_CONFIG_MAP[promptTier as MaterialsConfigKey] ?? materialsConfig;
     const maxSteps = 30;
     let hasError = false; // 标记是否已经处理了错误
 
