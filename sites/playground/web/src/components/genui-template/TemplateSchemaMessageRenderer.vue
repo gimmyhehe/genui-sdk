@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
 import SchemaVersionCard from './SchemaVersionCard.vue';
 import { useIsMobile } from '../../use-mobile';
-import useTemplate from './useTemplate';
+import useTemplate from './composables/use-template';
 import {
   rebuildSchemaFromCard,
 } from './template-chat-utils';

@@ -1,9 +1,9 @@
 import { ref, shallowRef, computed } from 'vue';
 import { useConversation, IndexedDBStrategy } from '@opentiny/genui-sdk-vue';
 import { AIClient, type ChatMessage } from '@opentiny/tiny-robot-kit';
-import { CustomModelProvider } from './template-provider';
-import type { LLMConfig, ISchemaManualMessageItem, ISchemaManualEditRecord } from './chat.types';
-import { formatDate, generateId } from '../../utils';
+import { CustomModelProvider } from '../template-provider';
+import type { LLMConfig, ISchemaManualMessageItem, ISchemaManualEditRecord } from '../chat.types';
+import { formatDate, generateId } from '../../../utils';
 import {
   findLatestSchemaInConversation,
   resolveRenderableSchemaFromMessages,
@@ -15,8 +15,8 @@ import {
   manualEditToCardSnapshot,
   repairAllStalePendingSchemaCards,
   normalizeManualSchemaSaveMessages,
-} from './template-chat-utils';
-import { t } from '../../i18n';
+} from '../template-chat-utils';
+import { t } from '../../../i18n';
 
 const conversation = shallowRef<ReturnType<typeof useConversation> | null>(null);
 let templateProvider: CustomModelProvider | null = null;

@@ -11,7 +11,7 @@ import McpTools from './tab-components/mcpTools.vue';
 import GenuiHistory from './tab-components/GenuiHistory.vue';
 import LanguageSwitcher from './LanguageSwitcher.vue';
 import { useIsMobile } from '../hooks';
-import useTemplate from './genui-template/useTemplate';
+import useTemplate from './genui-template/composables/use-template';
 import { t } from '../i18n';
 
 const props = defineProps({

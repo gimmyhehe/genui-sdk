@@ -1,30 +1,18 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
+import { computed } from 'vue';
 import { CodeEditor, DiffEditor } from 'monaco-editor-vue3';
 import { GenuiConfigProvider, GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 import { TinyButton } from '@opentiny/vue';
 import { iconClose, iconTime } from '@opentiny/vue-icon';
-import type { Conversation } from '@opentiny/tiny-robot-kit';
 import GenuiTemplateChat from './GenuiTemplateChat.vue';
 import GenuiTemplateMobileSheet from './GenuiTemplateMobileSheet.vue';
 import SchemaVersionHistoryPanel from './SchemaVersionHistoryPanel.vue';
-import useTemplate from './useTemplate';
+import useTemplate from './composables/use-template';
 import { useIsMobile } from '../../use-mobile';
-import { SCHEMA_JSON_DIFF_EDITOR_OPTIONS, useMonacoPlaygroundTheme } from './use-monaco-playground-theme';
-import {
-  findLatestSchemaCardInConversation,
-  isRenderableSchema,
-  rebuildSchemaFromCard,
-  collectSchemaVersionHistory,
-  groupSchemaVersionHistory,
-  filterSchemaVersionHistoryForCard,
-  resolveSchemaCardScopeId,
-  resolveSchemaVersionDiffOriginal,
-  resolveSchemaVersionDiffModified,
-  hasUnifiedDiffChanges,
-} from './template-chat-utils';
-import type { ISchemaVersionHistoryEntry } from './template-chat-utils/schema-version-history';
+import { SCHEMA_JSON_DIFF_EDITOR_OPTIONS, useMonacoPlaygroundTheme } from './composables/use-monaco-playground-theme';
+import { isRenderableSchema } from './template-chat-utils';
+import { useGenuiTemplate } from './composables';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 import { locale, t } from '../../i18n';
 import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
@@ -36,22 +24,51 @@ const TinyIconTime = iconTime();
 
 const {
   currentSchema,
-  setCurrentSchema,
-  setCurrentPreviewSchema,
   currentPreviewSchema,
   currentPreviewSchemaComplete,
   currentCardId,
-  currentConversationId,
-  messages,
-  templateConversationState,
-  applySchemaFromMessages,
-  appendManualSchemaVersion,
 } = useTemplate();
+
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
 
 const monacoTheme = useMonacoPlaygroundTheme(() => props.theme);
+
+const {
+  rendererPanelVisible,
+  schemaHistoryVisible,
+  schemaEditorVisible,
+  mobileSchemaJsonEditorOpen,
+  schemaVersionHistoryGroups,
+  schemaEditorText,
+  schemaEditorDiffOriginal,
+  schemaEditorDiffModified,
+  schemaEditorShowDiffView,
+  toggleSchemaHistoryPanel,
+  closeSchemaHistoryPanel,
+  showReturnLatestButton,
+  showApplyVersionButton,
+  isSchemaEditorReadOnly,
+  schemaEditorDirty,
+  schemaEditorSaveLoading,
+  applySchemaEditorTextToPreview,
+  editorOptions,
+  toggleSchemaEditor,
+  closeSchemaEditorView,
+  closeRendererPanel,
+  onMobileSheetMaskClick,
+  handleMobileJsonEditorOpen,
+  mobileSheetPanelStyle,
+  onMobileSheetGrabTouchStart,
+  handleHistoryEntrySelect,
+  toggleSchemaVersion,
+  selectSchemaVersionCard,
+  applyCurrentVersion,
+  handleSaveSchemaEditor,
+  resetToLatestVersion,
+  onSchemaRefresh,
+} = useGenuiTemplate();
 
 const rendererSchema = computed(() => {
   const schema = currentPreviewSchema.value ?? currentSchema.value;
@@ -62,501 +79,6 @@ const rendererSchemaKey = computed(() => {
   const schema = rendererSchema.value as Record<string, unknown> | null;
   const componentName = schema?.componentName ?? 'schema';
   return `${currentCardId.value || 'preview'}-${String(componentName)}`;
-});
-const rendererPanelVisible = ref(true);
-const schemaHistoryVisible = ref(false);
-const schemaEditorVisible = ref(false);
-const mobileSchemaJsonEditorOpen = ref(false);
-const MOBILE_SHEET_DEFAULT_HEIGHT_VH = 64;
-const MOBILE_SHEET_MIN_HEIGHT_VH = 42;
-const MOBILE_SHEET_MAX_HEIGHT_VH = 92;
-const mobileSheetHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
-const mobileSheetDragStartY = ref(0);
-const mobileSheetDragStartHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
-const mobileSheetDragging = ref(false);
-const latestSchemaCardId = computed(() => {
-  return findLatestSchemaCardInConversation(messages.value)?.cardId ?? '';
-});
-
-const allSchemaVersionHistoryEntries = computed(() =>
-  collectSchemaVersionHistory(messages.value, {
-    currentCardId: currentCardId.value,
-    latestCardId: latestSchemaCardId.value,
-  }),
-);
-
-const currentHistoryScopeCardId = computed(() =>
-  currentCardId.value ? resolveSchemaCardScopeId(messages.value, currentCardId.value) : '',
-);
-
-const schemaVersionHistoryGroups = computed(() => {
-  const scopedEntries = filterSchemaVersionHistoryForCard(
-    allSchemaVersionHistoryEntries.value,
-    messages.value,
-    currentHistoryScopeCardId.value,
-    currentCardId.value,
-  );
-  return groupSchemaVersionHistory(scopedEntries);
-});
-
-const isLatestSchemaVersionCard = (cardId: string) => {
-  if (!cardId || !latestSchemaCardId.value) {
-    return false;
-  }
-  if (cardId === latestSchemaCardId.value) {
-    return true;
-  }
-  return allSchemaVersionHistoryEntries.value.some((entry) => entry.isLatest && entry.cardId === cardId);
-};
-
-const flatSchemaVersionHistoryEntries = computed(() =>
-  schemaVersionHistoryGroups.value.flatMap((group) => group.items),
-);
-
-const currentHistoryEntry = computed(
-  () => flatSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value) ?? null,
-);
-
-const schemaEditorDiffFromHistory = ref(false);
-
-const schemaEditorDiffOriginal = computed(() => {
-  const entry = currentHistoryEntry.value;
-  if (!entry) {
-    return '{}';
-  }
-  return resolveSchemaVersionDiffOriginal(entry, flatSchemaVersionHistoryEntries.value);
-});
-
-const schemaEditorDiffModified = computed(() => {
-  const entry = currentHistoryEntry.value;
-  if (!entry) {
-    return schemaEditorText.value;
-  }
-  return resolveSchemaVersionDiffModified(entry);
-});
-
-const schemaEditorShowDiffView = computed(() => {
-  if (!schemaEditorDiffFromHistory.value || !currentHistoryEntry.value) {
-    return false;
-  }
-  return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
-});
-
-const toggleSchemaHistoryPanel = () => {
-  schemaHistoryVisible.value = !schemaHistoryVisible.value;
-};
-
-const closeSchemaHistoryPanel = () => {
-  schemaHistoryVisible.value = false;
-};
-
-const isViewingHistoryVersion = ref(false);
-const showReturnLatestButton = computed(
-  () =>
-    isViewingHistoryVersion.value &&
-    !isHistoryVersionApplied.value &&
-    Boolean(currentCardId.value && !isLatestSchemaVersionCard(currentCardId.value)),
-);
-
-const showApplyVersionButton = computed(() => showReturnLatestButton.value && !isHistoryVersionApplied.value);
-
-const isHistoryVersionApplied = ref(true);
-
-const isViewingHistoryWithoutApply = computed(() => showReturnLatestButton.value && !isHistoryVersionApplied.value);
-
-const isSchemaEditorReadOnly = computed(() => schemaEditorDiffFromHistory.value || isViewingHistoryWithoutApply.value);
-
-const schemaEditorText = ref('{}');
-const schemaEditorBaseline = ref('{}');
-
-const isSchemaJsonEditorActive = computed(
-  () => (schemaEditorVisible.value && !isMobile.value) || (isMobile.value && mobileSchemaJsonEditorOpen.value),
-);
-
-const hasUnsavedSchemaEditorChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
-const schemaEditorDirty = computed(() => isSchemaJsonEditorActive.value && hasUnsavedSchemaEditorChanges());
-const schemaEditorSaveLoading = ref(false);
-
-const syncSchemaEditorBaseline = () => {
-  if (currentPreviewSchema.value) {
-    const text = JSON.stringify(currentPreviewSchema.value, null, 2);
-    schemaEditorText.value = text;
-    schemaEditorBaseline.value = text;
-  } else {
-    schemaEditorText.value = '{}';
-    schemaEditorBaseline.value = '{}';
-  }
-};
-
-const revertUnsavedSchemaEditorChanges = () => {
-  if (!hasUnsavedSchemaEditorChanges()) {
-    return;
-  }
-
-  schemaEditorText.value = schemaEditorBaseline.value;
-
-  try {
-    const schema = JSON.parse(schemaEditorBaseline.value || '{}');
-    setCurrentPreviewSchema(schema);
-  } catch {
-    syncSchemaEditorBaseline();
-  }
-};
-
-const applySchemaEditorTextToPreview = (value: string) => {
-  if (isSchemaEditorReadOnly.value) {
-    return;
-  }
-  schemaEditorText.value = value;
-  try {
-    const schema = JSON.parse(value || '{}');
-    setCurrentPreviewSchema(schema);
-  } catch (error) {
-    console.error('schemaEditor parse error ===>', error);
-  }
-};
-
-const editorOptions = computed(() => {
-  const readOnly = isSchemaEditorReadOnly.value;
-  return {
-    fontSize: 14,
-    minimap: { enabled: false },
-    automaticLayout: true,
-    folding: true,
-    foldingHighlight: true,
-    foldingStrategy: 'indentation',
-    formatOnPaste: !readOnly,
-    readOnly,
-    domReadOnly: readOnly,
-  };
-});
-
-const toggleSchemaEditor = () => {
-  if (schemaEditorVisible.value) {
-    revertUnsavedSchemaEditorChanges();
-  } else if (!isMobile.value) {
-    syncSchemaEditorBaseline();
-  }
-  schemaEditorVisible.value = !schemaEditorVisible.value;
-  if (isMobile.value) {
-    mobileSchemaJsonEditorOpen.value = false;
-  }
-};
-
-const closeSchemaEditorView = () => {
-  revertUnsavedSchemaEditorChanges();
-  schemaEditorVisible.value = false;
-  mobileSchemaJsonEditorOpen.value = false;
-  schemaEditorDiffFromHistory.value = false;
-  mobileSheetDragging.value = false;
-  mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
-};
-
-const closeRendererPanel = () => {
-  rendererPanelVisible.value = false;
-  closeSchemaEditorView();
-};
-
-const onMobileSheetMaskClick = () => {
-  if (mobileSchemaJsonEditorOpen.value) {
-    handleMobileJsonEditorOpen(false);
-  }
-};
-
-const handleMobileJsonEditorOpen = (open: boolean) => {
-  if (open) {
-    syncSchemaEditorBaseline();
-  } else {
-    revertUnsavedSchemaEditorChanges();
-  }
-  mobileSchemaJsonEditorOpen.value = open;
-};
-
-const mobileSheetPanelStyle = computed(() => ({
-  height: `${mobileSheetHeightVh.value}vh`,
-}));
-
-const clampMobileSheetHeight = (heightVh: number) =>
-  Math.min(MOBILE_SHEET_MAX_HEIGHT_VH, Math.max(MOBILE_SHEET_MIN_HEIGHT_VH, heightVh));
-
-const handleMobileSheetDragMove = (event: TouchEvent) => {
-  if (!mobileSheetDragging.value) {
-    return;
-  }
-  const touch = event.touches[0];
-  if (!touch) {
-    return;
-  }
-  const deltaY = touch.clientY - mobileSheetDragStartY.value;
-  const deltaVh = (deltaY / window.innerHeight) * 100;
-  mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetDragStartHeightVh.value - deltaVh);
-  event.preventDefault();
-};
-
-const removeMobileSheetDragListeners = () => {
-  window.removeEventListener('touchmove', handleMobileSheetDragMove);
-  window.removeEventListener('touchend', handleMobileSheetDragEnd);
-  window.removeEventListener('touchcancel', handleMobileSheetDragEnd);
-};
-
-function handleMobileSheetDragEnd() {
-  if (!mobileSheetDragging.value) {
-    return;
-  }
-  mobileSheetDragging.value = false;
-  removeMobileSheetDragListeners();
-  mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetHeightVh.value);
-}
-
-const onMobileSheetGrabTouchStart = (event: TouchEvent) => {
-  const touch = event.touches[0];
-  if (!touch) {
-    return;
-  }
-  mobileSheetDragging.value = true;
-  mobileSheetDragStartY.value = touch.clientY;
-  mobileSheetDragStartHeightVh.value = mobileSheetHeightVh.value;
-  window.addEventListener('touchmove', handleMobileSheetDragMove, { passive: false });
-  window.addEventListener('touchend', handleMobileSheetDragEnd);
-  window.addEventListener('touchcancel', handleMobileSheetDragEnd);
-};
-
-const handleHistoryEntrySelect = (entry: ISchemaVersionHistoryEntry) => {
-  if (entry.isPending) {
-    return;
-  }
-
-  const schema = rebuildSchemaFromCard(entry.cardMessage);
-  if (!schema) {
-    return;
-  }
-
-  schemaEditorDiffFromHistory.value = true;
-  toggleSchemaVersion(schema, entry.cardId, { diffFromHistory: true });
-  closeSchemaHistoryPanel();
-  syncSchemaEditorBaseline();
-  if (!isMobile.value) {
-    schemaEditorVisible.value = true;
-  } else {
-    mobileSchemaJsonEditorOpen.value = true;
-  }
-};
-
-const toggleSchemaVersion = (
-  schema: Record<string, unknown>,
-  cardId: string,
-  options: { diffFromHistory?: boolean } = {},
-) => {
-  if (hasUnsavedSchemaEditorChanges()) {
-    revertUnsavedSchemaEditorChanges();
-  }
-  rendererPanelVisible.value = true;
-  currentCardId.value = cardId;
-  schemaEditorDiffFromHistory.value = options.diffFromHistory ?? false;
-  const isLatestVersion = isLatestSchemaVersionCard(cardId);
-  isViewingHistoryVersion.value = !isLatestVersion;
-  isHistoryVersionApplied.value = isLatestVersion;
-  setCurrentPreviewSchema(schema);
-  if (isLatestVersion) {
-    setCurrentSchema(schema);
-  }
-  if (schemaEditorVisible.value || isMobile.value) {
-    syncSchemaEditorBaseline();
-  }
-  if (isMobile.value) {
-    mobileSchemaJsonEditorOpen.value = false;
-    schemaEditorVisible.value = true;
-    mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
-  }
-};
-
-const selectSchemaVersionCard = (cardId: string) => {
-  if (!cardId) {
-    return;
-  }
-  currentCardId.value = cardId;
-  schemaEditorDiffFromHistory.value = false;
-};
-
-const applyCurrentVersion = () => {
-  if (!showApplyVersionButton.value) {
-    return;
-  }
-
-  const schema = currentPreviewSchema.value;
-  if (!schema || !isRenderableSchema(schema)) {
-    return;
-  }
-
-  let prevSchema: Record<string, unknown> | undefined;
-  const effectiveSchema = currentSchema.value;
-  if (
-    effectiveSchema &&
-    typeof effectiveSchema === 'object' &&
-    !Array.isArray(effectiveSchema) &&
-    isRenderableSchema(effectiveSchema)
-  ) {
-    prevSchema = effectiveSchema as Record<string, unknown>;
-  }
-
-  const saved = appendManualSchemaVersion(schema, {
-    prevSchema,
-    sourceCardId: currentCardId.value,
-    sourceCardGeneratedTime: currentHistoryEntry.value?.generatedTime
-      ?? allSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value)?.generatedTime,
-    sourceCardInput: currentHistoryEntry.value?.input
-      ?? allSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value)?.input,
-  });
-  if (!saved) {
-    return;
-  }
-
-  isViewingHistoryVersion.value = false;
-  isHistoryVersionApplied.value = true;
-  schemaEditorDiffFromHistory.value = false;
-  syncSchemaEditorBaseline();
-};
-
-const handleSaveSchemaEditor = async () => {
-  if (!schemaEditorDirty.value || schemaEditorSaveLoading.value) {
-    return;
-  }
-  let schema: Record<string, unknown>;
-  try {
-    const parsed = JSON.parse(schemaEditorText.value || '{}');
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return;
-    }
-    schema = parsed as Record<string, unknown>;
-  } catch {
-    return;
-  }
-  if (!isRenderableSchema(schema)) {
-    return;
-  }
-
-  schemaEditorSaveLoading.value = true;
-  try {
-    let prevSchema: Record<string, unknown> | undefined;
-    try {
-      const parsedPrev = JSON.parse(schemaEditorBaseline.value || '{}');
-      if (parsedPrev && typeof parsedPrev === 'object' && !Array.isArray(parsedPrev)) {
-        prevSchema = parsedPrev as Record<string, unknown>;
-      }
-    } catch {
-      prevSchema = undefined;
-    }
-
-    const saved = appendManualSchemaVersion(schema, {
-      prevSchema,
-    });
-    if (saved) {
-      isViewingHistoryVersion.value = false;
-      isHistoryVersionApplied.value = true;
-      syncSchemaEditorBaseline();
-      closeSchemaEditorView();
-    }
-  } finally {
-    schemaEditorSaveLoading.value = false;
-  }
-};
-
-const resetToLatestVersion = () => {
-  const conversationState = templateConversationState.value;
-  if (!conversationState) {
-    return;
-  }
-  const currentConversation = conversationState.conversations.find(
-    (item: Conversation) => item.id === conversationState.currentId,
-  );
-  applySchemaFromMessages(currentConversation?.messages, {
-    clearIfMissing: !conversationState.loading,
-  });
-  isViewingHistoryVersion.value = false;
-  isHistoryVersionApplied.value = true;
-  schemaEditorDiffFromHistory.value = false;
-  syncSchemaEditorBaseline();
-  if (isMobile.value) {
-    mobileSchemaJsonEditorOpen.value = false;
-  }
-};
-
-watch(schemaEditorVisible, (visible) => {
-  if (visible && !isMobile.value && !hasUnsavedSchemaEditorChanges()) {
-    syncSchemaEditorBaseline();
-  }
-});
-
-watch(mobileSchemaJsonEditorOpen, (open) => {
-  if (open && !hasUnsavedSchemaEditorChanges()) {
-    syncSchemaEditorBaseline();
-  }
-});
-
-watch(
-  currentPreviewSchema,
-  () => {
-    if (schemaEditorShowDiffView.value || hasUnsavedSchemaEditorChanges()) {
-      return;
-    }
-    if (isSchemaJsonEditorActive.value) {
-      syncSchemaEditorBaseline();
-    }
-  },
-  { deep: true },
-);
-
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape') {
-    if (isMobile.value && schemaEditorVisible.value && mobileSchemaJsonEditorOpen.value) {
-      handleMobileJsonEditorOpen(false);
-      return;
-    }
-    if (isMobile.value) {
-      if (schemaEditorVisible.value) {
-        closeSchemaEditorView();
-      }
-      return;
-    }
-    if (schemaEditorVisible.value) {
-      closeSchemaEditorView();
-    }
-  }
-};
-
-const onSchemaRefresh = () => {
-  isViewingHistoryVersion.value = false;
-  isHistoryVersionApplied.value = true;
-  schemaEditorDiffFromHistory.value = false;
-};
-
-watch(currentConversationId, () => {
-  schemaEditorVisible.value = false;
-  mobileSchemaJsonEditorOpen.value = false;
-  schemaHistoryVisible.value = false;
-  isViewingHistoryVersion.value = false;
-  isHistoryVersionApplied.value = true;
-  rendererPanelVisible.value = true;
-  resetToLatestVersion();
-});
-
-watch(
-  () => templateConversationState.value?.loading,
-  (loading, prevLoading) => {
-    if (prevLoading === true && loading === false) {
-      resetToLatestVersion();
-    }
-  },
-);
-
-onMounted(() => {
-  resetToLatestVersion();
-  window.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
-  removeMobileSheetDragListeners();
 });
 </script>
 

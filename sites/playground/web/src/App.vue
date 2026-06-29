@@ -23,7 +23,7 @@ import UserFooter from './components/UserFooter.vue';
 import PlaygroundSidebar from './components/PlaygroundSidebar.vue';
 import { useInputMessage } from './hooks/use-input-message';
 import { useIsMobile } from './hooks';
-import useTemplate from './components/genui-template/useTemplate';
+import useTemplate from './components/genui-template/composables/use-template';
 import {
   getOverlapEliminatorHandler,
   getContinueGeneratingHandler,

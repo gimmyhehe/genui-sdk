@@ -10,7 +10,7 @@ import {
   SCHEMA_JSON_DIFF_EDITOR_OPTIONS,
   useMonacoPlaygroundTheme,
   type PlaygroundColorTheme,
-} from './use-monaco-playground-theme';
+} from './composables/use-monaco-playground-theme';
 import { t } from '../../i18n';
 
 const props = defineProps<{

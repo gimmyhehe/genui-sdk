@@ -35,7 +35,7 @@ import {
 } from './template-chat-utils';
 import { clonePlainJson } from './template-chat-utils/json-patch-format';
 import { generateId, stripSchemaFieldsWhileStreaming } from '../../utils';
-import useTemplate from './useTemplate';
+import useTemplate from './composables/use-template';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
 import { emitter } from './template-chat-event-emitter';

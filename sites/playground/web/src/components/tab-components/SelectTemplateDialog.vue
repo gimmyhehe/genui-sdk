@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import useTemplate from '../genui-template/useTemplate';
+import useTemplate from '../genui-template/composables/use-template';
 import { TinyDialogBox, TinyButton, TinyCheckboxGroup, TinyCheckbox } from '@opentiny/vue';
 import { t } from '../../i18n';
 

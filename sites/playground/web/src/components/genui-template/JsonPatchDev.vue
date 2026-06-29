@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue';
 import { TinyDialogBox, TinyButton } from '@opentiny/vue';
 import { CodeEditor } from 'monaco-editor-vue3';
-import { useMonacoPlaygroundTheme } from './use-monaco-playground-theme';
+import { useMonacoPlaygroundTheme } from './composables/use-monaco-playground-theme';
 import * as jsonDiffPatch from 'jsondiffpatch';
 import * as jsonPatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 import type { JsonPatchOp } from 'jsondiffpatch/formatters/jsonpatch-apply';

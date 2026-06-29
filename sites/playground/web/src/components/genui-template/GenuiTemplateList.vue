@@ -4,7 +4,7 @@ import { TrHistory, useTouchDevice } from '@opentiny/tiny-robot';
 import { computed, ref, watch } from 'vue';
 import { TinyModal, TinyCheckboxGroup, TinyCheckbox } from '@opentiny/vue';
 import { iconPlus } from '@opentiny/vue-icon';
-import useTemplate from './useTemplate';
+import useTemplate from './composables/use-template';
 import {
   HistoryTransferToolbar,
   downloadConversations,

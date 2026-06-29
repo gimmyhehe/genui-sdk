@@ -8,7 +8,7 @@ import {
   parseJsonPatchOperations,
   resolveJsonPatchPrevSchemaString,
 } from './template-chat-utils';
-import useTemplate from './useTemplate';
+import useTemplate from './composables/use-template';
 import { useIsMobile } from '../../use-mobile';
 import docCardIcon from '../../assets/images/card.svg';
 import docEditIcon from '../../assets/images/card-edit.svg';
