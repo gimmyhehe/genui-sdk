@@ -182,28 +182,30 @@ const lastSchemaCardId = computed(() => {
   return items[items.length - 1].id;
 });
 
+const customComponentsMap = computed(() => {
+  const map: Record<string, Component> = {};
+  props.customComponents?.forEach((item) => {
+    if (item.ref && item.component) {
+      map[item.component] = item.ref;
+    }
+  });
+  return map;
+});
+
+const customActionsMap = computed(() => {
+  const map: Record<string, ICustomActionItem> = {};
+  props.customActions?.forEach((action) => {
+    if (action.name) {
+      map[action.name] = action;
+    }
+  });
+  return map;
+});
+
 const messageRenderers = {
   'custom-text': (props: BubbleCommonProps & { content: string }) =>
     h('span', { class: 'tr-bubble__body-text' }, props.content),
   'schema-card': (schemaCardProps: IRendererProps) => {
-    const customComponentsMap: Record<string, Component> = {};
-    if (props.customComponents) {
-      props.customComponents.forEach((item) => {
-        if (item.ref && item.component) {
-          customComponentsMap[item.component] = item.ref;
-        }
-      });
-    }
-
-    // 将 customActions 数组转换为对象格式
-    const customActionsMap: Record<string, ICustomActionItem> = {};
-    if (props.customActions) {
-      props.customActions.forEach((action) => {
-        if (action.name) {
-          customActionsMap[action.name] = action;
-        }
-      });
-    }
     const isGenerating = lastSchemaCardId.value === schemaCardProps.id && generating.value;
 
     return h(
@@ -215,9 +217,9 @@ const messageRenderers = {
           ...schemaCardProps,
           requiredCompleteFieldSelectors: props.requiredCompleteFieldSelectors || [],
           generating: isGenerating,
-          customComponents: customComponentsMap,
+          customComponents: customComponentsMap.value,
           customActions: {
-            ...customActionsMap,
+            ...customActionsMap.value,
             continueChat: continueChatAction,
             saveState: saveStateAction,
           },
