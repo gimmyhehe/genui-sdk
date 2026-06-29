@@ -1,6 +1,5 @@
 <script setup>
 import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
-import { IconDownload } from '@opentiny/vue-icon';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
 import { GenuiConfigProvider, GenuiChat, GENUI_RENDERER } from '@opentiny/genui-sdk-vue';
 import {
@@ -16,13 +15,14 @@ import {
   shallowRef,
 } from 'vue';
 import { vueMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/components';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
 import UserFooter from './components/UserFooter.vue';
 import PlaygroundSidebar from './components/PlaygroundSidebar.vue';
-import { useExportVueCode, useInputMessage, useIsMobile } from './hooks';
+import SchemaExportHeader from './components/SchemaExportHeader.vue';
+import { useInputMessage, useIsMobile } from './hooks';
 import useTemplate from './components/genui-template/useTemplate';
 import {
   getOverlapEliminatorHandler,
@@ -35,7 +35,6 @@ import { locale, t } from './i18n';
 
 const { topRenderer, addIcons } = useIcon();
 const TopIconsRenderer = topRenderer();
-const TinyIconDownload = IconDownload();
 
 addIcons(IconAi);
 
@@ -250,30 +249,6 @@ const { initInputMessage } = useInputMessage(chat);
 const { isMobile } = useIsMobile();
 const isSidebarOpen = ref(!isMobile.value);
 
-onMounted(() => {
-  initInputMessage();
-  getModelOptions()
-    .then(async (data) => {
-      let modelChanged = false;
-      if (!data.find((item) => item.value === llmConfig.model)) {
-        llmConfig.model = data[0]?.value;
-        modelChanged = true;
-      }
-      modelData.value = data;
-      if (!modelChanged) {
-        modelFeatures.value = await getModelFeatures(llmConfig.model);
-      }
-    })
-    .catch((error) => {
-      console.error('获取模型列表失败:', error);
-    });
-  window.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
-});
-
 const roles = computed(() => {
   return {
     assistant: {
@@ -296,41 +271,16 @@ const customFetch = createCustomFetch(() => ({
   framework,
 }));
 
-/**
- * Rehydrates custom examples from cache using normalized data.
- */
 const initExampleList = () => {
   customExamples.value = normalizeCustomExamples(cacheCustomExamples);
 };
 
-/**
- * Updates custom examples and enforces the normalized shape.
- * @param {unknown[]} list Latest examples from UI events.
- */
 const updateCustomExamples = (list) => {
   customExamples.value = normalizeCustomExamples(list);
 };
 
-const { exportVueCode } = useExportVueCode();
 const rendererSlots = {
-  header: (props) =>
-    h(
-      'div',
-      { class: 'renderer-header' },
-      !props.isFinished || props.isError
-        ? null
-        : h(
-          'div',
-          {
-            class: 'schema-export-button',
-            onClick: () => exportVueCode(props.schema),
-          },
-          [
-            h(TinyIconDownload, { class: 'schema-export-icon' }),
-            h('span', { class: 'schema-export-label' }, '导出源码'),
-          ],
-        ),
-    ),
+  header: SchemaExportHeader,
 };
 
 watch(() => templateSchemaList.value, (newVal) => {
@@ -338,8 +288,6 @@ watch(() => templateSchemaList.value, (newVal) => {
     return;
   }
   const templateMap = new Map(newVal.map((item) => [item.id, item]));
-  // Only keep examples that still exist in templateSchemaList,
-  // and always refresh them from the latest template source.
   customExamples.value = customExamples.value
     .map((example) => templateMap.get(example.id))
     .filter(Boolean);
@@ -350,11 +298,15 @@ onMounted(() => {
   initExampleList();
   getModelOptions()
     .then(async (data) => {
+      let modelChanged = false;
       if (!data.find((item) => item.value === llmConfig.model)) {
         llmConfig.model = data[0]?.value;
+        modelChanged = true;
       }
       modelData.value = data;
-      syncModelFeatures(llmConfig.model);
+      if (!modelChanged) {
+        modelFeatures.value = await getModelFeatures(llmConfig.model);
+      }
     })
     .catch((error) => {
       console.error('Failed to get model options:', error);
@@ -409,6 +361,7 @@ onUnmounted(() => {
             :features="modelFeatures"
             :custom-fetch="customFetch"
             :custom-examples="customExamples"
+            :renderer-slots="rendererSlots"
           >
             <template #empty>
               <div class="empty">

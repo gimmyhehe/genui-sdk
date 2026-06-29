@@ -1,5 +1,5 @@
+import type { IRendererConfig } from '@opentiny/genui-sdk-core';
 import { generateCode as generateVueCode } from '@opentiny/genui-sdk-vue';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 
 type IComponentMapItem = {
   componentName: string;
@@ -37,6 +37,20 @@ const generateComponentsMap = (materialsList: any): IComponentMapItem[] => {
   return [...deduped.values()];
 };
 
+const componentsMapCache = new WeakMap<IRendererConfig, IComponentMapItem[]>();
+
+const getComponentsMap = (rendererConfig?: IRendererConfig) => {
+  if (!rendererConfig) {
+    return generateComponentsMap(undefined);
+  }
+  let map = componentsMapCache.get(rendererConfig);
+  if (!map) {
+    map = generateComponentsMap(rendererConfig.materialsList);
+    componentsMapCache.set(rendererConfig, map);
+  }
+  return map;
+};
+
 const downloadTextFile = (filename: string, text: string): void => {
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -50,8 +64,8 @@ const downloadTextFile = (filename: string, text: string): void => {
   URL.revokeObjectURL(url);
 };
 
-export const useExportVueCode = () => {
-  const componentsMap = generateComponentsMap(rendererConfig?.materialsList);
+export const useExportVueCode = (rendererConfig?: IRendererConfig) => {
+  const componentsMap = getComponentsMap(rendererConfig);
 
   const exportVueCode = async (schema: any): Promise<void> => {
     const { panelValue: code, panelName: fileName, errors } = await generateVueCode({
