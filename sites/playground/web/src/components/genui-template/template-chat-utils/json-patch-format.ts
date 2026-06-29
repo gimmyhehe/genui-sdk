@@ -51,7 +51,7 @@ export const formatJsonPatch = (
         positionId?: string;
       };
       if (id) {
-        item.from = findComponentPath(templeSchema, id) ?? undefined;
+        item.from = findComponentPath(templeSchema, id);
       }
       if (position && positionId && item.from) {
         const positionPath = findComponentPath(templeSchema, positionId);
