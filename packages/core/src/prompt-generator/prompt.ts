@@ -186,7 +186,6 @@ function buildPromptSections(
   const includeJsonSchema = options?.includeJsonSchema ?? true;
   const includeSnippets = promptConfig?.includeSnippets ?? true;
   const includeExamples = promptConfig?.includeExamples ?? true;
-  const includeRules = options?.includeRules ?? true;
   const includeActions = options?.includeActions ?? true;
   const includeAboutThis = options?.includeAboutThis ?? true;
   const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
@@ -200,7 +199,7 @@ function buildPromptSections(
     includeSnippets ? genSnippetsPrompt(materials, extendWhiteList, customSnippets || []) : null,
     includeAboutThis ? aboutThis.trim() : null,
     includeActions ? genCustomActionsPrompt(customActions || []) : null,
-    includeRules ? genRulesPrompt(additionRules, tgCustomConfig, wrapperComponent) : null,
+    genRulesPrompt(additionRules, tgCustomConfig, wrapperComponent),
   ].filter(Boolean);
 }
 
