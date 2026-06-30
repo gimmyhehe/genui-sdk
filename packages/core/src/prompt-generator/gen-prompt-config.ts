@@ -1,4 +1,4 @@
-import type { IFunctionInfo } from '../protocols/materials';
+import type { IFunctionInfo } from '../material';
 import type { CardSchema, NodeSchema } from '../protocols/schema';
 import type { JsonSchema7Type } from 'zod-to-json-schema';
 

@@ -1,4 +1,4 @@
-import type { IMaterialsConfig } from '../protocols/render-config';
+import type { IMaterialsConfig } from './material-config';
 
 type DefaultValueMap = Record<string, any>;
 

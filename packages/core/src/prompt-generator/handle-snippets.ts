@@ -1,4 +1,4 @@
-import type { IMaterials } from '../protocols';
+import type { IMaterials } from '../material';
 import type { IWhiteList } from './prompt';
 
 export const extractSnippets = (materials: any[]) => {

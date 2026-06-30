@@ -1,5 +1,6 @@
 import { type JsonSchema7Type, zodToJsonSchema } from 'zod-to-json-schema';
-import type { IMaterials, CardSchema, IMaterialsConfig, IExample } from '../protocols';
+import type { IMaterials, IMaterialsConfig, IExample } from '../material';
+import type { CardSchema } from '../protocols';
 import { genRootSchema } from '../protocols'; // TODO: protocal cannnot contains methods
 import type {
   IGenPromptComponent,
