@@ -2,7 +2,11 @@ import { ref, shallowRef, computed } from 'vue';
 import { useConversation, IndexedDBStrategy } from '@opentiny/genui-sdk-vue';
 import { AIClient, type ChatMessage } from '@opentiny/tiny-robot-kit';
 import { CustomModelProvider } from '../template-provider';
-import type { LLMConfig, ISchemaManualMessageItem, ISchemaManualEditRecord } from '../chat.types';
+import type {
+  LLMConfig,
+  ISchemaManualMessageItem,
+  ISchemaManualEditRecord,
+} from '../chat.types';
 import { formatDate, generateId } from '../../../utils';
 import {
   findLatestSchemaInConversation,
@@ -98,7 +102,6 @@ export default function useTemplate(options?: UseTemplateOptions) {
           if (repairedPending || normalizedManual) {
             conversation.value!.saveConversations();
           }
-          // IndexedDB 加载完成后再恢复 schema，避免早于 GenuiTemplate onMounted 的空窗期
           applySchemaFromMessages(loadedMessages);
         },
         onFinish(_data: any, context) {
@@ -134,7 +137,6 @@ export default function useTemplate(options?: UseTemplateOptions) {
       currentPreviewSchemaComplete.value = isComplete;
     }
   };
-
 
   const setCurrentSchema = (schema: any) => {
     currentSchema.value = schema;
@@ -257,9 +259,6 @@ export default function useTemplate(options?: UseTemplateOptions) {
     conversation.value?.saveConversations();
   };
 
-  const MANUAL_SCHEMA_SAVE_INPUT = '手动编辑保存';
-
-
   const appendManualSchemaVersion = (
     schema: Record<string, unknown>,
     options: {
@@ -278,13 +277,14 @@ export default function useTemplate(options?: UseTemplateOptions) {
     const prevSchemaStr = JSON.stringify(prevSchema);
     const schemaStr = JSON.stringify(schema);
     const generatedTime = formatDate(new Date());
-    const input = options.input ?? MANUAL_SCHEMA_SAVE_INPUT;
+    const userInput = options.input?.trim();
     const editRecord: ISchemaManualEditRecord = {
       editId: generateId(),
       schema: schemaStr,
       prevSchema: prevSchemaStr,
       generatedTime,
-      input,
+      input: userInput ?? '',
+      inputType: userInput ? 'user' : 'manual_edit_save',
     };
 
     const attachSourceMetadata = (sourceCardId: string) => {
@@ -330,7 +330,8 @@ export default function useTemplate(options?: UseTemplateOptions) {
       const cardMessage: ISchemaManualMessageItem = {
         type: 'schema-manual',
         content: schemaStr,
-        input,
+        input: editRecord.input,
+        inputType: editRecord.inputType,
         cardId,
         generatedTime,
         schema: schemaStr,

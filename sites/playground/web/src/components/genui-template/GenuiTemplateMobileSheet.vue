@@ -55,9 +55,9 @@ const emit = defineEmits<{
 
 const headerTitle = computed(() => {
   if (!props.jsonEditorOpen) {
-    return '渲染效果';
+    return t('templateEditor.previewRender');
   }
-  return props.schemaEditorDiffMode ? '查看变更' : 'SchemaJSON';
+  return props.schemaEditorDiffMode ? t('templateEditor.viewChanges') : t('templateEditor.schemaJsonTitle');
 });
 
 const handleJsonEditorChange = (value: string) => {

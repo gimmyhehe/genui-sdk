@@ -13,6 +13,7 @@ export function getManualEdits(card: ISchemaManualMessageItem): ISchemaManualEdi
       prevSchema: card.prevSchema,
       generatedTime: card.generatedTime,
       input: card.input,
+      inputType: card.inputType,
     },
   ];
 }
@@ -28,6 +29,7 @@ export function manualEditToCardSnapshot(
     prevSchema: edit.prevSchema,
     generatedTime: edit.generatedTime,
     input: edit.input,
+    inputType: edit.inputType,
   };
 }
 
@@ -90,6 +92,7 @@ export function syncManualCardLatestFields(card: ISchemaManualMessageItem): void
   card.schema = latest.schema;
   card.generatedTime = latest.generatedTime;
   card.input = latest.input;
+  card.inputType = latest.inputType;
   card.prevSchema = edits[0].prevSchema;
   card.edits = edits;
 }

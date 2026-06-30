@@ -28,12 +28,15 @@ export interface IJsonPatchMessageItem {
   prevSchema: string;
 }
 
+export type SchemaManualInputType = 'manual_edit_save' | 'user';
+
 export interface ISchemaManualEditRecord {
   editId: string;
   schema: string;
   prevSchema: string;
   generatedTime: string;
   input: string;
+  inputType?: SchemaManualInputType;
 
   sourceCardId?: string;
 
@@ -46,6 +49,7 @@ export interface ISchemaManualMessageItem {
   type: 'schema-manual';
   content: string;
   input: string;
+  inputType?: SchemaManualInputType;
   cardId: string;
   generatedTime: string;
   schema: string;

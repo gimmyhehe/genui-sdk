@@ -63,7 +63,6 @@ export const formatJsonPatch = (
       }
     }
 
-    // 路径解析需基于前序操作后的 schema，必须使用标准 RFC6902 op
     jsonPatchFormatter.patch(templeSchema, [toStandardPatchOp(item)]);
 
     return item;

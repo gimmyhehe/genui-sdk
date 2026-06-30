@@ -185,11 +185,8 @@ export class CustomModelProvider extends BaseModelProvider {
             const delta = chunk.choices?.[0]?.delta || {};
             const { tool_calls, tool_calls_result, content, reasoning_content } = delta;
             if (reasoning_content) {
-              // 模板场景暂不处理 reasoning
             } else if (tool_calls) {
-              // 模板场景暂不处理 tool_calls
             } else if (tool_calls_result) {
-              // 模板场景暂不处理 tool_calls_result
             } else if (content !== undefined) {
               currentDelta = delta;
               chatMessage!.content += content;

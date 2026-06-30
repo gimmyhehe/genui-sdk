@@ -8,6 +8,8 @@ import {
   parseJsonPatchOperations,
   resolveJsonPatchPrevSchemaString,
 } from './template-chat-utils';
+import { resolveManualEditSaveTitle } from './template-chat-utils/schema-input-ids';
+import type { SchemaManualInputType } from './chat.types';
 import useTemplate from './composables/use-template';
 import { useIsMobile } from '../../use-mobile';
 import docCardIcon from '../../assets/images/card.svg';
@@ -21,6 +23,7 @@ export interface IRendererProps {
   type: 'json-patch' | 'schema-card' | 'schema-manual';
   cardId: string;
   input: string;
+  inputType?: SchemaManualInputType;
   content: string;
   generatedTime: string;
   schema: string;
@@ -39,7 +42,10 @@ const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
 
 const cardTitle = computed(() => {
-  const title = props.input?.trim() || (props.type === 'schema-manual' ? '手动编辑保存' : '');
+  const title =
+    props.type === 'schema-manual'
+      ? resolveManualEditSaveTitle(props)
+      : props.input?.trim() || '';
   return title.length > 20 ? `${title.substring(0, 20)}...` : title;
 });
 

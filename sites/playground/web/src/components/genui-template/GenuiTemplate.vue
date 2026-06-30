@@ -102,7 +102,7 @@ const rendererSchemaKey = computed(() => {
         <div class="schema-version-container" v-show="schemaEditorVisible && !isMobile">
           <div class="schema-version-container__header">
             <span class="schema-version-container__title">
-              {{ schemaEditorShowDiffView ? 'Schema 变更对比' : 'SchemaJSON' }}
+              {{ schemaEditorShowDiffView ? t('templateEditor.schemaDiffTitle') : t('templateEditor.schemaJsonTitle') }}
             </span>
             <div class="schema-version-container__header-actions">
               <tiny-button
@@ -113,7 +113,7 @@ const rendererSchemaKey = computed(() => {
                 :loading="schemaEditorSaveLoading"
                 @click="handleSaveSchemaEditor"
               >
-                保存
+                {{ t('templateEditor.save') }}
               </tiny-button>
               <tiny-button
                 type="text"

@@ -1,5 +1,6 @@
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { IMessageItem } from '../chat.types';
+import { normalizeManualEditInputs } from './schema-input-ids';
 
 export function isManualSchemaSaveMessage(message: ChatMessage): boolean {
   const items = (message as { messages?: IMessageItem[] }).messages;
@@ -20,6 +21,10 @@ export function normalizeManualSchemaSaveMessages(messages: ChatMessage[] | unde
       message.role = 'assistant';
       changed = true;
     }
+  }
+
+  if (normalizeManualEditInputs(messages)) {
+    changed = true;
   }
 
   return changed;

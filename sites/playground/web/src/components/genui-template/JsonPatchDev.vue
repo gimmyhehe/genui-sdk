@@ -17,7 +17,6 @@ const props = defineProps<{
 
 const visible = defineModel<boolean>({ default: false });
 
-/** 在 #tiny-genui-config-provider 内，随 Provider 解析后的 theme 切换 Monaco（auto 已是 light/dark） */
 const monacoTheme = useMonacoPlaygroundTheme();
 
 const editorOptions = {
@@ -40,10 +39,8 @@ const handlePatch = () => {
     const patchData = JSON.parse(jsonPatch.value);
     const target = structuredClone(leftData);
 
-    // 应用 patch
     jsonPatchFormatter.patch(target, patchData as JsonPatchOp[]);
 
-    // 更新 right 显示结果
     right.value = JSON.stringify(target as any, null, 2);
   } catch (error) {
     console.error('Patch 失败:', error);
@@ -55,16 +52,12 @@ const handleDiff = () => {
     const leftData = JSON.parse(left.value);
     const rightData = JSON.parse(right.value);
 
-    // 创建 diffPatcher 实例
     const diffPatcher = jsonDiffPatch.create();
 
-    // 计算 diff
     const delta = diffPatcher.diff(leftData, rightData);
 
-    // 将 delta 格式化为 JSON Patch 格式
     const patch = jsonPatchFormatter.format(delta);
 
-    // 更新 jsonPatch 显示结果
     jsonPatch.value = JSON.stringify(patch, null, 2);
   } catch (error) {
     console.error('Diff 失败:', error);

@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue';
 import { TinyButton } from '@opentiny/vue';
 import { iconClose } from '@opentiny/vue-icon';
 import type { ISchemaVersionHistoryEntry } from './template-chat-utils/schema-version-history';
+import { t } from '../../i18n';
 
 const props = defineProps<{
   visible: boolean;
@@ -46,15 +47,15 @@ const toggleGroup = (label: string) => {
       class="schema-version-history-panel"
       :class="{ 'is-dark': isDark }"
       role="complementary"
-      aria-label="历史记录"
+      :aria-label="t('templateEditor.history')"
     >
       <header class="schema-version-history-panel__header">
-        <h3 class="schema-version-history-panel__title">历史记录</h3>
+        <h3 class="schema-version-history-panel__title">{{ t('templateEditor.history') }}</h3>
         <tiny-button
           type="text"
           class="schema-version-history-panel__close"
           :icon="TinyCloseIcon"
-          aria-label="关闭历史记录"
+          :aria-label="t('templateEditor.closeHistory')"
           @click="emit('close')"
         />
       </header>
@@ -111,7 +112,7 @@ const toggleGroup = (label: string) => {
             </div>
           </section>
         </template>
-        <div v-else class="schema-version-history-panel__empty">暂无版本记录</div>
+        <div v-else class="schema-version-history-panel__empty">{{ t('templateEditor.historyEmpty') }}</div>
       </div>
     </aside>
   </Transition>

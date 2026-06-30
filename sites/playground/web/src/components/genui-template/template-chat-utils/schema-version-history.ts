@@ -3,6 +3,17 @@ import type { ISchemaCardLikeMessage } from './conversation-schema';
 import { findSchemaCardByCardId, rebuildSchemaFromCard, isSchemaVersionHistoryCollectible } from './conversation-schema';
 import { findManualCardInMessages, getManualEdits, manualEditToCardSnapshot } from './manual-schema';
 import type { ISchemaManualEditRecord, ISchemaManualMessageItem } from '../chat.types';
+import { t, locale, Locale } from '../../../i18n';
+import { resolveCardInput, resolveManualEditSaveTitle } from './schema-input-ids';
+
+function getWeekdayLabel(dayIndex: number): string {
+  return t(`templateEditor.weekday${dayIndex}`);
+}
+
+function formatTimePart(date: Date): string {
+  const lang = locale.value === Locale.EnUS ? 'en-US' : 'zh-CN';
+  return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit', hour12: false }).format(date);
+}
 
 export interface ISchemaVersionHistoryEntry {
   cardId: string;
@@ -36,8 +47,6 @@ const startOfLocalWeek = (timeMs: number) => {
   return dayStart - daysFromMonday * MS_PER_DAY;
 };
 
-const pad2 = (n: number) => String(n).padStart(2, '0');
-
 export function parseGeneratedTimeMs(generatedTime: string): number {
   const text = generatedTime?.trim();
   if (!text) {
@@ -50,20 +59,18 @@ export function parseGeneratedTimeMs(generatedTime: string): number {
   return Number.isNaN(parsed) ? Date.now() : parsed;
 }
 
-const WEEKDAY_LABELS = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-
 export function formatHistoryPointTimeLabel(createdAtMs: number, nowMs: number = Date.now()): string {
   const d = new Date(createdAtMs);
   const now = new Date(nowMs);
+  const timePart = formatTimePart(d);
   const month = d.getMonth() + 1;
   const day = d.getDate();
-  const timePart = `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 
   if (d.getFullYear() === now.getFullYear()) {
-    return `${month}月${day}日 ${timePart}`;
+    return t('templateEditor.historyDateSameYear', { month, day, time: timePart });
   }
 
-  return `${d.getFullYear()}年${month}月${day}日 ${timePart}`;
+  return t('templateEditor.historyDateFull', { year: d.getFullYear(), month, day, time: timePart });
 }
 
 export function getHistoryTimeGroupLabel(createdAtMs: number, nowMs: number = Date.now()): string {
@@ -72,30 +79,33 @@ export function getHistoryTimeGroupLabel(createdAtMs: number, nowMs: number = Da
   const dayDiff = Math.round((todayStart - dayStart) / MS_PER_DAY);
 
   if (dayDiff <= 0) {
-    return '今天';
+    return t('templateEditor.timeToday');
   }
   if (dayDiff === 1) {
-    return '昨天';
+    return t('templateEditor.timeYesterday');
   }
 
   const currentWeekStart = startOfLocalWeek(nowMs);
   const createdWeekStart = startOfLocalWeek(createdAtMs);
 
   if (createdWeekStart === currentWeekStart) {
-    return WEEKDAY_LABELS[new Date(createdAtMs).getDay()];
+    return getWeekdayLabel(new Date(createdAtMs).getDay());
   }
 
   if (createdWeekStart === currentWeekStart - 7 * MS_PER_DAY) {
-    return '上周';
+    return t('templateEditor.timeLastWeek');
   }
 
   const created = new Date(createdAtMs);
   const now = new Date(nowMs);
   if (created.getFullYear() === now.getFullYear()) {
-    return `${created.getMonth() + 1}月`;
+    return t('templateEditor.historyMonth', { month: created.getMonth() + 1 });
   }
 
-  return `${created.getFullYear()}年${created.getMonth() + 1}月`;
+  return t('templateEditor.historyYearMonth', {
+    year: created.getFullYear(),
+    month: created.getMonth() + 1,
+  });
 }
 
 function buildDescription(
@@ -103,18 +113,18 @@ function buildDescription(
   options: { isLatest: boolean; isPending: boolean },
 ): string {
   if (options.isPending) {
-    return '生成中...';
+    return t('templateEditor.generating');
   }
   if (options.isLatest) {
-    return '最近更新';
+    return t('templateEditor.recentUpdate');
   }
   if (card.type === 'schema-manual') {
-    return card.input?.trim() || '手动编辑保存';
+    return resolveManualEditSaveTitle(card);
   }
   if (card.type === 'json-patch') {
-    return card.input?.trim() || '增量更新';
+    return resolveCardInput(card.input, 'templateEditor.incrementalUpdate');
   }
-  return card.input?.trim() || 'AI 生成版本';
+  return resolveCardInput(card.input, 'templateEditor.aiGeneratedVersion');
 }
 
 function filterCollectibleHistoryEntries(
@@ -184,7 +194,7 @@ function buildManualRestoreDescription(
   options: { isLatest: boolean; isPending: boolean; allowPrevSchemaInfer?: boolean },
 ): string {
   if (options.isPending) {
-    return '生成中...';
+    return t('templateEditor.generating');
   }
 
   let sourceTime: string | null = null;
@@ -197,26 +207,26 @@ function buildManualRestoreDescription(
   }
 
   if (sourceTime) {
-    return `应用自 ${sourceTime} 的版本`;
+    return t('templateEditor.appliedFromVersion', { time: sourceTime });
   }
 
   const hasExplicitSource = Boolean(edit.sourceCardId?.trim() || edit.sourceCardGeneratedTime?.trim());
   if (hasExplicitSource) {
-    return '应用自历史版本';
+    return t('templateEditor.appliedFromHistory');
   }
 
   if (options.isLatest) {
-    return '最近更新';
+    return t('templateEditor.recentUpdate');
   }
 
-  return edit.input?.trim() || '手动编辑保存';
+  return resolveManualEditSaveTitle(edit);
 }
 
 function buildAuthor(card: ISchemaCardLikeMessage): { authorLabel: string; authorType: 'user' | 'ai' } {
   if (card.type === 'schema-manual') {
-    return { authorLabel: '用户', authorType: 'user' };
+    return { authorLabel: t('templateEditor.authorUser'), authorType: 'user' };
   }
-  return { authorLabel: 'AI', authorType: 'ai' };
+  return { authorLabel: t('templateEditor.authorAi'), authorType: 'ai' };
 }
 
 export function collectSchemaVersionHistory(
@@ -263,7 +273,7 @@ export function collectSchemaVersionHistory(
             generatedTime: edit.generatedTime ?? '',
             createdAtMs,
             sequenceIndex: sequenceIndex++,
-            timeLabel: isPending ? '刚刚' : formatHistoryPointTimeLabel(createdAtMs),
+            timeLabel: isPending ? t('templateEditor.justNow') : formatHistoryPointTimeLabel(createdAtMs),
             description: '',
             authorLabel,
             authorType,
@@ -292,7 +302,7 @@ export function collectSchemaVersionHistory(
         generatedTime: item.generatedTime ?? '',
         createdAtMs,
         sequenceIndex: sequenceIndex++,
-        timeLabel: isPending ? '刚刚' : formatHistoryPointTimeLabel(createdAtMs),
+        timeLabel: isPending ? t('templateEditor.justNow') : formatHistoryPointTimeLabel(createdAtMs),
         description: '',
         authorLabel,
         authorType,
@@ -335,7 +345,7 @@ export function groupSchemaVersionHistory(
 
   for (const entry of sorted) {
     const label = entry.isPending
-      ? '今天'
+      ? t('templateEditor.timeToday')
       : getHistoryTimeGroupLabel(entry.createdAtMs, nowMs);
     if (!buckets.has(label)) {
       buckets.set(label, []);

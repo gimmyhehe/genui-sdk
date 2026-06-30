@@ -5,6 +5,7 @@ export * from './schema-path';
 export * from './schema-id-generator';
 export * from './context-message';
 export * from './conversation-schema';
+export * from './schema-input-ids';
 export * from './schema-version-history';
 export * from './manual-schema';
 export * from './schema-version-diff';

@@ -162,7 +162,7 @@ const schemaCardRenderer = async (props: any) => {
       json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
     }
     deltaPatcher.patchWithDelta(target, json, isCompleted);
-    const schemaWithId = generateIdForComponents(target); // TODO: 流式渲染过程中，ID一直在刷新，会影响到渲染diff性能，需要设计稳定的方案
+    const schemaWithId = generateIdForComponents(target);
     setCurrentPreviewSchema(schemaWithId);
   } catch (error) {
     console.error('schemaCardRenderer error ===>', error);
@@ -273,7 +273,6 @@ const handleRefresh = ({ index }: { index: number }) => {
 
   messages.value = messages.value.slice(0, index);
 
-  // 流式 schema 事件使用最后一条用户消息的 messageId 作为 cardId，需与 currentCardId 对齐
   const lastUserMessage = getLastUserMessage(messages.value);
   if (lastUserMessage && !lastUserMessage.messageId) {
     lastUserMessage.messageId = generateId();
@@ -555,7 +554,6 @@ onUnmounted(() => {
 }
 
 :deep(.tr-bubble[data-role='assistant'] .tr-bubble__content-items) {
-  // 匹配：type非空 + 排除 schema-card/loading-text 这两个值
   > [type]:not([type='']):not([type='schema-card']):not([type='schema-manual']):not([type='loading-text']) {
     display: var(--thinking-display, initial);
   }

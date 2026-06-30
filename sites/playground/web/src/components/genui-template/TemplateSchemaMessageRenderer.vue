@@ -33,11 +33,7 @@ const genuiRendererProps = computed(() => ({
 }));
 
 const schemaVersionCardProps = computed(() => ({
-  cardId: props.itemProps?.cardId ?? '',
-  input: props.itemProps?.input ?? '',
-  content: props.itemProps?.content ?? '',
-  generatedTime: props.itemProps?.generatedTime ?? '',
-  schema: props.itemProps?.schema ?? '',
+  ...props.itemProps,
   prevSchema: props.prevSchema || props.itemProps?.prevSchema || '',
 }));
 

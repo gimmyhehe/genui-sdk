@@ -81,7 +81,6 @@ export function rebuildSchemaFromCard(
   card: ISchemaCardLikeMessage,
   options: { messages?: ChatMessage[] } = {},
 ): Record<string, unknown> | null {
-  // json-patch 以 prevSchema + patch 为准，避免 card.schema 缓存滞后
   if (card.type === 'json-patch' && card.content?.trim()) {
     const prevSchemaStr = resolveJsonPatchPrevSchemaString(card, options.messages);
     const baseline = parseSchemaJson(prevSchemaStr);
