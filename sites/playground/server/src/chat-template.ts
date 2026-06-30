@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
-import { MATERIALS_CONFIG_MAP, materialsConfig, type MaterialsConfigKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { MATERIALS_CONFIG_MAP, materialsConfig, type VariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { ngMaterialsConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
 import { streamText, stepCountIs } from 'ai';
 import getRawBody from 'raw-body';
@@ -37,7 +37,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     userAppendPrompt: playgroundConfig.promptList?.filter(Boolean).join('\n') || '',
     model: playgroundConfig.model || '',
     temperature: playgroundConfig.temperature || 0.3,
-    promptTier: playgroundConfig.promptTier,
+    promptVariant: playgroundConfig.promptVariant,
   };
 };
 
@@ -78,7 +78,7 @@ export const createChatTemplate = () => {
       }
 
       const playgroundConfig = getPlaygroundConfig(playgroundStr);
-      const { mcpServers, framework, userAppendPrompt, promptTier } = playgroundConfig;
+      const { mcpServers, framework, userAppendPrompt, promptVariant } = playgroundConfig;
 
       const llmConfigParams: LLMConfigParams = {
         model: playgroundConfig.model,
@@ -95,7 +95,9 @@ export const createChatTemplate = () => {
       const renderConfigForFramework =
         framework === 'Angular'
           ? ngMaterialsConfig
-          : MATERIALS_CONFIG_MAP[promptTier as MaterialsConfigKey] ?? materialsConfig;
+          : promptVariant && Object.hasOwn(MATERIALS_CONFIG_MAP, promptVariant)
+            ? MATERIALS_CONFIG_MAP[promptVariant as VariantKey]
+            : materialsConfig;
       const maxSteps = 30;
       const systemPrompt = `${genPrompt(renderConfigForFramework, tgCustomConfig)}
       ${body.templateSchema ? generateJsonPatchPrompt() : ''}

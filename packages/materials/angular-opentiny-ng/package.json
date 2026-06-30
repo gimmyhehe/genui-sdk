@@ -20,6 +20,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@opentiny/genui-sdk-core": "workspace:*"
   },
   "devDependencies": {
     "escape-string-regexp": "^1.0.5",

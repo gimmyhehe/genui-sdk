@@ -94,7 +94,11 @@ export const skillRulesPrompt = ['特别重要：除了上下文数据和工具�
 
 export const targetRulesPrompt = ['如果上下文或者工具调用结果中没有可用数据，可以使用Mock数据来完成会话'];
 
-export const genRulesPrompt = (additionRules: string[], tgCustomConfig?: IGenPromptCustomConfig) => {
+export const genRulesPrompt = (
+  additionRules: string[],
+  tgCustomConfig?: IGenPromptCustomConfig,
+  wrapperComponent = 'TinyCard',
+) => {
   const hasContinueChat = tgCustomConfig?.customActions?.some((action) => action.name === 'continueChat');
   const hasSaveState = tgCustomConfig?.customActions?.some((action) => action.name === 'saveState');
 
@@ -119,7 +123,7 @@ export const genRulesPrompt = (additionRules: string[], tgCustomConfig?: IGenPro
     '- 单个组件节点也可以使用 `condition` 来控制显示',
     '- 请注意对话的连续性，不要重复渲染多余内容',
     '- 图片和链接地址不可杜撰',
-    '- 根节点请尽可能使用 `TinyCard` 组件包裹，但禁止设置颜色样式',
+    `- 根节点请尽可能使用 \`${wrapperComponent}\` 组件包裹，但禁止设置颜色样式`,
     '- 禁止设置所有组件的 `background`、`color`、`background-color` 等颜色 CSS 样式',
     '- 禁止使用任何弹窗组件，逻辑中禁止使用 `alert`、`confirm`、`prompt`',
     '- 禁止设置饼图的 `settings.radius`',
@@ -190,7 +194,7 @@ function buildPromptSections(
     includeSnippets ? genSnippetsPrompt(materials, extendWhiteList, customSnippets || []) : null,
     aboutThis.trim(),
     genCustomActionsPrompt(customActions || []),
-    genRulesPrompt(additionRules, tgCustomConfig),
+    genRulesPrompt(additionRules, tgCustomConfig, wrapperComponent),
   ].filter(Boolean);
 }
 

@@ -53,6 +53,6 @@ export const MATERIALS_CONFIG_MAP = {
   plus: plusMaterialsConfig,
 } as const;
 
-export type MaterialsConfigKey = keyof typeof MATERIALS_CONFIG_MAP;
+export type VariantKey = keyof typeof MATERIALS_CONFIG_MAP;
 
 export const materialsConfig = standardMaterialsConfig;

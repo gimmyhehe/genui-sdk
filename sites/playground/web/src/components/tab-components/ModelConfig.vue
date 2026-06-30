@@ -15,9 +15,9 @@ import { t } from '../../i18n';
 import { MATERIALS_CONFIG_MAP } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 
 const renderConfigLabelMap = {
-  mini: 'model.promptTierMini',
-  standard: 'model.promptTierStandard',
-  plus: 'model.promptTierPlus',
+  mini: 'model.promptVariantMini',
+  standard: 'model.promptVariantStandard',
+  plus: 'model.promptVariantPlus',
 };
 
 const emit = defineEmits(['update:llmConfig', 'createNewTemplate', 'update-custom-examples']);
@@ -44,12 +44,12 @@ const updateModel = (model) => updateConfig({ model });
 
 const updateTemperature = (temperature) => updateConfig({ temperature });
 
-const promptTierOptions = Object.keys(MATERIALS_CONFIG_MAP).map((key) => ({
+const promptVariantOptions = Object.keys(MATERIALS_CONFIG_MAP).map((key) => ({
   value: key,
   label: t(renderConfigLabelMap[key] || key),
 }));
 
-const updatePromptTier = (promptTier) => updateConfig({ promptTier });
+const updatePromptVariant = (promptVariant) => updateConfig({ promptVariant });
 
 const updatePromptList = (promptList) => updateConfig({ promptList });
 
@@ -129,11 +129,11 @@ const createNewTemplate = () => {
       <b>{{ slotScope.slotScope }}</b>
     </template>
   </tiny-slider>
-  <div class="config-title">{{ t('model.promptTier') }}</div>
+  <div class="config-title">{{ t('model.promptVariant') }}</div>
   <tiny-base-select
-    :model-value="llmConfig.promptTier || 'standard'"
-    @update:model-value="updatePromptTier"
-    :options="promptTierOptions"
+    :model-value="llmConfig.promptVariant || 'standard'"
+    @update:model-value="updatePromptVariant"
+    :options="promptVariantOptions"
     class="config-content"
     style="margin-bottom: 12px"
   />

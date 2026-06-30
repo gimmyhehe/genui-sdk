@@ -6,7 +6,7 @@ import path from 'node:path';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
 import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
-import { MATERIALS_CONFIG_MAP, materialsConfig, type MaterialsConfigKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import { MATERIALS_CONFIG_MAP, materialsConfig, type VariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { ngMaterialsConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
@@ -222,7 +222,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     temperature: playgroundConfig.temperature || 0.3,
     agents,
     skills: playgroundConfig.skills || [],
-    promptTier: playgroundConfig.promptTier,
+    promptVariant: playgroundConfig.promptVariant,
   };
 };
 
@@ -256,7 +256,7 @@ export function createChatGenui() {
     }
 
     const playgroundConfig = getPlaygroundConfig(playgroundStr);
-    const { mcpServers, framework, userAppendPrompt, agents, skills, promptTier } = playgroundConfig;
+    const { mcpServers, framework, userAppendPrompt, agents, skills, promptVariant } = playgroundConfig;
 
     const llmConfigParams: LLMConfigParams = {
       model: playgroundConfig.model,
@@ -291,7 +291,9 @@ export function createChatGenui() {
     const renderConfigForFramework =
       framework === 'Angular'
         ? ngMaterialsConfig
-        : MATERIALS_CONFIG_MAP[promptTier as MaterialsConfigKey] ?? materialsConfig;
+        : promptVariant && Object.hasOwn(MATERIALS_CONFIG_MAP, promptVariant)
+          ? MATERIALS_CONFIG_MAP[promptVariant as VariantKey]
+          : materialsConfig;
     const maxSteps = 30;
     let hasError = false; // 标记是否已经处理了错误
 

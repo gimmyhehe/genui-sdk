@@ -382,7 +382,7 @@
                     "required": false,
                     "readOnly": false,
                     "disabled": false,
-                    "type": "string"
+                    "type": "boolean"
                   }
                 ]
               }
