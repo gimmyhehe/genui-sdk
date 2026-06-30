@@ -1,3 +1,4 @@
+import type { IMaterialsConfig, IExample } from '@opentiny/genui-sdk-core';
 import bundleJson from './bundle.json' with { type: 'json' };
 import builtinJson from './builtin.json' with { type: 'json' };
 import chartJson from './chart.json' with { type: 'json' };
@@ -5,18 +6,7 @@ import extendJson from './extend.json' with { type: 'json' };
 import { examples as allExamples } from './example-schema';
 import { miniWhiteList, standardWhiteList, whiteList } from './white-list';
 
-export interface IPromptSectionConfig {
-  includeJsonSchema?: boolean;
-  includeSnippets?: boolean;
-}
-
-export interface IMaterialsConfig {
-  materials: any[];
-  examples: any[];
-  whiteList: string[];
-  wrapperComponent?: string;
-  promptConfig?: IPromptSectionConfig;
-}
+export type { IMaterialsConfig, IPromptSectionConfig, IExample } from '@opentiny/genui-sdk-core';
 
 const BASE_CONFIG = {
   materials: [bundleJson, builtinJson, chartJson, extendJson],
@@ -24,7 +14,7 @@ const BASE_CONFIG = {
 };
 
 const filterExamples = (ids: string[]) =>
-  allExamples.filter((example) => example.id && ids.includes(example.id));
+  allExamples.filter((example): example is IExample => !!example.id && ids.includes(example.id));
 
 export const miniMaterialsConfig: IMaterialsConfig = {
   ...BASE_CONFIG,

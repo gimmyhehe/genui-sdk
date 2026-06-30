@@ -8,6 +8,7 @@
     "build": "vite build"
   },
   "dependencies": {
+    "@opentiny/genui-sdk-core": "workspace:*",
     "@opentiny/vue-button": "^3.28.0",
     "@opentiny/vue-card": "^3.28.0",
     "@opentiny/vue-carousel": "^3.28.0",

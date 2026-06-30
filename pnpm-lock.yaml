@@ -497,6 +497,9 @@ importers:
 
   packages/materials/vue-opentiny-vue:
     dependencies:
+      '@opentiny/genui-sdk-core':
+        specifier: workspace:*
+        version: link:../../core
       '@opentiny/vue-button':
         specifier: ^3.28.0
         version: 3.28.0

@@ -181,7 +181,7 @@ export type IBlock = any;
 
 export interface IMaterials {
   data: {
-    framework: 'Vue' | 'React' | 'Angular' | 'Vanilla';
+    framework: string;
     materials: {
       components?: IComponent[];
       packages?: IPackage[];
