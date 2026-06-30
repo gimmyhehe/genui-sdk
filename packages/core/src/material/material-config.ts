@@ -19,4 +19,5 @@ export interface IMaterialsConfig {
   whiteList: string[];
   wrapperComponent?: string;
   promptConfig?: IPromptSectionConfig;
+  additionRules?: string[];
 }

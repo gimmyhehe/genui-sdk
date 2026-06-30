@@ -96,10 +96,12 @@ export const skillRulesPrompt = ['特别重要：除了上下文数据和工具�
 
 export const targetRulesPrompt = ['如果上下文或者工具调用结果中没有可用数据，可以使用Mock数据来完成会话'];
 
-export const genRulesPrompt = (
-  additionRules: string[],
-  tgCustomConfig?: IGenPromptCustomConfig,
-  wrapperComponent = 'TinyCard',
+const formatRuleItems = (rules: string[]) =>
+  rules.map((rule) => (rule.startsWith('- ') ? rule : `- ${rule}`));
+
+const buildBaseRuleItems = (
+  tgCustomConfig: IGenPromptCustomConfig | undefined,
+  wrapperComponent?: string,
 ) => {
   const hasContinueChat = tgCustomConfig?.customActions?.some((action) => action.name === 'continueChat');
   const hasSaveState = tgCustomConfig?.customActions?.some((action) => action.name === 'saveState');
@@ -114,24 +116,52 @@ export const genRulesPrompt = (
     );
   }
 
-  const rules = [
+  return [
     '- schemaJson 必须是一个根节点 `componentName` 为 `Page` 的 JSON',
     ...actionRules,
     '- `type` 为 `JSFunction` 的 `value` 必须是完整的函数',
-    '- 表单必须要有 `model` 属性，表单输入项（input/select/radio 等）必须设置 `modelValue` 的 `type` 为 `JSExpression` 且 `model` 为 `true`，且必须具有对应 `state` 状态字段，否则将不能交互',
     '- `state` 和 `methods` 字段必须紧跟 `"componentName": "Page",` 之后，请务必先生成 `state` 和 `methods` 字段，再使用。',
     '- `children` 不能放到 `props` 里，必须是数组或字符串',
     '- `children` 不支持 `JSExpression` 表达式；请使用 `Text` 组件展示文本，或使用 `loop` 来实现列表渲染',
     '- 单个组件节点也可以使用 `condition` 来控制显示',
     '- 请注意对话的连续性，不要重复渲染多余内容',
     '- 图片和链接地址不可杜撰',
-    `- 根节点请尽可能使用 \`${wrapperComponent}\` 组件包裹，但禁止设置颜色样式`,
+    ...(wrapperComponent
+      ? [`- 根节点请尽可能使用 \`${wrapperComponent}\` 组件包裹，但禁止设置颜色样式`]
+      : []),
     '- 禁止设置所有组件的 `background`、`color`、`background-color` 等颜色 CSS 样式',
     '- 禁止使用任何弹窗组件，逻辑中禁止使用 `alert`、`confirm`、`prompt`',
-    '- 禁止设置饼图的 `settings.radius`',
     '- 生成的 schemaJson 必须使用 \`\`\`schemaJson {content} \`\`\` 代码块包裹',
-    ...additionRules.map((rule) => `- ${rule}`),
-  ].join('\n');
+  ];
+};
+
+export const genRulesPrompt = (
+  modeRules: string[],
+  tgCustomConfig?: IGenPromptCustomConfig,
+  wrapperComponent?: string,
+  promptOptions?: Pick<IGenPromptOptions, 'includeBaseRules' | 'additionRules'>,
+) => {
+  const includeBaseRules = promptOptions?.includeBaseRules ?? true;
+  const additionRules = promptOptions?.additionRules ?? [];
+
+  const ruleItems = [
+    ...(includeBaseRules ? buildBaseRuleItems(tgCustomConfig, wrapperComponent) : []),
+    ...formatRuleItems(modeRules),
+    ...formatRuleItems(additionRules),
+  ];
+
+  if (ruleItems.length === 0) {
+    return '';
+  }
+
+  const rules = ruleItems.join('\n');
+
+  if (!includeBaseRules) {
+    return `## schemaJson 生成规则
+
+${rules}
+`;
+  }
 
   return `## schemaJson 生成规则
 
@@ -181,7 +211,8 @@ function buildPromptSections(
   tgCustomConfig: IGenPromptCustomConfig | undefined,
   options?: IGenPromptOptions,
 ) {
-  const { materials, examples, whiteList, wrapperComponent = 'TinyCard', promptConfig } = renderConfig;
+  const { materials, examples, whiteList, wrapperComponent, promptConfig, additionRules: materialAdditionRules } =
+    renderConfig;
   const { customComponents, customSnippets, customExamples, customActions } = tgCustomConfig || {};
   const includeJsonSchema = options?.includeJsonSchema ?? true;
   const includeSnippets = promptConfig?.includeSnippets ?? true;
@@ -189,7 +220,8 @@ function buildPromptSections(
   const includeActions = options?.includeActions ?? true;
   const includeAboutThis = options?.includeAboutThis ?? true;
   const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
-  const additionRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
+  const modeRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
+  const additionRules = [...(materialAdditionRules ?? []), ...(options?.additionRules ?? [])];
 
   return [
     options?.isSkill ? skillPromptPrefix : promptPrefix,
@@ -199,7 +231,7 @@ function buildPromptSections(
     includeSnippets ? genSnippetsPrompt(materials, extendWhiteList, customSnippets || []) : null,
     includeAboutThis ? aboutThis.trim() : null,
     includeActions ? genCustomActionsPrompt(customActions || []) : null,
-    genRulesPrompt(additionRules, tgCustomConfig, wrapperComponent),
+    genRulesPrompt(modeRules, tgCustomConfig, wrapperComponent, { ...options, additionRules }),
   ].filter(Boolean);
 }
 

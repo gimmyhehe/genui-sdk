@@ -8,9 +8,19 @@ import { miniWhiteList, standardWhiteList } from './white-list';
 
 export type { IMaterialsConfig, IPromptSectionConfig, IExample } from '@opentiny/genui-sdk-core';
 
+const MINI_ADDITION_RULES = [
+  '表单必须要有 `model` 属性，表单输入项（input/select/radio 等）必须设置 `modelValue` 的 `type` 为 `JSExpression` 且 `model` 为 `true`，且必须具有对应 `state` 状态字段，否则将不能交互',
+];
+
+const STANDARD_ADDITION_RULES = [
+  '表单必须要有 `model` 属性，表单输入项（input/select/radio 等）必须设置 `modelValue` 的 `type` 为 `JSExpression` 且 `model` 为 `true`，且必须具有对应 `state` 状态字段，否则将不能交互',
+  '禁止设置饼图的 `settings.radius`',
+];
+
 const BASE_CONFIG = {
   materials: [bundleJson, builtinJson, chartJson, extendJson],
   wrapperComponent: 'TinyCard',
+  additionRules: MINI_ADDITION_RULES,
 };
 
 const filterExamples = (ids: string[]) =>
@@ -27,6 +37,7 @@ export const standardMaterialsConfig: IMaterialsConfig = {
   ...BASE_CONFIG,
   whiteList: standardWhiteList,
   examples: filterExamples(['form', 'info', 'grid', 'tabs']),
+  additionRules: STANDARD_ADDITION_RULES,
 };
 
 export const MATERIALS_CONFIG_MAP = {

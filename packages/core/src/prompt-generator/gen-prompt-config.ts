@@ -67,8 +67,11 @@ export interface IGenPromptOptions {
   includeJsonSchema?: boolean;
   includeActions?: boolean;
   includeAboutThis?: boolean;
+  includeBaseRules?: boolean;
+  additionRules?: string[];
 }
 
+// TODO: remove this interface, 不应该放在core包里
 export interface IGenPromptConfig extends IGenPromptCustomConfig {
   framework?: 'Vue' | 'Angular';
   strategy?: 'append' | 'override' | 'prepend';
