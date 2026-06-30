@@ -6,6 +6,7 @@ import type {
   IGenPromptComponent,
   IGenPromptSnippet,
   IGenPromptCustomConfig,
+  IGenPromptOptions,
 } from './gen-prompt-config';
 import { getComponentsName, getComponentsInfo } from './handle-component';
 import { getSnippetsInfo } from './handle-snippets';
@@ -178,12 +179,16 @@ const getExtendWhiteList = (whiteList: string[], customComponents: IGenPromptCom
 function buildPromptSections(
   renderConfig: IMaterialsConfig,
   tgCustomConfig: IGenPromptCustomConfig | undefined,
-  options?: { isSkill?: boolean },
+  options?: IGenPromptOptions,
 ) {
   const { materials, examples, whiteList, wrapperComponent = 'TinyCard', promptConfig } = renderConfig;
   const { customComponents, customSnippets, customExamples, customActions } = tgCustomConfig || {};
-  const includeJsonSchema = promptConfig?.includeJsonSchema ?? true;
+  const includeJsonSchema = options?.includeJsonSchema ?? true;
   const includeSnippets = promptConfig?.includeSnippets ?? true;
+  const includeExamples = promptConfig?.includeExamples ?? true;
+  const includeRules = options?.includeRules ?? true;
+  const includeActions = options?.includeActions ?? true;
+  const includeAboutThis = options?.includeAboutThis ?? true;
   const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
   const additionRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
 
@@ -191,18 +196,18 @@ function buildPromptSections(
     options?.isSkill ? skillPromptPrefix : promptPrefix,
     genComponentsPrompt(materials, extendWhiteList, customComponents || []),
     includeJsonSchema ? genJsonSchemaPrompt(genJsonSchema(extendWhiteList)) : null,
-    genExamplesPrompt(examples.concat(customExamples || []), wrapperComponent),
+    includeExamples ? genExamplesPrompt(examples.concat(customExamples || []), wrapperComponent) : null,
     includeSnippets ? genSnippetsPrompt(materials, extendWhiteList, customSnippets || []) : null,
-    aboutThis.trim(),
-    genCustomActionsPrompt(customActions || []),
-    genRulesPrompt(additionRules, tgCustomConfig, wrapperComponent),
+    includeAboutThis ? aboutThis.trim() : null,
+    includeActions ? genCustomActionsPrompt(customActions || []) : null,
+    includeRules ? genRulesPrompt(additionRules, tgCustomConfig, wrapperComponent) : null,
   ].filter(Boolean);
 }
 
 export function genPrompt(
   renderConfig: IMaterialsConfig,
   tgCustomConfig?: IGenPromptCustomConfig,
-  options?: { isSkill?: boolean },
+  options?: IGenPromptOptions,
 ) {
   const sections = buildPromptSections(renderConfig, tgCustomConfig, options);
   return sections.join('\n\n');

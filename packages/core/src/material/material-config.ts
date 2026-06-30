@@ -9,8 +9,8 @@ export interface IExample {
 }
 
 export interface IPromptSectionConfig {
-  includeJsonSchema?: boolean;
   includeSnippets?: boolean;
+  includeExamples?: boolean;
 }
 
 export interface IMaterialsConfig {

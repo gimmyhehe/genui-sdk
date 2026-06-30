@@ -8,5 +8,4 @@ export const ngMaterialsConfig: IMaterialsConfig = {
   examples,
   whiteList,
   wrapperComponent: 'TiCard',
-  promptConfig: { includeJsonSchema: true, includeSnippets: true },
 };

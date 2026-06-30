@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
-import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
+import { genPrompt, type IGenPromptCustomConfig, type IGenPromptOptions } from '@opentiny/genui-sdk-core';
 import { MATERIALS_CONFIG_MAP, materialsConfig, type VariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { ngMaterialsConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -25,6 +25,10 @@ type StreamTextOptions = Parameters<typeof streamText>[0];
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
+
+export function getGenPromptOptions(promptVariant?: VariantKey): IGenPromptOptions | undefined {
+  return promptVariant === 'mini' ? { includeJsonSchema: false } : undefined;
+}
 
 function extractStatusCode(error: any): number | undefined {
   if (!error) {
@@ -306,7 +310,7 @@ export function createChatGenui() {
       model,
       temperature,
       system:
-        genPrompt(renderConfigForFramework, tgCustomConfig) +
+        genPrompt(renderConfigForFramework, tgCustomConfig, getGenPromptOptions(promptVariant)) +
         '\n' +
         specificPrompt +
         '\n' +

@@ -62,6 +62,14 @@ export interface IGenPromptCustomConfig {
   customActions?: IGenPromptAction[];
 }
 
+export interface IGenPromptOptions {
+  isSkill?: boolean;
+  includeJsonSchema?: boolean;
+  includeRules?: boolean;
+  includeActions?: boolean;
+  includeAboutThis?: boolean;
+}
+
 export interface IGenPromptConfig extends IGenPromptCustomConfig {
   framework?: 'Vue' | 'Angular';
   strategy?: 'append' | 'override' | 'prepend';

@@ -9,7 +9,7 @@ import { streamText, stepCountIs } from 'ai';
 import getRawBody from 'raw-body';
 import { openaiCompatibleTransformChunk } from '@opentiny/genui-sdk-chat-completions';
 import type { IOpenaiCompatibleChunk } from '@opentiny/genui-sdk-chat-completions';
-import { generateLlmConfig, generateAiSdkTools } from './chat-genui.js';
+import { generateLlmConfig, generateAiSdkTools, getGenPromptOptions } from './chat-genui.js';
 import { generateJsonPatchPrompt } from './json-patch-prompt.js';
 import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
 
@@ -99,7 +99,7 @@ export const createChatTemplate = () => {
             ? MATERIALS_CONFIG_MAP[promptVariant as VariantKey]
             : materialsConfig;
       const maxSteps = 30;
-      const systemPrompt = `${genPrompt(renderConfigForFramework, tgCustomConfig)}
+      const systemPrompt = `${genPrompt(renderConfigForFramework, tgCustomConfig, getGenPromptOptions(promptVariant))}
       ${body.templateSchema ? generateJsonPatchPrompt() : ''}
       ${specificPrompt}
       ${customSystemPrompt}`;

@@ -17,7 +17,6 @@ import { MATERIALS_CONFIG_MAP } from '@opentiny/genui-sdk-materials-vue-opentiny
 const renderConfigLabelMap = {
   mini: 'model.promptVariantMini',
   standard: 'model.promptVariantStandard',
-  plus: 'model.promptVariantPlus',
 };
 
 const emit = defineEmits(['update:llmConfig', 'createNewTemplate', 'update-custom-examples']);
