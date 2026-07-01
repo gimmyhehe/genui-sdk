@@ -9,7 +9,7 @@ import {
   RENDERER_SETTINGS,
 } from '@opentiny/tiny-schema-renderer-ng';
 import { requiredCompleteFieldSelectors } from './config';
-import { GenuiRendererSettingsService } from './renderer-settings.service';
+import { RendererSettingsService } from './renderer-settings.service';
 
 export const CARD_ID = Symbol('schema-card-id');
 export interface ICustomAction {
@@ -35,10 +35,10 @@ const errorSchema = {
     Renderer,
   ],
   providers: [
-    GenuiRendererSettingsService,
+    RendererSettingsService,
     {
       provide: RENDERER_SETTINGS,
-      useExisting: GenuiRendererSettingsService,
+      useExisting: RendererSettingsService,
     },
   ],
   templateUrl: './genui-renderer.html',
