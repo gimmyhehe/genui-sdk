@@ -1,4 +1,3 @@
-import { computed } from 'vue';
 import { useIsMobile } from '../../../use-mobile';
 import { useTemplateEditorUi } from './use-template-editor-ui';
 import { useTemplateMobileUi } from './use-template-mobile-ui';
@@ -22,14 +21,6 @@ export function useTemplateEditorPlatform() {
     openSheet,
     resetUi: resetMobileUi,
   } = useTemplateMobileUi();
-
-  const schemaEditorVisibleUnified = computed(() =>
-    isMobile.value ? sheetVisible.value : schemaEditorVisible.value,
-  );
-
-  const isJsonEditorActive = computed(() =>
-    isMobile.value ? jsonEditorOpen.value : schemaEditorVisible.value,
-  );
 
   const closeSchemaEditor = (revertUnsavedChanges: () => void) => {
     revertUnsavedChanges();
@@ -117,9 +108,6 @@ export function useTemplateEditorPlatform() {
   };
 
   return {
-    isMobile,
-    schemaEditorVisible: schemaEditorVisibleUnified,
-    isJsonEditorActive,
     closeSchemaEditor,
     closeRendererPanel,
     toggleDesktopSchemaEditor,

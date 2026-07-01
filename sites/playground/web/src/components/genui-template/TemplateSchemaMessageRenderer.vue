@@ -5,9 +5,9 @@ import SchemaVersionCard from './SchemaVersionCard.vue';
 import { useIsMobile } from '../../use-mobile';
 import { useTemplateConversation } from './composables/use-template-conversation';
 import { useSchemaVersionWrite } from './composables/use-schema-version-write';
-import {
-  rebuildSchemaFromCard,
-} from './template-chat-utils';
+import { useTemplatePage } from './composables/use-template-page';
+import { useTemplateVersionControl } from './composables/use-template-version-control';
+import { rebuildSchemaFromCard } from './template-chat-utils';
 
 const props = defineProps<{
   itemProps: any;
@@ -16,14 +16,11 @@ const props = defineProps<{
   errorMessagesMap: Map<string, string>;
 }>();
 
-const emit = defineEmits<{
-  (event: 'schema-version-toggle', schema: Record<string, unknown>, cardId: string): void;
-  (event: 'schema-version-select', cardId: string): void;
-}>();
-
 const { isMobile } = useIsMobile();
 const { messages } = useTemplateConversation();
 const { getMessageByCardId } = useSchemaVersionWrite();
+const { toggleSchemaVersion } = useTemplatePage();
+const { selectVersionCard } = useTemplateVersionControl();
 
 const generating = computed(() => !props.itemProps?.generatedTime);
 
@@ -47,11 +44,11 @@ const handleSchemaVersionCardClick = (cardId: string) => {
   const card = getMessageByCardId(cardId);
   const schema = card ? rebuildSchemaFromCard(card, { messages: messages.value }) : null;
   if (schema && card) {
-    emit('schema-version-toggle', schema, cardId);
+    toggleSchemaVersion(schema, cardId);
     return;
   }
 
-  emit('schema-version-select', cardId);
+  selectVersionCard(cardId);
 };
 </script>
 

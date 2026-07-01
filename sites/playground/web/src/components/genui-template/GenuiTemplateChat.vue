@@ -37,6 +37,7 @@ import { clonePlainJson } from './template-chat-utils/json-patch-format';
 import { generateId, stripSchemaFieldsWhileStreaming } from '../../utils';
 import { useTemplateConversation } from './composables/use-template-conversation';
 import { useTemplateSchema } from './composables/use-template-schema';
+import { useTemplateVersionControl } from './composables/use-template-version-control';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
 import { emitter } from './template-chat-event-emitter';
@@ -50,12 +51,11 @@ const props = defineProps<{
   messages?: IMessage[];
 }>();
 
-const emit = defineEmits(['schema-version-toggle', 'schema-version-select', 'schema-refresh']);
-
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
 const errorMessagesMap = ref<Map<string, string>>(new Map());
+const { onSchemaRefresh } = useTemplateVersionControl();
 const { conversationKit, templateConversationState, updateConversationTitle: updateTemplateTitle } = useTemplateConversation();
 const {
   currentSchema,
@@ -279,7 +279,7 @@ const handleRefresh = ({ index }: { index: number }) => {
   }
   setCurrentCardId(String(lastUserMessage?.messageId ?? generateId()));
 
-  emit('schema-refresh');
+  onSchemaRefresh();
   send();
 };
 
@@ -304,9 +304,6 @@ const messageRenderers = {
       type: 'json-patch',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
-        emit('schema-version-toggle', schema, cardId),
-      onSchemaVersionSelect: (cardId: string) => emit('schema-version-select', cardId),
     });
   },
   'schema-card': (props) => {
@@ -315,9 +312,6 @@ const messageRenderers = {
       type: 'schema-card',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
-        emit('schema-version-toggle', schema, cardId),
-      onSchemaVersionSelect: (cardId: string) => emit('schema-version-select', cardId),
     });
   },
   'schema-manual': (props) => {
@@ -326,9 +320,6 @@ const messageRenderers = {
       type: 'schema-manual',
       prevSchema: prevSchema.value,
       errorMessagesMap: errorMessagesMap.value,
-      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
-        emit('schema-version-toggle', schema, cardId),
-      onSchemaVersionSelect: (cardId: string) => emit('schema-version-select', cardId),
     });
   },
 };

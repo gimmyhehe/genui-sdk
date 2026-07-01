@@ -9,6 +9,7 @@ import { useSchemaDiff } from './use-schema-diff';
 import { useSchemaEditor } from './use-schema-editor';
 import { useTemplateHistoryUi } from './use-template-history-ui';
 import { useTemplateEditorPlatform } from './use-template-editor-platform';
+import { useTemplateEditorUi } from './use-template-editor-ui';
 import { useTemplateMobileUi, disposeMobileSheetDrag } from './use-template-mobile-ui';
 
 export function useTemplatePage() {
@@ -16,8 +17,9 @@ export function useTemplatePage() {
   const { currentConversationId, templateConversationState } = useTemplateConversation();
   const { writeNewVersion } = useSchemaVersionWrite();
 
+  const { schemaEditorVisible } = useTemplateEditorUi();
+  const { jsonEditorOpen, resetUi: resetMobileUi } = useTemplateMobileUi();
   const {
-    isJsonEditorActive,
     closeSchemaEditor,
     closeRendererPanel: closeRendererPanelUi,
     toggleDesktopSchemaEditor,
@@ -27,7 +29,10 @@ export function useTemplatePage() {
     handleEscape,
     resetUi: resetEditorPlatformUi,
   } = useTemplateEditorPlatform();
-  const { resetUi: resetMobileUi } = useTemplateMobileUi();
+
+  const isJsonEditorActive = computed(
+    () => schemaEditorVisible.value || jsonEditorOpen.value,
+  );
   const { closeSchemaHistoryPanel, resetUi: resetHistoryUi } = useTemplateHistoryUi();
 
   const {
@@ -193,5 +198,6 @@ export function useTemplatePage() {
     applyCurrentVersion,
     handleSaveSchemaEditor,
     resetToLatestVersion,
+    schemaEditorDirty,
   };
 }

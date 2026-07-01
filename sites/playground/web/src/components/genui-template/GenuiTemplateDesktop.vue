@@ -12,7 +12,6 @@ import {
   useTemplatePage,
   useSchemaEditor,
   useSchemaDiff,
-  useSchemaVersionHistory,
   useTemplateVersionControl,
   useTemplateEditorUi,
   useTemplateHistoryUi,
@@ -36,30 +35,24 @@ const {
   applyTextToPreview,
   editorOptions,
   isReadOnly: isSchemaEditorReadOnly,
-  hasUnsavedChanges,
 } = useSchemaEditor();
 const {
   schemaEditorShowDiffView,
   schemaEditorDiffOriginal,
   schemaEditorDiffModified,
 } = useSchemaDiff();
-const { showReturnLatestButton, selectVersionCard, onSchemaRefresh } = useTemplateVersionControl();
-const { schemaVersionHistoryGroups } = useSchemaVersionHistory();
-const { schemaHistoryVisible, toggleSchemaHistoryPanel, closeSchemaHistoryPanel } = useTemplateHistoryUi();
+const { showReturnLatestButton } = useTemplateVersionControl();
+const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateHistoryUi();
 const { rendererPanelVisible, schemaEditorVisible } = useTemplateEditorUi();
-const schemaEditorDirty = computed(
-  () => schemaEditorVisible.value && hasUnsavedChanges(),
-);
 
 const {
   toggleSchemaEditor,
   closeSchemaEditorView,
   closeRendererPanel,
-  handleHistoryEntrySelect,
-  toggleSchemaVersion,
   applyCurrentVersion,
   handleSaveSchemaEditor,
   resetToLatestVersion,
+  schemaEditorDirty,
 } = useTemplatePage();
 
 const rendererSchema = computed(() => {
@@ -80,9 +73,6 @@ const rendererSchemaKey = computed(() => {
       <genui-template-chat
         v-show="!schemaEditorVisible"
         class="genui-template-chat"
-        @schema-version-toggle="toggleSchemaVersion"
-        @schema-version-select="selectVersionCard"
-        @schema-refresh="onSchemaRefresh"
       />
       <div class="schema-version-container" v-show="schemaEditorVisible">
         <div class="schema-version-container__header">
@@ -171,13 +161,7 @@ const rendererSchemaKey = computed(() => {
             :generating="false"
             :is-json-complete="true"
           />
-          <schema-version-history-panel
-            :visible="schemaHistoryVisible"
-            :groups="schemaVersionHistoryGroups"
-            :theme="theme"
-            @close="closeSchemaHistoryPanel"
-            @select="handleHistoryEntrySelect"
-          />
+          <schema-version-history-panel :theme="theme" />
         </div>
       </div>
     </div>

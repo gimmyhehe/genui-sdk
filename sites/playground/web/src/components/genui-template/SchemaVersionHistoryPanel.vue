@@ -2,27 +2,28 @@
 import { computed, ref, watch } from 'vue';
 import { TinyButton } from '@opentiny/vue';
 import { iconClose } from '@opentiny/vue-icon';
-import type { ISchemaVersionHistoryEntry } from './template-chat-utils/schema-version-history';
+import type { PlaygroundColorTheme } from './composables/use-monaco-playground-theme';
+import {
+  useTemplatePage,
+  useSchemaVersionHistory,
+  useTemplateHistoryUi,
+} from './composables';
 import { t } from '../../i18n';
 
 const props = defineProps<{
-  visible: boolean;
-  groups: Array<{ label: string; items: ISchemaVersionHistoryEntry[] }>;
-  theme?: 'light' | 'dark' | 'lite' | 'auto';
-}>();
-
-const emit = defineEmits<{
-  (event: 'close'): void;
-  (event: 'select', entry: ISchemaVersionHistoryEntry): void;
+  theme?: PlaygroundColorTheme;
 }>();
 
 const TinyCloseIcon = iconClose();
+const { schemaVersionHistoryGroups } = useSchemaVersionHistory();
+const { schemaHistoryVisible, closeSchemaHistoryPanel } = useTemplateHistoryUi();
+const { handleHistoryEntrySelect } = useTemplatePage();
 
 const isDark = computed(() => props.theme === 'dark');
 const collapsedGroups = ref<Record<string, boolean>>({});
 
 watch(
-  () => props.groups.map((group) => group.label),
+  () => schemaVersionHistoryGroups.value.map((group) => group.label),
   (labels) => {
     for (const label of labels) {
       if (!(label in collapsedGroups.value)) {
@@ -43,7 +44,7 @@ const toggleGroup = (label: string) => {
 <template>
   <Transition name="schema-history-panel">
     <aside
-      v-if="visible"
+      v-if="schemaHistoryVisible"
       class="schema-version-history-panel"
       :class="{ 'is-dark': isDark }"
       role="complementary"
@@ -56,14 +57,14 @@ const toggleGroup = (label: string) => {
           class="schema-version-history-panel__close"
           :icon="TinyCloseIcon"
           :aria-label="t('templateEditor.closeHistory')"
-          @click="emit('close')"
+          @click="closeSchemaHistoryPanel"
         />
       </header>
 
       <div class="schema-version-history-panel__body">
-        <template v-if="groups.length">
+        <template v-if="schemaVersionHistoryGroups.length">
           <section
-            v-for="group in groups"
+            v-for="group in schemaVersionHistoryGroups"
             :key="group.label"
             class="schema-version-history-panel__section"
           >
@@ -102,7 +103,7 @@ const toggleGroup = (label: string) => {
                 type="button"
                 class="schema-version-history-panel__item"
                 :class="{ 'is-active': entry.isCurrent, 'is-pending': entry.isPending }"
-                @click="emit('select', entry)"
+                @click="handleHistoryEntrySelect(entry)"
               >
                 <div class="schema-version-history-panel__item-main">
                   <div class="schema-version-history-panel__item-time">{{ entry.timeLabel }}</div>
