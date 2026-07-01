@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
-import useTemplate from '../genui-template/composables/use-template';
+import { useTemplateConversation } from '../genui-template/composables/use-template-conversation';
 import { TinyDialogBox, TinyButton, TinyCheckboxGroup, TinyCheckbox } from '@opentiny/vue';
 import { t } from '../../i18n';
 
@@ -17,7 +17,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible', 'confirmSelectExample', 'createNewTemplate']);
 
-const { templateSchemaList } = useTemplate();
+const { templateSchemaList } = useTemplateConversation();
 const selectedExamples = ref([]);
 
 /**

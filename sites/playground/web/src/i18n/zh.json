@@ -183,6 +183,7 @@
     "historyEmpty": "暂无版本记录",
     "previewRender": "渲染效果",
     "manualEditSave": "手动编辑保存",
+    "manualEditBackendContent": "用户手动编辑",
     "incrementalUpdate": "增量更新",
     "aiGeneratedVersion": "AI 生成版本",
     "recentUpdate": "最近更新",

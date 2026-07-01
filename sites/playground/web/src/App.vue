@@ -23,7 +23,9 @@ import UserFooter from './components/UserFooter.vue';
 import PlaygroundSidebar from './components/PlaygroundSidebar.vue';
 import { useInputMessage } from './hooks/use-input-message';
 import { useIsMobile } from './hooks';
-import useTemplate from './components/genui-template/composables/use-template';
+import { useTemplateConversation } from './components/genui-template/composables/use-template-conversation';
+import { useTemplateSchema } from './components/genui-template/composables/use-template-schema';
+import { useTemplateList } from './components/genui-template/composables/use-template-list';
 import {
   getOverlapEliminatorHandler,
   getContinueGeneratingHandler,
@@ -243,7 +245,15 @@ const handleKeydown = (event) => {
 };
 
 const templateUrl = import.meta.env.VITE_CHAT_TEMPLATE_URL;
-const { isTemplateInit, templateSchemaList, switchTemplate } = useTemplate({ url: templateUrl, llmConfig });
+useTemplateConversation({
+  url: templateUrl,
+  llmConfig,
+  onLoaded: (loadedMessages) => {
+    useTemplateSchema().applySchemaFromMessages(loadedMessages);
+  },
+});
+const { isTemplateInit, templateSchemaList } = useTemplateConversation();
+const { switchTemplate } = useTemplateList();
 const { initInputMessage } = useInputMessage(chat);
 const { isMobile } = useIsMobile();
 const isSidebarOpen = ref(!isMobile.value);

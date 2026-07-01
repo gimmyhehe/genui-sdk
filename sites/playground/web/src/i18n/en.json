@@ -183,6 +183,7 @@
     "historyEmpty": "No version history",
     "previewRender": "Preview",
     "manualEditSave": "Manual edit save",
+    "manualEditBackendContent": "User manual edit",
     "incrementalUpdate": "Incremental update",
     "aiGeneratedVersion": "AI generated version",
     "recentUpdate": "Latest update",

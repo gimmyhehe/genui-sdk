@@ -3,7 +3,8 @@ import { computed } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
 import SchemaVersionCard from './SchemaVersionCard.vue';
 import { useIsMobile } from '../../use-mobile';
-import useTemplate from './composables/use-template';
+import { useTemplateConversation } from './composables/use-template-conversation';
+import { useSchemaVersionWrite } from './composables/use-schema-version-write';
 import {
   rebuildSchemaFromCard,
 } from './template-chat-utils';
@@ -21,7 +22,8 @@ const emit = defineEmits<{
 }>();
 
 const { isMobile } = useIsMobile();
-const { getMessageByCardId, messages } = useTemplate();
+const { messages } = useTemplateConversation();
+const { getMessageByCardId } = useSchemaVersionWrite();
 
 const generating = computed(() => !props.itemProps?.generatedTime);
 

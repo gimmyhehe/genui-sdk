@@ -10,7 +10,8 @@ import {
 } from './template-chat-utils';
 import { resolveManualEditSaveTitle } from './template-chat-utils/schema-input-ids';
 import type { SchemaManualInputType } from './chat.types';
-import useTemplate from './composables/use-template';
+import { useTemplateConversation } from './composables/use-template-conversation';
+import { useSchemaVersionWrite } from './composables/use-schema-version-write';
 import { useIsMobile } from '../../use-mobile';
 import docCardIcon from '../../assets/images/card.svg';
 import docEditIcon from '../../assets/images/card-edit.svg';
@@ -36,7 +37,8 @@ defineOptions({ inheritAttrs: false });
 const props = defineProps<IRendererProps>();
 const emit = defineEmits(['card-select']);
 
-const { getMessageByCardId, messages } = useTemplate();
+const { messages } = useTemplateConversation();
+const { getMessageByCardId } = useSchemaVersionWrite();
 
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);

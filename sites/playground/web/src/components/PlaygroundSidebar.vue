@@ -11,7 +11,8 @@ import McpTools from './tab-components/mcpTools.vue';
 import GenuiHistory from './tab-components/GenuiHistory.vue';
 import LanguageSwitcher from './LanguageSwitcher.vue';
 import { useIsMobile } from '../hooks';
-import useTemplate from './genui-template/composables/use-template';
+import { useTemplateConversation } from './genui-template/composables/use-template-conversation';
+import { useTemplateList } from './genui-template/composables/use-template-list';
 import { t } from '../i18n';
 
 const props = defineProps({
@@ -21,7 +22,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:expanded', 'new-task', 'update:theme', 'update-custom-examples']);
 
-const { isTemplateInit, switchTemplate, createTemplate } = useTemplate();
+const { isTemplateInit } = useTemplateConversation();
+const { switchTemplate, createTemplate } = useTemplateList();
 
 const ENABLE_TEMPLATE = import.meta.env.VITE_ENABLE_TEMPLATE === 'true';
 // 条件异步加载 genui-template 组件，不启用时完全不导入，构建时不会被打包

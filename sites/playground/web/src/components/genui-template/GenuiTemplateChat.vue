@@ -35,7 +35,8 @@ import {
 } from './template-chat-utils';
 import { clonePlainJson } from './template-chat-utils/json-patch-format';
 import { generateId, stripSchemaFieldsWhileStreaming } from '../../utils';
-import useTemplate from './composables/use-template';
+import { useTemplateConversation } from './composables/use-template-conversation';
+import { useTemplateSchema } from './composables/use-template-schema';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
 import { emitter } from './template-chat-event-emitter';
@@ -55,17 +56,15 @@ const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
 const errorMessagesMap = ref<Map<string, string>>(new Map());
+const { conversationKit, templateConversationState, updateConversationTitle: updateTemplateTitle } = useTemplateConversation();
 const {
-  conversation,
-  templateConversationState,
   currentSchema,
   currentPreviewSchema,
   currentCardId,
   setCurrentSchema,
   setCurrentPreviewSchema,
-  updateTemplateTitle,
   setCurrentCardId,
-} = useTemplate();
+} = useTemplateSchema();
 
 watch(
   () => TinyGenuiConfig?.value?.theme,
@@ -81,11 +80,11 @@ watch(
   },
 );
 
-const { messageManager } = conversation;
+const messageManager = computed(() => conversationKit.value!.messageManager.value);
 
 const messages = computed(() => messageManager.value.messages.value);
 
-const generating = computed(() => GeneratingStatus.includes(conversation.messageManager.value.messageState.status));
+const generating = computed(() => GeneratingStatus.includes(messageManager.value.messageState.status));
 
 const messagesContainer: Ref<HTMLElement | undefined> = ref();
 
@@ -101,11 +100,12 @@ const roles: Record<string, BubbleRoleConfig> = {
           slotProps.bubbleProps.role !== 'assistant' ||
           (slotProps.index !== undefined && slotProps.index !== messages.value.length - 1) ||
           !generating.value;
+        const isLastBubble = slotProps.index === messages.value.length - 1;
         return h(AssistantFooter, {
           bubbleProps: slotProps.bubbleProps,
           index: slotProps.index,
           isFinished,
-          messageManager: messageManager.value,
+          isLastBubble,
           chatMessage: (messageManager.value.messages.value[slotProps.index] || {}) as IChatMessage,
           onRefresh: handleRefresh,
           onCopy: handleCopy,

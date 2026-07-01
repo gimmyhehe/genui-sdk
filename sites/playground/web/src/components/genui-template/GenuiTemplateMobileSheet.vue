@@ -18,7 +18,6 @@ const props = defineProps<{
   jsonEditorOpen: boolean;
   panelStyle: CSSProperties;
   showReturnLatestButton: boolean;
-  showApplyVersionButton?: boolean;
   currentPreviewSchema: Record<string, unknown> | null;
   currentPreviewSchemaComplete?: boolean | undefined;
   schemaEditor: string;
@@ -178,7 +177,6 @@ const toggleJsonEditor = () => {
           </div>
           <div v-if="showReturnLatestButton" class="schema-mobile-sheet__footer">
             <tiny-button
-              v-if="showApplyVersionButton"
               round
               class="schema-mobile-sheet__latest-btn"
               @click="emit('apply-current-version')"

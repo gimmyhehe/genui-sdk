@@ -1,5 +1,4 @@
-import { computed, ref, type ComputedRef, type Ref } from 'vue';
-import type { ChatMessage } from '@opentiny/tiny-robot-kit';
+import { computed } from 'vue';
 import {
   findLatestSchemaCardInConversation,
   collectSchemaVersionHistory,
@@ -7,12 +6,12 @@ import {
   filterSchemaVersionHistoryForCard,
   resolveSchemaCardScopeId,
 } from '../template-chat-utils';
+import { useTemplateSchema } from './use-template-schema';
+import { useTemplateConversation } from './use-template-conversation';
 
-export function useSchemaVersionHistory(
-  messages: ComputedRef<ChatMessage[]>,
-  currentCardId: Ref<string>,
-) {
-  const schemaHistoryVisible = ref(false);
+export function useSchemaVersionHistory() {
+  const { messages } = useTemplateConversation();
+  const { currentCardId } = useTemplateSchema();
 
   const latestSchemaCardId = computed(() => findLatestSchemaCardInConversation(messages.value)?.cardId ?? '');
 
@@ -55,22 +54,11 @@ export function useSchemaVersionHistory(
     () => flatSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value) ?? null,
   );
 
-  const toggleSchemaHistoryPanel = () => {
-    schemaHistoryVisible.value = !schemaHistoryVisible.value;
-  };
-
-  const closeSchemaHistoryPanel = () => {
-    schemaHistoryVisible.value = false;
-  };
-
   return {
-    schemaHistoryVisible,
     allSchemaVersionHistoryEntries,
     schemaVersionHistoryGroups,
     isLatestSchemaVersionCard,
     flatSchemaVersionHistoryEntries,
     currentHistoryEntry,
-    toggleSchemaHistoryPanel,
-    closeSchemaHistoryPanel,
   };
 }

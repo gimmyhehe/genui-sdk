@@ -1,36 +1,20 @@
-import { computed, ref, watch, type ComputedRef, type Ref, type ShallowRef } from 'vue';
+import { computed, ref } from 'vue';
+import { useTemplateSchema } from './use-template-schema';
+import { useTemplateVersionControl } from './use-template-version-control';
 
-export function useSchemaEditor(options: {
-  isMobile: Ref<boolean>;
-  currentPreviewSchema: ShallowRef<unknown>;
-  setCurrentPreviewSchema: (schema: unknown) => void;
-  isViewingHistoryWithoutApply: ComputedRef<boolean>;
-  schemaEditorDiffFromHistory: Ref<boolean>;
-}) {
-  const {
-    isMobile,
-    currentPreviewSchema,
-    setCurrentPreviewSchema,
-    isViewingHistoryWithoutApply,
-    schemaEditorDiffFromHistory,
-  } = options;
+const schemaEditorText = ref('{}');
+const schemaEditorBaseline = ref('{}');
+const schemaEditorSaveLoading = ref(false);
 
-  const schemaEditorVisible = ref(false);
-  const mobileSchemaJsonEditorOpen = ref(false);
-  const schemaEditorText = ref('{}');
-  const schemaEditorBaseline = ref('{}');
-  const schemaEditorSaveLoading = ref(false);
+export function useSchemaEditor() {
+  const { currentPreviewSchema, setCurrentPreviewSchema } = useTemplateSchema();
+  const { isDiffMode, showReturnLatestButton } = useTemplateVersionControl();
 
-  const isSchemaEditorReadOnly = computed(() => schemaEditorDiffFromHistory.value || isViewingHistoryWithoutApply.value);
+  const isReadOnly = computed(() => isDiffMode.value || showReturnLatestButton.value);
 
-  const isSchemaJsonEditorActive = computed(
-    () => (schemaEditorVisible.value && !isMobile.value) || (isMobile.value && mobileSchemaJsonEditorOpen.value),
-  );
+  const hasUnsavedChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
 
-  const hasUnsavedSchemaEditorChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
-  const schemaEditorDirty = computed(() => isSchemaJsonEditorActive.value && hasUnsavedSchemaEditorChanges());
-
-  const syncSchemaEditorBaseline = () => {
+  const syncBaseline = () => {
     if (currentPreviewSchema.value) {
       const text = JSON.stringify(currentPreviewSchema.value, null, 2);
       schemaEditorText.value = text;
@@ -41,8 +25,8 @@ export function useSchemaEditor(options: {
     }
   };
 
-  const revertUnsavedSchemaEditorChanges = () => {
-    if (!hasUnsavedSchemaEditorChanges()) {
+  const revertUnsavedChanges = () => {
+    if (!hasUnsavedChanges()) {
       return;
     }
 
@@ -52,12 +36,12 @@ export function useSchemaEditor(options: {
       const schema = JSON.parse(schemaEditorBaseline.value || '{}');
       setCurrentPreviewSchema(schema);
     } catch {
-      syncSchemaEditorBaseline();
+      syncBaseline();
     }
   };
 
-  const applySchemaEditorTextToPreview = (value: string) => {
-    if (isSchemaEditorReadOnly.value) {
+  const applyTextToPreview = (value: string) => {
+    if (isReadOnly.value) {
       return;
     }
     schemaEditorText.value = value;
@@ -70,7 +54,7 @@ export function useSchemaEditor(options: {
   };
 
   const editorOptions = computed(() => {
-    const readOnly = isSchemaEditorReadOnly.value;
+    const readOnly = isReadOnly.value;
     return {
       fontSize: 14,
       minimap: { enabled: false },
@@ -84,61 +68,32 @@ export function useSchemaEditor(options: {
     };
   });
 
-  const toggleSchemaEditor = () => {
-    if (schemaEditorVisible.value) {
-      revertUnsavedSchemaEditorChanges();
-    } else if (!isMobile.value) {
-      syncSchemaEditorBaseline();
-    }
-    schemaEditorVisible.value = !schemaEditorVisible.value;
-    if (isMobile.value) {
-      mobileSchemaJsonEditorOpen.value = false;
-    }
-  };
-
-  const handleMobileJsonEditorOpen = (open: boolean) => {
-    if (open) {
-      syncSchemaEditorBaseline();
-    } else {
-      revertUnsavedSchemaEditorChanges();
-    }
-    mobileSchemaJsonEditorOpen.value = open;
-  };
-
-  const onMobileSheetMaskClick = () => {
-    if (mobileSchemaJsonEditorOpen.value) {
-      handleMobileJsonEditorOpen(false);
+  const parseSchemaText = (text: string): Record<string, unknown> | null => {
+    try {
+      const parsed = JSON.parse(text || '{}');
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return null;
+      }
+      return parsed as Record<string, unknown>;
+    } catch {
+      return null;
     }
   };
 
-  watch(schemaEditorVisible, (visible) => {
-    if (visible && !isMobile.value && !hasUnsavedSchemaEditorChanges()) {
-      syncSchemaEditorBaseline();
-    }
-  });
-
-  watch(mobileSchemaJsonEditorOpen, (open) => {
-    if (open && !hasUnsavedSchemaEditorChanges()) {
-      syncSchemaEditorBaseline();
-    }
-  });
+  const parseEditorSchema = () => parseSchemaText(schemaEditorText.value);
+  const parseBaselineSchema = () => parseSchemaText(schemaEditorBaseline.value);
 
   return {
-    schemaEditorVisible,
-    mobileSchemaJsonEditorOpen,
     schemaEditorText,
     schemaEditorBaseline,
     schemaEditorSaveLoading,
-    isSchemaEditorReadOnly,
-    isSchemaJsonEditorActive,
-    schemaEditorDirty,
-    hasUnsavedSchemaEditorChanges,
-    syncSchemaEditorBaseline,
-    revertUnsavedSchemaEditorChanges,
-    applySchemaEditorTextToPreview,
+    isReadOnly,
+    hasUnsavedChanges,
+    syncBaseline,
+    revertUnsavedChanges,
+    applyTextToPreview,
     editorOptions,
-    toggleSchemaEditor,
-    handleMobileJsonEditorOpen,
-    onMobileSheetMaskClick,
+    parseEditorSchema,
+    parseBaselineSchema,
   };
 }

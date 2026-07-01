@@ -3,16 +3,23 @@ import type { ISchemaCardLikeMessage } from './conversation-schema';
 import { findSchemaCardByCardId, rebuildSchemaFromCard, isSchemaVersionHistoryCollectible } from './conversation-schema';
 import { findManualCardInMessages, getManualEdits, manualEditToCardSnapshot } from './manual-schema';
 import type { ISchemaManualEditRecord, ISchemaManualMessageItem } from '../chat.types';
-import { t, locale, Locale } from '../../../i18n';
+import { t } from '../../../i18n';
+import { formatDate } from '../../../utils/date-format';
 import { resolveCardInput, resolveManualEditSaveTitle } from './schema-input-ids';
 
 function getWeekdayLabel(dayIndex: number): string {
   return t(`templateEditor.weekday${dayIndex}`);
 }
 
-function formatTimePart(date: Date): string {
-  const lang = locale.value === Locale.EnUS ? 'en-US' : 'zh-CN';
-  return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit', hour12: false }).format(date);
+function formatVersionTimeLabel(generatedTime: string, createdAtMs: number): string {
+  const text = generatedTime?.trim();
+  if (text) {
+    return text;
+  }
+  if (createdAtMs > 0) {
+    return formatDate(createdAtMs);
+  }
+  return '';
 }
 
 export interface ISchemaVersionHistoryEntry {
@@ -59,18 +66,8 @@ export function parseGeneratedTimeMs(generatedTime: string): number {
   return Number.isNaN(parsed) ? Date.now() : parsed;
 }
 
-export function formatHistoryPointTimeLabel(createdAtMs: number, nowMs: number = Date.now()): string {
-  const d = new Date(createdAtMs);
-  const now = new Date(nowMs);
-  const timePart = formatTimePart(d);
-  const month = d.getMonth() + 1;
-  const day = d.getDate();
-
-  if (d.getFullYear() === now.getFullYear()) {
-    return t('templateEditor.historyDateSameYear', { month, day, time: timePart });
-  }
-
-  return t('templateEditor.historyDateFull', { year: d.getFullYear(), month, day, time: timePart });
+export function formatHistoryPointTimeLabel(createdAtMs: number): string {
+  return createdAtMs > 0 ? formatDate(createdAtMs) : '';
 }
 
 export function getHistoryTimeGroupLabel(createdAtMs: number, nowMs: number = Date.now()): string {
@@ -110,13 +107,10 @@ export function getHistoryTimeGroupLabel(createdAtMs: number, nowMs: number = Da
 
 function buildDescription(
   card: ISchemaCardLikeMessage,
-  options: { isLatest: boolean; isPending: boolean },
+  options: { isPending: boolean },
 ): string {
   if (options.isPending) {
     return t('templateEditor.generating');
-  }
-  if (options.isLatest) {
-    return t('templateEditor.recentUpdate');
   }
   if (card.type === 'schema-manual') {
     return resolveManualEditSaveTitle(card);
@@ -191,7 +185,7 @@ function buildManualRestoreDescription(
   edit: ISchemaManualEditRecord,
   entries: ISchemaVersionHistoryEntry[],
   messages: ChatMessage[] | undefined,
-  options: { isLatest: boolean; isPending: boolean; allowPrevSchemaInfer?: boolean },
+  options: { isPending: boolean; allowPrevSchemaInfer?: boolean },
 ): string {
   if (options.isPending) {
     return t('templateEditor.generating');
@@ -213,10 +207,6 @@ function buildManualRestoreDescription(
   const hasExplicitSource = Boolean(edit.sourceCardId?.trim() || edit.sourceCardGeneratedTime?.trim());
   if (hasExplicitSource) {
     return t('templateEditor.appliedFromHistory');
-  }
-
-  if (options.isLatest) {
-    return t('templateEditor.recentUpdate');
   }
 
   return resolveManualEditSaveTitle(edit);
@@ -273,7 +263,9 @@ export function collectSchemaVersionHistory(
             generatedTime: edit.generatedTime ?? '',
             createdAtMs,
             sequenceIndex: sequenceIndex++,
-            timeLabel: isPending ? t('templateEditor.justNow') : formatHistoryPointTimeLabel(createdAtMs),
+            timeLabel: isPending
+              ? t('templateEditor.justNow')
+              : formatVersionTimeLabel(edit.generatedTime ?? '', createdAtMs),
             description: '',
             authorLabel,
             authorType,
@@ -302,7 +294,9 @@ export function collectSchemaVersionHistory(
         generatedTime: item.generatedTime ?? '',
         createdAtMs,
         sequenceIndex: sequenceIndex++,
-        timeLabel: isPending ? t('templateEditor.justNow') : formatHistoryPointTimeLabel(createdAtMs),
+        timeLabel: isPending
+          ? t('templateEditor.justNow')
+          : formatVersionTimeLabel(item.generatedTime ?? '', createdAtMs),
         description: '',
         authorLabel,
         authorType,
@@ -330,7 +324,7 @@ export function collectSchemaVersionHistory(
     return {
       ...entry,
       isLatest,
-      description: buildDescription(entry.cardMessage, { isLatest, isPending: entry.isPending }),
+      description: buildDescription(entry.cardMessage, { isPending: entry.isPending }),
     };
   });
 }
@@ -418,12 +412,10 @@ export function filterSchemaVersionHistoryForCard(
       );
       const description = (isFirstEdit || hasSourceInfo) && matchedEdit
         ? buildManualRestoreDescription(matchedEdit, entries, messages, {
-          isLatest: isLatestInScope,
           isPending: entry.isPending,
           allowPrevSchemaInfer: isFirstEdit,
         })
         : buildDescription(entry.cardMessage, {
-          isLatest: isLatestInScope,
           isPending: entry.isPending,
         });
 

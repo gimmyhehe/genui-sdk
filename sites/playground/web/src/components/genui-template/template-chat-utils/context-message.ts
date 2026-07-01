@@ -1,6 +1,7 @@
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { IMessageItem } from '../chat.types';
 import { normalizeManualEditInputs } from './schema-input-ids';
+import { t } from '../../../i18n';
 
 export function isManualSchemaSaveMessage(message: ChatMessage): boolean {
   const items = (message as { messages?: IMessageItem[] }).messages;
@@ -31,10 +32,13 @@ export function normalizeManualSchemaSaveMessages(messages: ChatMessage[] | unde
 }
 
 function toBackendChatMessage(message: ChatMessage): ChatMessage | null {
-  if (isManualSchemaSaveMessage(message)) {
-    return null;
-  }
   const { type, ...rest } = message as ChatMessage & { type?: string };
+  if (isManualSchemaSaveMessage(message)) {
+    return {
+      ...rest,
+      content: t('templateEditor.manualEditBackendContent'),
+    } as ChatMessage;
+  }
   return rest as ChatMessage;
 }
 
