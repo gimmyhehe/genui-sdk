@@ -1,5 +1,4 @@
 import type { IMaterialsProtocol } from '../material';
-import type { IWhiteList } from './prompt';
 
 export interface IUsefulPropInfo {
   property: string;
@@ -10,12 +9,12 @@ export interface IUsefulPropInfo {
   properties?: any;
 }
 
-const getI18n = (desc: any) => {
+function getI18n(desc: any) {
   const { zh_CN, text } = desc || {};
   return text?.zh_CN || zh_CN;
-};
+}
 
-const getUsefulPropInfo = (propsGroup: any) => {
+function getUsefulPropInfo(propsGroup: any) {
   const allProps = propsGroup.reduce((acc: any, curr: any) => {
     acc.push(...curr.content);
     return acc;
@@ -33,9 +32,9 @@ const getUsefulPropInfo = (propsGroup: any) => {
     }
     return usefulPropInfo;
   });
-};
+}
 
-const getUsefulEventInfo = (events: any) => {
+function getUsefulEventInfo(events: any) {
   if (!events) {
     return {};
   }
@@ -46,20 +45,20 @@ const getUsefulEventInfo = (events: any) => {
     event.description = getI18n(description) || getI18n(label);
     return event;
   });
-};
+}
 
 const getUsefulSlotInfo = getUsefulEventInfo;
 
-const getCmpSchemaInfo = (schema: any) => {
+function getCmpSchemaInfo(schema: any) {
   const { properties, events, slots } = schema;
   return {
     properties: getUsefulPropInfo(properties),
     events: getUsefulEventInfo(events),
     slots: getUsefulSlotInfo(slots),
   };
-};
+}
 
-const getUsefulInfo = (componentInfo: any) => {
+function getUsefulInfo(componentInfo: any) {
   const { name, component, description, schema } = componentInfo;
   const usefulInfo = {
     name: getI18n(name),
@@ -69,9 +68,9 @@ const getUsefulInfo = (componentInfo: any) => {
   };
 
   return usefulInfo;
-};
+}
 
-const filterComponent = (component: any, whiteList: IWhiteList) => {
+function filterComponent(component: any, whiteList: string[]) {
   if (!(whiteList.length > 0)) {
     return true;
   }
@@ -79,20 +78,20 @@ const filterComponent = (component: any, whiteList: IWhiteList) => {
     return true;
   }
   return false;
-};
+}
 
-const extractComponents = (materials: any[], whiteList: IWhiteList) => {
+function extractComponents(materials: any[], whiteList: string[]) {
   return materials
     .map((material) => material.data.materials.components)
     .filter((i) => i)
     .flat()
     .filter((component) => filterComponent(component, whiteList));
-};
+}
 
-export const getComponentsName = (materials: IMaterialsProtocol[], whiteList: IWhiteList) => {
+export function getComponentsName(materials: IMaterialsProtocol[], whiteList: string[]) {
   return extractComponents(materials, whiteList).map((component) => component.component);
-};
+}
 
-export const getComponentsInfo = (materials: IMaterialsProtocol[], whiteList: IWhiteList) => {
+export function getComponentsInfo(materials: IMaterialsProtocol[], whiteList: string[]) {
   return extractComponents(structuredClone(materials), whiteList).map(getUsefulInfo);
-};
+}

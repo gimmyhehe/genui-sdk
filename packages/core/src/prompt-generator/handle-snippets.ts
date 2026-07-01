@@ -1,14 +1,13 @@
 import type { IMaterialsProtocol } from '../material';
-import type { IWhiteList } from './prompt';
 
-export const extractSnippets = (materials: any[]) => {
+export function extractSnippets(materials: any[]) {
   return materials
     .map((material) => material.data.materials.snippets)
     .filter((i) => i)
     .flat();
-};
+}
 
-export const flatSnippets = (snippets: any) => {
+export function flatSnippets(snippets: any) {
   const result: any = [];
 
   snippets.forEach((snippets: any) => {
@@ -20,9 +19,9 @@ export const flatSnippets = (snippets: any) => {
   });
 
   return result;
-};
+}
 
-export const filterSnippets = (snippet: any, whiteList: IWhiteList) => {
+export function filterSnippets(snippet: any, whiteList: string[]) {
   let name = snippet?.snippetName;
   if (!name) {
     return false;
@@ -30,10 +29,10 @@ export const filterSnippets = (snippet: any, whiteList: IWhiteList) => {
   const validList = whiteList.map((name) => name.toLocaleLowerCase());
   name = name.replaceAll('-', '').toLocaleLowerCase();
   return validList.includes(name);
-};
+}
 
-export const getSnippetsInfo = (materials: IMaterialsProtocol[], whiteList: IWhiteList) => {
+export function getSnippetsInfo(materials: IMaterialsProtocol[], whiteList: string[]) {
   return flatSnippets(extractSnippets(materials))
     .filter((snippet: any) => filterSnippets(snippet, whiteList))
     .map((item: any) => item.schema);
-};
+}
