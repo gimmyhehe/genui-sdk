@@ -1,16 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, ContentChild, Input, OnInit, Optional, SimpleChanges, SkipSelf, TemplateRef, Type, ViewChild } from '@angular/core';
-import { DeltaPatcher, repairJson, RepairJsonState, type MaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
+import { Component, ContentChild, Input, OnInit, SimpleChanges, TemplateRef, Type, ViewChild } from '@angular/core';
+import { DeltaPatcher, repairJson, RepairJsonState } from '@opentiny/genui-sdk-core';
 import {
   RendererMain as Renderer,
   Mapper,
   directiveMap,
   ModuleRef,
   RENDERER_SETTINGS,
-  type IRendererSettings,
 } from '@opentiny/tiny-schema-renderer-ng';
-import { GENUI_DEFAULT_PROPS_MAP } from './injection-tokens';
 import { requiredCompleteFieldSelectors } from './config';
+import { GenuiRendererSettingsService } from './renderer-settings.service';
 
 export const CARD_ID = Symbol('schema-card-id');
 export interface ICustomAction {
@@ -36,19 +35,10 @@ const errorSchema = {
     Renderer,
   ],
   providers: [
+    GenuiRendererSettingsService,
     {
       provide: RENDERER_SETTINGS,
-      useFactory: (
-        parentSettings: IRendererSettings | null,
-        defaultPropsMap: MaterialDefaultValueMap | null,
-      ): IRendererSettings => ({
-        ...(parentSettings ?? {}),
-        defaultPropsMap: defaultPropsMap ?? parentSettings?.defaultPropsMap ?? {},
-      }),
-      deps: [
-        [new Optional(), new SkipSelf(), RENDERER_SETTINGS],
-        [new Optional(), GENUI_DEFAULT_PROPS_MAP],
-      ],
+      useExisting: GenuiRendererSettingsService,
     },
   ],
   templateUrl: './genui-renderer.html',
