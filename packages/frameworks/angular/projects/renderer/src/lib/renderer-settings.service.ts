@@ -4,14 +4,17 @@ import { RENDERER_SETTINGS, type IRendererSettings } from '@opentiny/tiny-schema
 import { GENUI_DEFAULT_PROPS_MAP } from './injection-tokens';
 
 @Injectable()
-export class RendererSettingsService implements IRendererSettings {
+export class RendererSettingsService {
   constructor(
-    @Optional() @SkipSelf() @Inject(RENDERER_SETTINGS) parentSettings: IRendererSettings | null,
-    @Optional() @Inject(GENUI_DEFAULT_PROPS_MAP) defaultPropsMap: MaterialDefaultValueMap | null,
+    @Optional() @SkipSelf() @Inject(RENDERER_SETTINGS) private parentSettings: IRendererSettings | null,
+    @Optional() @Inject(GENUI_DEFAULT_PROPS_MAP) private defaultPropsMap: MaterialDefaultValueMap | null,
   ) {
-    Object.assign(this, {
-      ...(parentSettings ?? {}),
-      defaultPropsMap: defaultPropsMap ?? parentSettings?.defaultPropsMap ?? {},
-    });
+  }
+
+  getSettings(): IRendererSettings {
+    return {
+      ...(this.parentSettings ?? {}),
+      defaultPropsMap: this.defaultPropsMap ?? this.parentSettings?.defaultPropsMap ?? {},
+    };
   }
 }

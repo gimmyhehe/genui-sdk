@@ -38,7 +38,8 @@ const errorSchema = {
     RendererSettingsService,
     {
       provide: RENDERER_SETTINGS,
-      useExisting: RendererSettingsService,
+      useFactory: (rss: RendererSettingsService) => rss.getSettings(),
+      deps: [RendererSettingsService],
     },
   ],
   templateUrl: './genui-renderer.html',
