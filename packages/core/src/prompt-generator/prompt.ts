@@ -1,5 +1,5 @@
 import { type JsonSchema7Type, zodToJsonSchema } from 'zod-to-json-schema';
-import type { IMaterials, IMaterialsConfig, IExample } from '../material';
+import type { IMaterialsProtocol, IMaterialsMeta, IExample } from '../material';
 import type { CardSchema } from '../protocols';
 import { genRootSchema } from '../protocols'; // TODO: protocal cannnot contains methods
 import type {
@@ -29,7 +29,7 @@ export const skillPromptPrefix = `# 技能说明
 `;
 
 export const genComponentsPrompt = (
-  materials: IMaterials[],
+  materials: IMaterialsProtocol[],
   whiteList: IWhiteList,
   customComponents: IGenPromptComponent[],
 ) => {
@@ -78,7 +78,7 @@ ${examplesStr}
 };
 
 export const genSnippetsPrompt = (
-  materials: IMaterials[],
+  materials: IMaterialsProtocol[],
   whiteList: IWhiteList,
   customSnippets: IGenPromptSnippet[],
 ) => {
@@ -207,21 +207,20 @@ const getExtendWhiteList = (whiteList: string[], customComponents: IGenPromptCom
 
 
 function buildPromptSections(
-  renderConfig: IMaterialsConfig,
+  materialsMeta: IMaterialsMeta,
   tgCustomConfig: IGenPromptCustomConfig | undefined,
   options?: IGenPromptOptions,
 ) {
-  const { materials, examples, whiteList, wrapperComponent, promptConfig, additionRules: materialAdditionRules } =
-    renderConfig;
+  const { materials, examples, whiteList, wrapperComponent, rules: materialRules } = materialsMeta;
   const { customComponents, customSnippets, customExamples, customActions } = tgCustomConfig || {};
   const includeJsonSchema = options?.includeJsonSchema ?? true;
-  const includeSnippets = promptConfig?.includeSnippets ?? true;
-  const includeExamples = promptConfig?.includeExamples ?? true;
+  const includeSnippets = options?.includeSnippets ?? true;
+  const includeExamples = options?.includeExamples ?? true;
   const includeActions = options?.includeActions ?? true;
   const includeAboutThis = options?.includeAboutThis ?? true;
   const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
   const modeRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
-  const additionRules = [...(materialAdditionRules ?? []), ...(options?.additionRules ?? [])];
+  const additionRules = [...(materialRules ?? []), ...(options?.additionRules ?? [])];
 
   return [
     options?.isSkill ? skillPromptPrefix : promptPrefix,
@@ -235,11 +234,12 @@ function buildPromptSections(
   ].filter(Boolean);
 }
 
+// TODO: 待优化,tgCustomConfig放最下面
 export function genPrompt(
-  renderConfig: IMaterialsConfig,
+  materialsMeta: IMaterialsMeta,
   tgCustomConfig?: IGenPromptCustomConfig,
   options?: IGenPromptOptions,
 ) {
-  const sections = buildPromptSections(renderConfig, tgCustomConfig, options);
+  const sections = buildPromptSections(materialsMeta, tgCustomConfig, options);
   return sections.join('\n\n');
 }

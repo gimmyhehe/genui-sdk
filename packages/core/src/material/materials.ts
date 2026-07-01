@@ -179,7 +179,7 @@ export interface ISnippet {
 
 export type IBlock = any;
 
-export interface IMaterials {
+export interface IMaterialsProtocol {
   data: {
     framework: string;
     materials: {

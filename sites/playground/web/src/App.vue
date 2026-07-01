@@ -374,7 +374,7 @@ onUnmounted(() => {
           :theme="theme"
           :locale="locale"
           :materials="materials"
-          :materials-config="materialsConfig"
+          :materials-meta="materialsConfig"
           style="height: 100%"
         >
           <GenuiChat

@@ -1,4 +1,4 @@
-import type { IMaterialsConfig } from './material-config';
+import type { IMaterialsMeta } from './material-config';
 
 type DefaultValueMap = Record<string, any>;
 
@@ -42,7 +42,7 @@ const collectPropertyDefaults = (
 };
 
 export const buildMaterialDefaultValueMap = (
-  materialsConfig: Partial<IMaterialsConfig> = {},
+  materialsConfig: Partial<IMaterialsMeta> = {},
 ): MaterialDefaultValueMap => {
   const result: MaterialDefaultValueMap = {};
   const materials = materialsConfig.materials ?? [];

@@ -1,5 +1,5 @@
 import type { CardSchema } from '../protocols/schema';
-import type { IMaterials } from './materials';
+import type { IMaterialsProtocol } from './materials';
 
 export interface IExample {
   id?: string;
@@ -8,16 +8,10 @@ export interface IExample {
   schema: CardSchema;
 }
 
-export interface IPromptSectionConfig {
-  includeSnippets?: boolean;
-  includeExamples?: boolean;
-}
-
-export interface IMaterialsConfig {
-  materials: IMaterials[];
+export interface IMaterialsMeta {
+  materials: IMaterialsProtocol[];
   examples: IExample[];
   whiteList: string[];
   wrapperComponent?: string;
-  promptConfig?: IPromptSectionConfig;
-  additionRules?: string[];
+  rules?: string[];
 }

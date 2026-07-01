@@ -1,12 +1,10 @@
-import { components, type IComponents } from './components';
+import { buildMaterialDefaultValueMap, type IMaterials } from '@opentiny/genui-sdk-core';
+import { materialsConfig } from '../render-config/merge';
+import { components } from './components';
 import { requiredCompleteFieldSelectors } from './required-complete-field-selectors';
 
-export interface IMaterials {
-  components: IComponents;
-  requiredCompleteFieldSelectors?: string[];
-}
-
-export const materials = {
+export const materials: IMaterials = {
   components,
   requiredCompleteFieldSelectors,
+  defaultPropsMap: buildMaterialDefaultValueMap(materialsConfig),
 };

@@ -1,4 +1,4 @@
-import type { IMaterials } from '../material';
+import type { IMaterialsProtocol } from '../material';
 import type { IWhiteList } from './prompt';
 
 export interface IUsefulPropInfo {
@@ -89,10 +89,10 @@ const extractComponents = (materials: any[], whiteList: IWhiteList) => {
     .filter((component) => filterComponent(component, whiteList));
 };
 
-export const getComponentsName = (materials: IMaterials[], whiteList: IWhiteList) => {
+export const getComponentsName = (materials: IMaterialsProtocol[], whiteList: IWhiteList) => {
   return extractComponents(materials, whiteList).map((component) => component.component);
 };
 
-export const getComponentsInfo = (materials: IMaterials[], whiteList: IWhiteList) => {
+export const getComponentsInfo = (materials: IMaterialsProtocol[], whiteList: IWhiteList) => {
   return extractComponents(structuredClone(materials), whiteList).map(getUsefulInfo);
 };

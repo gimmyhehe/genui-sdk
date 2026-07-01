@@ -65,6 +65,8 @@ export interface IGenPromptCustomConfig {
 export interface IGenPromptOptions {
   isSkill?: boolean;
   includeJsonSchema?: boolean;
+  includeSnippets?: boolean;
+  includeExamples?: boolean;
   includeActions?: boolean;
   includeAboutThis?: boolean;
   includeBaseRules?: boolean;

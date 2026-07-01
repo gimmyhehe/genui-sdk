@@ -27,7 +27,9 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
 
 export function getGenPromptOptions(promptVariant?: VariantKey): IGenPromptOptions | undefined {
-  return promptVariant === 'mini' ? { includeJsonSchema: false } : undefined;
+  if (promptVariant === 'mini') {
+    return { includeJsonSchema: false, includeSnippets: false };
+  }
 }
 
 function extractStatusCode(error: any): number | undefined {

@@ -278,7 +278,7 @@ onUnmounted(() => {
     :theme="theme"
     :locale="locale"
     :materials="materials"
-    :materials-config="materialsConfig"
+    :materials-meta="materialsConfig"
     style="width: 100%; height: 100%"
   >
     <div :class="['genui-schema-template', { 'is-mobile': isMobile }]">
