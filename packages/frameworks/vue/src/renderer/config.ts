@@ -1,5 +1,6 @@
 export const requiredCompleteFieldSelectors = [
   '[componentName=Img] > props > src',
+  '[componentName=img] > props > src',
   'componentName',
   'style',
   '[componentName=Page] > css',
@@ -9,6 +10,5 @@ export const requiredCompleteFieldSelectors = [
   'type',
   ':empty:object',
   // ng element version
-  '[componentName=img] > props > src',
   '[componentName] > props > ngModel',
 ];
