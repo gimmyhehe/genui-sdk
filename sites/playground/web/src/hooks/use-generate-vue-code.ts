@@ -1,5 +1,6 @@
 import type { IRendererConfig } from '@opentiny/genui-sdk-core';
-import { generateCode as generateVueCode } from '@opentiny/genui-sdk-vue';
+import { generateCode as generateVueCode, GENUI_RENDERER_CONFIG } from '@opentiny/genui-sdk-vue';
+import { inject } from 'vue';
 
 type IComponentMapItem = {
   componentName: string;
@@ -65,7 +66,9 @@ const downloadTextFile = (filename: string, text: string): void => {
 };
 
 export const useExportVueCode = (rendererConfig?: IRendererConfig) => {
-  const componentsMap = getComponentsMap(rendererConfig);
+  const injectedRendererConfig = inject(GENUI_RENDERER_CONFIG, undefined);
+  const resolvedRendererConfig = rendererConfig ?? injectedRendererConfig;
+  const componentsMap = getComponentsMap(resolvedRendererConfig);
 
   const exportVueCode = async (schema: any): Promise<void> => {
     const { panelValue: code, panelName: fileName, errors } = await generateVueCode({

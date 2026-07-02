@@ -6,7 +6,13 @@ import { watch, provide, computed, onMounted, ref } from 'vue';
 import { buildMaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
 import type { GenuiMaterialRegistry, IRendererConfig } from '@opentiny/genui-sdk-core';
 import { I18nMessages, useI18n } from '../chat/i18n';
-import { GENUI_I18N, GENUI_CONFIG, GENUI_MATERIALS, GENUI_DEFAULT_PROPS_MAP } from '../chat/injection-tokens';
+import {
+  GENUI_I18N,
+  GENUI_CONFIG,
+  GENUI_MATERIALS,
+  GENUI_DEFAULT_PROPS_MAP,
+  GENUI_RENDERER_CONFIG,
+} from '../chat/injection-tokens';
 import { useMediaTheme } from './use-media-theme';
 
 export interface ConfigProviderProps {
@@ -68,6 +74,7 @@ provide(GENUI_MATERIALS, {
 });
 
 provide(GENUI_DEFAULT_PROPS_MAP, buildMaterialDefaultValueMap(props.rendererConfig ?? {}));
+provide(GENUI_RENDERER_CONFIG, props.rendererConfig);
 
 watch(
   () => [props.locale, props.i18n] as const,

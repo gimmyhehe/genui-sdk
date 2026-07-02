@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import type { IRendererSlotsProps } from '@opentiny/genui-sdk-vue';
 import { IconDownload } from '@opentiny/vue-icon';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { useExportVueCode } from '../hooks/use-generate-vue-code';
 
 const props = defineProps<IRendererSlotsProps>();
-const { exportVueCode } = useExportVueCode(rendererConfig);
+const { exportVueCode } = useExportVueCode();
 const TinyIconDownload = IconDownload();
 </script>
 
