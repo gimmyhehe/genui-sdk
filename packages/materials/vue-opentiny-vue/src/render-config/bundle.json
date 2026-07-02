@@ -96,7 +96,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -197,7 +196,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -233,7 +231,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -371,7 +369,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "boolean",
-                    "defaultValue": false,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -393,7 +390,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "boolean",
-                    "defaultValue": false,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -415,7 +411,7 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                                        "widget": {
+                    "widget": {
                       "component": "SelectConfigurator",
                       "props": {
                         "allowClear": true,
@@ -452,7 +448,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "boolean",
-                    "defaultValue": true,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -475,7 +470,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "boolean",
-                    "defaultValue": true,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -497,7 +491,7 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                                        "type": "string",
+                    "type": "string",
                     "widget": {
                       "component": "InputConfigurator",
                       "props": {}
@@ -519,7 +513,7 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                                        "type": "string",
+                    "type": "string",
                     "widget": {
                       "component": "InputConfigurator",
                       "props": {}
@@ -541,7 +535,7 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                                        "type": "string",
+                    "type": "string",
                     "widget": {
                       "component": "InputConfigurator",
                       "props": {}
@@ -563,7 +557,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": "date",
                     "type": "string",
                     "widget": {
                       "component": "SelectConfigurator",
@@ -637,7 +630,7 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                                        "type": "string",
+                    "type": "string",
                     "widget": {
                       "component": "InputConfigurator",
                       "props": {}
@@ -806,7 +799,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -1017,7 +1009,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1189,7 +1180,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "right",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -1291,7 +1281,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "left",
                     "widget": {
                       "component": "ButtonGroupConfigurator",
                       "props": {
@@ -1323,7 +1312,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": true,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1345,7 +1333,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1367,7 +1354,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1389,7 +1375,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": true,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1412,7 +1397,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -1448,7 +1432,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1471,7 +1454,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1744,7 +1726,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -2206,7 +2187,6 @@
                             "property": "resizable",
                             "type": "boolean",
                             "labelPosition": "left",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "resizable"
@@ -2226,7 +2206,6 @@
                             "property": "formatter",
                             "type": "function",
                             "labelPosition": "top",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "formatter"
@@ -2248,7 +2227,6 @@
                             "property": "show-overflow-tooltip",
                             "type": "boolean",
                             "labelPosition": "left",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "show-overflow-tooltip"
@@ -2268,7 +2246,6 @@
                             "property": "align",
                             "type": "string",
                             "labelPosition": "top",
-                            "defaultValue": "left",
                             "label": {
                               "text": {
                                 "zh_CN": "align"
@@ -2303,7 +2280,6 @@
                             "property": "header-align",
                             "type": "string",
                             "labelPosition": "top",
-                            "defaultValue": "left",
                             "label": {
                               "text": {
                                 "zh_CN": "header-align"
@@ -2338,7 +2314,6 @@
                             "property": "class-name",
                             "type": "string",
                             "labelPosition": "top",
-                            "defaultValue": "left",
                             "label": {
                               "text": {
                                 "zh_CN": "class-name"
@@ -2358,7 +2333,6 @@
                             "property": "label-class-name",
                             "type": "string",
                             "labelPosition": "top",
-                            "defaultValue": "left",
                             "label": {
                               "text": {
                                 "zh_CN": "label-class-name"
@@ -2378,7 +2352,6 @@
                             "property": "selectable",
                             "type": "function",
                             "labelPosition": "top",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "selectable"
@@ -2398,7 +2371,6 @@
                             "property": "reserve-selection",
                             "type": "boolean",
                             "labelPosition": "left",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "reserve-selection"
@@ -2418,7 +2390,6 @@
                             "property": "filters",
                             "type": "array",
                             "labelPosition": "top",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "filters"
@@ -2459,7 +2430,6 @@
                             "property": "filter-multiple",
                             "type": "string",
                             "labelPosition": "left",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "filter-multiple"
@@ -2479,7 +2449,6 @@
                             "property": "filter-method",
                             "type": "function",
                             "labelPosition": "top",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "filter-method"
@@ -2499,7 +2468,6 @@
                             "property": "filtered-value",
                             "type": "array",
                             "labelPosition": "top",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "filtered-value"
@@ -2595,7 +2563,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2617,7 +2584,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2640,7 +2606,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -2676,7 +2641,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": true,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2698,7 +2662,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": true,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2720,7 +2683,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2827,7 +2789,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "top",
-                    "defaultValue": "fixed",
                     "widget": {
                       "component": "InputConfigurator",
                       "props": {
@@ -2860,7 +2821,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2882,7 +2842,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2909,14 +2868,14 @@
                     {
                       "name": "selection",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前选中项"
                       }
                     },
                     {
                       "name": "row",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前行"
                       }
                     }
@@ -2937,7 +2896,7 @@
                     {
                       "name": "selection",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前选中项"
                       }
                     }
@@ -2958,7 +2917,7 @@
                     {
                       "name": "selection",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前选中项"
                       }
                     }
@@ -2979,28 +2938,28 @@
                     {
                       "name": "row",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前行"
                       }
                     },
                     {
                       "name": "column",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前列"
                       }
                     },
                     {
                       "name": "cell",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前单元格"
                       }
                     },
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生事件 event"
                       }
                     }
@@ -3021,28 +2980,28 @@
                     {
                       "name": "row",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前行"
                       }
                     },
                     {
                       "name": "column",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前列"
                       }
                     },
                     {
                       "name": "cell",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前单元格"
                       }
                     },
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生事件 event"
                       }
                     }
@@ -3362,7 +3321,7 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                                        "cols": 12,
+                    "cols": 12,
                     "bindState": false,
                     "widget": {
                       "component": "ContainerConfigurator",
@@ -3596,6 +3555,779 @@
         },
         {
           "version": "1.0.0",
+          "icon": "link",
+          "name": {
+            "zh_CN": "提示框"
+          },
+          "component": "a",
+          "description": "链接",
+          "docUrl": "",
+          "screenshot": "",
+          "tags": "",
+          "keywords": "",
+          "devMode": "proCode",
+          "group": "component",
+          "priority": 7,
+          "npm": {},
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础信息"
+                },
+                "description": {
+                  "zh_CN": "基础信息"
+                },
+                "content": [
+                  {
+                    "property": "children",
+                    "label": {
+                      "text": {
+                        "zh_CN": "类型"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "HtmlTextConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "类型"
+                    },
+                    "labelPosition": "none"
+                  },
+                  {
+                    "property": "href",
+                    "label": {
+                      "text": {
+                        "zh_CN": "链接"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "InputConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "指定链接的 URL"
+                    },
+                    "labelPosition": "left"
+                  },
+                  {
+                    "property": "target",
+                    "label": {
+                      "text": {
+                        "zh_CN": "打开方式"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "ButtonGroupConfigurator",
+                      "props": {
+                        "options": [
+                          {
+                            "label": "当前页面",
+                            "value": "_self"
+                          },
+                          {
+                            "label": "打开新页面",
+                            "value": "_blank"
+                          }
+                        ]
+                      }
+                    },
+                    "description": {
+                      "zh_CN": "指定链接的打开方式，例如在当前窗口中打开或在新窗口中打开。"
+                    }
+                  },
+                  {
+                    "property": "attributes3",
+                    "label": {
+                      "text": {
+                        "zh_CN": "原生属性"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "HtmlAttributesConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "原生属性"
+                    },
+                    "labelPosition": "none"
+                  }
+                ]
+              }
+            ]
+          },
+          "configure": {
+            "loop": true,
+            "condition": true,
+            "slots": [],
+            "styles": true,
+            "isContainer": true,
+            "isModal": false,
+            "nestingRule": {
+              "childWhitelist": "",
+              "parentWhitelist": "",
+              "descendantBlacklist": "",
+              "ancestorWhitelist": ""
+            },
+            "isNullNode": false,
+            "isLayout": false,
+            "rootSelector": "",
+            "shortcuts": {
+              "properties": []
+            },
+            "contextMenu": {
+              "actions": [],
+              "disable": []
+            }
+          }
+        },
+        {
+          "version": "1.0.0",
+          "name": {
+            "zh_CN": "标题"
+          },
+          "component": ["h1", "h2", "h3", "h4", "h5", "h6"],
+          "icon": "h16",
+          "description": "标题",
+          "docUrl": "",
+          "screenshot": "",
+          "tags": "",
+          "keywords": "",
+          "devMode": "proCode",
+          "npm": {},
+          "group": "component",
+          "category": "html",
+          "priority": 20,
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础信息"
+                },
+                "description": {
+                  "zh_CN": "基础信息"
+                },
+                "content": [
+                  {
+                    "property": "children",
+                    "label": {
+                      "text": {
+                        "zh_CN": "类型"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "HtmlTextConfigurator",
+                      "props": {
+                        "showRadioButton": true
+                      }
+                    },
+                    "description": {
+                      "zh_CN": ""
+                    },
+                    "labelPosition": "none"
+                  },
+                  {
+                    "property": "attributes3",
+                    "label": {
+                      "text": {
+                        "zh_CN": "原生属性"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "HtmlAttributesConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": ""
+                    },
+                    "labelPosition": "none"
+                  }
+                ]
+              }
+            ],
+            "events": {}
+          },
+          "configure": {
+            "loop": true,
+            "condition": true,
+            "styles": true,
+            "isContainer": false,
+            "isModal": false,
+            "nestingRule": {
+              "childWhitelist": [],
+              "parentWhitelist": "",
+              "descendantBlacklist": "",
+              "ancestorWhitelist": ""
+            },
+            "isNullNode": false,
+            "isLayout": false,
+            "rootSelector": "",
+            "shortcuts": {
+              "properties": ["disabled", "size"]
+            },
+            "contextMenu": {
+              "actions": ["create symbol"],
+              "disable": ["copy", "remove"]
+            }
+          }
+        },
+        {
+          "version": "1.0.0",
+          "name": {
+            "zh_CN": "段落"
+          },
+          "component": "p",
+          "icon": "paragraph",
+          "description": "段落",
+          "docUrl": "",
+          "screenshot": "",
+          "tags": "",
+          "keywords": "",
+          "devMode": "proCode",
+          "npm": {},
+          "group": "component",
+          "category": "html",
+          "priority": 30,
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础信息"
+                },
+                "description": {
+                  "zh_CN": "基础信息"
+                },
+                "content": [
+                  {
+                    "property": "children",
+                    "label": {
+                      "text": {
+                        "zh_CN": "类型"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "HtmlTextConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "类型"
+                    },
+                    "labelPosition": "none"
+                  },
+                  {
+                    "property": "attributes3",
+                    "label": {
+                      "text": {
+                        "zh_CN": "原生属性"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "HtmlAttributesConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "原生属性"
+                    },
+                    "labelPosition": "none"
+                  }
+                ]
+              }
+            ],
+            "events": {}
+          },
+          "configure": {
+            "loop": true,
+            "condition": true,
+            "styles": true,
+            "isContainer": false,
+            "isModal": false,
+            "nestingRule": {
+              "childWhitelist": [],
+              "parentWhitelist": "",
+              "descendantBlacklist": "",
+              "ancestorWhitelist": ""
+            },
+            "isNullNode": false,
+            "isLayout": false,
+            "rootSelector": "",
+            "shortcuts": {
+              "properties": []
+            },
+            "contextMenu": {
+              "actions": [],
+              "disable": []
+            }
+          }
+        },
+        {
+          "version": "1.0.0",
+          "name": {
+            "zh_CN": "输入框"
+          },
+          "component": "input",
+          "icon": "input",
+          "description": "输入框",
+          "docUrl": "",
+          "screenshot": "",
+          "tags": "",
+          "keywords": "",
+          "devMode": "proCode",
+          "npm": {},
+          "group": "component",
+          "category": "html",
+          "priority": 40,
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础信息"
+                },
+                "description": {
+                  "zh_CN": "基础信息"
+                },
+                "content": [
+                  {
+                    "property": "type",
+                    "label": {
+                      "text": {
+                        "zh_CN": "类型"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "SelectConfigurator",
+                      "props": {
+                        "options": [
+                          {
+                            "label": "checkbox",
+                            "value": "checkbox"
+                          },
+                          {
+                            "label": "color",
+                            "value": "color"
+                          },
+                          {
+                            "label": "date",
+                            "value": "date"
+                          },
+                          {
+                            "label": "button",
+                            "value": "button"
+                          },
+                          {
+                            "label": "email",
+                            "value": "email"
+                          },
+                          {
+                            "label": "file",
+                            "value": "file"
+                          },
+                          {
+                            "label": "hidden",
+                            "value": "hidden"
+                          },
+                          {
+                            "label": "image",
+                            "value": "image"
+                          },
+                          {
+                            "label": "month",
+                            "value": "month"
+                          },
+                          {
+                            "label": "number",
+                            "value": "number"
+                          },
+                          {
+                            "label": "password",
+                            "value": "password"
+                          },
+                          {
+                            "label": "radio",
+                            "value": "radio"
+                          },
+                          {
+                            "label": "range",
+                            "value": "range"
+                          },
+                          {
+                            "label": "reset",
+                            "value": "reset"
+                          },
+                          {
+                            "label": "search",
+                            "value": "search"
+                          },
+                          {
+                            "label": "submit",
+                            "value": "submit"
+                          },
+                          {
+                            "label": "text",
+                            "value": "text"
+                          },
+                          {
+                            "label": "time",
+                            "value": "time"
+                          },
+                          {
+                            "label": "week",
+                            "value": "week"
+                          },
+                          {
+                            "label": "url",
+                            "value": "url"
+                          }
+                        ]
+                      }
+                    },
+                    "description": {
+                      "zh_CN": "类型"
+                    }
+                  },
+                  {
+                    "property": "placeholder",
+                    "label": {
+                      "text": {
+                        "zh_CN": "占位符"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "InputConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "占位符"
+                    }
+                  },
+                  {
+                    "property": "attributes3",
+                    "label": {
+                      "text": {
+                        "zh_CN": "原生属性"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "HtmlAttributesConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "原生属性"
+                    },
+                    "labelPosition": "none"
+                  }
+                ]
+              }
+            ],
+            "events": {
+              "onBlur": {
+                "label": {
+                  "zh_CN": "失去焦点时触发"
+                },
+                "description": {
+                  "zh_CN": "在 Input 失去焦点时触发"
+                },
+                "type": "event",
+                "functionInfo": {
+                  "params": [
+                    {
+                      "name": "event",
+                      "type": "Object",
+                      "description": {
+                        "zh_CN": "原生 event"
+                      }
+                    }
+                  ],
+                  "returns": {}
+                }
+              },
+              "onFocus": {
+                "label": {
+                  "zh_CN": "获取焦点时触发"
+                },
+                "description": {
+                  "zh_CN": "在 Input 获取焦点时触发"
+                },
+                "type": "event",
+                "functionInfo": {
+                  "params": [
+                    {
+                      "name": "event",
+                      "type": "Object",
+                      "description": {
+                        "zh_CN": "原生 event"
+                      }
+                    }
+                  ],
+                  "returns": {}
+                }
+              },
+              "onChange": {
+                "label": {
+                  "zh_CN": "输入值改变时触发"
+                },
+                "description": {
+                  "zh_CN": "在 Input 输入值改变时触发"
+                },
+                "type": "event",
+                "functionInfo": {
+                  "params": [
+                    {
+                      "name": "event",
+                      "type": "Object",
+                      "description": {
+                        "zh_CN": "原生 event"
+                      }
+                    }
+                  ],
+                  "returns": {}
+                }
+              }
+            }
+          },
+          "configure": {
+            "loop": true,
+            "condition": true,
+            "styles": true,
+            "isContainer": false,
+            "isModal": false,
+            "nestingRule": {
+              "childWhitelist": [],
+              "parentWhitelist": "",
+              "descendantBlacklist": "",
+              "ancestorWhitelist": ""
+            },
+            "isNullNode": false,
+            "isLayout": false,
+            "rootSelector": "",
+            "shortcuts": {
+              "properties": ["disabled", "size"]
+            },
+            "contextMenu": {
+              "actions": ["create symbol"],
+              "disable": ["copy", "remove"]
+            }
+          }
+        },
+        {
+          "version": "1.0.0",
+          "name": {
+            "zh_CN": "视频"
+          },
+          "component": "video",
+          "icon": "video",
+          "description": "视频",
+          "docUrl": "",
+          "screenshot": "",
+          "tags": "",
+          "keywords": "",
+          "devMode": "proCode",
+          "npm": {},
+          "group": "component",
+          "category": "html",
+          "priority": 50,
+          "schema": {
+            "properties": [
+              {
+                "label": {
+                  "zh_CN": "基础信息"
+                },
+                "description": {
+                  "zh_CN": "基础信息"
+                },
+                "content": [
+                  {
+                    "property": "src",
+                    "label": {
+                      "text": {
+                        "zh_CN": "资源"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "InputConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "视频的 URL"
+                    }
+                  },
+                  {
+                    "property": "width",
+                    "label": {
+                      "text": {
+                        "zh_CN": "播放器宽度"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "InputConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "视频播放器的宽度"
+                    }
+                  },
+                  {
+                    "property": "height",
+                    "label": {
+                      "text": {
+                        "zh_CN": "播放器高度"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "InputConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "视频播放器的高度"
+                    }
+                  },
+                  {
+                    "property": "controls",
+                    "label": {
+                      "text": {
+                        "zh_CN": "显示控件"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "CheckBoxConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "是否显示控件"
+                    },
+                    "labelPosition": "left"
+                  },
+                  {
+                    "property": "autoplay",
+                    "label": {
+                      "text": {
+                        "zh_CN": "马上播放"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "CheckBoxConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "是否马上播放"
+                    },
+                    "labelPosition": "left"
+                  },
+                  {
+                    "property": "attributes3",
+                    "label": {
+                      "text": {
+                        "zh_CN": "原生属性"
+                      }
+                    },
+                    "required": true,
+                    "readOnly": false,
+                    "disabled": false,
+                    "cols": 12,
+                    "widget": {
+                      "component": "HtmlAttributesConfigurator",
+                      "props": {}
+                    },
+                    "description": {
+                      "zh_CN": "原生属性"
+                    },
+                    "labelPosition": "none"
+                  }
+                ]
+              }
+            ],
+            "events": {}
+          },
+          "configure": {
+            "loop": true,
+            "condition": true,
+            "styles": true,
+            "isContainer": false,
+            "isModal": false,
+            "nestingRule": {
+              "childWhitelist": [],
+              "parentWhitelist": "",
+              "descendantBlacklist": "",
+              "ancestorWhitelist": ""
+            },
+            "isNullNode": false,
+            "isLayout": false,
+            "rootSelector": "",
+            "shortcuts": {
+              "properties": []
+            },
+            "contextMenu": {
+              "actions": [],
+              "disable": []
+            }
+          }
+        },
+        {
+          "version": "1.0.0",
           "icon": "Image",
           "name": {
             "zh_CN": "Img"
@@ -3623,7 +4355,7 @@
                   {
                     "property": "src",
                     "type": "string",
-                                        "bindState": true,
+                    "bindState": true,
                     "label": {
                       "text": {
                         "zh_CN": "资源"
@@ -4737,7 +5469,6 @@
                     {
                       "name": "function",
                       "type": "Function",
-                      "defaultValue": "(valid) => {}",
                       "description": {
                         "zh_CN": "校验回调函数"
                       }
@@ -4759,7 +5490,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "输入框输入的值"
                       }
                     }
@@ -4780,7 +5511,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -4801,7 +5532,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -4888,7 +5619,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": "标签",
                     "cols": 12,
                     "widget": {
                       "component": "InputConfigurator",
@@ -5287,7 +6017,6 @@
                   {
                     "property": "text",
                     "type": "string",
-                    "defaultValue": "按钮文案",
                     "label": {
                       "text": {
                         "zh_CN": "按钮文字"
@@ -5848,7 +6577,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "输入框改变后的值"
                       }
                     }
@@ -5869,7 +6598,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "输入框输入的值"
                       }
                     }
@@ -5890,7 +6619,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的值"
                       }
                     }
@@ -5911,7 +6640,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -5932,7 +6661,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -6190,7 +6919,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
@@ -6495,7 +7224,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "下拉框选中项的值"
                       }
                     }
@@ -6516,7 +7245,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
@@ -6537,7 +7266,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -6558,7 +7287,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -6592,7 +7321,7 @@
                     {
                       "name": "value",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "被移除Tag对应数据项的值字段"
                       }
                     }
@@ -6787,7 +7516,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的开关状态值"
                       }
                     }
@@ -7019,14 +7748,14 @@
                     {
                       "name": "type",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "搜索类型,默认值为 {} "
                       }
                     },
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前input框中值"
                       }
                     }
@@ -7047,14 +7776,14 @@
                     {
                       "name": "type",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "搜索类型,默认值为 {} "
                       }
                     },
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前input框中值"
                       }
                     }
@@ -7286,7 +8015,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "选中项的值"
                       }
                     }
@@ -7307,7 +8036,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
@@ -7468,7 +8197,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "选中项的值"
                       }
                     }
@@ -7489,7 +8218,7 @@
                     {
                       "name": "value",
                       "type": "array",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
@@ -7602,14 +8331,6 @@
                         "zh_CN": "选项列表"
                       }
                     },
-                    "defaultValue": [
-                      {
-                        "label": "标签2"
-                      },
-                      {
-                        "label": "标签2"
-                      }
-                    ],
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
@@ -7673,7 +8394,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "选中项的值"
                       }
                     }
@@ -7694,7 +8415,7 @@
                     {
                       "name": "value",
                       "type": "array",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
@@ -7949,7 +8670,7 @@
                     {
                       "name": "value",
                       "type": "boolean",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的显示或隐藏的状态值"
                       }
                     }
@@ -8041,7 +8762,7 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                                        "cols": 12,
+                    "cols": 12,
                     "bindState": false,
                     "widget": {
                       "component": "ContainerConfigurator",
@@ -8160,14 +8881,14 @@
                     {
                       "name": "component",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前点击的页签对象"
                       }
                     },
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -8188,14 +8909,14 @@
                     {
                       "name": "tab",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前操作的页签对象"
                       }
                     },
                     {
                       "name": "type",
                       "type": "String",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前操作的类型（remove || add || edit）"
                       }
                     }
@@ -8216,7 +8937,7 @@
                     {
                       "name": "name",
                       "type": "String",
-                                            "description": {
+                      "description": {
                         "zh_CN": "页签名称"
                       }
                     }
@@ -8647,7 +9368,7 @@
                     {
                       "name": "data",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前激活面板的值"
                       }
                     }
@@ -8668,7 +9389,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的值"
                       }
                     }
@@ -8884,7 +9605,7 @@
                           {
                             "property": "title",
                             "type": "string",
-                                                        "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "列标题"
                               }
@@ -8897,7 +9618,7 @@
                           {
                             "property": "field",
                             "type": "string",
-                                                        "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "列键值"
                               }
@@ -8910,7 +9631,6 @@
                           {
                             "property": "sortable",
                             "type": "boolean",
-                            "defaultValue": true,
                             "label": {
                               "text": {
                                 "zh_CN": "是否排序"
@@ -8925,7 +9645,7 @@
                           {
                             "property": "width",
                             "type": "string",
-                                                        "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "列宽"
                               }
@@ -8938,7 +9658,7 @@
                           {
                             "property": "formatText",
                             "type": "string",
-                                                        "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "内置渲染器"
                               }
@@ -8990,7 +9710,7 @@
                           {
                             "property": "renderer",
                             "type": "object",
-                                                        "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "渲染函数"
                               }
@@ -9005,7 +9725,7 @@
                           {
                             "property": "slots",
                             "type": "object",
-                                                        "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "插槽"
                               }
@@ -9193,11 +9913,6 @@
                     "readOnly": false,
                     "disabled": false,
                     "cols": 12,
-                    "defaultValue": {
-                      "attrs": {
-                        "currentPage": 1
-                      }
-                    },
                     "widget": {
                       "component": "CodeConfigurator",
                       "props": {
@@ -9539,14 +10254,13 @@
                     {
                       "name": "table",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "{$table,filters} 包含 table 实例对象和过滤条件的对象"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onSortChange": {
                 "label": {
@@ -9561,14 +10275,13 @@
                     {
                       "name": "table",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "{$table,filters} 包含 table 实例对象和过滤条件的对象"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onSelectAll": {
                 "label": {
@@ -9583,28 +10296,27 @@
                     {
                       "name": "table",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": " 包含 table 实例对象"
                       }
                     },
                     {
                       "name": "checked",
                       "type": "boolean",
-                                            "description": {
+                      "description": {
                         "zh_CN": "勾选状态"
                       }
                     },
                     {
                       "name": "selction",
                       "type": "Array",
-                                            "description": {
+                      "description": {
                         "zh_CN": "选中的表格数据数组"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onSelectChange": {
                 "label": {
@@ -9619,21 +10331,20 @@
                     {
                       "name": "table",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": " table 实例对象"
                       }
                     },
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": " 原生 Event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onToggleExpandChange": {
                 "label": {
@@ -9648,21 +10359,20 @@
                     {
                       "name": "table",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "{$table,row,rowIndex} 包含 table 实例对象和当前行数据的对象"
                       }
                     },
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": " 原生 Event"
                       }
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onCurrentChange": {
                 "label": {
@@ -9880,7 +10590,6 @@
                     "readOnly": false,
                     "disabled": false,
                     "cols": 12,
-                    "defaultValue": "total,sizes,prev, pager, next",
                     "widget": {
                       "component": "InputConfigurator",
                       "props": {
@@ -9909,7 +10618,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前页的值"
                       }
                     }
@@ -9930,7 +10639,7 @@
                     {
                       "name": "page",
                       "type": "String",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前页的页码值"
                       }
                     }
@@ -9951,7 +10660,7 @@
                     {
                       "name": "page",
                       "type": "String",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前页的页码值"
                       }
                     }
@@ -10106,7 +10815,6 @@
                     "readOnly": false,
                     "disabled": false,
                     "cols": 12,
-                    "defaultValue": true,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -10263,14 +10971,14 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前选中项的值"
                       }
                     },
                     {
                       "name": "value",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前选中对象"
                       }
                     }
@@ -10291,7 +10999,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的当前选中值"
                       }
                     }
@@ -10325,7 +11033,7 @@
                     {
                       "name": "value",
                       "type": "String",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前页码数"
                       }
                     }
@@ -10419,16 +11127,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": [
-                      {
-                        "label": "一级 1",
-                        "children": [
-                          {
-                            "label": "二级 1-1"
-                          }
-                        ]
-                      }
-                    ],
                     "cols": 12,
                     "widget": {
                       "component": "CodeConfigurator",
@@ -10609,14 +11307,14 @@
                     {
                       "name": "data",
                       "type": "object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前选中节点信息"
                       }
                     },
                     {
                       "name": "currentNode",
                       "type": "object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "树组件目前的选中状态信息，包含 checkedNodes、checkedKeys、halfCheckedNodes、halfCheckedKeys 四个属性"
                       }
                     }
@@ -10637,21 +11335,21 @@
                     {
                       "name": "data",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前选中节点信息"
                       }
                     },
                     {
                       "name": "node",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "树组件目前的选中状态信息，包含 checkedNodes、checkedKeys、halfCheckedNodes、halfCheckedKeys 四个属性"
                       }
                     },
                     {
                       "name": "vm",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "树组件实例"
                       }
                     }
@@ -10718,12 +11416,6 @@
                   {
                     "property": "vertical",
                     "type": "Boolean",
-                    "defaultValue": {
-                      "type": "i18n",
-                      "zh_CN": "垂直布局",
-                      "en_US": "layout",
-                      "key": ""
-                    },
                     "label": {
                       "text": {
                         "zh_CN": "垂直布局"
@@ -10774,20 +11466,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": [
-                      {
-                        "name": "配置基本信息",
-                        "status": "ready"
-                      },
-                      {
-                        "name": "配置报价",
-                        "status": "wait"
-                      },
-                      {
-                        "name": "完成报价",
-                        "status": "wait"
-                      }
-                    ],
                     "cols": 12,
                     "widget": {
                       "component": "CodeConfigurator",
@@ -10817,14 +11495,14 @@
                     {
                       "name": "type",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "点击节点的下标"
                       }
                     },
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "当前节点对象：{ name: 节点名称, time: 时间 }"
                       }
                     }
@@ -10969,7 +11647,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": "提示信息",
                     "cols": 12,
                     "widget": {
                       "component": "InputConfigurator",
@@ -11009,7 +11686,6 @@
                         "zh_CN": "是否可见"
                       }
                     },
-                    "defaultValue": true,
                     "cols": 12,
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -11027,7 +11703,6 @@
                         "zh_CN": "手动控制"
                       }
                     },
-                    "defaultValue": true,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -11533,7 +12208,7 @@
                     {
                       "name": "value",
                       "type": "boolean",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的可见状态值"
                       }
                     }
@@ -11839,7 +12514,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "输入框改变后的值"
                       }
                     }
@@ -11860,7 +12535,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "输入框输入的值"
                       }
                     }
@@ -11881,7 +12556,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的值"
                       }
                     }
@@ -11902,7 +12577,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -11923,7 +12598,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -12269,7 +12944,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "输入框改变后的值"
                       }
                     }
@@ -12290,7 +12965,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "输入框输入的值"
                       }
                     }
@@ -12311,7 +12986,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "双向绑定的值"
                       }
                     }
@@ -12332,7 +13007,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -12353,7 +13028,7 @@
                     {
                       "name": "event",
                       "type": "Object",
-                                            "description": {
+                      "description": {
                         "zh_CN": "原生 event"
                       }
                     }
@@ -12584,7 +13259,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "右侧列表元素变化时触发"
                       }
                     }
@@ -12605,7 +13280,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "左侧列表元素被用户选中 / 取消选中时触发;"
                       }
                     }
@@ -12626,7 +13301,7 @@
                     {
                       "name": "value",
                       "type": "string",
-                                            "description": {
+                      "description": {
                         "zh_CN": "右侧列表元素被用户选中 / 取消选中时触发"
                       }
                     }
