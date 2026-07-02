@@ -1,1 +1,1 @@
-export { fetchAgentCardHandler } from './handler.js';
+export * from './handler.js';
