@@ -1,6 +1,6 @@
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ZodRawShape } from 'zod';
-import type { ApiOperation, DynamicToolInfo, OpenApiMcpConfig, ToolCallArgs } from './types.js';
+import type { ApiOperation, DynamicToolInfo, OpenApiToolsBuildConfig, ToolCallArgs } from './types.js';
 import { extractOperations } from './extract-operations.js';
 import { executeApiOperation, loadApiRequestTimeoutMs } from './http-executor.js';
 import { parametersToZodShape, requestBodyToZodField } from './schema-to-zod.js';
@@ -87,7 +87,7 @@ function buildOperationToolDefinition(
 
 export function listOpenApiOperationToolDefinitions(
   spec: OpenAPIV3.Document,
-  config: OpenApiMcpConfig,
+  config: OpenApiToolsBuildConfig,
   baseUrl: string,
 ): OpenApiOperationToolDefinition[] {
   const operations = extractOperations(spec, config);

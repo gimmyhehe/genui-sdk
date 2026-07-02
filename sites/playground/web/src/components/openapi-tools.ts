@@ -1,6 +1,6 @@
 export type OpenApiInputMode = 'url' | 'inline' | 'file';
 
-export interface OpenApiMcpToolFormData {
+export interface OpenApiToolServiceFormData {
   name: string;
   openapi: string;
   openapiInputMode: OpenApiInputMode;
@@ -8,23 +8,21 @@ export interface OpenApiMcpToolFormData {
   index: number;
 }
 
-export type ApiMcpPreviewTool = {
+export type OpenApiPreviewTool = {
   name: string;
   summary?: string;
   method: string;
   path: string;
 };
 
-export type ApiMcpPreviewData = {
+export type OpenApiPreviewData = {
   baseUrl: string;
   toolCount: number;
   toolNames: string[];
-  tools?: ApiMcpPreviewTool[];
+  tools?: OpenApiPreviewTool[];
 };
 
-export type ApiMcpPreviewResult = ApiMcpPreviewData;
-
-export type OpenApiMcpToolConfig = {
+export type OpenApiToolServiceConfig = {
   name: string;
   openapi: string;
   description?: string;
@@ -36,7 +34,7 @@ export type OpenApiMcpToolConfig = {
   excludePathPrefixes?: string[];
   toolCount?: number;
   toolNames?: string[];
-  tools?: ApiMcpPreviewTool[];
+  tools?: OpenApiPreviewTool[];
   enabled?: boolean;
 };
 

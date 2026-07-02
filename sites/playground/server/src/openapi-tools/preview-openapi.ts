@@ -3,16 +3,16 @@ import {
   parseOpenApiInput,
   resolveBaseUrl,
 } from '../openapi/index.js';
-import type { ApiMcpPreviewResult } from './types.js';
+import type { OpenApiPreviewData } from './types.js';
 
 export type PreviewOpenApiInput = {
   openapi: string;
   toolNamePrefix?: string;
 };
 
-export async function previewOpenApiMcpRegistration(
+export async function previewOpenApiTools(
   input: PreviewOpenApiInput,
-): Promise<ApiMcpPreviewResult> {
+): Promise<OpenApiPreviewData> {
   const spec = await parseOpenApiInput(input.openapi);
   const baseUrl = resolveBaseUrl(spec);
   const operations = extractOperations(spec, { toolNamePrefix: input.toolNamePrefix });

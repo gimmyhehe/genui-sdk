@@ -1,6 +1,6 @@
 import type { OpenAPIV3 } from 'openapi-types';
 
-export type OpenApiMcpConfig = {
+export type OpenApiToolsBuildConfig = {
   baseUrl?: string;
   apiHeaders?: Record<string, string>;
   excludeMethods?: string[];

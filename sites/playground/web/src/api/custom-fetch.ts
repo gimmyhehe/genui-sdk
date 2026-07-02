@@ -1,5 +1,5 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
-import type { OpenApiMcpToolConfig } from '../components/api-mcp';
+import type { OpenApiToolServiceConfig } from '../components/openapi-tools';
 
 export interface IMcpServerConfig {
   name: string;
@@ -36,7 +36,7 @@ export interface ISkillConfig {
   enabled?: boolean;
 }
 
-export type IOpenApiMcpToolConfig = OpenApiMcpToolConfig;
+export type IOpenApiToolServiceConfig = OpenApiToolServiceConfig;
 
 export interface IPlaygroundConfig {
   mcpServers: IMcpServerConfig[];
@@ -46,7 +46,7 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents: IAgentConfig[];
   skills: ISkillConfig[];
-  openApiMcpTools: IOpenApiMcpToolConfig[];
+  openApiTools: IOpenApiToolServiceConfig[];
 }
 
 /** 仅序列化已启用的 Skill，并去掉 enabled 字段以减小 metadata 体积 */
@@ -76,7 +76,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       temperature,
       agents = [],
       skills = [],
-      openApiMcpTools = [],
+      openApiTools = [],
     } = config;
 
     const playgroundConfig = {
@@ -87,7 +87,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       temperature,
       agents: agents.filter((agent) => agent.enabled),
       skills: skillsPayloadForChat(skills),
-      openApiMcpTools: openApiMcpTools.filter((tool) => tool.enabled !== false),
+      openApiTools: openApiTools.filter((tool) => tool.enabled !== false),
     };
 
     return fetch(url, {

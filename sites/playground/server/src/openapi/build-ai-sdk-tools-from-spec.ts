@@ -3,11 +3,11 @@ import { z } from 'zod';
 import type { OpenAPIV3 } from 'openapi-types';
 import { listOpenApiOperationToolDefinitions } from './operation-tool-definitions.js';
 import { parseOpenApiInput, resolveBaseUrl } from './parse-openapi-input.js';
-import type { OpenApiMcpConfig } from './types.js';
+import type { OpenApiToolsBuildConfig } from './types.js';
 
 export function buildOpenApiAiSdkToolsForSpec(
   spec: OpenAPIV3.Document,
-  config: OpenApiMcpConfig,
+  config: OpenApiToolsBuildConfig,
 ): Record<string, ReturnType<typeof tool>> {
   const baseUrl = resolveBaseUrl(spec, config.baseUrl);
   const definitions = listOpenApiOperationToolDefinitions(spec, config, baseUrl);
@@ -28,7 +28,7 @@ export function buildOpenApiAiSdkToolsForSpec(
 }
 
 export async function buildOpenApiAiSdkToolsFromDocuments(
-  entries: Array<{ openapi: string; config: OpenApiMcpConfig }>,
+  entries: Array<{ openapi: string; config: OpenApiToolsBuildConfig }>,
 ): Promise<Record<string, ReturnType<typeof tool>>> {
   const tools: Record<string, ReturnType<typeof tool>> = {};
 

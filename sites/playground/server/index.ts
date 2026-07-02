@@ -7,7 +7,7 @@ import minimist from 'minimist';
 import { useProviderModelMapperSync, initProviderModelMapperFromData } from './src/use-provider-mapper.js';
 import { loadProviderModelsDataFromFile, mergeProviderModelsData } from './src/provider-models-mapper.js';
 import { fetchOpenTinyProviderModelsData } from './src/opentiny-models.js';
-import { createChatGenui, checkApiMcpHandler, checkMcpHandler } from './src/chat-genui.js';
+import { createChatGenui, checkOpenApiToolsHandler, checkMcpHandler } from './src/chat-genui.js';
 import { createChatTemplate } from './src/chat-template.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -101,7 +101,7 @@ const getModelsHandler = async (req: Request, res: Response) => {
 app.get('/get-models', getModelsHandler);
 app.post('/chat-genui', chatGenuiHandler);
 app.post('/check-mcp', checkMcpHandler);
-app.post('/check-api-mcp', checkApiMcpHandler);
+app.post('/check-openapi-tools', checkOpenApiToolsHandler);
 app.post('/chat-template', chatTemplateHandler);
 
 const port = Number(process.env.PORT);

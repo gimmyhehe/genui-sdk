@@ -10,4 +10,4 @@ export {
   buildOpenApiAiSdkToolsForSpec,
   buildOpenApiAiSdkToolsFromDocuments,
 } from './build-ai-sdk-tools-from-spec.js';
-export type { OpenApiMcpConfig, ApiOperation, ApiParameter } from './types.js';
+export type { OpenApiToolsBuildConfig, ApiOperation, ApiParameter } from './types.js';

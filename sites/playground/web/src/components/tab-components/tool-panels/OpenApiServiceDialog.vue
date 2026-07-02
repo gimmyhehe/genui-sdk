@@ -11,16 +11,16 @@ import {
 } from '@opentiny/vue';
 import {
   readOpenApiFile,
-  type ApiMcpPreviewData,
-  type ApiMcpPreviewTool,
-  type OpenApiMcpToolFormData,
+  type OpenApiPreviewData,
+  type OpenApiPreviewTool,
+  type OpenApiToolServiceFormData,
   type OpenApiInputMode,
-} from '../../api-mcp';
+} from '../../openapi-tools';
 
 const props = defineProps<{
   visible: boolean;
-  apiMcpData: OpenApiMcpToolFormData;
-  previewData: ApiMcpPreviewData | null;
+  serviceFormData: OpenApiToolServiceFormData;
+  previewData: OpenApiPreviewData | null;
   previewStatus: 'idle' | 'loading' | 'success' | 'error';
   previewError: string;
   previewLoading: boolean;
@@ -29,9 +29,9 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:visible', value: boolean): void;
-  (e: 'update:apiMcpData', value: OpenApiMcpToolFormData): void;
+  (e: 'update:serviceFormData', value: OpenApiToolServiceFormData): void;
   (e: 'parseOpenApi'): void;
-  (e: 'confirmApiMcp'): void;
+  (e: 'confirmOpenApiService'): void;
 }>();
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
@@ -47,19 +47,19 @@ const handleClose = () => {
   emit('update:visible', false);
 };
 
-const patchFormData = (patch: Partial<OpenApiMcpToolFormData>) => {
-  emit('update:apiMcpData', {
-    ...props.apiMcpData,
+const patchFormData = (patch: Partial<OpenApiToolServiceFormData>) => {
+  emit('update:serviceFormData', {
+    ...props.serviceFormData,
     ...patch,
   });
 };
 
-const updateField = (field: keyof OpenApiMcpToolFormData, value: string) => {
-  patchFormData({ [field]: value } as Partial<OpenApiMcpToolFormData>);
+const updateField = (field: keyof OpenApiToolServiceFormData, value: string) => {
+  patchFormData({ [field]: value } as Partial<OpenApiToolServiceFormData>);
 };
 
 const onModeChange = (mode: OpenApiInputMode) => {
-  if (mode === props.apiMcpData.openapiInputMode) {
+  if (mode === props.serviceFormData.openapiInputMode) {
     return;
   }
   patchFormData({
@@ -117,7 +117,7 @@ const onDrop = async (event: DragEvent) => {
   }
 };
 
-const previewTools = computed<ApiMcpPreviewTool[]>(() => {
+const previewTools = computed<OpenApiPreviewTool[]>(() => {
   const data = props.previewData;
   if (!data) {
     return [];
@@ -132,7 +132,7 @@ const previewTools = computed<ApiMcpPreviewTool[]>(() => {
   }));
 });
 
-const formatToolSummary = (tool: ApiMcpPreviewTool) => {
+const formatToolSummary = (tool: OpenApiPreviewTool) => {
   return tool.summary?.trim() || '无描述';
 };
 </script>
@@ -140,65 +140,65 @@ const formatToolSummary = (tool: ApiMcpPreviewTool) => {
 <template>
   <tiny-dialog-box
     :visible="visible"
-    :title="apiMcpData.index > -1 ? '编辑 API服务' : '添加 API服务'"
+    :title="serviceFormData.index > -1 ? '编辑 API服务' : '添加 API服务'"
     width="600px"
     height="480px"
-    class="api-mcp-dialog"
+    class="openapi-service-dialog"
     :append-to-body="true"
     @update:visible="emit('update:visible', $event)"
     @close="handleClose"
   >
-    <div class="api-mcp-dialog-body">
-    <tiny-form :model="apiMcpData" label-width="140px" label-position="left" class="api-mcp-dialog-form">
+    <div class="openapi-service-dialog-body">
+    <tiny-form :model="serviceFormData" label-width="140px" label-position="left" class="openapi-service-dialog-form">
       <tiny-form-item label="OpenAPI 文档" required>
-        <div class="api-mcp-input-section">
+        <div class="openapi-service-input-section">
           <tiny-button-group
             size="small"
             :data="modeButtonData"
-            :model-value="apiMcpData.openapiInputMode"
+            :model-value="serviceFormData.openapiInputMode"
             @update:model-value="onModeChange($event as OpenApiInputMode)"
           />
-          <div v-if="apiMcpData.openapiInputMode === 'url'" class="api-mcp-mode-panel">
+          <div v-if="serviceFormData.openapiInputMode === 'url'" class="openapi-service-mode-panel">
             <tiny-input
-              :model-value="apiMcpData.openapi"
+              :model-value="serviceFormData.openapi"
               placeholder="https://example.com/openapi.json"
               @update:model-value="updateField('openapi', $event)"
             />
           </div>
-          <div v-else-if="apiMcpData.openapiInputMode === 'inline'" class="api-mcp-mode-panel">
+          <div v-else-if="serviceFormData.openapiInputMode === 'inline'" class="openapi-service-mode-panel">
             <tiny-input
               type="textarea"
-              :model-value="apiMcpData.openapi"
+              :model-value="serviceFormData.openapi"
               :rows="8"
               placeholder="粘贴 OpenAPI JSON 或 YAML 文档"
-              class="api-mcp-inline-input"
+              class="openapi-service-inline-input"
               @update:model-value="updateField('openapi', $event)"
             />
           </div>
-          <div v-else class="api-mcp-mode-panel">
+          <div v-else class="openapi-service-mode-panel">
             <div
-              class="api-mcp-dropzone"
-              :class="{ 'api-mcp-dropzone--active': isDragOver }"
+              class="openapi-service-dropzone"
+              :class="{ 'openapi-service-dropzone--active': isDragOver }"
               @dragover="onDragOver"
               @dragleave="onDragLeave"
               @drop="onDrop"
               @click="openFilePicker"
             >
-              <div class="api-mcp-dropzone__title">拖入 OpenAPI 文件，或点击选择</div>
-              <div class="api-mcp-dropzone__hint">支持 .json、.yaml、.yml</div>
-              <div v-if="apiMcpData.openapiFileName" class="api-mcp-dropzone__file">
-                已加载：{{ apiMcpData.openapiFileName }}
+              <div class="openapi-service-dropzone__title">拖入 OpenAPI 文件，或点击选择</div>
+              <div class="openapi-service-dropzone__hint">支持 .json、.yaml、.yml</div>
+              <div v-if="serviceFormData.openapiFileName" class="openapi-service-dropzone__file">
+                已加载：{{ serviceFormData.openapiFileName }}
               </div>
             </div>
             <input
               ref="fileInputRef"
               type="file"
-              class="api-mcp-file-input"
+              class="openapi-service-file-input"
               accept=".json,.yaml,.yml,application/json,text/yaml"
               @change="onFileInputChange"
             />
           </div>
-          <div class="api-mcp-parse-row">
+          <div class="openapi-service-parse-row">
             <tiny-button type="primary" :loading="previewLoading" @click="emit('parseOpenApi')">
               {{ previewStatus === 'error' ? '重试' : '解析 OpenAPI' }}
             </tiny-button>
@@ -207,44 +207,44 @@ const formatToolSummary = (tool: ApiMcpPreviewTool) => {
       </tiny-form-item>
       <tiny-form-item label="名称" prop="name" required>
         <tiny-input
-          :model-value="apiMcpData.name"
+          :model-value="serviceFormData.name"
           placeholder="服务名称（用于界面展示）"
           @update:model-value="updateField('name', $event)"
         />
       </tiny-form-item>
     </tiny-form>
-      <div v-if="previewStatus === 'loading'" class="api-mcp-hint api-mcp-hint--info">
+      <div v-if="previewStatus === 'loading'" class="openapi-service-hint openapi-service-hint--info">
         正在解析 OpenAPI 文档...
       </div>
-      <div v-if="previewStatus === 'error'" class="api-mcp-hint api-mcp-hint--error">
+      <div v-if="previewStatus === 'error'" class="openapi-service-hint openapi-service-hint--error">
         {{ previewError }}
       </div>
-      <div v-if="previewStatus === 'success' && previewData" class="api-mcp-preview">
-        <div class="api-mcp-preview__badge">OpenAPI 已解析</div>
-        <div class="api-mcp-preview__main">
-          <div class="api-mcp-preview__block">
-            <span class="api-mcp-preview__block-label">Base URL</span>
-            <div class="api-mcp-preview__url">{{ previewData.baseUrl }}</div>
+      <div v-if="previewStatus === 'success' && previewData" class="openapi-service-preview">
+        <div class="openapi-service-preview__badge">OpenAPI 已解析</div>
+        <div class="openapi-service-preview__main">
+          <div class="openapi-service-preview__block">
+            <span class="openapi-service-preview__block-label">Base URL</span>
+            <div class="openapi-service-preview__url">{{ previewData.baseUrl }}</div>
           </div>
-          <div class="api-mcp-preview__block">
-            <span class="api-mcp-preview__block-label">工具数量</span>
-            <div class="api-mcp-preview__count">{{ previewData.toolCount }} 个</div>
+          <div class="openapi-service-preview__block">
+            <span class="openapi-service-preview__block-label">工具数量</span>
+            <div class="openapi-service-preview__count">{{ previewData.toolCount }} 个</div>
           </div>
-          <div class="api-mcp-preview__block">
-            <span class="api-mcp-preview__block-label">工具列表</span>
-            <ul v-if="previewTools.length" class="api-mcp-preview__tool-list">
-              <li v-for="(tool, i) in previewTools" :key="i" class="api-mcp-preview__tool-item">
-                <div class="api-mcp-preview__tool-name">{{ tool.name }}</div>
-                <div class="api-mcp-preview__tool-desc">{{ formatToolSummary(tool) }}</div>
+          <div class="openapi-service-preview__block">
+            <span class="openapi-service-preview__block-label">工具列表</span>
+            <ul v-if="previewTools.length" class="openapi-service-preview__tool-list">
+              <li v-for="(tool, i) in previewTools" :key="i" class="openapi-service-preview__tool-item">
+                <div class="openapi-service-preview__tool-name">{{ tool.name }}</div>
+                <div class="openapi-service-preview__tool-desc">{{ formatToolSummary(tool) }}</div>
               </li>
             </ul>
-            <div v-else class="api-mcp-preview__tool-empty">未解析到可用 API 操作</div>
+            <div v-else class="openapi-service-preview__tool-empty">未解析到可用 API 操作</div>
           </div>
         </div>
       </div>
     </div>
     <template #footer>
-      <tiny-button type="primary" :loading="confirmLoading" @click="emit('confirmApiMcp')">
+      <tiny-button type="primary" :loading="confirmLoading" @click="emit('confirmOpenApiService')">
         确认
       </tiny-button>
     </template>
@@ -252,20 +252,20 @@ const formatToolSummary = (tool: ApiMcpPreviewTool) => {
 </template>
 
 <style scoped lang="less">
-.api-mcp-dialog {
+.openapi-service-dialog {
   :deep(.tiny-dialog-box__body) {
     overflow: hidden;
   }
 }
 
-.api-mcp-dialog-body {
+.openapi-service-dialog-body {
   height: 360px;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 4px;
 }
 
-.api-mcp-dialog-form {
+.openapi-service-dialog-form {
   :deep(.tiny-form-item__label) {
     line-height: 1.35;
     white-space: normal;
@@ -273,18 +273,18 @@ const formatToolSummary = (tool: ApiMcpPreviewTool) => {
   }
 }
 
-.api-mcp-input-section {
+.openapi-service-input-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
 }
 
-.api-mcp-mode-panel {
+.openapi-service-mode-panel {
   width: 100%;
 }
 
-.api-mcp-inline-input {
+.openapi-service-inline-input {
   :deep(textarea) {
     height: 160px !important;
     min-height: 160px !important;
@@ -297,7 +297,7 @@ const formatToolSummary = (tool: ApiMcpPreviewTool) => {
   }
 }
 
-.api-mcp-dropzone {
+.openapi-service-dropzone {
   border: 1px dashed #d9d9d9;
   border-radius: 8px;
   height: 120px;
@@ -338,16 +338,16 @@ const formatToolSummary = (tool: ApiMcpPreviewTool) => {
   }
 }
 
-.api-mcp-file-input {
+.openapi-service-file-input {
   display: none;
 }
 
-.api-mcp-parse-row {
+.openapi-service-parse-row {
   display: flex;
   justify-content: flex-end;
 }
 
-.api-mcp-preview {
+.openapi-service-preview {
   position: relative;
   margin-top: 16px;
   padding: 0;
@@ -453,7 +453,7 @@ const formatToolSummary = (tool: ApiMcpPreviewTool) => {
   }
 }
 
-.api-mcp-hint {
+.openapi-service-hint {
   margin-top: 8px;
   padding: 6px 8px;
   border-radius: 4px;

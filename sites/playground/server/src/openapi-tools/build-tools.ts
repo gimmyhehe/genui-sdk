@@ -1,5 +1,5 @@
 import { buildOpenApiAiSdkToolsFromDocuments } from '../openapi/build-ai-sdk-tools-from-spec.js';
-import type { OpenApiMcpToolConfig } from './types.js';
+import type { OpenApiToolServiceConfig } from './types.js';
 
 function slugifyName(name: string): string {
   const slug = name
@@ -10,7 +10,7 @@ function slugifyName(name: string): string {
   return /^[0-9]/.test(slug) ? `_${slug}` : slug;
 }
 
-export async function buildOpenApiMcpTools(services: OpenApiMcpToolConfig[] | undefined) {
+export async function buildOpenApiTools(services: OpenApiToolServiceConfig[] | undefined) {
   const enabled = (services ?? []).filter(
     (service) => service.enabled !== false && service.openapi?.trim(),
   );

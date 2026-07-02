@@ -101,8 +101,13 @@ const normalizeCustomExamples = (examples) => {
 
 const migratedCache = {
   ...(cacheLLmConfig || {}),
-  openApiMcpTools: cacheLLmConfig?.openApiMcpTools ?? cacheLLmConfig?.apiMcpServices ?? [],
+  openApiTools:
+    cacheLLmConfig?.openApiTools
+    ?? cacheLLmConfig?.openApiMcpTools
+    ?? cacheLLmConfig?.apiMcpServices
+    ?? [],
 };
+delete migratedCache.openApiMcpTools;
 delete migratedCache.apiMcpServices;
 
 const isOpen = ref(true);
@@ -112,12 +117,12 @@ const llmConfig = reactive({
   mcpServers: [],
   agents: [],
   skills: [],
-  openApiMcpTools: [],
+  openApiTools: [],
   promptList: [],
   ...migratedCache,
 });
-if (!Array.isArray(llmConfig.openApiMcpTools)) {
-  llmConfig.openApiMcpTools = [];
+if (!Array.isArray(llmConfig.openApiTools)) {
+  llmConfig.openApiTools = [];
 }
 const customExamples = ref(normalizeCustomExamples(cacheCustomExamples));
 

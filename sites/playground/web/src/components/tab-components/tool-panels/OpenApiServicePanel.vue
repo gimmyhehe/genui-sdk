@@ -2,8 +2,8 @@
 import { ref, inject } from 'vue';
 import { TinyButton, TinySwitch, TinyPopover, TinyCollapseItem, TinyNotify } from '@opentiny/vue';
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
-import ApiMcpDialog from './ApiMcpDialog.vue';
-import { detectOpenApiInputMode, formatOpenApiSourceLabel } from '../../api-mcp';
+import OpenApiServiceDialog from './OpenApiServiceDialog.vue';
+import { detectOpenApiInputMode, formatOpenApiSourceLabel } from '../../openapi-tools';
 
 const playgroundContext = inject('playgroundContext');
 const { llmConfig } = playgroundContext;
@@ -13,7 +13,7 @@ const IconDel = iconDel();
 const IconEdit = iconEdit();
 const IconEllipsis = iconEllipsis();
 
-const showApiMcpFormDialog = ref(false);
+const showServiceFormDialog = ref(false);
 const previewLoading = ref(false);
 const confirmLoading = ref(false);
 const previewData = ref(null);
@@ -22,7 +22,7 @@ const previewError = ref('');
 const lastParsedOpenApi = ref('');
 const lastParsedToolNamePrefix = ref('');
 
-const emptyApiMcpData = () => ({
+const emptyServiceFormData = () => ({
   name: '',
   openapi: '',
   openapiInputMode: 'url',
@@ -30,7 +30,7 @@ const emptyApiMcpData = () => ({
   index: -1,
 });
 
-const apiMcpData = ref(emptyApiMcpData());
+const serviceFormData = ref(emptyServiceFormData());
 
 function slugifyName(name) {
   const slug = String(name ?? '')
@@ -57,24 +57,24 @@ const invalidatePreview = () => {
   lastParsedToolNamePrefix.value = '';
 };
 
-const closeApiMcpDialog = () => {
-  showApiMcpFormDialog.value = false;
-  apiMcpData.value = emptyApiMcpData();
+const closeServiceDialog = () => {
+  showServiceFormDialog.value = false;
+  serviceFormData.value = emptyServiceFormData();
   invalidatePreview();
   previewLoading.value = false;
   confirmLoading.value = false;
 };
 
-const addApiMcpService = () => {
-  apiMcpData.value = emptyApiMcpData();
+const addOpenApiService = () => {
+  serviceFormData.value = emptyServiceFormData();
   invalidatePreview();
-  showApiMcpFormDialog.value = true;
+  showServiceFormDialog.value = true;
 };
 
-const editApiMcpService = (service, index) => {
+const editOpenApiService = (service, index) => {
   const openApiDocument = resolveOpenApiDocument(service);
   const openApiFileName = resolveOpenApiFileName(service);
-  apiMcpData.value = {
+  serviceFormData.value = {
     name: service.name || '',
     openapi: openApiDocument,
     openapiInputMode: detectOpenApiInputMode(openApiDocument, openApiFileName),
@@ -90,11 +90,11 @@ const editApiMcpService = (service, index) => {
   };
   lastParsedOpenApi.value = openApiDocument;
   lastParsedToolNamePrefix.value = service.toolNamePrefix || slugifyName(service.name || '');
-  showApiMcpFormDialog.value = true;
+  showServiceFormDialog.value = true;
 };
 
-const onUpdateApiMcpData = (val) => {
-  apiMcpData.value = val;
+const onUpdateServiceFormData = (val) => {
+  serviceFormData.value = val;
   const openApiDocument = (val.openapi || '').trim();
   const prefix = (val.name || '').trim() ? slugifyName(val.name) : '';
   if (
@@ -105,19 +105,19 @@ const onUpdateApiMcpData = (val) => {
   }
 };
 
-const deleteApiMcpService = (service) => {
-  const services = [...(llmConfig.openApiMcpTools || [])];
-  llmConfig.openApiMcpTools = services.filter((s) => s.name !== service.name);
+const deleteOpenApiService = (service) => {
+  const services = [...(llmConfig.openApiTools || [])];
+  llmConfig.openApiTools = services.filter((s) => s.name !== service.name);
 };
 
-const updateApiMcpEnabled = (service, enabled) => {
-  const services = [...(llmConfig.openApiMcpTools || [])];
-  llmConfig.openApiMcpTools = services.map((s) => (s.name === service.name ? { ...s, enabled } : s));
+const updateOpenApiServiceEnabled = (service, enabled) => {
+  const services = [...(llmConfig.openApiTools || [])];
+  llmConfig.openApiTools = services.map((s) => (s.name === service.name ? { ...s, enabled } : s));
 };
 
 const parseOpenApi = async () => {
-  const openApiDocument = (apiMcpData.value.openapi || '').trim();
-  const name = (apiMcpData.value.name || '').trim();
+  const openApiDocument = (serviceFormData.value.openapi || '').trim();
+  const name = (serviceFormData.value.name || '').trim();
 
   if (!openApiDocument) {
     TinyNotify({
@@ -133,8 +133,8 @@ const parseOpenApi = async () => {
   previewError.value = '';
 
   try {
-    const checkApiMcpUrl = import.meta.env.VITE_CHECK_API_MCP_URL;
-    const res = await fetch(checkApiMcpUrl, {
+    const checkOpenApiToolsUrl = import.meta.env.VITE_CHECK_OPENAPI_TOOLS_URL;
+    const res = await fetch(checkOpenApiToolsUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -161,8 +161,8 @@ const parseOpenApi = async () => {
   }
 };
 
-const confirmApiMcp = async () => {
-  const { name, openapi, openapiFileName, index } = apiMcpData.value;
+const confirmOpenApiService = async () => {
+  const { name, openapi, openapiFileName, index } = serviceFormData.value;
   const openApiTrimmed = (openapi || '').trim();
   const nameTrimmed = (name || '').trim();
 
@@ -191,7 +191,7 @@ const confirmApiMcp = async () => {
       }
     }
 
-    const services = [...(llmConfig.openApiMcpTools || [])];
+    const services = [...(llmConfig.openApiTools || [])];
     const nameCollision = services.some((s, i) => i !== index && (s.name || '').trim() === nameTrimmed);
     if (nameCollision) {
       TinyNotify({
@@ -221,8 +221,8 @@ const confirmApiMcp = async () => {
       services.push(nextService);
     }
 
-    llmConfig.openApiMcpTools = services;
-    closeApiMcpDialog();
+    llmConfig.openApiTools = services;
+    closeServiceDialog();
   } finally {
     confirmLoading.value = false;
   }
@@ -230,14 +230,14 @@ const confirmApiMcp = async () => {
 </script>
 
 <template>
-  <tiny-collapse-item name="apiMcp" title="API服务">
+  <tiny-collapse-item name="openApiTools" title="API服务">
     <template #title-right>
-      <tiny-button type="text" :icon="IconPlus" @click.stop="addApiMcpService"> </tiny-button>
+      <tiny-button type="text" :icon="IconPlus" @click.stop="addOpenApiService"> </tiny-button>
     </template>
     <div class="mcp-server-list">
       <div
         class="mcp-server-item"
-        v-for="(service, index) in llmConfig.openApiMcpTools || []"
+        v-for="(service, index) in llmConfig.openApiTools || []"
         :key="service.name"
       >
         <div class="mcp-server-item-header">
@@ -245,7 +245,7 @@ const confirmApiMcp = async () => {
           <div>
             <tiny-switch
               :model-value="service.enabled !== false"
-              @update:model-value="updateApiMcpEnabled(service, $event)"
+              @update:model-value="updateOpenApiServiceEnabled(service, $event)"
               class="mcp-server-item-enabled"
             ></tiny-switch>
             <tiny-popover
@@ -256,11 +256,11 @@ const confirmApiMcp = async () => {
             >
               <template #default>
                 <div class="mcp-server-item-actions">
-                  <div @click="editApiMcpService(service, index)">
+                  <div @click="editOpenApiService(service, index)">
                     <component :is="IconEdit" />
                     <span>编辑</span>
                   </div>
-                  <div @click="deleteApiMcpService(service)">
+                  <div @click="deleteOpenApiService(service)">
                     <component :is="IconDel" />
                     <span>移除</span>
                   </div>
@@ -275,7 +275,7 @@ const confirmApiMcp = async () => {
         <div class="mcp-server-item-description">{{ formatOpenApiSourceLabel(service) }}</div>
       </div>
     </div>
-    <div v-show="llmConfig?.openApiMcpTools.length === 0" class="mcp-server-list-empty">
+    <div v-show="llmConfig?.openApiTools.length === 0" class="mcp-server-list-empty">
       <div class="mcp-server-item-empty">
         <div class="mcp-server-item-empty-icon">
           点击右上角
@@ -284,9 +284,9 @@ const confirmApiMcp = async () => {
         </div>
       </div>
     </div>
-    <ApiMcpDialog
-      :visible="showApiMcpFormDialog"
-      :api-mcp-data="apiMcpData"
+    <OpenApiServiceDialog
+      :visible="showServiceFormDialog"
+      :service-form-data="serviceFormData"
       :preview-data="previewData"
       :preview-status="previewStatus"
       :preview-error="previewError"
@@ -294,13 +294,13 @@ const confirmApiMcp = async () => {
       :confirm-loading="confirmLoading"
       @update:visible="
         (val) => {
-          if (!val) closeApiMcpDialog();
-          else showApiMcpFormDialog = val;
+          if (!val) closeServiceDialog();
+          else showServiceFormDialog = val;
         }
       "
-      @update:apiMcpData="onUpdateApiMcpData"
+      @update:serviceFormData="onUpdateServiceFormData"
       @parseOpenApi="parseOpenApi"
-      @confirmApiMcp="confirmApiMcp"
+      @confirmOpenApiService="confirmOpenApiService"
     />
   </tiny-collapse-item>
 </template>
