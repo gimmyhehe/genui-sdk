@@ -1,7 +1,7 @@
 import type { Request, Response as ExpressResponse } from 'express';
 import getRawBody from 'raw-body';
-import { normalizeAgentCard } from '../parse-card/parse.js';
-import { isAllowedAgentUrl, isPlaygroundDevelopment } from '../guard-agent-url/guard.js';
+import { normalizeAgentCard } from '../parse-card/index.js';
+import { isAllowedAgentUrl, isPlaygroundDevelopment } from '../guard-agent-url/index.js';
 
 const UPSTREAM_FETCH_TIMEOUT_MS = 10_000;
 

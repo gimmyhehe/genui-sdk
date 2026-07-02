@@ -1,8 +1,8 @@
-import { AgentCardProtocolError, resolveAgentInterface } from '../parse-card/parse.js';
+import { AgentCardProtocolError, resolveAgentInterface } from '../parse-card/index.js';
 import type { PlaygroundAgentConfig } from '../types.js';
-import { isAllowedAgentUrl, isPlaygroundDevelopment } from '../guard-agent-url/guard.js';
-import { buildA2aRequestHeaders } from './request/build-headers.js';
-import { invokeAgentWithOfficialSdk } from './send-message/invoke.js';
+import { isAllowedAgentUrl, isPlaygroundDevelopment } from '../guard-agent-url/index.js';
+import { buildA2aRequestHeaders } from './request/index.js';
+import { invokeAgentWithOfficialSdk } from './send-message/index.js';
 
 export type AgentInvokeResult =
   | { type: 'text'; text: string }

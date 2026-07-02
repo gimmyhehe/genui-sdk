@@ -1,6 +1,6 @@
 import { tool } from 'ai';
 import { z } from 'zod';
-import { invokeA2aAgent } from '../invoke-agent/invoke-a2a-agent.js';
+import { invokeA2aAgent } from '../invoke-agent/index.js';
 import type { PlaygroundAgentConfig } from '../types.js';
 
 function slugifyAgentName(name: string, index: number): string {

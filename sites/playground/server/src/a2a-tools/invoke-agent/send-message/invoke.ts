@@ -1,7 +1,6 @@
-import type { A2aProtocolVersion } from '../../parse-card/types.js';
+import type { A2aProtocolVersion } from '../../parse-card/index.js';
 import type { PlaygroundAgentConfig } from '../../types.js';
-import { sendA2aMessageV03 } from './adapters/v0_3.js';
-import { sendA2aMessageV10 } from './adapters/v1_0.js';
+import { sendA2aMessageV03, sendA2aMessageV10 } from './adapters/index.js';
 
 function toAgentCard(agent: PlaygroundAgentConfig): Record<string, unknown> {
   const { agentCardUrl: _agentCardUrl, enabled: _enabled, ...card } = agent;
