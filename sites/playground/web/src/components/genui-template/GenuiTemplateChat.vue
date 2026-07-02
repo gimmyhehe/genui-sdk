@@ -453,7 +453,9 @@ onUnmounted(() => {
       <tr-sender
         v-model="inputMessage"
         :placeholder="
-          GeneratingStatus.includes(messageManager.messageState.status) ? t('loading.thinking') : t('placeholder.input')
+          GeneratingStatus.includes(messageManager.messageState.status)
+            ? t('loading.thinking')
+            : t('template.inputPlaceholder')
         "
         :clearable="true"
         :loading="GeneratingStatus.includes(messageManager.messageState.status)"
