@@ -9,13 +9,16 @@ const defaultPropsMap: DefaultPropsMap = {
     clearable: true,
     'style.color': '#333',
     'options.*.label': '默认标签',
-    meta: { nested: { count: 1 } },
+    meta: { },
+    'meta.nested': {},
+    'meta.nested.count': 1,
   },
 };
 
 const schemaProps: Record<string, PropsValue> = {
   size: 'small',
   type: 'danger',
+  style: {},
   options: [
     { value: 'a' },
     { value: 'b', label: '已有标签' },
@@ -49,11 +52,19 @@ describe('applyDefaultPropsToProps', () => {
     expect(props['type']).toBe('danger');
   });
 
-  it('按嵌套路径创建对象并补齐默认值', () => {
+  it('路径已存在时补齐嵌套叶子属性', () => {
     const props = cloneSchemaProps();
     applyDefaults(props);
 
     expect(props['style']).toEqual({ color: '#333' });
+  });
+
+  it('中间路径不存在时跳过嵌套默认值', () => {
+    const props = cloneSchemaProps();
+    delete props['style'];
+    applyDefaults(props);
+
+    expect(props['style']).toBeUndefined();
   });
 
   it('通配路径为 options 每一项补齐 label', () => {
@@ -63,20 +74,45 @@ describe('applyDefaultPropsToProps', () => {
     const options = props['options'] as PropsValue[];
     expect(options[0]).toEqual({ value: 'a', label: '默认标签' });
     expect(options[1]).toEqual({ value: 'b', label: '已有标签' });
-    expect(options[2]).toEqual({ label: '默认标签' });
+    expect(options[2]).toBeNull();
     expect(options[3]).toBe('invalid-item');
   });
 
-  it('数组下标路径在空 props 上创建数组和对象', () => {
+  it('中间路径不存在时跳过数组下标路径', () => {
     const props: Record<string, PropsValue> = {};
     applyDefaultPropsToProps(COMPONENT, props, {
       [COMPONENT]: { 'options.0.label': '首项默认' },
     });
 
-    expect(props['options']).toEqual([{ label: '首项默认' }]);
+    expect(props['options']).toBeUndefined();
   });
 
-  it('options 不是数组时跳过数组相关路径', () => {
+  it('通配路径在 options 不是数组时按对象键名读取', () => {
+    const props: Record<string, PropsValue> = {
+      options: { '*': { value: 'a' } },
+    };
+    applyDefaultPropsToProps(COMPONENT, props, {
+      [COMPONENT]: { 'options.*.label': '默认标签' },
+    });
+
+    expect((props['options'] as Record<string, PropsValue>)['*']).toEqual({
+      value: 'a',
+      label: '默认标签',
+    });
+  });
+
+  it('数字键在对象上按普通属性读取', () => {
+    const props: Record<string, PropsValue> = {
+      items: { '0': { name: '已有' } },
+    };
+    applyDefaultPropsToProps(COMPONENT, props, {
+      [COMPONENT]: { 'items.0.name': '默认名称' },
+    });
+
+    expect((props['items'] as Record<string, PropsValue>)['0']).toEqual({ name: '已有' });
+  });
+
+  it('options 不是数组时跳过无法下钻的路径', () => {
     const props = cloneSchemaProps();
     props['options'] = 'not-array';
     applyDefaults(props);

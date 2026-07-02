@@ -5,46 +5,30 @@ export type DefaultPropsMap = Record<string, DefaultValueMap>;
 
 type Container = Record<string, PropsValue> | PropsValue[];
 
-function isObjectRecord(value: PropsValue): value is Record<string, PropsValue> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+function isContainer(value: PropsValue): value is Container {
+  return typeof value === 'object' && value !== null;
 }
 
 function cloneDefaultValue(value: PropsValue): PropsValue {
-  if (!isObjectRecord(value) && !Array.isArray(value)) {
+  if (!isContainer(value)) {
     return value;
   }
   return structuredClone(value);
 }
 
-function isArrayIndex(key: string): boolean {
-  return /^\d+$/.test(key);
-}
-
-function isArrayWildcard(key: string): boolean {
-  return key === '*';
-}
-
-function createContainer(nextKey: string): Container {
-  return isArrayIndex(nextKey) || isArrayWildcard(nextKey) ? [] : {};
-}
-
 function getChild(container: Container, key: string): PropsValue {
-  return Array.isArray(container) ? container[Number(key)] : container[key];
+  if (Array.isArray(container) && /^\d+$/.test(key)) {
+    return container[Number(key)];
+  }
+  return (container as Record<string, PropsValue>)[key];
 }
 
 function setChild(container: Container, key: string, value: PropsValue): void {
-  if (Array.isArray(container)) {
+  if (Array.isArray(container) && /^\d+$/.test(key)) {
     container[Number(key)] = value;
   } else {
-    container[key] = value;
+    (container as Record<string, PropsValue>)[key] = value;
   }
-}
-
-function isTraversable(value: PropsValue, nextKey: string): value is Container {
-  if (isArrayIndex(nextKey) || isArrayWildcard(nextKey)) {
-    return Array.isArray(value);
-  }
-  return isObjectRecord(value);
 }
 
 function fillAtPath(
@@ -58,10 +42,7 @@ function fillAtPath(
 
   const [key, ...rest] = keys;
 
-  if (isArrayWildcard(key)) {
-    if (!Array.isArray(current)) {
-      return;
-    }
+  if (key === '*' && Array.isArray(current)) {
     for (let i = 0; i < current.length; i++) {
       if (!rest.length) {
         if (current[i] == null) {
@@ -69,12 +50,8 @@ function fillAtPath(
         }
         continue;
       }
-      let item = current[i];
-      if (item == null) {
-        item = createContainer(rest[0]);
-        current[i] = item;
-      }
-      if (!isTraversable(item, rest[0])) {
+      const item = current[i];
+      if (item == null || !isContainer(item)) {
         continue;
       }
       fillAtPath(item, rest, defaultValue);
@@ -89,25 +66,17 @@ function fillAtPath(
     return;
   }
 
-  const nextKey = rest[0];
-  if (isArrayWildcard(nextKey)) {
-    const child = getChild(current, key);
-    if (!Array.isArray(child)) {
-      return;
-    }
-    fillAtPath(child, rest, defaultValue);
-    return;
-  }
-
   const nextValue = getChild(current, key);
   if (nextValue == null) {
-    const created = createContainer(nextKey);
-    setChild(current, key, created);
-    fillAtPath(created, rest, defaultValue);
     return;
   }
 
-  if (!isTraversable(nextValue, nextKey)) {
+  if (rest[0] === '*' && Array.isArray(nextValue)) {
+    fillAtPath(nextValue, rest, defaultValue);
+    return;
+  }
+
+  if (!isContainer(nextValue)) {
     return;
   }
 
@@ -127,7 +96,7 @@ export function applyDefaultPropsToProps(
   props: Record<string, PropsValue>,
   defaultPropsMap: DefaultPropsMap | null | undefined,
 ): void {
-  if (typeof componentName !== 'string' || !isObjectRecord(defaultPropsMap)) {
+  if (typeof componentName !== 'string' || !isContainer(defaultPropsMap)) {
     return;
   }
 
