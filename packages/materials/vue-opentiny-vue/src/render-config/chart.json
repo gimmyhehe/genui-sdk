@@ -454,7 +454,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "vertical",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -608,7 +607,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -983,7 +981,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -1326,7 +1323,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -1542,16 +1538,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "center": [
-                                "50%",
-                                "45%"
-                              ],
-                              "radius": [
-                                "44%",
-                                "50%"
-                              ]
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -1609,7 +1595,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -1922,7 +1907,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -2175,14 +2159,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "left": "center",
-                              "right": "80",
-                              "top": 60,
-                              "bottom": 60,
-                              "funnelAlign": "center",
-                              "orient": "horizontal"
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2202,14 +2178,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "width": "80%",
-                              "height": "80%",
-                              "min": 0,
-                              "max": 100,
-                              "minSize": "0%",
-                              "maxSize": "100%"
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2229,7 +2197,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -2422,77 +2389,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": {
-                              "1990": [
-                                [
-                                  28604,
-                                  77,
-                                  17096869,
-                                  "Australia",
-                                  1990
-                                ],
-                                [
-                                  31163,
-                                  77.4,
-                                  27662440,
-                                  "Canada",
-                                  1990
-                                ],
-                                [
-                                  60001,
-                                  68,
-                                  1154605773,
-                                  "China",
-                                  1990
-                                ]
-                              ],
-                              "2000": [
-                                [
-                                  19349,
-                                  69.6,
-                                  147568552,
-                                  "Russia",
-                                  2000
-                                ],
-                                [
-                                  10670,
-                                  67.3,
-                                  53994605,
-                                  "Turkey",
-                                  2000
-                                ],
-                                [
-                                  26424,
-                                  75.7,
-                                  57110117,
-                                  "United Kingdom",
-                                  2000
-                                ]
-                              ],
-                              "2015": [
-                                [
-                                  44056,
-                                  81.8,
-                                  23968973,
-                                  "Australia",
-                                  2015
-                                ],
-                                [
-                                  43294,
-                                  81.7,
-                                  35939927,
-                                  "Canada",
-                                  2015
-                                ],
-                                [
-                                  13334,
-                                  76.9,
-                                  1376048943,
-                                  "China",
-                                  2015
-                                ]
-                              ]
-                            },
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2515,7 +2411,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "[10, 70]",
                             "cols": 12,
                             "widget": {
                               "component": "CodeConfigurator",
@@ -2573,7 +2468,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -2889,7 +2783,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -3148,7 +3041,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": 225,
                             "cols": 12,
                             "type": "number",
                             "widget": {
@@ -3170,7 +3062,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": -45,
                             "cols": 12,
                             "type": "number",
                             "widget": {
@@ -3192,7 +3083,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": 0,
                             "cols": 12,
                             "type": "number",
                             "widget": {
@@ -3214,7 +3104,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": 100,
                             "cols": 12,
                             "type": "number",
                             "widget": {
@@ -3236,7 +3125,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": false,
                             "cols": 12,
                             "type": "boolean",
                             "widget": {
@@ -3281,7 +3169,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
@@ -3474,7 +3361,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cubicOut",
                             "cols": 12,
                             "type": "string",
                             "widget": {
@@ -3496,7 +3382,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cubicInOut",
                             "cols": 12,
                             "type": "string",
                             "widget": {
@@ -3518,7 +3403,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": 300,
                             "cols": 12,
                             "type": "number",
                             "widget": {
@@ -3540,7 +3424,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": 100,
                             "cols": 12,
                             "type": "number",
                             "widget": {
@@ -3708,7 +3591,6 @@
                             "readOnly": false,
                             "disabled": false,
                             "cols": 12,
-                            "defaultValue": "ProcessBarChart",
                             "widget": {
                               "component": "CodeConfigurator",
                               "props": {
@@ -3765,7 +3647,6 @@
                             "required": true,
                             "readOnly": false,
                             "disabled": false,
-                            "defaultValue": "cloud-light",
                             "cols": 12,
                             "widget": {
                               "component": "SelectConfigurator",
