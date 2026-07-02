@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { TinyButton } from '@opentiny/vue';
 import { AutoTip } from '@opentiny/vue-directive';
 import { iconRefresh, iconCopy } from '@opentiny/vue-icon';
-import type { IBubbleSlotsProps } from '@opentiny/genui-sdk-vue';
+import type { IBubbleSlotsProps } from '../common.types';
 import { t } from '../../i18n';
 
 const emit = defineEmits(['refresh', 'copy']);
@@ -15,6 +15,11 @@ const CopyIcon = iconCopy();
 
 const vAutoTip = AutoTip;
 const copyTooltip = ref(t('chatFooter.copy'));
+
+const isLastBubble = computed(() => {
+  const { messages } = props.messageManager;
+  return props.index === messages.value.length - 1;
+});
 
 const copyContent = async () => {
   emit('copy', props);

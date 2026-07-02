@@ -100,12 +100,11 @@ const roles: Record<string, BubbleRoleConfig> = {
           slotProps.bubbleProps.role !== 'assistant' ||
           (slotProps.index !== undefined && slotProps.index !== messages.value.length - 1) ||
           !generating.value;
-        const isLastBubble = slotProps.index === messages.value.length - 1;
         return h(AssistantFooter, {
           bubbleProps: slotProps.bubbleProps,
           index: slotProps.index,
           isFinished,
-          isLastBubble,
+          messageManager: messageManager.value,
           chatMessage: (messageManager.value.messages.value[slotProps.index] || {}) as IChatMessage,
           onRefresh: handleRefresh,
           onCopy: handleCopy,
