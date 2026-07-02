@@ -1,4 +1,44 @@
-import type { OpenApiInputMode } from './types';
+export type OpenApiInputMode = 'url' | 'inline' | 'file';
+
+export interface OpenApiMcpToolFormData {
+  name: string;
+  openapi: string;
+  openapiInputMode: OpenApiInputMode;
+  openapiFileName?: string;
+  index: number;
+}
+
+export type ApiMcpPreviewTool = {
+  name: string;
+  summary?: string;
+  method: string;
+  path: string;
+};
+
+export type ApiMcpPreviewData = {
+  baseUrl: string;
+  toolCount: number;
+  toolNames: string[];
+  tools?: ApiMcpPreviewTool[];
+};
+
+export type ApiMcpPreviewResult = ApiMcpPreviewData;
+
+export type OpenApiMcpToolConfig = {
+  name: string;
+  openapi: string;
+  description?: string;
+  baseUrl?: string;
+  apiHeaders?: Record<string, string>;
+  toolNamePrefix?: string;
+  openapiFileName?: string;
+  excludeMethods?: string[];
+  excludePathPrefixes?: string[];
+  toolCount?: number;
+  toolNames?: string[];
+  tools?: ApiMcpPreviewTool[];
+  enabled?: boolean;
+};
 
 const OPENAPI_FILE_EXTENSIONS = new Set(['.json', '.yaml', '.yml']);
 const LARGE_FILE_WARNING_BYTES = 512 * 1024;

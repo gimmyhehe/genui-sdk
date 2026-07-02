@@ -1,5 +1,5 @@
 import { buildOpenApiAiSdkToolsFromDocuments } from '../openapi/build-ai-sdk-tools-from-spec.js';
-import type { OpenApiMcpToolConfig } from '../../../../common/api-mcp/types.js';
+import type { OpenApiMcpToolConfig } from './types.js';
 
 function slugifyName(name: string): string {
   const slug = name

@@ -3,7 +3,7 @@ import { ref, inject } from 'vue';
 import { TinyButton, TinySwitch, TinyPopover, TinyCollapseItem, TinyNotify } from '@opentiny/vue';
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
 import ApiMcpDialog from './ApiMcpDialog.vue';
-import { detectOpenApiInputMode, formatOpenApiSourceLabel } from '../../../common';
+import { detectOpenApiInputMode, formatOpenApiSourceLabel } from '../../api-mcp';
 
 const playgroundContext = inject('playgroundContext');
 const { llmConfig } = playgroundContext;

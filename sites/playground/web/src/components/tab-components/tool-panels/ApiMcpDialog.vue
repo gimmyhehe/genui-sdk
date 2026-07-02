@@ -9,12 +9,13 @@ import {
   TinyInput,
   TinyNotify,
 } from '@opentiny/vue';
-import type { ApiMcpPreviewData, ApiMcpPreviewTool } from '@playground/common';
 import {
   readOpenApiFile,
+  type ApiMcpPreviewData,
+  type ApiMcpPreviewTool,
   type OpenApiMcpToolFormData,
   type OpenApiInputMode,
-} from '../../../common';
+} from '../../api-mcp';
 
 const props = defineProps<{
   visible: boolean;

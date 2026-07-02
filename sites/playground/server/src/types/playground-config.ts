@@ -1,5 +1,5 @@
 import type { PlaygroundAgentConfig } from '../a2a-tools/index.js';
-import type { OpenApiMcpToolConfig } from '../common/index.js';
+import type { OpenApiMcpToolConfig } from '../api-mcp/types.js';
 import type { McpServersConfig } from './mcp-server.js';
 import type { PlaygroundSkillConfig } from '../skills/index.js';
 

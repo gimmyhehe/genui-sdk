@@ -1,5 +1,5 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
-import type { OpenApiMcpToolConfig } from '@playground/common';
+import type { OpenApiMcpToolConfig } from '../components/api-mcp';
 
 export interface IMcpServerConfig {
   name: string;
