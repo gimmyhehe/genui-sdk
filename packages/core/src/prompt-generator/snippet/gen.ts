@@ -1,6 +1,6 @@
-import type { IMaterialsProtocol } from '../material';
-import type { NodeSchema } from '../protocols/schema';
-import { getSnippetsInfo } from './handle-snippets';
+import type { IMaterialsProtocol } from '../../material';
+import type { NodeSchema } from '../../protocols/schema';
+import { getSnippetsInfo } from './extract';
 
 export type IGenPromptSnippet = NodeSchema;
 

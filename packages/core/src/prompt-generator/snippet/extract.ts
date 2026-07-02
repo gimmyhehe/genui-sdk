@@ -1,4 +1,4 @@
-import type { IMaterialsProtocol } from '../material';
+import type { IMaterialsProtocol } from '../../material';
 
 export function extractSnippets(materials: any[]) {
   return materials

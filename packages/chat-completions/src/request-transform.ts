@@ -1,7 +1,7 @@
-import { type IGenPromptConfig, genPrompt } from '@opentiny/genui-sdk-core';
+import { genPrompt } from '@opentiny/genui-sdk-core';
 import { materialsConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
 import { ngMaterialsConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
-import { IChatCompletionCreateParams, ChatCompletionCreateParamsBase } from './types';
+import { IChatCompletionCreateParams, ChatCompletionCreateParamsBase, type IGenPromptConfig } from './types';
 
 function mergePrompt( 
   initialPrompt: string,

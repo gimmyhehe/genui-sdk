@@ -1,5 +1,5 @@
-import type { IFunctionInfo, IMaterialsProtocol } from '../material';
-import { getComponentsInfo } from './handle-component';
+import type { IFunctionInfo, IMaterialsProtocol } from '../../material';
+import { getComponentsInfo } from './extract';
 
 export interface IGenPromptComponentProperty {
   property: string;

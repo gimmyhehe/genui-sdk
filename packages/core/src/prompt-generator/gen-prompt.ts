@@ -1,12 +1,12 @@
 import type { IMaterialsMeta } from '../material';
 import { genCustomActionsPrompt, type IGenPromptAction } from './action';
 import { aboutThis } from './about-this';
-import { genComponentsPrompt, type IGenPromptComponent } from './components-prompt';
-import { genExamplesPrompt, type IGenPromptExample } from './examples-prompt';
-import { genJsonSchema, genJsonSchemaPrompt } from './json-schema-prompt';
+import { genComponentsPrompt, type IGenPromptComponent } from './component';
+import { genExamplesPrompt, type IGenPromptExample } from './examples';
+import { genJsonSchema, genJsonSchemaPrompt } from './json-schema';
 import { promptPrefix, skillPromptPrefix } from './prefix';
 import { genRulesPrompt, skillRulesPrompt, targetRulesPrompt } from './rules';
-import { genSnippetsPrompt, type IGenPromptSnippet } from './snippets-prompt';
+import { genSnippetsPrompt, type IGenPromptSnippet } from './snippet';
 
 export interface IGenPromptCustomConfig {
   customComponents?: IGenPromptComponent[];
@@ -24,11 +24,6 @@ export interface IGenPromptOptions {
   includeAboutThis?: boolean;
   includeBaseRules?: boolean;
   additionRules?: string[];
-}
-
-export interface IGenPromptConfig extends IGenPromptCustomConfig {
-  framework?: 'Vue' | 'Angular';
-  strategy?: 'append' | 'override' | 'prepend';
 }
 
 function getExtendWhiteList(whiteList: string[], customComponents: IGenPromptComponent[]) {
