@@ -9,13 +9,14 @@ import {
   TinyInput,
   TinyNotify,
 } from '@opentiny/vue';
-import {
-  readOpenApiFile,
-  type OpenApiPreviewData,
-  type OpenApiPreviewTool,
-  type OpenApiToolServiceFormData,
-  type OpenApiInputMode,
-} from '../../openapi-tools';
+import { t } from '../../../i18n';
+import { readOpenApiFile } from '../../openapi-tools';
+import type {
+  OpenApiPreviewData,
+  OpenApiPreviewTool,
+  OpenApiToolServiceFormData,
+  OpenApiInputMode,
+} from '../../common.types';
 
 const props = defineProps<{
   visible: boolean;
@@ -37,11 +38,11 @@ const emit = defineEmits<{
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const isDragOver = ref(false);
 
-const modeButtonData = [
+const modeButtonData = computed(() => [
   { text: 'URL', value: 'url' },
-  { text: '文档内容', value: 'inline' },
-  { text: '文件', value: 'file' },
-];
+  { text: t('openApi.modeInline'), value: 'inline' },
+  { text: t('openApi.modeFile'), value: 'file' },
+]);
 
 const handleClose = () => {
   emit('update:visible', false);
@@ -84,7 +85,7 @@ const applyOpenApiFile = async (file: File) => {
   } catch (error) {
     TinyNotify({
       type: 'error',
-      message: error instanceof Error ? error.message : '读取文件失败',
+      message: error instanceof Error ? error.message : t('openApi.readFileFailed'),
       position: 'top-right',
     });
   }
@@ -133,14 +134,14 @@ const previewTools = computed<OpenApiPreviewTool[]>(() => {
 });
 
 const formatToolSummary = (tool: OpenApiPreviewTool) => {
-  return tool.summary?.trim() || '无描述';
+  return tool.summary?.trim() || t('openApi.noDescription');
 };
 </script>
 
 <template>
   <tiny-dialog-box
     :visible="visible"
-    :title="serviceFormData.index > -1 ? '编辑 API服务' : '添加 API服务'"
+    :title="serviceFormData.index > -1 ? t('openApi.edit') : t('openApi.add')"
     width="600px"
     height="480px"
     class="openapi-service-dialog"
@@ -150,7 +151,7 @@ const formatToolSummary = (tool: OpenApiPreviewTool) => {
   >
     <div class="openapi-service-dialog-body">
     <tiny-form :model="serviceFormData" label-width="140px" label-position="left" class="openapi-service-dialog-form">
-      <tiny-form-item label="OpenAPI 文档" required>
+      <tiny-form-item :label="t('openApi.docLabel')" required>
         <div class="openapi-service-input-section">
           <tiny-button-group
             size="small"
@@ -170,7 +171,7 @@ const formatToolSummary = (tool: OpenApiPreviewTool) => {
               type="textarea"
               :model-value="serviceFormData.openapi"
               :rows="8"
-              placeholder="粘贴 OpenAPI JSON 或 YAML 文档"
+              :placeholder="t('openApi.inlinePlaceholder')"
               class="openapi-service-inline-input"
               @update:model-value="updateField('openapi', $event)"
             />
@@ -184,10 +185,10 @@ const formatToolSummary = (tool: OpenApiPreviewTool) => {
               @drop="onDrop"
               @click="openFilePicker"
             >
-              <div class="openapi-service-dropzone__title">拖入 OpenAPI 文件，或点击选择</div>
-              <div class="openapi-service-dropzone__hint">支持 .json、.yaml、.yml</div>
+              <div class="openapi-service-dropzone__title">{{ t('openApi.dropzoneTitle') }}</div>
+              <div class="openapi-service-dropzone__hint">{{ t('openApi.dropzoneHint') }}</div>
               <div v-if="serviceFormData.openapiFileName" class="openapi-service-dropzone__file">
-                已加载：{{ serviceFormData.openapiFileName }}
+                {{ t('openApi.fileLoaded', { fileName: serviceFormData.openapiFileName }) }}
               </div>
             </div>
             <input
@@ -200,52 +201,52 @@ const formatToolSummary = (tool: OpenApiPreviewTool) => {
           </div>
           <div class="openapi-service-parse-row">
             <tiny-button type="primary" :loading="previewLoading" @click="emit('parseOpenApi')">
-              {{ previewStatus === 'error' ? '重试' : '解析 OpenAPI' }}
+              {{ previewStatus === 'error' ? t('openApi.retry') : t('openApi.parse') }}
             </tiny-button>
           </div>
         </div>
       </tiny-form-item>
-      <tiny-form-item label="名称" prop="name" required>
+      <tiny-form-item :label="t('common.name')" prop="name" required>
         <tiny-input
           :model-value="serviceFormData.name"
-          placeholder="服务名称（用于界面展示）"
+          :placeholder="t('openApi.namePlaceholder')"
           @update:model-value="updateField('name', $event)"
         />
       </tiny-form-item>
     </tiny-form>
       <div v-if="previewStatus === 'loading'" class="openapi-service-hint openapi-service-hint--info">
-        正在解析 OpenAPI 文档...
+        {{ t('openApi.parsing') }}
       </div>
       <div v-if="previewStatus === 'error'" class="openapi-service-hint openapi-service-hint--error">
         {{ previewError }}
       </div>
       <div v-if="previewStatus === 'success' && previewData" class="openapi-service-preview">
-        <div class="openapi-service-preview__badge">OpenAPI 已解析</div>
+        <div class="openapi-service-preview__badge">{{ t('openApi.parsed') }}</div>
         <div class="openapi-service-preview__main">
           <div class="openapi-service-preview__block">
             <span class="openapi-service-preview__block-label">Base URL</span>
             <div class="openapi-service-preview__url">{{ previewData.baseUrl }}</div>
           </div>
           <div class="openapi-service-preview__block">
-            <span class="openapi-service-preview__block-label">工具数量</span>
-            <div class="openapi-service-preview__count">{{ previewData.toolCount }} 个</div>
+            <span class="openapi-service-preview__block-label">{{ t('openApi.toolCount') }}</span>
+            <div class="openapi-service-preview__count">{{ t('openApi.toolCountUnit', { count: previewData.toolCount }) }}</div>
           </div>
           <div class="openapi-service-preview__block">
-            <span class="openapi-service-preview__block-label">工具列表</span>
+            <span class="openapi-service-preview__block-label">{{ t('openApi.toolList') }}</span>
             <ul v-if="previewTools.length" class="openapi-service-preview__tool-list">
               <li v-for="(tool, i) in previewTools" :key="i" class="openapi-service-preview__tool-item">
                 <div class="openapi-service-preview__tool-name">{{ tool.name }}</div>
                 <div class="openapi-service-preview__tool-desc">{{ formatToolSummary(tool) }}</div>
               </li>
             </ul>
-            <div v-else class="openapi-service-preview__tool-empty">未解析到可用 API 操作</div>
+            <div v-else class="openapi-service-preview__tool-empty">{{ t('openApi.noTools') }}</div>
           </div>
         </div>
       </div>
     </div>
     <template #footer>
       <tiny-button type="primary" :loading="confirmLoading" @click="emit('confirmOpenApiService')">
-        确认
+        {{ t('common.confirm') }}
       </tiny-button>
     </template>
   </tiny-dialog-box>

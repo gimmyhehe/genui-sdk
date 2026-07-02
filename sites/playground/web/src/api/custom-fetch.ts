@@ -1,5 +1,5 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
-import type { OpenApiToolServiceConfig } from '../components/openapi-tools';
+import type { OpenApiToolServiceConfig } from '../components/common.types';
 
 export interface IMcpServerConfig {
   name: string;

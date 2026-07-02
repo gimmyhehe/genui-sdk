@@ -4,6 +4,7 @@ import { TinyButton, TinySwitch, TinyPopover, TinyCollapseItem, TinyNotify } fro
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
 import OpenApiServiceDialog from './OpenApiServiceDialog.vue';
 import { detectOpenApiInputMode, formatOpenApiSourceLabel } from '../../openapi-tools';
+import { t } from '../../../i18n';
 
 const playgroundContext = inject('playgroundContext');
 const { llmConfig } = playgroundContext;
@@ -122,7 +123,7 @@ const parseOpenApi = async () => {
   if (!openApiDocument) {
     TinyNotify({
       type: 'warning',
-      message: '请提供 OpenAPI 文档（URL、JSON/YAML 或文件）',
+      message: t('openApi.documentRequired'),
       position: 'top-right',
     });
     return false;
@@ -144,7 +145,7 @@ const parseOpenApi = async () => {
     });
     const data = await res.json();
     if (data.code !== 200) {
-      throw new Error(data.message || '解析 OpenAPI 失败');
+      throw new Error(data.message || t('openApi.parseFailed'));
     }
 
     previewData.value = data.data;
@@ -154,7 +155,9 @@ const parseOpenApi = async () => {
     return true;
   } catch (error) {
     previewStatus.value = 'error';
-    previewError.value = error?.message ? `解析 OpenAPI 失败：${error.message}` : '解析 OpenAPI 失败';
+    previewError.value = error?.message
+      ? t('openApi.parseFailedWithMessage', { message: error.message })
+      : t('openApi.parseFailed');
     return false;
   } finally {
     previewLoading.value = false;
@@ -169,7 +172,7 @@ const confirmOpenApiService = async () => {
   if (!nameTrimmed || !openApiTrimmed) {
     TinyNotify({
       type: 'warning',
-      message: '请填写名称并提供 OpenAPI 文档',
+      message: t('openApi.nameAndDocRequired'),
       position: 'top-right',
     });
     return;
@@ -196,7 +199,7 @@ const confirmOpenApiService = async () => {
     if (nameCollision) {
       TinyNotify({
         type: 'warning',
-        message: `已存在名为「${nameTrimmed}」的服务，名称不可重复`,
+        message: t('openApi.duplicateName', { name: nameTrimmed }),
         position: 'top-right',
       });
       return;
@@ -230,7 +233,7 @@ const confirmOpenApiService = async () => {
 </script>
 
 <template>
-  <tiny-collapse-item name="openApiTools" title="API服务">
+  <tiny-collapse-item name="openApiTools" :title="t('openApi.title')">
     <template #title-right>
       <tiny-button type="text" :icon="IconPlus" @click.stop="addOpenApiService"> </tiny-button>
     </template>
@@ -258,11 +261,11 @@ const confirmOpenApiService = async () => {
                 <div class="mcp-server-item-actions">
                   <div @click="editOpenApiService(service, index)">
                     <component :is="IconEdit" />
-                    <span>编辑</span>
+                    <span>{{ t('common.edit') }}</span>
                   </div>
                   <div @click="deleteOpenApiService(service)">
                     <component :is="IconDel" />
-                    <span>移除</span>
+                    <span>{{ t('common.remove') }}</span>
                   </div>
                 </div>
               </template>
@@ -278,9 +281,9 @@ const confirmOpenApiService = async () => {
     <div v-show="llmConfig?.openApiTools.length === 0" class="mcp-server-list-empty">
       <div class="mcp-server-item-empty">
         <div class="mcp-server-item-empty-icon">
-          点击右上角
+          {{ t('common.emptyHintPrefix') }}
           <component :is="IconPlus" class="mcp-server-item-empty-plus-icon" />
-          添加 API服务
+          {{ t('openApi.emptyAction') }}
         </div>
       </div>
     </div>
