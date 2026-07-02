@@ -139,7 +139,7 @@ const queryAgentCard = async () => {
   try {
     const fetchAgentCardUrl = (import.meta.env.VITE_FETCH_AGENT_CARD_URL || '').trim();
     if (!fetchAgentCardUrl) {
-      throw new Error('VITE_FETCH_AGENT_CARD_URL 环境变量未配置');
+      throw new Error(t('agent.fetchEnvNotConfigured'));
     }
     const res = await fetch(fetchAgentCardUrl, {
       method: 'POST',
@@ -149,11 +149,11 @@ const queryAgentCard = async () => {
     });
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.message || `HTTP ${res.status}`);
+      throw new Error(data.message || t('agent.httpError', { status: res.status }));
     }
     const card = data.data;
     if (!card || typeof card !== 'object') {
-      throw new Error('Agent Card 格式无效');
+      throw new Error(t('agent.invalidCardFormat'));
     }
     agentCard.value = card;
     agentData.value = {
