@@ -96,7 +96,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -197,7 +196,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -371,7 +369,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "boolean",
-                    "defaultValue": false,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -393,7 +390,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "boolean",
-                    "defaultValue": false,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -452,7 +448,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "boolean",
-                    "defaultValue": true,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -475,7 +470,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "boolean",
-                    "defaultValue": true,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -563,7 +557,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": "date",
                     "type": "string",
                     "widget": {
                       "component": "SelectConfigurator",
@@ -806,7 +799,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -1017,7 +1009,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1189,7 +1180,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "right",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -1291,7 +1281,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "left",
                     "widget": {
                       "component": "ButtonGroupConfigurator",
                       "props": {
@@ -1323,7 +1312,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": true,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1345,7 +1333,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1367,7 +1354,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1389,7 +1375,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": true,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1412,7 +1397,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -1448,7 +1432,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1471,7 +1454,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -1744,7 +1726,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -2206,8 +2187,7 @@
                             "property": "resizable",
                             "type": "boolean",
                             "labelPosition": "left",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "resizable"
                               }
@@ -2226,8 +2206,7 @@
                             "property": "formatter",
                             "type": "function",
                             "labelPosition": "top",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "formatter"
                               }
@@ -2248,8 +2227,7 @@
                             "property": "show-overflow-tooltip",
                             "type": "boolean",
                             "labelPosition": "left",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "show-overflow-tooltip"
                               }
@@ -2268,7 +2246,6 @@
                             "property": "align",
                             "type": "string",
                             "labelPosition": "top",
-                            "defaultValue": "left",
                             "label": {
                               "text": {
                                 "zh_CN": "align"
@@ -2303,7 +2280,6 @@
                             "property": "header-align",
                             "type": "string",
                             "labelPosition": "top",
-                            "defaultValue": "left",
                             "label": {
                               "text": {
                                 "zh_CN": "header-align"
@@ -2338,7 +2314,6 @@
                             "property": "class-name",
                             "type": "string",
                             "labelPosition": "top",
-                            "defaultValue": "left",
                             "label": {
                               "text": {
                                 "zh_CN": "class-name"
@@ -2358,7 +2333,6 @@
                             "property": "label-class-name",
                             "type": "string",
                             "labelPosition": "top",
-                            "defaultValue": "left",
                             "label": {
                               "text": {
                                 "zh_CN": "label-class-name"
@@ -2378,8 +2352,7 @@
                             "property": "selectable",
                             "type": "function",
                             "labelPosition": "top",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "selectable"
                               }
@@ -2398,8 +2371,7 @@
                             "property": "reserve-selection",
                             "type": "boolean",
                             "labelPosition": "left",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "reserve-selection"
                               }
@@ -2418,8 +2390,7 @@
                             "property": "filters",
                             "type": "array",
                             "labelPosition": "top",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "filters"
                               }
@@ -2459,8 +2430,7 @@
                             "property": "filter-multiple",
                             "type": "string",
                             "labelPosition": "left",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "filter-multiple"
                               }
@@ -2479,8 +2449,7 @@
                             "property": "filter-method",
                             "type": "function",
                             "labelPosition": "top",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "filter-method"
                               }
@@ -2499,8 +2468,7 @@
                             "property": "filtered-value",
                             "type": "array",
                             "labelPosition": "top",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "filtered-value"
                               }
@@ -2595,7 +2563,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2617,7 +2584,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2640,7 +2606,6 @@
                     "cols": 12,
                     "labelPosition": "left",
                     "type": "string",
-                    "defaultValue": "default",
                     "widget": {
                       "component": "SelectConfigurator",
                       "props": {
@@ -2676,7 +2641,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": true,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2698,7 +2662,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": true,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2720,7 +2683,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2827,7 +2789,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "top",
-                    "defaultValue": "fixed",
                     "widget": {
                       "component": "InputConfigurator",
                       "props": {
@@ -2860,7 +2821,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -2882,7 +2842,6 @@
                     "disabled": false,
                     "cols": 12,
                     "labelPosition": "left",
-                    "defaultValue": false,
                     "type": "boolean",
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -5586,7 +5545,6 @@
                     {
                       "name": "function",
                       "type": "Function",
-                      "defaultValue": "(valid) => {}",
                       "description": {
                         "zh_CN": "校验回调函数"
                       }
@@ -5737,7 +5695,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": "标签",
                     "cols": 12,
                     "widget": {
                       "component": "InputConfigurator",
@@ -6136,7 +6093,6 @@
                   {
                     "property": "text",
                     "type": "string",
-                    "defaultValue": "按钮文案",
                     "label": {
                       "text": {
                         "zh_CN": "按钮文字"
@@ -8451,14 +8407,6 @@
                         "zh_CN": "选项列表"
                       }
                     },
-                    "defaultValue": [
-                      {
-                        "label": "标签2"
-                      },
-                      {
-                        "label": "标签2"
-                      }
-                    ],
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
@@ -9759,8 +9707,7 @@
                           {
                             "property": "sortable",
                             "type": "boolean",
-                            "defaultValue": true,
-                            "label": {
+                                    "label": {
                               "text": {
                                 "zh_CN": "是否排序"
                               }
@@ -10042,11 +9989,6 @@
                     "readOnly": false,
                     "disabled": false,
                     "cols": 12,
-                    "defaultValue": {
-                      "attrs": {
-                        "currentPage": 1
-                      }
-                    },
                     "widget": {
                       "component": "CodeConfigurator",
                       "props": {
@@ -10394,8 +10336,7 @@
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onSortChange": {
                 "label": {
@@ -10416,8 +10357,7 @@
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onSelectAll": {
                 "label": {
@@ -10452,8 +10392,7 @@
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onSelectChange": {
                 "label": {
@@ -10481,8 +10420,7 @@
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onToggleExpandChange": {
                 "label": {
@@ -10510,8 +10448,7 @@
                     }
                   ],
                   "returns": {}
-                },
-                "defaultValue": "function onClick(e) {}"
+                }
               },
               "onCurrentChange": {
                 "label": {
@@ -10729,7 +10666,6 @@
                     "readOnly": false,
                     "disabled": false,
                     "cols": 12,
-                    "defaultValue": "total,sizes,prev, pager, next",
                     "widget": {
                       "component": "InputConfigurator",
                       "props": {
@@ -10955,7 +10891,6 @@
                     "readOnly": false,
                     "disabled": false,
                     "cols": 12,
-                    "defaultValue": true,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
@@ -11268,16 +11203,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": [
-                      {
-                        "label": "一级 1",
-                        "children": [
-                          {
-                            "label": "二级 1-1"
-                          }
-                        ]
-                      }
-                    ],
                     "cols": 12,
                     "widget": {
                       "component": "CodeConfigurator",
@@ -11567,12 +11492,6 @@
                   {
                     "property": "vertical",
                     "type": "Boolean",
-                    "defaultValue": {
-                      "type": "i18n",
-                      "zh_CN": "垂直布局",
-                      "en_US": "layout",
-                      "key": ""
-                    },
                     "label": {
                       "text": {
                         "zh_CN": "垂直布局"
@@ -11623,20 +11542,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": [
-                      {
-                        "name": "配置基本信息",
-                        "status": "ready"
-                      },
-                      {
-                        "name": "配置报价",
-                        "status": "wait"
-                      },
-                      {
-                        "name": "完成报价",
-                        "status": "wait"
-                      }
-                    ],
                     "cols": 12,
                     "widget": {
                       "component": "CodeConfigurator",
@@ -11818,7 +11723,6 @@
                     "required": true,
                     "readOnly": false,
                     "disabled": false,
-                    "defaultValue": "提示信息",
                     "cols": 12,
                     "widget": {
                       "component": "InputConfigurator",
@@ -11858,7 +11762,6 @@
                         "zh_CN": "是否可见"
                       }
                     },
-                    "defaultValue": true,
                     "cols": 12,
                     "widget": {
                       "component": "CheckBoxConfigurator",
@@ -11876,7 +11779,6 @@
                         "zh_CN": "手动控制"
                       }
                     },
-                    "defaultValue": true,
                     "widget": {
                       "component": "CheckBoxConfigurator",
                       "props": {}
