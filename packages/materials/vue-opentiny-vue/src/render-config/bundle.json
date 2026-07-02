@@ -2187,7 +2187,7 @@
                             "property": "resizable",
                             "type": "boolean",
                             "labelPosition": "left",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "resizable"
                               }
@@ -2206,7 +2206,7 @@
                             "property": "formatter",
                             "type": "function",
                             "labelPosition": "top",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "formatter"
                               }
@@ -2227,7 +2227,7 @@
                             "property": "show-overflow-tooltip",
                             "type": "boolean",
                             "labelPosition": "left",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "show-overflow-tooltip"
                               }
@@ -2352,7 +2352,7 @@
                             "property": "selectable",
                             "type": "function",
                             "labelPosition": "top",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "selectable"
                               }
@@ -2371,7 +2371,7 @@
                             "property": "reserve-selection",
                             "type": "boolean",
                             "labelPosition": "left",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "reserve-selection"
                               }
@@ -2390,7 +2390,7 @@
                             "property": "filters",
                             "type": "array",
                             "labelPosition": "top",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "filters"
                               }
@@ -2430,7 +2430,7 @@
                             "property": "filter-multiple",
                             "type": "string",
                             "labelPosition": "left",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "filter-multiple"
                               }
@@ -2449,7 +2449,7 @@
                             "property": "filter-method",
                             "type": "function",
                             "labelPosition": "top",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "filter-method"
                               }
@@ -2468,7 +2468,7 @@
                             "property": "filtered-value",
                             "type": "array",
                             "labelPosition": "top",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "filtered-value"
                               }
@@ -9707,7 +9707,7 @@
                           {
                             "property": "sortable",
                             "type": "boolean",
-                                    "label": {
+                            "label": {
                               "text": {
                                 "zh_CN": "是否排序"
                               }
