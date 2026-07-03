@@ -15,7 +15,9 @@ export function genSchema(whiteList: string[]) {
   return genRootSchema(whiteList) as ZodTypeAny;
 }
 
-// @ts-ignore //TODO: remove this "Type instantiation is excessively deep and possibly infinite."
 export function genJsonSchema(whiteList: string[]) {
+  //TODO: remove this "Type instantiation is excessively deep and possibly infinite."
+  // @ts-ignore 
   return zodToJsonSchema(genSchema(whiteList)) as JsonSchema7Type;
 }
+
