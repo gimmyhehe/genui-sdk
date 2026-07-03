@@ -92,7 +92,8 @@ export function listOpenApiOperationToolDefinitions(
 ): OpenApiOperationToolDefinition[] {
   const operations = extractOperations(spec, config);
   const apiHeaders = config.apiHeaders ?? {};
-  const requestTimeoutMs = config.requestTimeoutMs ?? loadApiRequestTimeoutMs();
+  const envTimeoutMs = loadApiRequestTimeoutMs();
+  const requestTimeoutMs = Math.min(config.requestTimeoutMs ?? envTimeoutMs, envTimeoutMs);
 
   return operations.map((operation) =>
     buildOperationToolDefinition(operation, baseUrl, apiHeaders, requestTimeoutMs),

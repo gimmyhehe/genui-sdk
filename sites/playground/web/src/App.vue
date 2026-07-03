@@ -99,17 +99,6 @@ const normalizeCustomExamples = (examples) => {
   return Array.from(dedupedExamples.values());
 };
 
-const migratedCache = {
-  ...(cacheLLmConfig || {}),
-  openApiTools:
-    cacheLLmConfig?.openApiTools
-    ?? cacheLLmConfig?.openApiMcpTools
-    ?? cacheLLmConfig?.apiMcpServices
-    ?? [],
-};
-delete migratedCache.openApiMcpTools;
-delete migratedCache.apiMcpServices;
-
 const isOpen = ref(true);
 const llmConfig = reactive({
   temperature: 0.5,
@@ -119,7 +108,7 @@ const llmConfig = reactive({
   skills: [],
   openApiTools: [],
   promptList: [],
-  ...migratedCache,
+  ...(cacheLLmConfig || {}),
 });
 if (!Array.isArray(llmConfig.openApiTools)) {
   llmConfig.openApiTools = [];

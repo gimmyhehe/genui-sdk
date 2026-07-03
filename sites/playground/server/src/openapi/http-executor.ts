@@ -3,7 +3,7 @@ import type { ApiOperation, ToolCallArgs } from './types.js';
 const DEFAULT_API_REQUEST_TIMEOUT_MS = 60_000;
 
 export function loadApiRequestTimeoutMs(): number {
-  const parsed = Number.parseInt(process.env.MCP_API_TIMEOUT_MS ?? '', 10);
+  const parsed = Number.parseInt(process.env.OPENAPI_API_TIMEOUT_MS ?? '', 10);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : DEFAULT_API_REQUEST_TIMEOUT_MS;
 }
 

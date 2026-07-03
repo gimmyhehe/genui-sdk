@@ -31,39 +31,13 @@ function parsePathListEnv(name: string): string[] {
     .map((p) => resolve(p));
 }
 
-function readBoolEnv(openApiName: string, legacyName: string, defaultValue: boolean): boolean {
-  if (process.env[openApiName] !== undefined && process.env[openApiName] !== '') {
-    return parseBoolEnv(openApiName, defaultValue);
-  }
-  return parseBoolEnv(legacyName, defaultValue);
-}
-
-function readPathListEnv(openApiName: string, legacyName: string): string[] {
-  const raw = process.env[openApiName] ?? process.env[legacyName];
-  if (!raw?.trim()) return [];
-  return raw
-    .split(',')
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((p) => resolve(p));
-}
-
 export function loadOpenApiInputPolicyFromEnv(): OpenApiInputPolicy {
-  const allowedFileRoots = readPathListEnv(
-    'MCP_OPENAPI_ALLOWED_FILE_DIRS',
-    'MCP_SWAGGER_ALLOWED_FILE_DIRS',
-  );
-
   return {
-    allowInline: readBoolEnv('MCP_OPENAPI_ALLOW_INLINE', 'MCP_SWAGGER_ALLOW_INLINE', true),
-    allowUrlFetch: readBoolEnv('MCP_OPENAPI_ALLOW_URL_FETCH', 'MCP_SWAGGER_ALLOW_URL_FETCH', false),
-    allowFileRead: readBoolEnv('MCP_OPENAPI_ALLOW_FILE_READ', 'MCP_SWAGGER_ALLOW_FILE_READ', false),
-    allowLocalhostUrl: readBoolEnv(
-      'MCP_OPENAPI_ALLOW_LOCALHOST_URL',
-      'MCP_SWAGGER_ALLOW_LOCALHOST_URL',
-      false,
-    ),
-    allowedFileRoots,
+    allowInline: parseBoolEnv('OPENAPI_ALLOW_INLINE', true),
+    allowUrlFetch: parseBoolEnv('OPENAPI_ALLOW_URL_FETCH', false),
+    allowFileRead: parseBoolEnv('OPENAPI_ALLOW_FILE_READ', false),
+    allowLocalhostUrl: parseBoolEnv('OPENAPI_ALLOW_LOCALHOST_URL', false),
+    allowedFileRoots: parsePathListEnv('OPENAPI_ALLOWED_FILE_DIRS'),
     urlHostnameAllowlist: parseHostnameAllowlistEnv(),
     fetchTimeoutMs: loadApiRequestTimeoutMs(),
     maxRedirects: 3,
@@ -71,7 +45,7 @@ export function loadOpenApiInputPolicyFromEnv(): OpenApiInputPolicy {
 }
 
 function parseHostnameAllowlistEnv(): string[] | null {
-  const raw = process.env.MCP_OPENAPI_URL_HOST_ALLOWLIST ?? process.env.MCP_SWAGGER_URL_HOST_ALLOWLIST;
+  const raw = process.env.OPENAPI_URL_HOST_ALLOWLIST;
   if (!raw?.trim()) return null;
   const hosts = raw
     .split(',')
@@ -186,7 +160,7 @@ async function assertHostnameResolvesToAllowedIps(hostname: string, policy: Open
 export async function validateOpenApiFetchUrl(urlString: string, policy: OpenApiInputPolicy): Promise<URL> {
   if (!policy.allowUrlFetch) {
     throw new Error(
-      'Remote URL fetch is disabled. Pass inline OpenAPI JSON/YAML, or set MCP_OPENAPI_ALLOW_URL_FETCH=true with appropriate host restrictions.',
+      'Remote URL fetch is disabled. Pass inline OpenAPI JSON/YAML, or set OPENAPI_ALLOW_URL_FETCH=true with appropriate host restrictions.',
     );
   }
 
@@ -259,12 +233,12 @@ export async function fetchOpenApiSpecUrl(urlString: string, policy: OpenApiInpu
 async function resolveAllowedFilePath(source: string, policy: OpenApiInputPolicy): Promise<string> {
   if (!policy.allowFileRead) {
     throw new Error(
-      'Local file paths are disabled. Pass inline OpenAPI JSON/YAML, or set MCP_OPENAPI_ALLOW_FILE_READ=true and MCP_OPENAPI_ALLOWED_FILE_DIRS.',
+      'Local file paths are disabled. Pass inline OpenAPI JSON/YAML, or set OPENAPI_ALLOW_FILE_READ=true and OPENAPI_ALLOWED_FILE_DIRS.',
     );
   }
 
   if (policy.allowedFileRoots.length === 0) {
-    throw new Error('File read is enabled but MCP_OPENAPI_ALLOWED_FILE_DIRS is not configured');
+    throw new Error('File read is enabled but OPENAPI_ALLOWED_FILE_DIRS is not configured');
   }
 
   const candidate = isAbsolute(source) ? source : resolve(process.cwd(), source);

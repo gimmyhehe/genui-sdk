@@ -1,4 +1,4 @@
-import { buildOpenApiAiSdkToolsFromDocuments } from '../openapi/build-ai-sdk-tools-from-spec.js';
+import { buildOpenApiAiSdkToolsFromDocuments } from '../openapi/index.js';
 import type { OpenApiToolServiceConfig } from './types.js';
 
 function slugifyName(name: string): string {
