@@ -27,19 +27,16 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js"
     },
     "./render-config": {
-      "import": "./dist/render-config.js",
       "types": "./dist/render-config.d.ts",
-      "require": "./dist/render-config.js"
+      "import": "./dist/render-config.js"
     },
     "./materials": {
-      "import": "./dist/materials.js",
       "types": "./dist/materials.d.ts",
-      "require": "./dist/materials.js"
+      "import": "./dist/materials.js"
     }
   }
 }

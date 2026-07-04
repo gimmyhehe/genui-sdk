@@ -8,12 +8,6 @@ export const formSchema = {
       email: '',
     },
   },
-  methods: {
-    departChange: {
-      type: 'JSFunction',
-      value: 'function departChange(value) { console.log(value) }',
-    },
-  },
   componentName: 'Page',
   props: {
     style: 'width: 414px;',

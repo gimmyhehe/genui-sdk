@@ -18,7 +18,6 @@ vue-element-plus/
 │       ├── bundle.json          # 核心组件物料（ElInput、ElTable 等）
 │       ├── builtin.json         # 内置节点（div、Text、Slot 等）
 │       ├── extend.json          # 扩展组件（ElCard、ElRow 等）
-│       ├── chart.json           # 图表占位（当前为空）
 │       ├── white-list.ts        # LLM 可用 componentName 白名单
 │       ├── example-schema.ts    # Prompt 示例 schema
 │       └── merge.ts             # 合并为 rendererConfig
@@ -117,7 +116,6 @@ import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-element-plus';
 - 组件库：`element-plus`
 - 默认包裹组件：`ElCard`
 - `bundle.json` 包含 Element Plus 核心表单/表格物料
-- `chart.json` 当前为空，可按需扩展图表物料
 
 ## 扩展更多组件
 
