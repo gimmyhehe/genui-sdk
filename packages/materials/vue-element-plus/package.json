@@ -6,7 +6,10 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "dev": "vite",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "element-plus": "^2.9.0",
@@ -19,7 +22,8 @@
     "typescript": "^5.8.2",
     "vite": "^6.0.0",
     "vite-plugin-css-injected-by-js": "^3.5.2",
-    "vite-plugin-dts": "^4.0.0"
+    "vite-plugin-dts": "^4.0.0",
+    "vitest": "^3.0.0"
   },
   "exports": {
     ".": {
@@ -32,10 +36,10 @@
       "types": "./dist/render-config.d.ts",
       "require": "./dist/render-config.js"
     },
-    "./extend-renderer": {
-      "import": "./dist/extend-renderer.js",
-      "types": "./dist/extend-renderer.d.ts",
-      "require": "./dist/extend-renderer.js"
+    "./materials": {
+      "import": "./dist/materials.js",
+      "types": "./dist/materials.d.ts",
+      "require": "./dist/materials.js"
     }
   }
 }

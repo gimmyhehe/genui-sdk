@@ -18,6 +18,8 @@ export const whiteList = [
   'ElCheckbox',
   'ElTag',
   'ElDivider',
+  'ElTabs',
+  'ElTabPane',
   // 内置 / 布局
   'a',
   'h1',
@@ -33,6 +35,7 @@ export const whiteList = [
   'label',
   'div',
   'Slot',
+  'Template',
   'Text',
   'Icon',
   'Img',
