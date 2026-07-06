@@ -223,8 +223,11 @@ const jsonPatchRenderer = async (props: any) => {
       return;
     }
 
-    setCurrentPreviewSchema(generateIdForComponents(targetSchema), isSuccessfulParse || lastOperationComplete);
-    if (isSuccessfulParse || lastOperationComplete) {
+    const isStreamComplete = isSuccessfulParse || lastOperationComplete;
+    const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
+
+    setCurrentPreviewSchema(generateIdForComponents(strippedSchema), isStreamComplete);
+    if (isStreamComplete) {
       setCurrentSchema(targetSchema);
     }
   } catch (error) {
