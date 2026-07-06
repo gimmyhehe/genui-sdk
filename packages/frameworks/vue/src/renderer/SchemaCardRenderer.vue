@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, watch, computed, inject, nextTick, onErrorCaptured } from 'vue';
+import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide } from 'vue';
 // @ts-ignore
-import defaultSchemaRenderer, { Mapper } from '@opentiny/tiny-schema-renderer';
-import { DeltaPatcher, repairJson, RepairJsonState } from '@opentiny/genui-sdk-core';
-import { extendMapper } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/extend-renderer'; //TODO: 耦合
+import defaultSchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
+import { DeltaPatcher, repairJson, RepairJsonState, type GenuiMaterialsMap, type MaterialDefaultValueMap } from '@opentiny/genui-sdk-core';
 import { requiredCompleteFieldSelectors as internalRequiredCompleteFieldSelectors } from './config';
-import { GENUI_RENDERER } from '../chat/injection-tokens';
+import {
+  GENUI_RENDERER,
+  GENUI_MATERIALS,
+  GENUI_DEFAULT_PROPS_MAP,
+} from '../chat/injection-tokens';
 import type { IRendererProps } from './renderer.types';
 import { cardIdSymbol } from '../chat/useChat';
 import { useI18n } from '../chat/i18n';
@@ -19,8 +22,6 @@ const props = withDefaults(defineProps<IRendererProps>(), {
   isJsonComplete: true,
 });
 
-extendMapper(Mapper, props.customComponents || {});
-
 const schema = ref<any>({});
 const rendererInstance = ref<defaultSchemaRenderer>(null);
 
@@ -33,6 +34,18 @@ const callAction = (actionName: string, params: any) => {
 };
 
 const SchemaRenderer = inject(GENUI_RENDERER, defaultSchemaRenderer);
+const vueMaterials = inject<GenuiMaterialsMap>(GENUI_MATERIALS, {});
+const defaultPropsMap = inject<MaterialDefaultValueMap>(GENUI_DEFAULT_PROPS_MAP, {});
+const customSettings = inject(RENDERER_SETTINGS_KEY, {});
+
+provide(RENDERER_SETTINGS_KEY, {
+  ...customSettings,
+  materials: {
+    ...vueMaterials,
+    ...props.customComponents,
+  },
+  defaultPropsMap,
+});
 
 const deltaPatcher = new DeltaPatcher({
   requiredCompleteFieldSelectors: [
@@ -69,11 +82,11 @@ let updateActionTimer: any | null = null;
 
 function updateContextAndState() {
   rendererInstance.value?.setContext({
-    callAction
-  })
+    callAction,
+  });
   rendererInstance.value?.setContext({
     [cardIdSymbol]: props.id,
-  })
+  });
   rendererInstance.value?.setState(props.state || {});
 }
 
@@ -82,7 +95,7 @@ watch(
   ([newVal, isJsonComplete]) => {
     isError.value = false;
     let json: any = newVal;
-    let isCompleted = true
+    let isCompleted = true;
     if (typeof newVal === 'string') {
       if (newVal.trim()) {
         const { value, state } = repairJson(newVal);
@@ -91,7 +104,7 @@ watch(
           return;
         }
         json = value;
-        isCompleted = state === RepairJsonState.SUCCESS
+        isCompleted = state === RepairJsonState.SUCCESS;
       } else {
         json = {};
       }
@@ -116,14 +129,18 @@ watch(
   },
 );
 // 异步组件可能在更新context时候并未ready，导致恢复会话的时候context没更新
-watch(() => rendererInstance.value, (newVal) => {
-  if (newVal && updateActionTimer) {
-    nextTick(() => updateContextAndState());
-    updateActionTimer = null;
-  }
-}, {
-  immediate: true,
-});
+watch(
+  () => rendererInstance.value,
+  (newVal) => {
+    if (newVal && updateActionTimer) {
+      nextTick(() => updateContextAndState());
+      updateActionTimer = null;
+    }
+  },
+  {
+    immediate: true,
+  },
+);
 </script>
 
 <template>
