@@ -295,32 +295,19 @@ const markdownRenderer = new BubbleMarkdownContentRenderer({
   mdConfig: { html: true },
 });
 
+const createSchemaMessageRenderer = (type: 'json-patch' | 'schema-card' | 'schema-manual') => (props: unknown) =>
+  h(TemplateSchemaMessageRenderer, {
+    itemProps: props,
+    type,
+    prevSchema: prevSchema.value,
+    errorMessagesMap: errorMessagesMap.value,
+  });
+
 const messageRenderers = {
   markdown: markdownRenderer,
-  'json-patch': (props) => {
-    return h(TemplateSchemaMessageRenderer, {
-      itemProps: props,
-      type: 'json-patch',
-      prevSchema: prevSchema.value,
-      errorMessagesMap: errorMessagesMap.value,
-    });
-  },
-  'schema-card': (props) => {
-    return h(TemplateSchemaMessageRenderer, {
-      itemProps: props,
-      type: 'schema-card',
-      prevSchema: prevSchema.value,
-      errorMessagesMap: errorMessagesMap.value,
-    });
-  },
-  'schema-manual': (props) => {
-    return h(TemplateSchemaMessageRenderer, {
-      itemProps: props,
-      type: 'schema-manual',
-      prevSchema: prevSchema.value,
-      errorMessagesMap: errorMessagesMap.value,
-    });
-  },
+  'json-patch': createSchemaMessageRenderer('json-patch'),
+  'schema-card': createSchemaMessageRenderer('schema-card'),
+  'schema-manual': createSchemaMessageRenderer('schema-manual'),
 };
 
 const inputMessage = computed({
