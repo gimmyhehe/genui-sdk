@@ -16,11 +16,16 @@ export function useTemplateList() {
     applySchemaFromMessages,
   } = useTemplateSchema();
 
-  const createTemplate = () => {
-    createConversation();
+  const resetEmptyTemplateSchema = () => {
     setCurrentSchema(null);
     setCurrentPreviewSchema(null);
+    setCurrentCardId('');
     adoptedCardId.value = '';
+  };
+
+  const createTemplate = () => {
+    createConversation();
+    resetEmptyTemplateSchema();
   };
 
   const switchTemplate = (id: string) => {
@@ -28,10 +33,7 @@ export function useTemplateList() {
     const currentMessages = getCurrentConversation()?.messages;
 
     if (!currentMessages?.length) {
-      setCurrentSchema(null);
-      setCurrentPreviewSchema(null);
-      setCurrentCardId('');
-      adoptedCardId.value = '';
+      resetEmptyTemplateSchema();
       return;
     }
 
