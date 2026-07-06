@@ -22,7 +22,9 @@ export default defineConfig({
     },
     outDir: path.resolve(__dirname, './dist'),
     rollupOptions: {
-      external: [...Object.keys(packageJson.dependencies || {}).map(name => new RegExp(`^${escapeStringRegexp(name)}(/|$)`))],
+      external: [
+        ...Object.keys(packageJson.dependencies || {}).map((name) => new RegExp(`^${escapeStringRegexp(name)}(/|$)`)),
+      ],
     },
   },
 });

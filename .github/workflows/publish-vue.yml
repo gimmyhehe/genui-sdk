@@ -75,8 +75,8 @@ jobs:
       - name: Setup .npmrc for publish
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
 
-      - name: Publish to npm (from vue output)
-        working-directory: packages/frameworks/vue/output
+      - name: Publish to npm (from vue package)
+        working-directory: packages/frameworks/vue
         run: pnpm publish --no-git-checks --access public --tag ${{ github.event.inputs.npm_tag }}
 
       - name: Create and push tag

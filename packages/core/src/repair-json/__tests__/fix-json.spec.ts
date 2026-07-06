@@ -1,4 +1,4 @@
-import { fixJson } from 'ai/src/util/fix-json';
+import { fixJson } from '../fix-json';
 import { describe, expect, it } from 'vitest';
 import { jsonrepair } from 'jsonrepair';
 

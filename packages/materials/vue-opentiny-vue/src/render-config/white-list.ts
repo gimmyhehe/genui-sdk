@@ -46,7 +46,6 @@ export const whiteList = [
   // 'TinyDialogBox',
   'TinyTabs',
   'TinyTabItem',
-  // 'ActionButton',
   // 'TinyBreadcrumb',
   // 'TinyBreadcrumbItem',
   // 'TinyCollapse',

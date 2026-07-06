@@ -11,6 +11,12 @@ A Vue 3 component library for enhanced LLM display and interaction. Stream AI-ge
 
 ## Usage
 
+安装时需同时安装 core 与 Vue 物料包（renderer 已内联在 vue 包中）：
+
+```bash
+pnpm add @opentiny/genui-sdk-vue @opentiny/genui-sdk-core @opentiny/genui-sdk-materials-vue-opentiny-vue
+```
+
 ```vue
 <script setup>
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';

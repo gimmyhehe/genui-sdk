@@ -86,15 +86,15 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
 
       - name: Publish server to npm
-        working-directory: packages/server/output
+        working-directory: packages/server
         run: pnpm publish --no-git-checks --access public --tag ${{ github.event.inputs.npm_tag }}
 
       - name: Publish Vue to npm
-        working-directory: packages/frameworks/vue/output
+        working-directory: packages/frameworks/vue
         run: pnpm publish --no-git-checks --access public --tag ${{ github.event.inputs.npm_tag }}
 
       - name: Publish Angular to npm
-        working-directory: packages/frameworks/angular/output
+        working-directory: packages/frameworks/angular
         run: pnpm publish --no-git-checks --access public --tag ${{ github.event.inputs.npm_tag }}
 
       - name: Create and push tags

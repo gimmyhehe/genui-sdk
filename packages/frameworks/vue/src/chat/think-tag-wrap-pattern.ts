@@ -1,23 +1,8 @@
-import { getPartialStartRegString } from "@opentiny/genui-sdk-core";
+import { FlagWrapPattern } from '@opentiny/genui-sdk-core';
 
-export class ThinkTagWrapPattern {
-  protected thinkStartFlag: string = '<think>';
-  protected thinkEndFlag: string = '</think>';
-  protected startRegex: RegExp = new RegExp(`${this.thinkStartFlag}`);
-  protected endRegex: RegExp = new RegExp(`${this.thinkEndFlag}`);
-  protected partialStartRegex: RegExp = new RegExp(`${getPartialStartRegString(this.thinkStartFlag)}$`);
-  protected partialEndRegex: RegExp = new RegExp(`${getPartialStartRegString(this.thinkEndFlag)}$`);
-
-  get regExpMap() {
-    return {
-      start: {
-        full: this.startRegex,
-        partial: this.partialStartRegex,
-      },
-      end: {
-        full: this.endRegex,
-        partial: this.partialEndRegex,
-      },
-    }
+/** 识别 `<think>` 推理标签包裹的流式内容段 */
+export class ThinkTagWrapPattern extends FlagWrapPattern {
+  constructor() {
+    super('<think>', '</think>');
   }
 }
