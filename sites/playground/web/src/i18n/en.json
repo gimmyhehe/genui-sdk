@@ -79,7 +79,8 @@
     "defaultTitle": "New template",
     "confirmDeleteOne": "Delete this template?",
     "confirmBatchDelete": "Delete {count} selected template(s)?",
-    "inputPlaceholder": "Describe what to build"
+    "inputPlaceholder": "Describe what to build",
+    "noUserMessageToReply": "No user message to reply to"
   },
   "common": {
     "edit": "Edit",

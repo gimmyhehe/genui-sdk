@@ -79,7 +79,8 @@
     "defaultTitle": "新模板",
     "confirmDeleteOne": "确定删除该模板吗？",
     "confirmBatchDelete": "确定删除选中的 {count} 个模板？",
-    "inputPlaceholder": "描述要构建的内容"
+    "inputPlaceholder": "描述要构建的内容",
+    "noUserMessageToReply": "没有可回复的用户消息"
   },
   "common": {
     "edit": "编辑",

@@ -6,6 +6,7 @@ import { emitter } from './template-chat-event-emitter';
 import { templateChat } from './template-chat-api';
 import { getBackendChatMessages, getLastUserMessage } from './template-chat-utils';
 import type { LLMConfig, IChatMessage, IMessageItem } from './chat.types';
+import { t } from '../../i18n';
 
 export interface ICustomModelProviderOptions {
   url: string;
@@ -63,6 +64,14 @@ export class CustomModelProvider extends BaseModelProvider {
     let chatMessage: IChatMessage | null = null;
     let lastUserInput = '';
 
+    const lastUserMessage = getLastUserMessage(request.messages);
+    if (!lastUserMessage) {
+      handler.onError?.(new Error(t('template.noUserMessageToReply')));
+      return;
+    }
+    const { content: input, messageId } = lastUserMessage;
+    lastUserInput = String(input ?? '');
+
     try {
       const response = await this.getData(request);
       let reader = response.body!.getReader();
@@ -73,13 +82,6 @@ export class CustomModelProvider extends BaseModelProvider {
         content: '',
         messages: [] as IMessageItem[],
       });
-      const lastUserMessage = getLastUserMessage(request.messages);
-      if (!lastUserMessage) {
-        handler.onError?.(new Error('没有可回复的用户消息'));
-        return;
-      }
-      const { content: input, messageId } = lastUserMessage;
-      lastUserInput = String(input ?? '');
       onData(chatMessage);
 
       const onMarkdown = (content: string, delta: IStreamDelta) => {
