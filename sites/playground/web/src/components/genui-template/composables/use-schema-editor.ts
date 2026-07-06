@@ -2,11 +2,10 @@ import { computed, ref } from 'vue';
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateVersionControl } from './use-template-version-control';
 
-const schemaEditorText = ref('{}');
-const schemaEditorBaseline = ref('{}');
-const schemaEditorSaveLoading = ref(false);
-
-export function useSchemaEditor() {
+function createSchemaEditorState() {
+  const schemaEditorText = ref('{}');
+  const schemaEditorBaseline = ref('{}');
+  const schemaEditorSaveLoading = ref(false);
   const { currentPreviewSchema, setCurrentPreviewSchema } = useTemplateSchema();
   const { isDiffMode, showReturnLatestButton } = useTemplateVersionControl();
 
@@ -96,4 +95,13 @@ export function useSchemaEditor() {
     parseEditorSchema,
     parseBaselineSchema,
   };
+}
+
+let schemaEditorState: ReturnType<typeof createSchemaEditorState> | null = null;
+
+export function useSchemaEditor() {
+  if (!schemaEditorState) {
+    schemaEditorState = createSchemaEditorState();
+  }
+  return schemaEditorState;
 }
