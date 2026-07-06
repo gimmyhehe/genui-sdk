@@ -1,7 +1,7 @@
 import type { PlaygroundAgentConfig } from '../a2a-tools/index.js';
 import type { McpServersConfig } from './mcp-server.js';
 import type { PlaygroundSkillConfig } from '../skills/index.js';
-import type { VariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import type { MaterialsMetaVariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
 
 export interface IPlaygroundConfig {
   mcpServers: McpServersConfig;
@@ -11,5 +11,5 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents?: PlaygroundAgentConfig[];
   skills?: PlaygroundSkillConfig[];
-  promptVariant?: VariantKey;
+  promptVariant?: MaterialsMetaVariantKey;
 }

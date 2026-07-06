@@ -65,10 +65,10 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js"
     },
-    "./render-config": {
-      "import": "./dist/render-config.js",
-      "types": "./dist/render-config.d.ts",
-      "require": "./dist/render-config.js"
+    "./materials-meta": {
+      "import": "./dist/materials-meta.js",
+      "types": "./dist/materials-meta.d.ts",
+      "require": "./dist/materials-meta.js"
     },
     "./materials": {
       "import": "./dist/materials.js",

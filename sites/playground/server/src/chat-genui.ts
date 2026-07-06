@@ -6,8 +6,8 @@ import path from 'node:path';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
 import { genPrompt, type IGenPromptCustomConfig, type IGenPromptOptions } from '@opentiny/genui-sdk-core';
-import { MATERIALS_CONFIG_MAP, materialsConfig, type VariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
-import { ngMaterialsConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
+import { materialsMetaMap, materialsMeta, type MaterialsMetaVariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials-meta';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
@@ -26,7 +26,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 
 const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
 
-export function getGenPromptOptions(promptVariant?: VariantKey): IGenPromptOptions | undefined {
+export function getGenPromptOptions(promptVariant?: MaterialsMetaVariantKey): IGenPromptOptions | undefined {
   if (promptVariant === 'mini') {
     return { includeJsonSchema: false, includeSnippets: false };
   }
@@ -296,10 +296,10 @@ export function createChatGenui() {
 
     const renderConfigForFramework =
       framework === 'Angular'
-        ? ngMaterialsConfig
-        : promptVariant && Object.hasOwn(MATERIALS_CONFIG_MAP, promptVariant)
-          ? MATERIALS_CONFIG_MAP[promptVariant as VariantKey]
-          : materialsConfig;
+        ? ngMaterialsMeta
+        : promptVariant && Object.hasOwn(materialsMetaMap, promptVariant)
+          ? materialsMetaMap[promptVariant as MaterialsMetaVariantKey]
+          : materialsMeta;
     const maxSteps = 30;
     let hasError = false; // 标记是否已经处理了错误
 

@@ -3,7 +3,7 @@ import bundleJson from './bundle.json' with { type: 'json' };
 import { examples } from './example-schema';
 import { whiteList } from './white-list';
 
-export const ngMaterialsConfig: IMaterialsMeta = {
+export const materialsMeta: IMaterialsMeta = {
   materials: [bundleJson],
   examples,
   whiteList,

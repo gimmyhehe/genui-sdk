@@ -26,24 +26,24 @@ const BASE_CONFIG = {
 const filterExamples = (ids: string[]) =>
   allExamples.filter((example): example is IExample => !!example.id && ids.includes(example.id));
 
-export const miniMaterialsConfig: IMaterialsMeta = {
+export const miniMaterialsMeta: IMaterialsMeta = {
   ...BASE_CONFIG,
   whiteList: miniWhiteList,
   examples: filterExamples(['form', 'grid']),
 };
 
-export const standardMaterialsConfig: IMaterialsMeta = {
+export const standardMaterialsMeta: IMaterialsMeta = {
   ...BASE_CONFIG,
   whiteList: standardWhiteList,
   examples: filterExamples(['form', 'info', 'grid', 'tabs']),
   rules: STANDARD_RULES,
 };
 
-export const MATERIALS_CONFIG_MAP = {
-  mini: miniMaterialsConfig,
-  standard: standardMaterialsConfig,
+export const materialsMetaMap = {
+  mini: miniMaterialsMeta,
+  standard: standardMaterialsMeta,
 } as const;
 
-export type VariantKey = keyof typeof MATERIALS_CONFIG_MAP;
+export type MaterialsMetaVariantKey = keyof typeof materialsMetaMap;
 
-export const materialsConfig = standardMaterialsConfig;
+export const materialsMeta = standardMaterialsMeta;

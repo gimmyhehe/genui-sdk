@@ -1,6 +1,6 @@
 import { genPrompt } from '@opentiny/genui-sdk-core';
-import { materialsConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
-import { ngMaterialsConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials-meta';
 import { IChatCompletionCreateParams, ChatCompletionCreateParamsBase, type IGenPromptConfig } from './types';
 
 function mergePrompt( 
@@ -34,7 +34,7 @@ export function requestTransform(
 
   const { framework = 'Vue', strategy = 'append', ...promptConfig } = tgCustomConfig;
 
-  const renderConfigForFramework = framework === 'Angular' ? ngMaterialsConfig : materialsConfig;
+  const renderConfigForFramework = framework === 'Angular' ? ngMaterialsMeta : materialsMeta;
   const systemMessages = newParams.messages?.find((message) => message.role === 'system');
   const prompt = genPrompt(renderConfigForFramework, promptConfig);
   if (systemMessages) {

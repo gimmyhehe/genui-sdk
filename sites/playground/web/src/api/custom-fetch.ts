@@ -1,5 +1,5 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
-import type { VariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
+import type { MaterialsMetaVariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
 
 export interface IMcpServerConfig {
   name: string;
@@ -44,7 +44,7 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents: IAgentConfig[];
   skills: ISkillConfig[];
-  promptVariant?: VariantKey;
+  promptVariant?: MaterialsMetaVariantKey;
 }
 
 /** 仅序列化已启用的 Skill，并去掉 enabled 字段以减小 metadata 体积 */

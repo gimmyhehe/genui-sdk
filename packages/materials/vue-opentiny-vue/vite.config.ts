@@ -18,7 +18,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: path.resolve(__dirname, './src/index.ts'),
-        'render-config': path.resolve(__dirname, './src/render-config/index.ts'),
+        'materials-meta': path.resolve(__dirname, './src/materials-meta/index.ts'),
         'materials': path.resolve(__dirname, './src/materials/index.ts'),
       },
       formats: ['es'],
