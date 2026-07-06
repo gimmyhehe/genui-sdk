@@ -6,7 +6,8 @@ import path from 'node:path';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
 import { genPrompt, type IGenPromptCustomConfig, type IGenPromptOptions } from '@opentiny/genui-sdk-core';
-import { materialsMetaMap, materialsMeta, type MaterialsMetaVariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+import { materialsMeta as miniMaterialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/mini/materials-meta';
 import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials-meta';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
@@ -24,11 +25,16 @@ import {
 } from './a2a-tools/index.js';
 import type { PlaygroundAgentConfig } from './a2a-tools/index.js';
 import { buildSkillTools } from './skills/index.js';
-import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
+import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig, MaterialsMetaVariantKey } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
 
 const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
+
+const vueMaterialsMetaByVariant = {
+  mini: miniMaterialsMeta,
+  standard: materialsMeta,
+} as const;
 
 export function getGenPromptOptions(promptVariant?: MaterialsMetaVariantKey): IGenPromptOptions | undefined {
   if (promptVariant === 'mini') {
@@ -311,8 +317,8 @@ export function createChatGenui() {
     const renderConfigForFramework =
       framework === 'Angular'
         ? ngMaterialsMeta
-        : promptVariant && Object.hasOwn(materialsMetaMap, promptVariant)
-          ? materialsMetaMap[promptVariant as MaterialsMetaVariantKey]
+        : promptVariant
+          ? vueMaterialsMetaByVariant[promptVariant]
           : materialsMeta;
     const maxSteps = 30;
     let hasError = false; // 标记是否已经处理了错误

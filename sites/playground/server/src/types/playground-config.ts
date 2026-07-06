@@ -1,7 +1,7 @@
 import type { PlaygroundAgentConfig } from '../a2a-tools/index.js';
 import type { McpServersConfig } from './mcp-server.js';
 import type { PlaygroundSkillConfig } from '../skills/index.js';
-import type { MaterialsMetaVariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+export type MaterialsMetaVariantKey = 'mini' | 'standard';
 
 export interface IPlaygroundConfig {
   mcpServers: McpServersConfig;

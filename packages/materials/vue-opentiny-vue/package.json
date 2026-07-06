@@ -66,14 +66,24 @@
       "require": "./dist/index.js"
     },
     "./materials-meta": {
-      "import": "./dist/materials-meta.js",
-      "types": "./dist/materials-meta.d.ts",
-      "require": "./dist/materials-meta.js"
+      "import": "./dist/standard/materials-meta.js",
+      "types": "./dist/standard/materials-meta.d.ts",
+      "require": "./dist/standard/materials-meta.js"
+    },
+    "./mini/materials-meta": {
+      "import": "./dist/mini/materials-meta.js",
+      "types": "./dist/mini/materials-meta.d.ts",
+      "require": "./dist/mini/materials-meta.js"
     },
     "./materials": {
-      "import": "./dist/materials.js",
-      "types": "./dist/materials.d.ts",
-      "require": "./dist/materials.js"
+      "import": "./dist/standard/materials.js",
+      "types": "./dist/standard/materials.d.ts",
+      "require": "./dist/standard/materials.js"
+    },
+    "./mini/materials": {
+      "import": "./dist/mini/materials.js",
+      "types": "./dist/mini/materials.d.ts",
+      "require": "./dist/mini/materials.js"
     }
   }
 }

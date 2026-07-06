@@ -3,7 +3,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
-import { materialsMetaMap, materialsMeta, type MaterialsMetaVariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+import { materialsMeta as miniMaterialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/mini/materials-meta';
 import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials-meta';
 import { streamText, stepCountIs } from 'ai';
 import getRawBody from 'raw-body';
@@ -14,6 +15,11 @@ import { generateJsonPatchPrompt } from './json-patch-prompt.js';
 import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
+
+const vueMaterialsMetaByVariant = {
+  mini: miniMaterialsMeta,
+  standard: materialsMeta,
+} as const;
 
 const getPlaygroundConfig = (playgroundStr: string) => {
   let playgroundConfig: IPlaygroundConfig = {
@@ -95,8 +101,8 @@ export const createChatTemplate = () => {
       const renderConfigForFramework =
         framework === 'Angular'
           ? ngMaterialsMeta
-          : promptVariant && Object.hasOwn(materialsMetaMap, promptVariant)
-            ? materialsMetaMap[promptVariant as MaterialsMetaVariantKey]
+          : promptVariant
+            ? vueMaterialsMetaByVariant[promptVariant]
             : materialsMeta;
       const maxSteps = 30;
       const systemPrompt = `${genPrompt(renderConfigForFramework, tgCustomConfig, getGenPromptOptions(promptVariant))}

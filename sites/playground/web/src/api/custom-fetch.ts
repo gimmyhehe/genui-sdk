@@ -1,5 +1,5 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
-import type { MaterialsMetaVariantKey } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+type MaterialsMetaVariantKey = 'mini' | 'standard';
 
 export interface IMcpServerConfig {
   name: string;
