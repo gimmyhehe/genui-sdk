@@ -1,4 +1,4 @@
-import type { IMaterialsMeta } from './material-config';
+import type { IMaterialsMeta } from './material-meta';
 
 type DefaultValueMap = Record<string, any>;
 
