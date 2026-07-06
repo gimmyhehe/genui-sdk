@@ -1,1 +1,21 @@
-export { requiredCompleteFieldSelectors } from '@opentiny/genui-sdk-core';
+export const requiredCompleteFieldSelectors = [
+  '[componentName=Img] > props > src',
+  'componentName',
+  'style',
+  '[componentName=Page] > css',
+  '[type=JSFunction]',
+  '[type=JSExpression]',
+  '[type=JSSlot][value=]',
+  'type',
+  ':empty:object',
+  '[componentName=TinyTabItem] > props > name',
+  '[componentName=TinyTransfer] > props > data',
+  '[componentName=TinyNumeric] > props > controlsPosition',
+  '[componentName=TinyNumeric] > props > modelValue',
+  '[componentName^=TinyHuicharts] > props > options > theme',
+  '[componentName=TinyForm] > props > labelPosition',
+  '[componentName=TinyRadioGroup] > props > options > * > label',
+  // ng element version
+  '[componentName=img] > props > src',
+  '[componentName] > props > ngModel',
+];
