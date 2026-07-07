@@ -2,7 +2,7 @@ import { watch, onMounted, onUnmounted } from 'vue';
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateConversation } from './use-template-conversation';
 import { useTemplateActions } from './use-template-actions';
-import { disposeMobileSheetDrag } from './use-template-mobile-ui';
+import { disposeMobileSheetDrag } from './use-template-ui';
 
 export function useTemplateLifecycle() {
   const { currentPreviewSchemaComplete } = useTemplateSchema();

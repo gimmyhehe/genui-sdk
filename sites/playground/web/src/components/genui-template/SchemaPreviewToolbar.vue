@@ -4,7 +4,7 @@ import { iconClose, iconTime } from '@opentiny/vue-icon';
 import {
   useTemplateActions,
   useTemplateVersionControl,
-  useTemplateHistoryUi,
+  useTemplateUi,
   useSchemaDiff,
 } from './composables';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
@@ -17,7 +17,7 @@ withDefaults(defineProps<{
 const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
 const { showReturnLatestButton } = useTemplateVersionControl();
-const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateHistoryUi();
+const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateUi();
 const { schemaEditorShowDiffView } = useSchemaDiff();
 const {
   toggleSchemaEditor,

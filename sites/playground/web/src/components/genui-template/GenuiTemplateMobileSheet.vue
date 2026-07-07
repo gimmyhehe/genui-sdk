@@ -15,8 +15,7 @@ import {
   useSchemaEditor,
   useSchemaDiff,
   useTemplateVersionControl,
-  useTemplateHistoryUi,
-  useTemplateMobileUi,
+  useTemplateUi,
 } from './composables';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 import { t } from '../../i18n';
@@ -32,14 +31,15 @@ const { currentPreviewSchema, currentPreviewSchemaComplete } = useTemplateSchema
 const { schemaEditorSaveLoading, editorOptions } = useSchemaEditor();
 const { schemaEditorShowDiffView } = useSchemaDiff();
 const { showReturnLatestButton } = useTemplateVersionControl();
-const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateHistoryUi();
 const {
+  schemaHistoryVisible,
+  toggleSchemaHistoryPanel,
   sheetVisible,
   jsonEditorOpen,
   mobileSheetPanelStyle,
   onMaskClick,
   onMobileSheetGrabTouchStart,
-} = useTemplateMobileUi();
+} = useTemplateUi();
 const {
   closeSchemaEditorView,
   handleMobileJsonEditorOpen,

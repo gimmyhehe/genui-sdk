@@ -12,7 +12,7 @@ import {
   useTemplateActions,
   useSchemaEditor,
   useSchemaDiff,
-  useTemplateEditorUi,
+  useTemplateUi,
   useTemplateConversation,
 } from './composables';
 import { isRenderableSchema } from './template-chat-utils';
@@ -30,7 +30,7 @@ const {
   isReadOnly: isSchemaEditorReadOnly,
 } = useSchemaEditor();
 const { schemaEditorShowDiffView } = useSchemaDiff();
-const { rendererPanelVisible, schemaEditorVisible } = useTemplateEditorUi();
+const { rendererPanelVisible, schemaEditorVisible } = useTemplateUi();
 const { isTemplateInit } = useTemplateConversation();
 
 const {

@@ -6,7 +6,7 @@ import type { PlaygroundColorTheme } from './composables/use-monaco-playground-t
 import {
   useTemplateActions,
   useSchemaVersionHistory,
-  useTemplateHistoryUi,
+  useTemplateUi,
 } from './composables';
 import { t } from '../../i18n';
 
@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const TinyCloseIcon = iconClose();
 const { schemaVersionHistoryGroups } = useSchemaVersionHistory();
-const { schemaHistoryVisible, closeSchemaHistoryPanel } = useTemplateHistoryUi();
+const { schemaHistoryVisible, closeSchemaHistoryPanel } = useTemplateUi();
 const { handleHistoryEntrySelect } = useTemplateActions();
 
 const isDark = computed(() => props.theme === 'dark');

@@ -5,17 +5,14 @@ import { useSchemaVersionWrite } from './use-schema-version-write';
 import { useTemplateVersionControl } from './use-template-version-control';
 import { useSchemaDiff } from './use-schema-diff';
 import { useSchemaEditor } from './use-schema-editor';
-import { useTemplateHistoryUi } from './use-template-history-ui';
-import { useTemplateEditorPlatform } from './use-template-editor-platform';
-import { useTemplateEditorUi } from './use-template-editor-ui';
-import { useTemplateMobileUi } from './use-template-mobile-ui';
+import { useTemplateUi } from './use-template-ui';
 
 function createTemplateActions() {
   const { writeNewVersion } = useSchemaVersionWrite();
 
-  const { schemaEditorVisible } = useTemplateEditorUi();
-  const { jsonEditorOpen, resetUi: resetMobileUi } = useTemplateMobileUi();
   const {
+    schemaEditorVisible,
+    jsonEditorOpen,
     closeSchemaEditor,
     closeRendererPanel: closeRendererPanelUi,
     toggleDesktopSchemaEditor,
@@ -23,13 +20,14 @@ function createTemplateActions() {
     afterVersionPreview,
     openEditorAfterHistorySelect,
     handleEscape,
+    closeSchemaHistoryPanel,
     resetUi: resetEditorPlatformUi,
-  } = useTemplateEditorPlatform();
+    resetMobileUi,
+  } = useTemplateUi();
 
   const isJsonEditorActive = computed(
     () => schemaEditorVisible.value || jsonEditorOpen.value,
   );
-  const { closeSchemaHistoryPanel, resetUi: resetHistoryUi } = useTemplateHistoryUi();
 
   const {
     clearHistoryDiffView,
@@ -147,7 +145,6 @@ function createTemplateActions() {
 
   const resetAll = () => {
     resetEditorPlatformUi();
-    resetHistoryUi();
     resetToLatestVersion();
   };
 
