@@ -1,5 +1,5 @@
 import { genPrompt } from '@opentiny/genui-sdk-core';
-import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/meta';
 import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials-meta';
 import { IChatCompletionCreateParams, ChatCompletionCreateParamsBase, type IGenPromptConfig } from './types';
 

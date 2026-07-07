@@ -65,25 +65,15 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js"
     },
-    "./materials-meta": {
+    "./meta": {
       "import": "./dist/standard/materials-meta.js",
-      "types": "./dist/materials-meta/standard.d.ts",
+      "types": "./dist/materials-meta/index.d.ts",
       "require": "./dist/standard/materials-meta.js"
-    },
-    "./mini/materials-meta": {
-      "import": "./dist/mini/materials-meta.js",
-      "types": "./dist/materials-meta/mini.d.ts",
-      "require": "./dist/mini/materials-meta.js"
     },
     "./materials": {
       "import": "./dist/standard/materials.js",
       "types": "./dist/materials/standard.d.ts",
       "require": "./dist/standard/materials.js"
-    },
-    "./mini/materials": {
-      "import": "./dist/mini/materials.js",
-      "types": "./dist/materials/mini.d.ts",
-      "require": "./dist/mini/materials.js"
     }
   }
 }

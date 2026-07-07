@@ -18,17 +18,11 @@
       "@opentiny/genui-sdk-materials-vue-opentiny-vue": [
         "../../../packages/materials/vue-opentiny-vue/src/index.ts"
       ],
-      "@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta": [
-        "../../../packages/materials/vue-opentiny-vue/src/materials-meta/standard.ts"
-      ],
-      "@opentiny/genui-sdk-materials-vue-opentiny-vue/mini/materials-meta": [
-        "../../../packages/materials/vue-opentiny-vue/src/materials-meta/mini.ts"
+      "@opentiny/genui-sdk-materials-vue-opentiny-vue/meta": [
+        "../../../packages/materials/vue-opentiny-vue/src/materials-meta/index.ts"
       ],
       "@opentiny/genui-sdk-materials-vue-opentiny-vue/materials": [
         "../../../packages/materials/vue-opentiny-vue/src/materials/standard.ts"
-      ],
-      "@opentiny/genui-sdk-materials-vue-opentiny-vue/mini/materials": [
-        "../../../packages/materials/vue-opentiny-vue/src/materials/mini.ts"
       ],
       "@opentiny/genui-sdk-materials-angular-opentiny-ng": [
         "../../../packages/materials/angular-opentiny-ng/src/index.ts"

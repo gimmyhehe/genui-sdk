@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { genPrompt } from '@opentiny/genui-sdk-core';
-import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/meta';
 import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials-meta';
 import type { LlmBenchmarkRunOptions, LlmBenchmarkSample, LlmBenchmarkSampleCase } from './framework/index';
 import { coreLlmBenchmarkSampleCases } from './samples';

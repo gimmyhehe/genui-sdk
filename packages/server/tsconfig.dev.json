@@ -8,11 +8,8 @@
       "@opentiny/genui-sdk-core": [
         "../core/src/index.ts"
       ],
-      "@opentiny/genui-sdk-materials-vue-opentiny-vue/materials-meta": [
-        "../materials/vue-opentiny-vue/src/materials-meta/standard.ts"
-      ],
-      "@opentiny/genui-sdk-materials-vue-opentiny-vue/mini/materials-meta": [
-        "../materials/vue-opentiny-vue/src/materials-meta/mini.ts"
+      "@opentiny/genui-sdk-materials-vue-opentiny-vue/meta": [
+        "../materials/vue-opentiny-vue/src/materials-meta/index.ts"
       ],
       "@opentiny/genui-sdk-materials-angular-opentiny-ng/materials-meta": [
         "../materials/angular-opentiny-ng/src/materials-meta/index.ts"

@@ -1,8 +1,8 @@
 import type { IMaterialsMeta, IExample, IMaterialsProtocol } from '@opentiny/genui-sdk-core';
-import bundleJson from './bundle.json' with { type: 'json' };
-import builtinJson from './builtin.json' with { type: 'json' };
-import chartJson from './chart.json' with { type: 'json' };
-import extendJson from './extend.json' with { type: 'json' };
+import bundleJson from './materials/bundle.json' with { type: 'json' };
+import builtinJson from './materials/builtin.json' with { type: 'json' };
+import chartJson from './materials/chart.json' with { type: 'json' };
+import extendJson from './materials/extend.json' with { type: 'json' };
 import { examples as allExamples } from './example-schema';
 
 export type { IMaterialsMeta, IExample } from '@opentiny/genui-sdk-core';
