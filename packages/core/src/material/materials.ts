@@ -1,10 +1,10 @@
 
-export type GenuiMaterialComponent = unknown;
+export type IMaterialComponent = unknown;
 
-export type GenuiMaterialsMap = Record<string, GenuiMaterialComponent>;
+export type IMaterialsMap = Record<string, IMaterialComponent>;
 
 export interface IMaterials {
-  components?: GenuiMaterialsMap;
+  components?: IMaterialsMap;
   requiredCompleteFieldSelectors?: string[];
   defaultPropsMap?: Record<string, any>;
 }
