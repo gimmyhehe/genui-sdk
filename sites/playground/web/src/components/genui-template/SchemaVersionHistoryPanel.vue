@@ -4,7 +4,7 @@ import { TinyButton } from '@opentiny/vue';
 import { iconClose } from '@opentiny/vue-icon';
 import type { PlaygroundColorTheme } from './composables/use-monaco-playground-theme';
 import {
-  useTemplatePage,
+  useTemplateActions,
   useSchemaVersionHistory,
   useTemplateHistoryUi,
 } from './composables';
@@ -17,7 +17,7 @@ const props = defineProps<{
 const TinyCloseIcon = iconClose();
 const { schemaVersionHistoryGroups } = useSchemaVersionHistory();
 const { schemaHistoryVisible, closeSchemaHistoryPanel } = useTemplateHistoryUi();
-const { handleHistoryEntrySelect } = useTemplatePage();
+const { handleHistoryEntrySelect } = useTemplateActions();
 
 const isDark = computed(() => props.theme === 'dark');
 const collapsedGroups = ref<Record<string, boolean>>({});

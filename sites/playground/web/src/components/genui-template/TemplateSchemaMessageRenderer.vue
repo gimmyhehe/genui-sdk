@@ -5,9 +5,11 @@ import SchemaVersionCard from './SchemaVersionCard.vue';
 import { useIsMobile } from '../../use-mobile';
 import { useTemplateConversation } from './composables/use-template-conversation';
 import { useSchemaVersionWrite } from './composables/use-schema-version-write';
-import { useTemplatePage } from './composables/use-template-page';
-import { useTemplateVersionControl } from './composables/use-template-version-control';
 import { rebuildSchemaFromCard } from './template-chat-utils';
+
+const emit = defineEmits<{
+  'schema-version-toggle': [schema: Record<string, unknown> | null, cardId: string];
+}>();
 
 const props = defineProps<{
   itemProps: any;
@@ -19,8 +21,6 @@ const props = defineProps<{
 const { isMobile } = useIsMobile();
 const { messages } = useTemplateConversation();
 const { getMessageByCardId } = useSchemaVersionWrite();
-const { toggleSchemaVersion } = useTemplatePage();
-const { selectVersionCard } = useTemplateVersionControl();
 
 const generating = computed(() => !props.itemProps?.generatedTime);
 
@@ -44,11 +44,11 @@ const handleSchemaVersionCardClick = (cardId: string) => {
   const card = getMessageByCardId(cardId);
   const schema = card ? rebuildSchemaFromCard(card, { messages: messages.value }) : null;
   if (schema && card) {
-    toggleSchemaVersion(schema, cardId);
+    emit('schema-version-toggle', schema, cardId);
     return;
   }
 
-  selectVersionCard(cardId);
+  emit('schema-version-toggle', null, cardId);
 };
 </script>
 

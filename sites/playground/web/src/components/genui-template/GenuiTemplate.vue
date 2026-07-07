@@ -6,12 +6,14 @@ import GenuiTemplateDesktop from './GenuiTemplateDesktop.vue';
 import GenuiTemplateMobile from './GenuiTemplateMobile.vue';
 import { locale } from '../../i18n';
 import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
+import { useTemplateLifecycle } from './composables/use-template-lifecycle';
 
 defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
 
 const { isMobile } = useIsMobile();
+useTemplateLifecycle();
 </script>
 
 <template>

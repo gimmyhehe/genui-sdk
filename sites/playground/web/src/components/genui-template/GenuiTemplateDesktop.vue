@@ -9,7 +9,7 @@ import SchemaVersionHistoryPanel from './SchemaVersionHistoryPanel.vue';
 import { useTemplateSchema } from './composables/use-template-schema';
 import { SCHEMA_JSON_DIFF_EDITOR_OPTIONS, useMonacoPlaygroundTheme } from './composables/use-monaco-playground-theme';
 import {
-  useTemplatePage,
+  useTemplateActions,
   useSchemaEditor,
   useSchemaDiff,
   useTemplateVersionControl,
@@ -41,7 +41,7 @@ const {
   schemaEditorDiffOriginal,
   schemaEditorDiffModified,
 } = useSchemaDiff();
-const { showReturnLatestButton } = useTemplateVersionControl();
+const { showReturnLatestButton, selectVersionCard } = useTemplateVersionControl();
 const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateHistoryUi();
 const { rendererPanelVisible, schemaEditorVisible } = useTemplateEditorUi();
 
@@ -52,8 +52,17 @@ const {
   applyCurrentVersion,
   handleSaveSchemaEditor,
   resetToLatestVersion,
+  toggleSchemaVersion,
   schemaEditorDirty,
-} = useTemplatePage();
+} = useTemplateActions();
+
+const onSchemaVersionToggle = (schema: Record<string, unknown> | null, cardId: string) => {
+  if (schema) {
+    toggleSchemaVersion(schema, cardId);
+    return;
+  }
+  selectVersionCard(cardId);
+};
 
 const rendererSchema = computed(() => {
   const schema = currentPreviewSchema.value ?? currentSchema.value;
@@ -73,6 +82,7 @@ const rendererSchemaKey = computed(() => {
       <genui-template-chat
         v-show="!schemaEditorVisible"
         class="genui-template-chat"
+        @schema-version-toggle="onSchemaVersionToggle"
       />
       <div class="schema-version-container" v-show="schemaEditorVisible">
         <div class="schema-version-container__header">

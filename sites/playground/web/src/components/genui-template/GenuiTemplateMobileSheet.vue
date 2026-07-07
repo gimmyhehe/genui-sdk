@@ -11,7 +11,7 @@ import {
   type PlaygroundColorTheme,
 } from './composables/use-monaco-playground-theme';
 import {
-  useTemplatePage,
+  useTemplateActions,
   useTemplateSchema,
   useSchemaEditor,
   useSchemaDiff,
@@ -58,7 +58,7 @@ const {
   handleSaveSchemaEditor,
   resetToLatestVersion,
   schemaEditorDirty,
-} = useTemplatePage();
+} = useTemplateActions();
 
 const headerTitle = computed(() => {
   if (!jsonEditorOpen.value) {
