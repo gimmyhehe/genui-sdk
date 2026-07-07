@@ -1,1 +1,1 @@
-export * from './materials-meta';
+export * from './meta';

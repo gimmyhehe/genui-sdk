@@ -1,5 +1,5 @@
 import { buildMaterialDefaultValueMap, type IMaterials } from '@opentiny/genui-sdk-core';
-import { materialsMeta } from '../materials-meta/standard';
+import { materialsMeta } from '../meta/standard';
 import { components } from './components';
 import { requiredCompleteFieldSelectors as baseRequiredCompleteFieldSelectors } from './shared';
 
