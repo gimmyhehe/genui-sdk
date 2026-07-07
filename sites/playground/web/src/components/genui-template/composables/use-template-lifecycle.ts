@@ -5,7 +5,7 @@ import { useTemplateActions } from './use-template-actions';
 import { disposeMobileSheetDrag } from './use-template-mobile-ui';
 
 export function useTemplateLifecycle() {
-  const { currentPreviewSchema } = useTemplateSchema();
+  const { currentPreviewSchemaComplete } = useTemplateSchema();
   const { currentConversationId, templateConversationState } = useTemplateConversation();
   const {
     resetToLatestVersion,
@@ -15,15 +15,11 @@ export function useTemplateLifecycle() {
     syncBaseline,
   } = useTemplateActions();
 
-  watch(
-    currentPreviewSchema,
-    () => {
-      if (shouldSyncEditorBaseline()) {
-        syncBaseline();
-      }
-    },
-    { deep: true },
-  );
+  watch(currentPreviewSchemaComplete, (isComplete) => {
+    if (isComplete && shouldSyncEditorBaseline()) {
+      syncBaseline();
+    }
+  });
 
   watch(currentConversationId, resetAll);
 

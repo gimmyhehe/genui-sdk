@@ -15,6 +15,7 @@ import {
   useTemplateVersionControl,
   useTemplateEditorUi,
   useTemplateHistoryUi,
+  useTemplateConversation,
 } from './composables';
 import { isRenderableSchema } from './template-chat-utils';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
@@ -41,9 +42,10 @@ const {
   schemaEditorDiffOriginal,
   schemaEditorDiffModified,
 } = useSchemaDiff();
-const { showReturnLatestButton, selectVersionCard } = useTemplateVersionControl();
+const { showReturnLatestButton } = useTemplateVersionControl();
 const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateHistoryUi();
 const { rendererPanelVisible, schemaEditorVisible } = useTemplateEditorUi();
+const { isTemplateInit } = useTemplateConversation();
 
 const {
   toggleSchemaEditor,
@@ -52,17 +54,9 @@ const {
   applyCurrentVersion,
   handleSaveSchemaEditor,
   resetToLatestVersion,
-  toggleSchemaVersion,
+  handleSchemaVersionToggle,
   schemaEditorDirty,
 } = useTemplateActions();
-
-const onSchemaVersionToggle = (schema: Record<string, unknown> | null, cardId: string) => {
-  if (schema) {
-    toggleSchemaVersion(schema, cardId);
-    return;
-  }
-  selectVersionCard(cardId);
-};
 
 const rendererSchema = computed(() => {
   const schema = currentPreviewSchema.value ?? currentSchema.value;
@@ -80,9 +74,10 @@ const rendererSchemaKey = computed(() => {
   <div class="genui-schema-template">
     <div class="genui-schema-template-item chat-container">
       <genui-template-chat
+        v-if="isTemplateInit"
         v-show="!schemaEditorVisible"
         class="genui-template-chat"
-        @schema-version-toggle="onSchemaVersionToggle"
+        @schema-version-toggle="handleSchemaVersionToggle"
       />
       <div class="schema-version-container" v-show="schemaEditorVisible">
         <div class="schema-version-container__header">

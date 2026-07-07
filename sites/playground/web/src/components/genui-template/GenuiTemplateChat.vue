@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, h, inject, onMounted, onUnmounted, toRaw } from 'vue';
+import { ref, watch, computed, h, inject, onMounted, onUnmounted } from 'vue';
 import type { Ref } from 'vue';
 import '@opentiny/tiny-robot/dist/style.css';
 import { DeltaPatcher, type IChatMessage } from '@opentiny/genui-sdk-core';
@@ -84,11 +84,15 @@ watch(
   },
 );
 
-const messageManager = computed(() => conversationKit.value!.messageManager.value);
+const messageManager = computed(() => conversationKit.value?.messageManager.value ?? null);
 
-const messages = computed(() => messageManager.value.messages.value);
+const messages = computed(() => messageManager.value?.messages.value ?? []);
 
-const generating = computed(() => GeneratingStatus.includes(messageManager.value.messageState.status));
+const generating = computed(() =>
+  messageManager.value
+    ? GeneratingStatus.includes(messageManager.value.messageState.status)
+    : false,
+);
 
 const messagesContainer: Ref<HTMLElement | undefined> = ref();
 
@@ -108,8 +112,8 @@ const roles: Record<string, BubbleRoleConfig> = {
           bubbleProps: slotProps.bubbleProps,
           index: slotProps.index,
           isFinished,
-          messageManager: messageManager.value,
-          chatMessage: (messageManager.value.messages.value[slotProps.index] || {}) as IChatMessage,
+          messageManager: messageManager.value!,
+          chatMessage: (messageManager.value?.messages.value[slotProps.index] || {}) as IChatMessage,
           onRefresh: handleRefresh,
           onCopy: handleCopy,
         });
@@ -165,8 +169,10 @@ const schemaCardRenderer = async (props: any) => {
       json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
     }
     deltaPatcher.patchWithDelta(target, json, isCompleted);
-    const schemaWithId = generateIdForComponents(target);
-    setCurrentPreviewSchema(schemaWithId);
+    const schemaWithId = generateIdForComponents(target, {
+      previousSchema: currentPreviewSchema.value,
+    });
+    setCurrentPreviewSchema(schemaWithId, isCompleted);
   } catch (error) {
     console.error('schemaCardRenderer error ===>', error);
     errorMessagesMap.value.set(props.cardId, error.message);
@@ -230,7 +236,10 @@ const jsonPatchRenderer = async (props: any) => {
     const isStreamComplete = isSuccessfulParse || lastOperationComplete;
     const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
 
-    setCurrentPreviewSchema(generateIdForComponents(strippedSchema), isStreamComplete);
+    setCurrentPreviewSchema(
+      generateIdForComponents(strippedSchema, { previousSchema: currentPreviewSchema.value }),
+      isStreamComplete,
+    );
     if (isStreamComplete) {
       setCurrentSchema(targetSchema);
     }
@@ -254,6 +263,9 @@ const getCardMessageByIndex = (index: number) => {
 };
 
 const handleRefresh = ({ index }: { index: number }) => {
+  if (!messageManager.value) {
+    return;
+  }
   const { messages, send } = messageManager.value;
   const cardMessage = getCardMessageByIndex(index);
 
@@ -320,9 +332,11 @@ const messageRenderers = {
 };
 
 const inputMessage = computed({
-  get: () => messageManager.value.inputMessage.value,
+  get: () => messageManager.value?.inputMessage.value ?? '',
   set: (v: string) => {
-    messageManager.value.inputMessage.value = v;
+    if (messageManager.value) {
+      messageManager.value.inputMessage.value = v;
+    }
   },
 });
 
@@ -336,7 +350,7 @@ const throttledScrollToBottom = throttle(autoScrollToBottom, 400);
 const showMessages = computed(() => {
   let list = messages.value;
 
-  if (messageManager.value.messageState.status === STATUS.PROCESSING) {
+  if (messageManager.value?.messageState.status === STATUS.PROCESSING) {
     return [
       ...list,
       {
@@ -399,7 +413,7 @@ const handleSendMessage = async () => {
   }
 
   prevSchema.value = JSON.stringify(currentSchema.value);
-  messageManager.value.send();
+  messageManager.value?.send();
   clearInputMessage();
   scrollToBottom();
 };
@@ -466,7 +480,7 @@ onUnmounted(() => {
         :maxLength="5000"
         @clear="clearInputMessage"
         @submit="handleSendMessage"
-        @cancel="messageManager.abortRequest"
+        @cancel="() => messageManager?.abortRequest()"
       >
       </tr-sender>
       <div class="footer-text">{{ t('footer.aiGenerated') }}</div>

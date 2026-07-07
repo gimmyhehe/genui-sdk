@@ -10,7 +10,7 @@ import { useTemplateEditorPlatform } from './use-template-editor-platform';
 import { useTemplateEditorUi } from './use-template-editor-ui';
 import { useTemplateMobileUi } from './use-template-mobile-ui';
 
-export function useTemplateActions() {
+function createTemplateActions() {
   const { writeNewVersion } = useSchemaVersionWrite();
 
   const { schemaEditorVisible } = useTemplateEditorUi();
@@ -34,6 +34,7 @@ export function useTemplateActions() {
   const {
     clearHistoryDiffView,
     previewVersion,
+    selectVersionCard,
     applyCurrentVersion: applyVersionCurrent,
     resetToLatestVersion: resetVersionToLatest,
   } = useTemplateVersionControl();
@@ -81,6 +82,17 @@ export function useTemplateActions() {
     }
     previewVersion(schema, cardId, options);
     afterVersionPreview({ syncBaseline });
+  };
+
+  const handleSchemaVersionToggle = (
+    schema: Record<string, unknown> | null,
+    cardId: string,
+  ) => {
+    if (schema) {
+      toggleSchemaVersion(schema, cardId);
+      return;
+    }
+    selectVersionCard(cardId);
   };
 
   const handleHistoryEntrySelect = (entry: ISchemaVersionHistoryEntry) => {
@@ -163,6 +175,7 @@ export function useTemplateActions() {
     closeRendererPanel,
     handleMobileJsonEditorOpen,
     handleHistoryEntrySelect,
+    handleSchemaVersionToggle,
     toggleSchemaVersion,
     applyCurrentVersion,
     handleSaveSchemaEditor,
@@ -173,4 +186,13 @@ export function useTemplateActions() {
     syncBaseline,
     schemaEditorDirty,
   };
+}
+
+let templateActionsState: ReturnType<typeof createTemplateActions> | null = null;
+
+export function useTemplateActions() {
+  if (!templateActionsState) {
+    templateActionsState = createTemplateActions();
+  }
+  return templateActionsState;
 }
