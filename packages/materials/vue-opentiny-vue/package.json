@@ -67,12 +67,12 @@
     },
     "./meta": {
       "import": "./dist/meta.js",
-      "types": "./dist/meta/index.d.ts",
+      "types": "./dist/meta.d.ts",
       "require": "./dist/meta.js"
     },
     "./materials": {
       "import": "./dist/materials.js",
-      "types": "./dist/materials/index.d.ts",
+      "types": "./dist/materials.d.ts",
       "require": "./dist/materials.js"
     }
   }
