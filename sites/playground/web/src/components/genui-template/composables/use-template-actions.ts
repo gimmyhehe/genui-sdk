@@ -6,164 +6,165 @@ import { useTemplateVersionControl } from './use-template-version-control';
 import { useSchemaEditor } from './use-schema-editor';
 import { useTemplateUi } from './use-template-ui';
 
-function createTemplateActions() {
-  const { writeNewVersion } = useSchemaVersionWrite();
+const isJsonEditorActive = computed(() => {
+  const { schemaEditorVisible, jsonEditorOpen } = useTemplateUi();
+  return schemaEditorVisible.value || jsonEditorOpen.value;
+});
 
-  const {
-    schemaEditorVisible,
-    jsonEditorOpen,
-    closeSchemaEditor,
-    closeRendererPanel: closeRendererPanelUi,
-    toggleDesktopSchemaEditor,
-    setJsonEditorOpen,
-    afterVersionPreview,
-    openEditorAfterHistorySelect,
-    handleEscape,
-    closeSchemaHistoryPanel,
-    resetUi: resetEditorPlatformUi,
-    resetMobileUi,
-  } = useTemplateUi();
+const schemaEditorDirty = computed(() => {
+  const { hasUnsavedChanges } = useSchemaEditor();
+  return isJsonEditorActive.value && hasUnsavedChanges();
+});
 
-  const isJsonEditorActive = computed(
-    () => schemaEditorVisible.value || jsonEditorOpen.value,
-  );
+const closeSchemaEditorView = () => {
+  const { closeSchemaEditor } = useTemplateUi();
+  const { revertUnsavedChanges } = useSchemaEditor();
+  const { clearHistoryDiffView } = useTemplateVersionControl();
+  closeSchemaEditor(revertUnsavedChanges);
+  clearHistoryDiffView();
+};
 
-  const {
-    clearHistoryDiffView,
-    previewVersion,
-    selectVersionCard,
-    applyCurrentVersion: applyVersionCurrent,
-    resetToLatestVersion: resetVersionToLatest,
-  } = useTemplateVersionControl();
+const closeRendererPanel = () => {
+  const { closeRendererPanel: closeRendererPanelUi } = useTemplateUi();
+  const { revertUnsavedChanges } = useSchemaEditor();
+  const { clearHistoryDiffView } = useTemplateVersionControl();
+  closeRendererPanelUi(revertUnsavedChanges);
+  clearHistoryDiffView();
+};
 
+const toggleSchemaEditor = () => {
+  const { toggleDesktopSchemaEditor } = useTemplateUi();
+  const { revertUnsavedChanges, syncBaseline } = useSchemaEditor();
+  toggleDesktopSchemaEditor({ revertUnsavedChanges, syncBaseline });
+};
+
+const handleMobileJsonEditorOpen = (open: boolean) => {
+  const { setJsonEditorOpen } = useTemplateUi();
+  const { revertUnsavedChanges, syncBaseline } = useSchemaEditor();
+  setJsonEditorOpen(open, { revertUnsavedChanges, syncBaseline });
+};
+
+const toggleSchemaVersion = (
+  schema: Record<string, unknown>,
+  cardId: string,
+  options: { diffFromHistory?: boolean } = {},
+) => {
+  const { hasUnsavedChanges, revertUnsavedChanges, syncBaseline } = useSchemaEditor();
+  const { previewVersion } = useTemplateVersionControl();
+  const { afterVersionPreview } = useTemplateUi();
+
+  if (hasUnsavedChanges()) {
+    revertUnsavedChanges();
+  }
+  previewVersion(schema, cardId, options);
+  afterVersionPreview({ syncBaseline });
+};
+
+const handleSchemaVersionToggle = (
+  schema: Record<string, unknown> | null,
+  cardId: string,
+) => {
+  if (schema) {
+    toggleSchemaVersion(schema, cardId);
+    return;
+  }
+  useTemplateVersionControl().selectVersionCard(cardId);
+};
+
+const handleHistoryEntrySelect = (entry: ISchemaVersionHistoryEntry) => {
+  if (entry.isPending) {
+    return;
+  }
+
+  const schema = rebuildSchemaFromCard(entry.cardMessage);
+  if (!schema) {
+    return;
+  }
+
+  const { closeSchemaHistoryPanel, openEditorAfterHistorySelect } = useTemplateUi();
+  const { syncBaseline } = useSchemaEditor();
+
+  toggleSchemaVersion(schema, entry.cardId, { diffFromHistory: true });
+  closeSchemaHistoryPanel();
+  openEditorAfterHistorySelect({ syncBaseline });
+};
+
+const applyCurrentVersion = () => {
+  const { syncBaseline } = useSchemaEditor();
+  if (!useTemplateVersionControl().applyCurrentVersion()) {
+    return;
+  }
+  syncBaseline();
+};
+
+const handleSaveSchemaEditor = async () => {
   const {
     schemaEditorSaveLoading,
-    hasUnsavedChanges,
-    syncBaseline,
-    revertUnsavedChanges,
     parseEditorSchema,
     parseBaselineSchema,
-    schemaEditorShowDiffView,
+    syncBaseline,
   } = useSchemaEditor();
+  const { writeNewVersion } = useSchemaVersionWrite();
 
-  const schemaEditorDirty = computed(
-    () => isJsonEditorActive.value && hasUnsavedChanges(),
-  );
+  if (!schemaEditorDirty.value || schemaEditorSaveLoading.value) {
+    return;
+  }
 
-  const closeSchemaEditorView = () => {
-    closeSchemaEditor(revertUnsavedChanges);
-    clearHistoryDiffView();
-  };
+  const schema = parseEditorSchema();
+  if (!schema || !isRenderableSchema(schema)) {
+    return;
+  }
 
-  const closeRendererPanel = () => {
-    closeRendererPanelUi(revertUnsavedChanges);
-    clearHistoryDiffView();
-  };
-
-  const toggleSchemaEditor = () => {
-    toggleDesktopSchemaEditor({ revertUnsavedChanges, syncBaseline });
-  };
-
-  const handleMobileJsonEditorOpen = (open: boolean) => {
-    setJsonEditorOpen(open, { revertUnsavedChanges, syncBaseline });
-  };
-
-  const toggleSchemaVersion = (
-    schema: Record<string, unknown>,
-    cardId: string,
-    options: { diffFromHistory?: boolean } = {},
-  ) => {
-    if (hasUnsavedChanges()) {
-      revertUnsavedChanges();
+  schemaEditorSaveLoading.value = true;
+  try {
+    const saved = writeNewVersion(schema, { prevSchema: parseBaselineSchema() });
+    if (saved) {
+      syncBaseline();
+      closeSchemaEditorView();
     }
-    previewVersion(schema, cardId, options);
-    afterVersionPreview({ syncBaseline });
-  };
+  } finally {
+    schemaEditorSaveLoading.value = false;
+  }
+};
 
-  const handleSchemaVersionToggle = (
-    schema: Record<string, unknown> | null,
-    cardId: string,
-  ) => {
-    if (schema) {
-      toggleSchemaVersion(schema, cardId);
-      return;
-    }
-    selectVersionCard(cardId);
-  };
+const resetToLatestVersion = () => {
+  const { syncBaseline } = useSchemaEditor();
+  const { resetToLatestVersion: resetVersionToLatest } = useTemplateVersionControl();
+  const { resetMobileUi } = useTemplateUi();
+  resetVersionToLatest();
+  syncBaseline();
+  resetMobileUi();
+};
 
-  const handleHistoryEntrySelect = (entry: ISchemaVersionHistoryEntry) => {
-    if (entry.isPending) {
-      return;
-    }
+const resetAll = () => {
+  const { resetUi: resetEditorPlatformUi } = useTemplateUi();
+  resetEditorPlatformUi();
+  resetToLatestVersion();
+};
 
-    const schema = rebuildSchemaFromCard(entry.cardMessage);
-    if (!schema) {
-      return;
-    }
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key !== 'Escape') {
+    return;
+  }
+  const { handleEscape } = useTemplateUi();
+  const { revertUnsavedChanges } = useSchemaEditor();
+  handleEscape({
+    revertUnsavedChanges,
+    closeSchemaEditorView,
+    closeJsonEditor: () => handleMobileJsonEditorOpen(false),
+  });
+};
 
-    toggleSchemaVersion(schema, entry.cardId, { diffFromHistory: true });
-    closeSchemaHistoryPanel();
-    openEditorAfterHistorySelect({ syncBaseline });
-  };
+const shouldSyncEditorBaseline = () => {
+  const { hasUnsavedChanges, schemaEditorShowDiffView } = useSchemaEditor();
+  if (schemaEditorShowDiffView.value || hasUnsavedChanges()) {
+    return false;
+  }
+  return isJsonEditorActive.value;
+};
 
-  const applyCurrentVersion = () => {
-    if (!applyVersionCurrent()) {
-      return;
-    }
-    syncBaseline();
-  };
-
-  const handleSaveSchemaEditor = async () => {
-    if (!schemaEditorDirty.value || schemaEditorSaveLoading.value) {
-      return;
-    }
-
-    const schema = parseEditorSchema();
-    if (!schema || !isRenderableSchema(schema)) {
-      return;
-    }
-
-    schemaEditorSaveLoading.value = true;
-    try {
-      const saved = writeNewVersion(schema, { prevSchema: parseBaselineSchema() });
-      if (saved) {
-        syncBaseline();
-        closeSchemaEditorView();
-      }
-    } finally {
-      schemaEditorSaveLoading.value = false;
-    }
-  };
-
-  const resetToLatestVersion = () => {
-    resetVersionToLatest();
-    syncBaseline();
-    resetMobileUi();
-  };
-
-  const resetAll = () => {
-    resetEditorPlatformUi();
-    resetToLatestVersion();
-  };
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape') {
-      return;
-    }
-    handleEscape({
-      revertUnsavedChanges,
-      closeSchemaEditorView,
-      closeJsonEditor: () => handleMobileJsonEditorOpen(false),
-    });
-  };
-
-  const shouldSyncEditorBaseline = () => {
-    if (schemaEditorShowDiffView.value || hasUnsavedChanges()) {
-      return false;
-    }
-    return isJsonEditorActive.value;
-  };
-
+export function useTemplateActions() {
+  const { syncBaseline } = useSchemaEditor();
   return {
     toggleSchemaEditor,
     closeSchemaEditorView,
@@ -181,13 +182,4 @@ function createTemplateActions() {
     syncBaseline,
     schemaEditorDirty,
   };
-}
-
-let templateActionsState: ReturnType<typeof createTemplateActions> | null = null;
-
-export function useTemplateActions() {
-  if (!templateActionsState) {
-    templateActionsState = createTemplateActions();
-  }
-  return templateActionsState;
 }

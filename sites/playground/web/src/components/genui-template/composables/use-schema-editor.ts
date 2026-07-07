@@ -7,114 +7,114 @@ import {
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateVersionControl } from './use-template-version-control';
 
-function createSchemaEditorState() {
-  const schemaEditorText = ref('{}');
-  const schemaEditorBaseline = ref('{}');
-  const schemaEditorSaveLoading = ref(false);
-  const { currentPreviewSchema, setCurrentPreviewSchema } = useTemplateSchema();
-  const {
-    isDiffMode,
-    showReturnLatestButton,
-    currentHistoryEntry,
-    flatSchemaVersionHistoryEntries,
-  } = useTemplateVersionControl();
+const schemaEditorText = ref('{}');
+const schemaEditorBaseline = ref('{}');
+const schemaEditorSaveLoading = ref(false);
 
-  const isReadOnly = computed(() => isDiffMode.value || showReturnLatestButton.value);
+const isReadOnly = computed(() => {
+  const { isDiffMode, showReturnLatestButton } = useTemplateVersionControl();
+  return isDiffMode.value || showReturnLatestButton.value;
+});
 
-  const schemaEditorDiffOriginal = computed(() => {
-    const entry = currentHistoryEntry.value;
-    if (!entry) {
-      return '{}';
-    }
-    return resolveSchemaVersionDiffOriginal(entry, flatSchemaVersionHistoryEntries.value);
-  });
+const schemaEditorDiffOriginal = computed(() => {
+  const { currentHistoryEntry, flatSchemaVersionHistoryEntries } = useTemplateVersionControl();
+  const entry = currentHistoryEntry.value;
+  if (!entry) {
+    return '{}';
+  }
+  return resolveSchemaVersionDiffOriginal(entry, flatSchemaVersionHistoryEntries.value);
+});
 
-  const schemaEditorDiffModified = computed(() => {
-    const entry = currentHistoryEntry.value;
-    if (!entry) {
-      return schemaEditorText.value;
-    }
-    return resolveSchemaVersionDiffModified(entry);
-  });
+const schemaEditorDiffModified = computed(() => {
+  const { currentHistoryEntry } = useTemplateVersionControl();
+  const entry = currentHistoryEntry.value;
+  if (!entry) {
+    return schemaEditorText.value;
+  }
+  return resolveSchemaVersionDiffModified(entry);
+});
 
-  const schemaEditorShowDiffView = computed(() => {
-    if (!isDiffMode.value || !currentHistoryEntry.value) {
-      return false;
-    }
-    return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
-  });
+const schemaEditorShowDiffView = computed(() => {
+  const { isDiffMode, currentHistoryEntry } = useTemplateVersionControl();
+  if (!isDiffMode.value || !currentHistoryEntry.value) {
+    return false;
+  }
+  return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
+});
 
-  const hasUnsavedChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
-
-  const syncBaseline = () => {
-    if (currentPreviewSchema.value) {
-      const text = JSON.stringify(currentPreviewSchema.value, null, 2);
-      schemaEditorText.value = text;
-      schemaEditorBaseline.value = text;
-    } else {
-      schemaEditorText.value = '{}';
-      schemaEditorBaseline.value = '{}';
-    }
+const editorOptions = computed(() => {
+  const readOnly = isReadOnly.value;
+  return {
+    fontSize: 14,
+    minimap: { enabled: false },
+    automaticLayout: true,
+    folding: true,
+    foldingHighlight: true,
+    foldingStrategy: 'indentation',
+    formatOnPaste: !readOnly,
+    readOnly,
+    domReadOnly: readOnly,
   };
+});
 
-  const revertUnsavedChanges = () => {
-    if (!hasUnsavedChanges()) {
-      return;
-    }
+const hasUnsavedChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
 
-    schemaEditorText.value = schemaEditorBaseline.value;
+const syncBaseline = () => {
+  const { currentPreviewSchema } = useTemplateSchema();
+  if (currentPreviewSchema.value) {
+    const text = JSON.stringify(currentPreviewSchema.value, null, 2);
+    schemaEditorText.value = text;
+    schemaEditorBaseline.value = text;
+  } else {
+    schemaEditorText.value = '{}';
+    schemaEditorBaseline.value = '{}';
+  }
+};
 
-    try {
-      const schema = JSON.parse(schemaEditorBaseline.value || '{}');
-      setCurrentPreviewSchema(schema);
-    } catch {
-      syncBaseline();
-    }
-  };
+const revertUnsavedChanges = () => {
+  if (!hasUnsavedChanges()) {
+    return;
+  }
 
-  const applyTextToPreview = (value: string) => {
-    if (isReadOnly.value) {
-      return;
-    }
-    schemaEditorText.value = value;
-    try {
-      const schema = JSON.parse(value || '{}');
-      setCurrentPreviewSchema(schema);
-    } catch (error) {
-      console.error('schemaEditor parse error ===>', error);
-    }
-  };
+  schemaEditorText.value = schemaEditorBaseline.value;
 
-  const editorOptions = computed(() => {
-    const readOnly = isReadOnly.value;
-    return {
-      fontSize: 14,
-      minimap: { enabled: false },
-      automaticLayout: true,
-      folding: true,
-      foldingHighlight: true,
-      foldingStrategy: 'indentation',
-      formatOnPaste: !readOnly,
-      readOnly,
-      domReadOnly: readOnly,
-    };
-  });
+  try {
+    const schema = JSON.parse(schemaEditorBaseline.value || '{}');
+    useTemplateSchema().setCurrentPreviewSchema(schema);
+  } catch {
+    syncBaseline();
+  }
+};
 
-  const parseSchemaText = (text: string): Record<string, unknown> | null => {
-    try {
-      const parsed = JSON.parse(text || '{}');
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        return null;
-      }
-      return parsed as Record<string, unknown>;
-    } catch {
+const applyTextToPreview = (value: string) => {
+  if (isReadOnly.value) {
+    return;
+  }
+  schemaEditorText.value = value;
+  try {
+    const schema = JSON.parse(value || '{}');
+    useTemplateSchema().setCurrentPreviewSchema(schema);
+  } catch (error) {
+    console.error('schemaEditor parse error ===>', error);
+  }
+};
+
+const parseSchemaText = (text: string): Record<string, unknown> | null => {
+  try {
+    const parsed = JSON.parse(text || '{}');
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       return null;
     }
-  };
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
 
-  const parseEditorSchema = () => parseSchemaText(schemaEditorText.value);
-  const parseBaselineSchema = () => parseSchemaText(schemaEditorBaseline.value);
+const parseEditorSchema = () => parseSchemaText(schemaEditorText.value);
+const parseBaselineSchema = () => parseSchemaText(schemaEditorBaseline.value);
 
+export function useSchemaEditor() {
   return {
     schemaEditorText,
     schemaEditorBaseline,
@@ -131,13 +131,4 @@ function createSchemaEditorState() {
     schemaEditorDiffModified,
     schemaEditorShowDiffView,
   };
-}
-
-let schemaEditorState: ReturnType<typeof createSchemaEditorState> | null = null;
-
-export function useSchemaEditor() {
-  if (!schemaEditorState) {
-    schemaEditorState = createSchemaEditorState();
-  }
-  return schemaEditorState;
 }
