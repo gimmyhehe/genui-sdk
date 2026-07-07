@@ -71,9 +71,9 @@
       "require": "./dist/meta.js"
     },
     "./materials": {
-      "import": "./dist/standard/materials.js",
-      "types": "./dist/materials/standard.d.ts",
-      "require": "./dist/standard/materials.js"
+      "import": "./dist/materials.js",
+      "types": "./dist/materials/index.d.ts",
+      "require": "./dist/materials.js"
     }
   }
 }
