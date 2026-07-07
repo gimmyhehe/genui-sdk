@@ -4,8 +4,7 @@ import { TrHistory, useTouchDevice } from '@opentiny/tiny-robot';
 import { computed, ref, watch } from 'vue';
 import { TinyModal, TinyCheckboxGroup, TinyCheckbox } from '@opentiny/vue';
 import { iconPlus } from '@opentiny/vue-icon';
-import { useTemplateConversation } from './composables/use-template-conversation';
-import { useTemplateList } from './composables/use-template-list';
+import useTemplate from './useTemplate';
 import {
   HistoryTransferToolbar,
   downloadConversations,
@@ -22,9 +21,11 @@ const emit = defineEmits(['switch-template']);
 const {
   conversationKit,
   templateConversationState,
-  updateConversationTitle: updateTemplateTitle,
-} = useTemplateConversation();
-const { switchTemplate, deleteTemplate, createTemplate } = useTemplateList();
+  updateTemplateTitle,
+  switchTemplate,
+  deleteTemplate,
+  createTemplate,
+} = useTemplate();
 
 const selectedTemplateIds = ref<string[]>([]);
 const selectionActive = ref(false);

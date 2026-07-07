@@ -2,7 +2,6 @@
 import { ref, watch, computed, h, inject, onMounted, onUnmounted } from 'vue';
 import type { Ref } from 'vue';
 import '@opentiny/tiny-robot/dist/style.css';
-import { DeltaPatcher, type IChatMessage } from '@opentiny/genui-sdk-core';
 import {
   TrBubbleList,
   TrSender,
@@ -12,9 +11,10 @@ import {
 } from '@opentiny/tiny-robot';
 import { GeneratingStatus, STATUS } from '@opentiny/tiny-robot-kit';
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
+import type { IChatMessage } from '@opentiny/genui-sdk-core';
 import { IconAi, IconUser, IconArrowDown } from '@opentiny/tiny-robot-svgs';
 import type { BubbleRoleConfig } from '@opentiny/tiny-robot';
-import { requiredCompleteFieldSelectors, scrollEnd, throttle, GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
+import { scrollEnd, throttle, GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import copy from 'clipboard-copy';
 import type {
@@ -25,19 +25,14 @@ import type {
   ISchemaManualMessageItem,
 } from './chat.types';
 import {
-  textToJson,
-  validateJsonPatch,
-  PARSE_PARTIAL_JSON_STATE,
-  applyJsonPatchOperations,
-  generateIdForComponents,
   finalizePendingSchemaCard,
   getLastUserMessage,
 } from './template-chat-utils';
-import { clonePlainJson } from './template-chat-utils/json-patch-format';
-import { generateId, stripSchemaFieldsWhileStreaming } from '../../utils';
+import { generateId } from '../../utils';
 import { useTemplateConversation } from './composables/use-template-conversation';
 import { useTemplateSchema } from './composables/use-template-schema';
 import { useTemplateVersionControl } from './composables/use-template-version-control';
+import { useTemplateStreamRender } from './composables/use-template-stream-render';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
 import { emitter } from './template-chat-event-emitter';
@@ -58,7 +53,6 @@ const emit = defineEmits<{
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
-const errorMessagesMap = ref<Map<string, string>>(new Map());
 const { onSchemaRefresh } = useTemplateVersionControl();
 const { conversationKit, templateConversationState, updateConversationTitle: updateTemplateTitle } = useTemplateConversation();
 const {
@@ -69,6 +63,11 @@ const {
   setCurrentPreviewSchema,
   setCurrentCardId,
 } = useTemplateSchema();
+const {
+  errorMessagesMap,
+  handleSchemaJsonChanged,
+  resetLastPreviewSchema,
+} = useTemplateStreamRender();
 
 watch(
   () => TinyGenuiConfig?.value?.theme,
@@ -128,126 +127,12 @@ const roles: Record<string, BubbleRoleConfig> = {
   },
 };
 
-const handleSchemaJsonChanged = (event: { type: 'schema-card' | 'json-patch', cardId: string, content: string, delta: any, newMessage: boolean }) => {
-  const { type, cardId, content, newMessage } = event;
-  if (type === 'schema-card') {
-    schemaCardRenderer({ content, cardId, newMessage });
-  } else if (type === 'json-patch') {
-    jsonPatchRenderer({ content, cardId, newMessage });
-  }
-};
 onMounted(() => {
   emitter.on('schema-json-changed', handleSchemaJsonChanged);
 });
 onUnmounted(() => {
   emitter.off('schema-json-changed', handleSchemaJsonChanged);
 });
-
-const lastPreviewSchema = ref<any>(null);
-
-const deltaPatcher = new DeltaPatcher({
-  requiredCompleteFieldSelectors,
-});
-
-const schemaCardRenderer = async (props: any) => {
-  try {
-    const { content, cardId } = props;
-
-    if (cardId !== currentCardId.value) {
-      return;
-    }
-
-    let json = null;
-    let isCompleted = true;
-    let target = {};
-    if (typeof content === 'string' && content) {
-      const { value, state } = await textToJson(content);
-      isCompleted = state === PARSE_PARTIAL_JSON_STATE.SUCCESSFUL_PARSE;
-      if (!value) {
-        return;
-      }
-      json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
-    }
-    deltaPatcher.patchWithDelta(target, json, isCompleted);
-    const schemaWithId = generateIdForComponents(target, {
-      previousSchema: currentPreviewSchema.value,
-    });
-    setCurrentPreviewSchema(schemaWithId, isCompleted);
-  } catch (error) {
-    console.error('schemaCardRenderer error ===>', error);
-    errorMessagesMap.value.set(props.cardId, error.message);
-  }
-};
-
-const isStreamOperation = (operation: any) => {
-  return (
-    (operation.op === 'add' || operation.op === 'replace')
-    && typeof operation.id === 'string' && operation.id !== ''
-    && typeof operation.path === 'string' && operation.path !== ''
-    && 'value' in operation
-  );
-};
-
-const jsonPatchRenderer = async (props: any) => {
-  try {
-    const { content, cardId, newMessage } = props;
-
-    if (cardId !== currentCardId.value) {
-      return;
-    }
-    if (newMessage) {
-      lastPreviewSchema.value = JSON.parse(JSON.stringify(currentPreviewSchema.value));
-    }
-
-    const { value, state } = await textToJson(content);
-    if (state !== PARSE_PARTIAL_JSON_STATE.SUCCESSFUL_PARSE
-      && state !== PARSE_PARTIAL_JSON_STATE.REPAIRED_PARSE // 允许流式处理
-    ) return;
-    const isSuccessfulParse = state === PARSE_PARTIAL_JSON_STATE.SUCCESSFUL_PARSE;
-    let lastOperationComplete = true;
-
-    const valid = validateJsonPatch(value as any);
-    if (!valid) return;
-
-    const operations = value as any[];
-    if (!isSuccessfulParse) {
-      const lastOperation = operations[operations.length - 1];
-      if (!isStreamOperation(lastOperation)) {
-        operations.pop();
-        lastOperationComplete = true;
-      } else {
-        lastOperationComplete = false;
-      }
-    }
-    if (operations.length === 0) {
-      return;
-    }
-
-    const patchBaseline = lastPreviewSchema.value ?? clonePlainJson(currentSchema.value);
-    if (!patchBaseline) {
-      return;
-    }
-
-    const targetSchema = applyJsonPatchOperations(patchBaseline, operations);
-    if (!targetSchema) {
-      return;
-    }
-
-    const isStreamComplete = isSuccessfulParse || lastOperationComplete;
-    const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
-
-    setCurrentPreviewSchema(
-      generateIdForComponents(strippedSchema, { previousSchema: currentPreviewSchema.value }),
-      isStreamComplete,
-    );
-    if (isStreamComplete) {
-      setCurrentSchema(targetSchema);
-    }
-  } catch (error) {
-    errorMessagesMap.value.set(props.cardId, error.message);
-    console.error('jsonPatch error ===>', error);
-  }
-};
 
 const getCardMessageByIndex = (index: number) => {
   return (
@@ -274,7 +159,7 @@ const handleRefresh = ({ index }: { index: number }) => {
   if (cardMessage?.type === 'schema-card') {
     setCurrentSchema(null);
     setCurrentPreviewSchema({});
-    lastPreviewSchema.value = {};
+    resetLastPreviewSchema({});
   } else {
     let parsedSchema = null;
     try {
@@ -285,7 +170,7 @@ const handleRefresh = ({ index }: { index: number }) => {
     if (parsedSchema) {
       setCurrentSchema(parsedSchema);
       setCurrentPreviewSchema(parsedSchema);
-      lastPreviewSchema.value = JSON.parse(JSON.stringify(parsedSchema));
+      resetLastPreviewSchema(JSON.parse(JSON.stringify(parsedSchema)));
     }
   }
 

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { CodeEditor, DiffEditor } from 'monaco-editor-vue3';
 import { GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
 import { iconClose, iconTime } from '@opentiny/vue-icon';
 import SchemaVersionHistoryPanel from './SchemaVersionHistoryPanel.vue';
+import SchemaJsonEditor from './SchemaJsonEditor.vue';
+import SchemaPreviewToolbar from './SchemaPreviewToolbar.vue';
 import {
-  SCHEMA_JSON_DIFF_EDITOR_OPTIONS,
-  useMonacoPlaygroundTheme,
   type PlaygroundColorTheme,
 } from './composables/use-monaco-playground-theme';
 import {
@@ -26,22 +25,12 @@ const props = defineProps<{
   theme: PlaygroundColorTheme;
 }>();
 
-const monacoTheme = useMonacoPlaygroundTheme(() => props.theme);
 const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
 
-const { currentPreviewSchema, currentPreviewSchemaComplete, currentCardId } = useTemplateSchema();
-const {
-  schemaEditorText,
-  schemaEditorSaveLoading,
-  applyTextToPreview,
-  editorOptions,
-} = useSchemaEditor();
-const {
-  schemaEditorShowDiffView,
-  schemaEditorDiffOriginal,
-  schemaEditorDiffModified,
-} = useSchemaDiff();
+const { currentPreviewSchema, currentPreviewSchemaComplete } = useTemplateSchema();
+const { schemaEditorSaveLoading, editorOptions } = useSchemaEditor();
+const { schemaEditorShowDiffView } = useSchemaDiff();
 const { showReturnLatestButton } = useTemplateVersionControl();
 const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateHistoryUi();
 const {
@@ -54,9 +43,7 @@ const {
 const {
   closeSchemaEditorView,
   handleMobileJsonEditorOpen,
-  applyCurrentVersion,
   handleSaveSchemaEditor,
-  resetToLatestVersion,
   schemaEditorDirty,
 } = useTemplateActions();
 
@@ -149,47 +136,12 @@ const toggleJsonEditor = () => {
             </div>
             <Transition name="schema-mobile-json">
               <div v-show="jsonEditorOpen" class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer">
-                <diff-editor
-                  v-if="schemaEditorShowDiffView"
-                  :key="
-                    currentCardId || `${schemaEditorDiffOriginal?.length}-${schemaEditorDiffModified?.length}`
-                  "
-                  :original="schemaEditorDiffOriginal || '{}'"
-                  :value="schemaEditorDiffModified || schemaEditorText"
-                  language="json"
-                  :theme="monacoTheme"
-                  :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
-                />
-                <code-editor
-                  v-else
-                  :key="`${currentCardId}-${editorOptions.readOnly}`"
-                  :value="schemaEditorText"
-                  language="json"
-                  :theme="monacoTheme"
-                  :options="editorOptions"
-                  @update:value="applyTextToPreview"
-                />
+                <schema-json-editor :theme="theme" layout="sheet" />
               </div>
             </Transition>
             <schema-version-history-panel :theme="theme" />
           </div>
-          <div v-if="showReturnLatestButton" class="schema-mobile-sheet__footer">
-            <tiny-button
-              round
-              class="schema-mobile-sheet__latest-btn"
-              @click="applyCurrentVersion"
-            >
-              {{ t('templateEditor.applyVersion') }}
-            </tiny-button>
-            <tiny-button
-              type="primary"
-              round
-              class="schema-mobile-sheet__latest-btn"
-              @click="resetToLatestVersion"
-            >
-              {{ t('templateEditor.returnLatest') }}
-            </tiny-button>
-          </div>
+          <schema-preview-toolbar v-if="showReturnLatestButton" variant="mobile-footer" />
         </div>
       </div>
     </Transition>
@@ -350,26 +302,6 @@ const toggleJsonEditor = () => {
     object-fit: contain;
   }
 
-  &__latest-btn {
-    flex-shrink: 1;
-    min-width: 0;
-    max-width: 50%;
-  }
-
-  &__footer {
-    z-index: 3;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    background: #fff;
-
-    .schema-mobile-sheet__latest-btn {
-      max-width: none;
-    }
-  }
-
   &__body {
     position: relative;
     flex: 1;
@@ -407,12 +339,6 @@ const toggleJsonEditor = () => {
     min-height: 120px;
     padding: 12px;
     box-sizing: border-box;
-  }
-
-  &__editor--layer :deep(.monaco-code-editor),
-  &__editor--layer :deep(.monaco-diff-editor) {
-    flex: 1;
-    min-height: 0;
   }
 }
 

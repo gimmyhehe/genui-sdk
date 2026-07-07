@@ -1,59 +1,41 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { CodeEditor, DiffEditor } from 'monaco-editor-vue3';
 import { GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
-import { iconClose, iconTime } from '@opentiny/vue-icon';
+import { iconClose } from '@opentiny/vue-icon';
 import GenuiTemplateChat from './GenuiTemplateChat.vue';
 import SchemaVersionHistoryPanel from './SchemaVersionHistoryPanel.vue';
+import SchemaJsonEditor from './SchemaJsonEditor.vue';
+import SchemaPreviewToolbar from './SchemaPreviewToolbar.vue';
 import { useTemplateSchema } from './composables/use-template-schema';
-import { SCHEMA_JSON_DIFF_EDITOR_OPTIONS, useMonacoPlaygroundTheme } from './composables/use-monaco-playground-theme';
 import {
   useTemplateActions,
   useSchemaEditor,
   useSchemaDiff,
-  useTemplateVersionControl,
   useTemplateEditorUi,
-  useTemplateHistoryUi,
   useTemplateConversation,
 } from './composables';
 import { isRenderableSchema } from './template-chat-utils';
-import viewSchemaIcon from '../../assets/images/view-schema.svg';
 import { t } from '../../i18n';
 
 const props = defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
 
-const monacoTheme = useMonacoPlaygroundTheme(() => props.theme);
 const TinyCloseIcon = iconClose();
-const TinyIconTime = iconTime();
 
 const { currentSchema, currentPreviewSchema, currentCardId } = useTemplateSchema();
 const {
-  schemaEditorText,
   schemaEditorSaveLoading,
-  applyTextToPreview,
-  editorOptions,
   isReadOnly: isSchemaEditorReadOnly,
 } = useSchemaEditor();
-const {
-  schemaEditorShowDiffView,
-  schemaEditorDiffOriginal,
-  schemaEditorDiffModified,
-} = useSchemaDiff();
-const { showReturnLatestButton } = useTemplateVersionControl();
-const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateHistoryUi();
+const { schemaEditorShowDiffView } = useSchemaDiff();
 const { rendererPanelVisible, schemaEditorVisible } = useTemplateEditorUi();
 const { isTemplateInit } = useTemplateConversation();
 
 const {
-  toggleSchemaEditor,
   closeSchemaEditorView,
-  closeRendererPanel,
-  applyCurrentVersion,
   handleSaveSchemaEditor,
-  resetToLatestVersion,
   handleSchemaVersionToggle,
   schemaEditorDirty,
 } = useTemplateActions();
@@ -104,60 +86,12 @@ const rendererSchemaKey = computed(() => {
             />
           </div>
         </div>
-        <div class="schema-version-container__editor">
-          <diff-editor
-            v-if="schemaEditorShowDiffView"
-            :key="currentCardId"
-            :original="schemaEditorDiffOriginal"
-            :value="schemaEditorDiffModified"
-            language="json"
-            :theme="monacoTheme"
-            :options="SCHEMA_JSON_DIFF_EDITOR_OPTIONS"
-          />
-          <code-editor
-            v-else
-            :key="`${currentCardId}-${isSchemaEditorReadOnly}`"
-            :value="schemaEditorText"
-            language="json"
-            :theme="monacoTheme"
-            :options="editorOptions"
-            @update:value="applyTextToPreview"
-          />
-        </div>
+        <schema-json-editor :theme="theme" layout="panel" />
       </div>
     </div>
     <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && rendererPanelVisible">
       <div class="renderer-container-wrapper">
-        <div class="top-button-group">
-          <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
-            <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
-            {{ schemaEditorShowDiffView ? t('templateEditor.viewChanges') : t('templateEditor.viewJson') }}
-          </button>
-          <div class="top-button-group-right">
-            <tiny-button v-if="showReturnLatestButton" round @click="applyCurrentVersion">
-              {{ t('templateEditor.applyVersion') }}
-            </tiny-button>
-            <tiny-button v-if="showReturnLatestButton" type="primary" round @click="resetToLatestVersion">
-              {{ t('templateEditor.returnLatest') }}
-            </tiny-button>
-            <tiny-button
-              type="text"
-              class="genui-schema-toolbar-close-btn"
-              :class="{ 'is-active': schemaHistoryVisible }"
-              :icon="TinyIconTime"
-              :aria-label="t('templateEditor.history')"
-              :title="t('templateEditor.history')"
-              @click="toggleSchemaHistoryPanel"
-            />
-            <tiny-button
-              type="text"
-              class="genui-schema-toolbar-close-btn"
-              :icon="TinyCloseIcon"
-              :aria-label="t('templateEditor.closePreview')"
-              @click="closeRendererPanel"
-            />
-          </div>
-        </div>
+        <schema-preview-toolbar variant="desktop" />
         <div class="schema-renderer-body">
           <schema-renderer
             :key="rendererSchemaKey"
@@ -209,81 +143,23 @@ const rendererSchemaKey = computed(() => {
       flex-direction: column;
       position: relative;
       border-left: 1px solid rgb(232, 232, 232);
+    }
 
-      .top-button-group {
-        flex-shrink: 0;
-        box-sizing: border-box;
-        height: @schema-toolbar-height;
-        min-height: @schema-toolbar-height;
-        max-height: @schema-toolbar-height;
-        border-bottom: 1px solid rgb(232, 232, 232);
-        padding: 0 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+    .schema-renderer-body {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-        .button-svg-icon {
-          width: 16px;
-          height: 16px;
-          margin-right: 6px;
-          vertical-align: middle;
-        }
-
-        .schema-toggle-text {
-          display: inline-flex;
-          align-items: center;
-          margin: 0;
-          padding: 0;
-          border: none;
-          background: transparent;
-          font: inherit;
-          text-align: inherit;
-          color: #191919;
-          text-decoration: none;
-          cursor: pointer;
-          user-select: none;
-
-          &:hover {
-            color: #191919;
-            text-decoration: underline;
-            text-underline-offset: 2px;
-          }
-
-          &:focus-visible {
-            outline: 2px solid #1890ff;
-            outline-offset: 2px;
-            border-radius: 4px;
-          }
-        }
-
-        .top-button-group-right {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-      }
-
-      .schema-renderer-body {
-        flex: 1;
-        min-height: 0;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      .schema-renderer {
-        flex: 1;
-        min-height: 0;
-        padding: 20px;
-        overflow: auto;
-        box-sizing: border-box;
-      }
-
-      .genui-schema-toolbar-close-btn.is-active {
-        color: #1677ff;
-        background: rgba(22, 119, 255, 0.1);
-      }
+    .schema-renderer {
+      flex: 1;
+      min-height: 0;
+      padding: 20px;
+      overflow: auto;
+      box-sizing: border-box;
     }
   }
 }
@@ -358,20 +234,6 @@ const rendererSchemaKey = computed(() => {
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
-  }
-
-  &__editor {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  &__editor :deep(.monaco-code-editor),
-  &__editor :deep(.monaco-diff-editor) {
-    flex: 1;
-    min-height: 0;
   }
 }
 </style>

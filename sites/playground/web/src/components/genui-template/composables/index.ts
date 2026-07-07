@@ -11,5 +11,6 @@ export * from './use-template-list';
 export * from './use-template-mobile-ui';
 export * from './use-template-actions';
 export * from './use-template-lifecycle';
+export * from './use-template-stream-render';
 export * from './use-template-schema';
 export * from './use-template-version-control';
