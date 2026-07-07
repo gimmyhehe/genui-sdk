@@ -8,7 +8,6 @@ import {
 } from './composables/use-monaco-playground-theme';
 import { useTemplateSchema } from './composables/use-template-schema';
 import { useSchemaEditor } from './composables/use-schema-editor';
-import { useSchemaDiff } from './composables/use-schema-diff';
 
 const props = withDefaults(defineProps<{
   theme: PlaygroundColorTheme | 'lite' | 'auto';
@@ -24,12 +23,10 @@ const {
   applyTextToPreview,
   editorOptions,
   isReadOnly,
-} = useSchemaEditor();
-const {
   schemaEditorShowDiffView,
   schemaEditorDiffOriginal,
   schemaEditorDiffModified,
-} = useSchemaDiff();
+} = useSchemaEditor();
 
 const diffEditorKey = computed(() => {
   if (props.layout === 'sheet') {

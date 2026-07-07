@@ -13,7 +13,6 @@ import {
   useTemplateActions,
   useTemplateSchema,
   useSchemaEditor,
-  useSchemaDiff,
   useTemplateVersionControl,
   useTemplateUi,
 } from './composables';
@@ -28,8 +27,7 @@ const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
 
 const { currentPreviewSchema, currentPreviewSchemaComplete } = useTemplateSchema();
-const { schemaEditorSaveLoading, editorOptions } = useSchemaEditor();
-const { schemaEditorShowDiffView } = useSchemaDiff();
+const { schemaEditorSaveLoading, editorOptions, schemaEditorShowDiffView } = useSchemaEditor();
 const { showReturnLatestButton } = useTemplateVersionControl();
 const {
   schemaHistoryVisible,

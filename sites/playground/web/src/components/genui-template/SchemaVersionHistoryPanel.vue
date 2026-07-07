@@ -5,7 +5,7 @@ import { iconClose } from '@opentiny/vue-icon';
 import type { PlaygroundColorTheme } from './composables/use-monaco-playground-theme';
 import {
   useTemplateActions,
-  useSchemaVersionHistory,
+  useTemplateVersionControl,
   useTemplateUi,
 } from './composables';
 import { t } from '../../i18n';
@@ -15,7 +15,7 @@ const props = defineProps<{
 }>();
 
 const TinyCloseIcon = iconClose();
-const { schemaVersionHistoryGroups } = useSchemaVersionHistory();
+const { schemaVersionHistoryGroups } = useTemplateVersionControl();
 const { schemaHistoryVisible, closeSchemaHistoryPanel } = useTemplateUi();
 const { handleHistoryEntrySelect } = useTemplateActions();
 

@@ -1,9 +1,15 @@
 import { computed, ref } from 'vue';
-import { isRenderableSchema } from '../template-chat-utils';
+import {
+  isRenderableSchema,
+  findLatestSchemaCardInConversation,
+  collectSchemaVersionHistory,
+  groupSchemaVersionHistory,
+  filterSchemaVersionHistoryForCard,
+  resolveSchemaCardScopeId,
+} from '../template-chat-utils';
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateConversation } from './use-template-conversation';
 import { useSchemaVersionWrite } from './use-schema-version-write';
-import { useSchemaVersionHistory } from './use-schema-version-history';
 
 const historyDiffCardId = ref<string | null>(null);
 
@@ -17,14 +23,49 @@ export function useTemplateVersionControl() {
     setCurrentPreviewSchema,
     applySchemaFromMessages,
   } = useTemplateSchema();
-  const { templateConversationState } = useTemplateConversation();
+  const { templateConversationState, messages } = useTemplateConversation();
   const { writeNewVersion } = useSchemaVersionWrite();
 
-  const {
-    isLatestSchemaVersionCard,
-    currentHistoryEntry,
-    allSchemaVersionHistoryEntries,
-  } = useSchemaVersionHistory();
+  const latestSchemaCardId = computed(() => findLatestSchemaCardInConversation(messages.value)?.cardId ?? '');
+
+  const allSchemaVersionHistoryEntries = computed(() =>
+    collectSchemaVersionHistory(messages.value, {
+      currentCardId: currentCardId.value,
+      latestCardId: latestSchemaCardId.value,
+    }),
+  );
+
+  const currentHistoryScopeCardId = computed(() =>
+    currentCardId.value ? resolveSchemaCardScopeId(messages.value, currentCardId.value) : '',
+  );
+
+  const schemaVersionHistoryGroups = computed(() => {
+    const scopedEntries = filterSchemaVersionHistoryForCard(
+      allSchemaVersionHistoryEntries.value,
+      messages.value,
+      currentHistoryScopeCardId.value,
+      currentCardId.value,
+    );
+    return groupSchemaVersionHistory(scopedEntries);
+  });
+
+  const isLatestSchemaVersionCard = (cardId: string) => {
+    if (!cardId || !latestSchemaCardId.value) {
+      return false;
+    }
+    if (cardId === latestSchemaCardId.value) {
+      return true;
+    }
+    return allSchemaVersionHistoryEntries.value.some((entry) => entry.isLatest && entry.cardId === cardId);
+  };
+
+  const flatSchemaVersionHistoryEntries = computed(() =>
+    schemaVersionHistoryGroups.value.flatMap((group) => group.items),
+  );
+
+  const currentHistoryEntry = computed(
+    () => flatSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value) ?? null,
+  );
 
   const isDiffMode = computed(
     () => historyDiffCardId.value !== null && historyDiffCardId.value === currentCardId.value,
@@ -135,6 +176,9 @@ export function useTemplateVersionControl() {
     historyDiffCardId,
     isDiffMode,
     showReturnLatestButton,
+    schemaVersionHistoryGroups,
+    flatSchemaVersionHistoryEntries,
+    currentHistoryEntry,
     previewVersion,
     selectVersionCard,
     applyCurrentVersion,

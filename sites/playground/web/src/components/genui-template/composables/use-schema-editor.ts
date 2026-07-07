@@ -1,4 +1,9 @@
 import { computed, ref } from 'vue';
+import {
+  resolveSchemaVersionDiffOriginal,
+  resolveSchemaVersionDiffModified,
+  hasUnifiedDiffChanges,
+} from '../template-chat-utils';
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateVersionControl } from './use-template-version-control';
 
@@ -7,9 +12,37 @@ function createSchemaEditorState() {
   const schemaEditorBaseline = ref('{}');
   const schemaEditorSaveLoading = ref(false);
   const { currentPreviewSchema, setCurrentPreviewSchema } = useTemplateSchema();
-  const { isDiffMode, showReturnLatestButton } = useTemplateVersionControl();
+  const {
+    isDiffMode,
+    showReturnLatestButton,
+    currentHistoryEntry,
+    flatSchemaVersionHistoryEntries,
+  } = useTemplateVersionControl();
 
   const isReadOnly = computed(() => isDiffMode.value || showReturnLatestButton.value);
+
+  const schemaEditorDiffOriginal = computed(() => {
+    const entry = currentHistoryEntry.value;
+    if (!entry) {
+      return '{}';
+    }
+    return resolveSchemaVersionDiffOriginal(entry, flatSchemaVersionHistoryEntries.value);
+  });
+
+  const schemaEditorDiffModified = computed(() => {
+    const entry = currentHistoryEntry.value;
+    if (!entry) {
+      return schemaEditorText.value;
+    }
+    return resolveSchemaVersionDiffModified(entry);
+  });
+
+  const schemaEditorShowDiffView = computed(() => {
+    if (!isDiffMode.value || !currentHistoryEntry.value) {
+      return false;
+    }
+    return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
+  });
 
   const hasUnsavedChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
 
@@ -94,6 +127,9 @@ function createSchemaEditorState() {
     editorOptions,
     parseEditorSchema,
     parseBaselineSchema,
+    schemaEditorDiffOriginal,
+    schemaEditorDiffModified,
+    schemaEditorShowDiffView,
   };
 }
 

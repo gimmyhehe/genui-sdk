@@ -3,7 +3,6 @@ import { isRenderableSchema, rebuildSchemaFromCard } from '../template-chat-util
 import type { ISchemaVersionHistoryEntry } from '../template-chat-utils/schema-version-history';
 import { useSchemaVersionWrite } from './use-schema-version-write';
 import { useTemplateVersionControl } from './use-template-version-control';
-import { useSchemaDiff } from './use-schema-diff';
 import { useSchemaEditor } from './use-schema-editor';
 import { useTemplateUi } from './use-template-ui';
 
@@ -44,9 +43,8 @@ function createTemplateActions() {
     revertUnsavedChanges,
     parseEditorSchema,
     parseBaselineSchema,
+    schemaEditorShowDiffView,
   } = useSchemaEditor();
-
-  const { schemaEditorShowDiffView } = useSchemaDiff();
 
   const schemaEditorDirty = computed(
     () => isJsonEditorActive.value && hasUnsavedChanges(),

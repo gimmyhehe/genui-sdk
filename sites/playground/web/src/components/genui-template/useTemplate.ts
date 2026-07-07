@@ -2,7 +2,6 @@ import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { LLMConfig } from './chat.types';
 import { useTemplateConversation } from './composables/use-template-conversation';
 import { useTemplateSchema } from './composables/use-template-schema';
-import { useTemplateList } from './composables/use-template-list';
 import { useSchemaVersionWrite } from './composables/use-schema-version-write';
 
 export interface UseTemplateOptions {
@@ -29,8 +28,38 @@ export default function useTemplate(options?: UseTemplateOptions) {
 
   const conversation = useTemplateConversation();
   const schema = useTemplateSchema();
-  const list = useTemplateList();
   const { getMessageByCardId } = useSchemaVersionWrite();
+
+  const resetEmptyTemplateSchema = () => {
+    schema.setCurrentSchema(null);
+    schema.setCurrentPreviewSchema(null);
+    schema.setCurrentCardId('');
+    schema.adoptedCardId.value = '';
+  };
+
+  const createTemplate = () => {
+    conversation.createConversation();
+    resetEmptyTemplateSchema();
+  };
+
+  const switchTemplate = (id: string) => {
+    conversation.switchConversation(id);
+    const currentMessages = conversation.getCurrentConversation()?.messages;
+
+    if (!currentMessages?.length) {
+      resetEmptyTemplateSchema();
+      return;
+    }
+
+    schema.applySchemaFromMessages(currentMessages);
+  };
+
+  const deleteTemplate = (id: string) => {
+    const isEmpty = conversation.deleteConversation(id);
+    if (isEmpty) {
+      createTemplate();
+    }
+  };
 
   return {
     isTemplateInit: conversation.isTemplateInit,
@@ -52,9 +81,9 @@ export default function useTemplate(options?: UseTemplateOptions) {
     setAdoptedCardId: schema.setAdoptedCardId,
     getCurrentCardId: schema.getCurrentCardId,
     applySchemaFromMessages: schema.applySchemaFromMessages,
-    createTemplate: list.createTemplate,
-    switchTemplate: list.switchTemplate,
-    deleteTemplate: list.deleteTemplate,
+    createTemplate,
+    switchTemplate,
+    deleteTemplate,
     changeLlmConfig: conversation.changeLlmConfig,
     updateTemplateTitle: conversation.updateConversationTitle,
     getMessageByCardId,

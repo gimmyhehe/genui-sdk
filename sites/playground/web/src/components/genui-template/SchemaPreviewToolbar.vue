@@ -5,7 +5,7 @@ import {
   useTemplateActions,
   useTemplateVersionControl,
   useTemplateUi,
-  useSchemaDiff,
+  useSchemaEditor,
 } from './composables';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 import { t } from '../../i18n';
@@ -18,7 +18,7 @@ const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
 const { showReturnLatestButton } = useTemplateVersionControl();
 const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateUi();
-const { schemaEditorShowDiffView } = useSchemaDiff();
+const { schemaEditorShowDiffView } = useSchemaEditor();
 const {
   toggleSchemaEditor,
   closeRendererPanel,

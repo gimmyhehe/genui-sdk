@@ -11,7 +11,6 @@ import { useTemplateSchema } from './composables/use-template-schema';
 import {
   useTemplateActions,
   useSchemaEditor,
-  useSchemaDiff,
   useTemplateUi,
   useTemplateConversation,
 } from './composables';
@@ -28,8 +27,8 @@ const { currentSchema, currentPreviewSchema, currentCardId } = useTemplateSchema
 const {
   schemaEditorSaveLoading,
   isReadOnly: isSchemaEditorReadOnly,
+  schemaEditorShowDiffView,
 } = useSchemaEditor();
-const { schemaEditorShowDiffView } = useSchemaDiff();
 const { rendererPanelVisible, schemaEditorVisible } = useTemplateUi();
 const { isTemplateInit } = useTemplateConversation();
 
