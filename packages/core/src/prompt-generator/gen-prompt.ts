@@ -5,7 +5,7 @@ import { genComponentsPrompt, type IGenPromptComponent } from './component';
 import { genExamplesPrompt, type IGenPromptExample } from './examples';
 import { genJsonSchema, genJsonSchemaPrompt } from './json-schema';
 import { promptPrefix, skillPromptPrefix } from './prefix';
-import { genRulesPrompt, skillRulesPrompt, targetRulesPrompt } from './rules';
+import { genRulesPrompt } from './rules';
 import { genSnippetsPrompt, type IGenPromptSnippet } from './snippet';
 
 export interface IGenPromptCustomConfig {
@@ -23,7 +23,7 @@ export interface IGenPromptOptions {
   includeActions?: boolean;
   includeAboutThis?: boolean;
   includeBaseRules?: boolean;
-  additionRules?: string[];
+  rules?: string[];
 }
 
 function getExtendWhiteList(whiteList: string[], customComponents: IGenPromptComponent[]) {
@@ -47,8 +47,7 @@ function buildPromptSections(
   const includeActions = options?.includeActions ?? true;
   const includeAboutThis = options?.includeAboutThis ?? true;
   const extendWhiteList = getExtendWhiteList(whiteList, customComponents || []);
-  const modeRules = options?.isSkill ? skillRulesPrompt : targetRulesPrompt;
-  const additionRules = [...(materialRules ?? []), ...(options?.additionRules ?? [])];
+  const rules = [...(materialRules ?? []), ...(options?.rules ?? [])];
 
   return [
     options?.isSkill ? skillPromptPrefix : promptPrefix,
@@ -58,7 +57,7 @@ function buildPromptSections(
     includeSnippets ? genSnippetsPrompt(materials, extendWhiteList, customSnippets || []) : null,
     includeAboutThis ? aboutThis.trim() : null,
     includeActions ? genCustomActionsPrompt(customActions || []) : null,
-    genRulesPrompt(modeRules, tgCustomConfig, wrapperComponent, { ...options, additionRules }),
+    genRulesPrompt(tgCustomConfig, wrapperComponent, { ...options, rules }),
   ].filter(Boolean);
 }
 

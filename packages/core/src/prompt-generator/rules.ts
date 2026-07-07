@@ -1,4 +1,5 @@
 import type { IGenPromptAction } from './action';
+import type { IGenPromptOptions } from './gen-prompt';
 
 export const skillRulesPrompt = ['特别重要：除了上下文数据和工具调用结果以外，禁止使用任何Mock数据'];
 
@@ -45,18 +46,18 @@ function buildBaseRuleItems(
 }
 
 export function genRulesPrompt(
-  modeRules: string[],
   tgCustomConfig?: { customActions?: IGenPromptAction[] },
   wrapperComponent?: string,
-  promptOptions?: { includeBaseRules?: boolean; additionRules?: string[] },
+  promptOptions?: IGenPromptOptions,
 ) {
   const includeBaseRules = promptOptions?.includeBaseRules ?? true;
-  const additionRules = promptOptions?.additionRules ?? [];
+  const extraRules = promptOptions?.rules ?? [];
+  const modeRules = promptOptions?.isSkill ? skillRulesPrompt : targetRulesPrompt;
 
   const ruleItems = [
     ...(includeBaseRules ? buildBaseRuleItems(tgCustomConfig, wrapperComponent) : []),
     ...formatRuleItems(modeRules),
-    ...formatRuleItems(additionRules),
+    ...formatRuleItems(extraRules),
   ];
 
   if (ruleItems.length === 0) {
@@ -95,7 +96,6 @@ ${rules}
 - 输出的 schemaJson 必须是严格的JSON格式，禁止省略属性的双引号，禁止使用单引号，禁止在最后一个属性添加逗号，禁止使用注释
 - 如果有信息要展示，请主动生成卡片
 - 如果需要用户提供更多信息补充，请主动生成表单卡片
-- 如果生成的卡片是表单卡片，一定要使用双向绑定功能，\`modelValue\` 的 \`model\` 属性要设置为 true，即 \`modelValue.model = true\`
 
 **其他规则与最高优先级规则冲突时，忽略其他规则，优先满足最高优先级规则。**
 `;
