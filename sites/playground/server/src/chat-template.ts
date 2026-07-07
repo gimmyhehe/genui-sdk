@@ -2,23 +2,17 @@ import { Request, Response } from 'express';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
-import { materialsMeta, miniMaterialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/meta';
-import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/meta';
+import { type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
 import { streamText, stepCountIs } from 'ai';
 import getRawBody from 'raw-body';
 import { openaiCompatibleTransformChunk } from '@opentiny/genui-sdk-chat-completions';
 import type { IOpenaiCompatibleChunk } from '@opentiny/genui-sdk-chat-completions';
-import { generateLlmConfig, generateAiSdkTools, getGenPromptOptions } from './chat-genui.js';
+import { generateLlmConfig, generateAiSdkTools } from './chat-genui.js';
+import { genPlaygroundPrompt } from './gen-prompt/index.js';
 import { generateJsonPatchPrompt } from './json-patch-prompt.js';
 import type { IPlaygroundConfig, LLMConfigParams } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
-
-const vueMaterialsMetaByVariant = {
-  mini: miniMaterialsMeta,
-  standard: materialsMeta,
-} as const;
 
 const getPlaygroundConfig = (playgroundStr: string) => {
   let playgroundConfig: IPlaygroundConfig = {
@@ -97,14 +91,8 @@ export const createChatTemplate = () => {
         mcpServers.filter((s) => s.enabled),
         abort.signal,
       );
-      const renderConfigForFramework =
-        framework === 'Angular'
-          ? ngMaterialsMeta
-          : promptVariant
-            ? vueMaterialsMetaByVariant[promptVariant]
-            : materialsMeta;
       const maxSteps = 30;
-      const systemPrompt = `${genPrompt(renderConfigForFramework, tgCustomConfig, getGenPromptOptions(promptVariant))}
+      const systemPrompt = `${genPlaygroundPrompt(framework, promptVariant, tgCustomConfig)}
       ${body.templateSchema ? generateJsonPatchPrompt() : ''}
       ${specificPrompt}
       ${customSystemPrompt}`;

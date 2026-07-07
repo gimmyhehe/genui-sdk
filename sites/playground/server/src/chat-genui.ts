@@ -5,9 +5,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
-import { genPrompt, type IGenPromptCustomConfig, type IGenPromptOptions } from '@opentiny/genui-sdk-core';
-import { materialsMeta, miniMaterialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/meta';
-import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/meta';
+import { type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
@@ -24,22 +22,12 @@ import {
 } from './a2a-tools/index.js';
 import type { PlaygroundAgentConfig } from './a2a-tools/index.js';
 import { buildSkillTools } from './skills/index.js';
-import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig, MaterialsMetaVariantKey } from './types/index.js';
+import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
+import { genPlaygroundPrompt } from './gen-prompt/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
 
 const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
-
-const vueMaterialsMetaByVariant = {
-  mini: miniMaterialsMeta,
-  standard: materialsMeta,
-} as const;
-
-export function getGenPromptOptions(promptVariant?: MaterialsMetaVariantKey): IGenPromptOptions | undefined {
-  if (promptVariant === 'mini') {
-    return { includeJsonSchema: false, includeSnippets: false };
-  }
-}
 
 function extractStatusCode(error: any): number | undefined {
   if (!error) {
@@ -313,12 +301,6 @@ export function createChatGenui() {
     }
     const tools = { ...mcpTools, ...agentTools, ...skillTools };
 
-    const renderConfigForFramework =
-      framework === 'Angular'
-        ? ngMaterialsMeta
-        : promptVariant
-          ? vueMaterialsMetaByVariant[promptVariant]
-          : materialsMeta;
     const maxSteps = 30;
     let hasError = false; // 标记是否已经处理了错误
 
@@ -331,7 +313,7 @@ export function createChatGenui() {
       model,
       temperature,
       system:
-        genPrompt(renderConfigForFramework, tgCustomConfig, getGenPromptOptions(promptVariant)) +
+        genPlaygroundPrompt(framework, promptVariant, tgCustomConfig) +
         '\n' +
         specificPrompt +
         '\n' +
