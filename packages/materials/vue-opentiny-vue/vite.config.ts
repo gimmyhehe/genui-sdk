@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     vue(),
     dts({
-      rollupTypes: false,
+      rollupTypes: true,
     }),
     cssInjectedByJsPlugin(),
   ],

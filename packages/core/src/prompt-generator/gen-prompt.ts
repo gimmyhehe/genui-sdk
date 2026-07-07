@@ -8,6 +8,11 @@ import { promptPrefix, skillPromptPrefix } from './prefix';
 import { genRulesPrompt } from './rules';
 import { genSnippetsPrompt, type IGenPromptSnippet } from './snippet';
 
+export type { IGenPromptAction } from './action';
+export type { IGenPromptComponent } from './component';
+export type { IGenPromptExample } from './examples';
+export type { IGenPromptSnippet } from './snippet';
+
 export interface IGenPromptCustomConfig {
   customComponents?: IGenPromptComponent[];
   customSnippets?: IGenPromptSnippet[];

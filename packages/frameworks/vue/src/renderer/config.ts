@@ -9,6 +9,5 @@ export const requiredCompleteFieldSelectors = [
   '[type=JSSlot][value=]',
   'type',
   ':empty:object',
-  // ng element version
   '[componentName] > props > ngModel',
 ];
