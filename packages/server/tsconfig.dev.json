@@ -11,8 +11,8 @@
       "@opentiny/genui-sdk-materials-vue-opentiny-vue/meta": [
         "../materials/vue-opentiny-vue/src/meta/index.ts"
       ],
-      "@opentiny/genui-sdk-materials-angular-opentiny-ng/materials-meta": [
-        "../materials/angular-opentiny-ng/src/materials-meta/index.ts"
+      "@opentiny/genui-sdk-materials-angular-opentiny-ng/meta": [
+        "../materials/angular-opentiny-ng/src/meta/index.ts"
       ]
     }
   },

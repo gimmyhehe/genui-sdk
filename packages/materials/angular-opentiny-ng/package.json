@@ -10,10 +10,10 @@
       "types": "./dist/index.d.ts",
       "require": "./dist/index.js"
     },
-    "./materials-meta": {
-      "import": "./dist/materials-meta.js",
-      "types": "./dist/materials-meta.d.ts",
-      "require": "./dist/materials-meta.js"
+    "./meta": {
+      "import": "./dist/meta.js",
+      "types": "./dist/meta.d.ts",
+      "require": "./dist/meta.js"
     }
   },
   "scripts": {
