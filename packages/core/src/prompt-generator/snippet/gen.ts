@@ -1,4 +1,4 @@
-import type { IMaterialsProtocol } from '../../material';
+import type { IMaterialsProtocol } from '../../material/materials-protocol';
 import type { NodeSchema } from '../../protocols/schema';
 import { getSnippetsInfo } from './extract';
 

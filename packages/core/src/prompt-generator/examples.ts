@@ -1,4 +1,4 @@
-import type { IExample } from '../material';
+import type { IExample } from '../material/materials-meta';
 import type { CardSchema } from '../protocols';
 
 export interface IGenPromptExample {

@@ -1,4 +1,4 @@
-import type { IMaterialsProtocol } from '../../material';
+import type { IMaterialsProtocol } from '../../material/materials-protocol';
 
 export interface IUsefulPropInfo {
   property: string;

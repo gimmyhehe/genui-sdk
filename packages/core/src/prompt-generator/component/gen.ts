@@ -1,4 +1,4 @@
-import type { IFunctionInfo, IMaterialsProtocol } from '../../material';
+import type { IFunctionInfo, IMaterialsProtocol } from '../../material/materials-protocol';
 import { getComponentsInfo } from './extract';
 
 export interface IGenPromptComponentProperty {

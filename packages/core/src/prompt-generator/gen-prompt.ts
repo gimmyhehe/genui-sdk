@@ -1,4 +1,4 @@
-import type { IMaterialsMeta } from '../material';
+import type { IMaterialsMeta } from '../material/materials-meta';
 import { genCustomActionsPrompt, type IGenPromptAction } from './action';
 import { aboutThis } from './about-this';
 import { genComponentsPrompt, type IGenPromptComponent } from './component';
