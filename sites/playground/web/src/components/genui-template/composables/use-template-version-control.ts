@@ -1,4 +1,7 @@
 import { computed, ref } from 'vue';
+import type { ChatMessage } from '@opentiny/tiny-robot-kit';
+import type { ISchemaManualMessageItem, ISchemaManualEditRecord } from '../chat.types';
+import { formatDate, generateId } from '../../../utils';
 import {
   isRenderableSchema,
   findLatestSchemaCardInConversation,
@@ -6,25 +9,42 @@ import {
   groupSchemaVersionHistory,
   filterSchemaVersionHistoryForCard,
   resolveSchemaCardScopeId,
+  findSchemaCardByCardId,
+  findManualCardInMessages,
+  getMergeableManualSaveMessage,
+  getManualEdits,
+  syncManualCardLatestFields,
+  manualEditToCardSnapshot,
+  resolveSchemaVersionDiffOriginal,
+  resolveSchemaVersionDiffModified,
+  hasUnifiedDiffChanges,
 } from '../template-chat-utils';
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateConversation } from './use-template-conversation';
-import { useSchemaVersionWrite } from './use-schema-version-write';
 
-const historyDiffCardId = ref<string | null>(null);
+type VersionPreviewMode = 'live' | 'history-diff';
+
+const versionPreviewMode = ref<VersionPreviewMode>('live');
+
+const isSameSchema = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
 
 export function useTemplateVersionControl() {
   const {
     currentCardId,
-    adoptedCardId,
     currentSchema,
     currentPreviewSchema,
     setCurrentSchema,
     setCurrentPreviewSchema,
+    setCurrentCardId,
     applySchemaFromMessages,
   } = useTemplateSchema();
-  const { templateConversationState, messages } = useTemplateConversation();
-  const { writeNewVersion } = useSchemaVersionWrite();
+  const {
+    templateConversationState,
+    messages,
+    getMessageManager,
+    getCurrentConversation,
+    saveConversations,
+  } = useTemplateConversation();
 
   const latestSchemaCardId = computed(() => findLatestSchemaCardInConversation(messages.value)?.cardId ?? '');
 
@@ -67,23 +87,166 @@ export function useTemplateVersionControl() {
     () => flatSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value) ?? null,
   );
 
-  const isDiffMode = computed(
-    () => historyDiffCardId.value !== null && historyDiffCardId.value === currentCardId.value,
-  );
+  const isDiffMode = computed(() => versionPreviewMode.value === 'history-diff');
 
   const showReturnLatestButton = computed(() => {
     const cardId = currentCardId.value;
-    if (!cardId) {
+    if (!cardId || isLatestSchemaVersionCard(cardId)) {
       return false;
     }
-    if (adoptedCardId.value && cardId === adoptedCardId.value) {
-      return false;
+    const preview = currentPreviewSchema.value;
+    const committed = currentSchema.value;
+    if (preview == null || committed == null) {
+      return true;
     }
-    return !isLatestSchemaVersionCard(cardId);
+    return !isSameSchema(preview, committed);
   });
 
-  const clearHistoryDiffView = () => {
-    historyDiffCardId.value = null;
+  const isEditorReadOnly = computed(() => isDiffMode.value || showReturnLatestButton.value);
+
+  const schemaEditorDiffOriginal = computed(() => {
+    const entry = currentHistoryEntry.value;
+    if (!entry) {
+      return '{}';
+    }
+    return resolveSchemaVersionDiffOriginal(entry, flatSchemaVersionHistoryEntries.value);
+  });
+
+  const schemaEditorDiffModified = computed(() => {
+    const entry = currentHistoryEntry.value;
+    if (!entry) {
+      return '{}';
+    }
+    return resolveSchemaVersionDiffModified(entry);
+  });
+
+  const schemaEditorShowDiffView = computed(() => {
+    if (!isDiffMode.value || !currentHistoryEntry.value) {
+      return false;
+    }
+    return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
+  });
+
+  const getMessageByCardId = (cardId: string) => {
+    if (!cardId) {
+      return;
+    }
+
+    const msgs = getCurrentConversation()?.messages;
+    const aiCard = findSchemaCardByCardId(msgs, cardId);
+    if (aiCard) {
+      return aiCard;
+    }
+
+    const manualCard = findManualCardInMessages(msgs, cardId);
+    if (!manualCard) {
+      return;
+    }
+
+    const matchedEdit = getManualEdits(manualCard).find((edit) => edit.editId === cardId);
+    return matchedEdit ? manualEditToCardSnapshot(manualCard, matchedEdit) : manualCard;
+  };
+
+  const writeNewVersion = (
+    schemaPayload: Record<string, unknown>,
+    options: {
+      prevSchema?: Record<string, unknown>;
+      input?: string;
+      sourceCardId?: string;
+      sourceCardGeneratedTime?: string;
+      sourceCardInput?: string;
+    } = {},
+  ) => {
+    const messageMgr = getMessageManager();
+    const currentConversation = getCurrentConversation();
+    if (!messageMgr || !currentConversation) {
+      return null;
+    }
+
+    const prevSchema = options.prevSchema ?? currentSchema.value ?? {};
+    const prevSchemaStr = JSON.stringify(prevSchema);
+    const schemaStr = JSON.stringify(schemaPayload);
+    const generatedTime = formatDate(new Date());
+    const userInput = options.input?.trim();
+    const editRecord: ISchemaManualEditRecord = {
+      editId: generateId(),
+      schema: schemaStr,
+      prevSchema: prevSchemaStr,
+      generatedTime,
+      input: userInput ?? '',
+      inputType: userInput ? 'user' : 'manual_edit_save',
+    };
+
+    const attachSourceMetadata = (sourceCardId: string) => {
+      editRecord.sourceCardId = sourceCardId;
+      if (options.sourceCardInput?.trim()) {
+        editRecord.sourceCardInput = options.sourceCardInput.trim();
+      }
+      if (options.sourceCardGeneratedTime?.trim()) {
+        editRecord.sourceCardGeneratedTime = options.sourceCardGeneratedTime.trim();
+      }
+      const sourceCard = getMessageByCardId(sourceCardId);
+      if (!editRecord.sourceCardInput?.trim() && sourceCard?.input?.trim()) {
+        editRecord.sourceCardInput = sourceCard.input.trim();
+      }
+      if (!editRecord.sourceCardGeneratedTime?.trim() && sourceCard?.generatedTime?.trim()) {
+        editRecord.sourceCardGeneratedTime = sourceCard.generatedTime;
+      }
+    };
+
+    if (options.sourceCardId) {
+      attachSourceMetadata(options.sourceCardId);
+    }
+
+    const msgs = messageMgr.messages.value;
+    const mergeTarget = getMergeableManualSaveMessage(msgs);
+
+    let cardId: string;
+
+    if (mergeTarget) {
+      const { message: lastMessage, card } = mergeTarget;
+      card.edits = [...getManualEdits(card), editRecord];
+      syncManualCardLatestFields(card);
+      cardId = card.cardId;
+      lastMessage.messageId = cardId;
+    } else {
+      cardId = generateId();
+      const cardMessage: ISchemaManualMessageItem = {
+        type: 'schema-manual',
+        content: schemaStr,
+        input: editRecord.input,
+        inputType: editRecord.inputType,
+        cardId,
+        generatedTime,
+        schema: schemaStr,
+        prevSchema: prevSchemaStr,
+        edits: [editRecord],
+      };
+
+      const manualSaveMessage = {
+        role: 'assistant',
+        content: '',
+        messageId: cardId,
+        messages: [cardMessage],
+      } as ChatMessage;
+
+      msgs.push(manualSaveMessage);
+    }
+
+    messageMgr.messages.value = [...msgs];
+    currentConversation.messages = [...msgs];
+    currentConversation.updatedAt = Date.now();
+
+    setCurrentSchema(schemaPayload);
+    setCurrentPreviewSchema(schemaPayload);
+    setCurrentCardId(cardId);
+    saveConversations();
+
+    return cardId;
+  };
+
+  const resetVersionPreviewMode = () => {
+    versionPreviewMode.value = 'live';
   };
 
   const previewVersion = (
@@ -92,11 +255,10 @@ export function useTemplateVersionControl() {
     previewOptions: { diffFromHistory?: boolean } = {},
   ) => {
     currentCardId.value = cardId;
-    historyDiffCardId.value = previewOptions.diffFromHistory ? cardId : null;
+    versionPreviewMode.value = previewOptions.diffFromHistory ? 'history-diff' : 'live';
     setCurrentPreviewSchema(schema);
     if (isLatestSchemaVersionCard(cardId)) {
       setCurrentSchema(schema);
-      adoptedCardId.value = cardId;
     }
   };
 
@@ -105,7 +267,7 @@ export function useTemplateVersionControl() {
       return;
     }
     currentCardId.value = cardId;
-    clearHistoryDiffView();
+    resetVersionPreviewMode();
   };
 
   const resolvePrevSchema = () => {
@@ -149,7 +311,7 @@ export function useTemplateVersionControl() {
       return false;
     }
 
-    clearHistoryDiffView();
+    resetVersionPreviewMode();
     return true;
   };
 
@@ -164,26 +326,30 @@ export function useTemplateVersionControl() {
     applySchemaFromMessages(currentConversation?.messages, {
       clearIfMissing: !conversationState.loading,
     });
-    clearHistoryDiffView();
+    resetVersionPreviewMode();
   };
 
   const onSchemaRefresh = () => {
-    adoptedCardId.value = currentCardId.value;
-    clearHistoryDiffView();
+    resetVersionPreviewMode();
   };
 
   return {
-    historyDiffCardId,
     isDiffMode,
     showReturnLatestButton,
+    isEditorReadOnly,
+    schemaEditorDiffOriginal,
+    schemaEditorDiffModified,
+    schemaEditorShowDiffView,
     schemaVersionHistoryGroups,
     flatSchemaVersionHistoryEntries,
     currentHistoryEntry,
+    getMessageByCardId,
+    writeNewVersion,
     previewVersion,
     selectVersionCard,
     applyCurrentVersion,
     resetToLatestVersion,
     onSchemaRefresh,
-    clearHistoryDiffView,
+    resetVersionPreviewMode,
   };
 }

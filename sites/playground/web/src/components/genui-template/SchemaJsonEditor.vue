@@ -6,8 +6,7 @@ import {
   useMonacoPlaygroundTheme,
   type PlaygroundColorTheme,
 } from './composables/use-monaco-playground-theme';
-import { useTemplateSchema } from './composables/use-template-schema';
-import { useSchemaEditor } from './composables/use-schema-editor';
+import { useTemplateContext } from './composables';
 
 const props = withDefaults(defineProps<{
   theme: PlaygroundColorTheme | 'lite' | 'auto';
@@ -17,40 +16,47 @@ const props = withDefaults(defineProps<{
 });
 
 const monacoTheme = useMonacoPlaygroundTheme(() => props.theme);
-const { currentCardId } = useTemplateSchema();
-const {
-  schemaEditorText,
-  applyTextToPreview,
-  editorOptions,
-  isReadOnly,
-  schemaEditorShowDiffView,
-  schemaEditorDiffOriginal,
-  schemaEditorDiffModified,
-} = useSchemaEditor();
+const { schema, version, editor } = useTemplateContext();
+
+const editorOptions = computed(() => {
+  const readOnly = version.isEditorReadOnly.value;
+  return {
+    fontSize: 14,
+    minimap: { enabled: false },
+    automaticLayout: true,
+    folding: true,
+    foldingHighlight: true,
+    foldingStrategy: 'indentation',
+    formatOnPaste: !readOnly,
+    readOnly,
+    domReadOnly: readOnly,
+  };
+});
 
 const diffEditorKey = computed(() => {
   if (props.layout === 'sheet') {
-    return currentCardId.value
-      || `${schemaEditorDiffOriginal.value?.length}-${schemaEditorDiffModified.value?.length}`;
+    return schema.currentCardId.value
+      || `${version.schemaEditorDiffOriginal.value?.length}-${version.schemaEditorDiffModified.value?.length}`;
   }
-  return currentCardId.value;
+  return schema.currentCardId.value;
 });
 
-const codeEditorKey = computed(() => {
-  if (props.layout === 'sheet') {
-    return `${currentCardId.value}-${editorOptions.value.readOnly}`;
-  }
-  return `${currentCardId.value}-${isReadOnly.value}`;
-});
+const codeEditorKey = computed(() =>
+  `${schema.currentCardId.value}-${version.isEditorReadOnly.value}`,
+);
 
-const diffOriginal = computed(() => schemaEditorDiffOriginal.value || '{}');
-const diffModified = computed(() => schemaEditorDiffModified.value || schemaEditorText.value);
+const diffOriginal = computed(() => version.schemaEditorDiffOriginal.value || '{}');
+const diffModified = computed(() => version.schemaEditorDiffModified.value || editor.schemaEditorText.value);
+
+const handleTextUpdate = (value: string) => {
+  editor.applyTextToPreview(value, version.isEditorReadOnly.value);
+};
 </script>
 
 <template>
   <div :class="['schema-json-editor', `schema-json-editor--${layout}`]">
     <diff-editor
-      v-if="schemaEditorShowDiffView"
+      v-if="version.schemaEditorShowDiffView"
       :key="diffEditorKey"
       :original="diffOriginal"
       :value="diffModified"
@@ -61,11 +67,11 @@ const diffModified = computed(() => schemaEditorDiffModified.value || schemaEdit
     <code-editor
       v-else
       :key="codeEditorKey"
-      :value="schemaEditorText"
+      :value="editor.schemaEditorText"
       language="json"
       :theme="monacoTheme"
       :options="editorOptions"
-      @update:value="applyTextToPreview"
+      @update:value="handleTextUpdate"
     />
   </div>
 </template>

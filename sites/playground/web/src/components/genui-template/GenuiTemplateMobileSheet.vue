@@ -6,54 +6,30 @@ import { iconClose, iconTime } from '@opentiny/vue-icon';
 import SchemaVersionHistoryPanel from './SchemaVersionHistoryPanel.vue';
 import SchemaJsonEditor from './SchemaJsonEditor.vue';
 import SchemaPreviewToolbar from './SchemaPreviewToolbar.vue';
-import {
-  type PlaygroundColorTheme,
-} from './composables/use-monaco-playground-theme';
-import {
-  useTemplateActions,
-  useTemplateSchema,
-  useSchemaEditor,
-  useTemplateVersionControl,
-  useTemplateUi,
-} from './composables';
+import { type PlaygroundColorTheme } from './composables/use-monaco-playground-theme';
+import { useTemplateContext } from './composables';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 import { t } from '../../i18n';
 
-const props = defineProps<{
+defineProps<{
   theme: PlaygroundColorTheme;
 }>();
 
 const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
-
-const { currentPreviewSchema, currentPreviewSchemaComplete } = useTemplateSchema();
-const { schemaEditorSaveLoading, editorOptions, schemaEditorShowDiffView } = useSchemaEditor();
-const { showReturnLatestButton } = useTemplateVersionControl();
-const {
-  schemaHistoryVisible,
-  toggleSchemaHistoryPanel,
-  sheetVisible,
-  jsonEditorOpen,
-  mobileSheetPanelStyle,
-  onMaskClick,
-  onMobileSheetGrabTouchStart,
-} = useTemplateUi();
-const {
-  closeSchemaEditorView,
-  handleMobileJsonEditorOpen,
-  handleSaveSchemaEditor,
-  schemaEditorDirty,
-} = useTemplateActions();
+const { schema, version, editor, ui, actions } = useTemplateContext();
 
 const headerTitle = computed(() => {
-  if (!jsonEditorOpen.value) {
+  if (!ui.isMobileJsonOpen.value) {
     return t('templateEditor.previewRender');
   }
-  return schemaEditorShowDiffView.value ? t('templateEditor.viewChanges') : t('templateEditor.schemaJsonTitle');
+  return version.schemaEditorShowDiffView.value
+    ? t('templateEditor.viewChanges')
+    : t('templateEditor.schemaJsonTitle');
 });
 
 const toggleJsonEditor = () => {
-  handleMobileJsonEditorOpen(!jsonEditorOpen.value);
+  actions.handleMobileJsonEditorOpen(!ui.isMobileJsonOpen.value);
 };
 </script>
 
@@ -61,47 +37,47 @@ const toggleJsonEditor = () => {
   <Teleport to="body">
     <Transition name="schema-mobile-sheet">
       <div
-        v-show="sheetVisible"
+        v-show="ui.isMobileSheetOpen"
         class="schema-mobile-sheet"
         role="dialog"
         aria-modal="true"
         :aria-label="
-          jsonEditorOpen
-            ? schemaEditorShowDiffView
+          ui.isMobileJsonOpen
+            ? version.schemaEditorShowDiffView
               ? t('templateEditor.jsonEditorAria')
               : t('templateEditor.jsonPreviewAria')
             : t('templateEditor.jsonPreviewAria')
         "
       >
-        <div class="schema-mobile-sheet__mask" @click="onMaskClick" />
-        <div class="schema-mobile-sheet__panel" :style="mobileSheetPanelStyle">
-          <div class="schema-mobile-sheet__grab" @touchstart="onMobileSheetGrabTouchStart" />
+        <div class="schema-mobile-sheet__mask" @click="ui.onMaskClick" />
+        <div class="schema-mobile-sheet__panel" :style="ui.mobileSheetPanelStyle">
+          <div class="schema-mobile-sheet__grab" @touchstart="ui.onMobileSheetGrabTouchStart" />
           <div class="schema-mobile-sheet__header">
             <h3 class="schema-mobile-sheet__title">{{ headerTitle }}</h3>
             <div class="schema-mobile-sheet__header-actions">
               <tiny-button
-                v-if="jsonEditorOpen && schemaEditorDirty && !schemaEditorShowDiffView && !editorOptions.readOnly"
+                v-if="ui.isMobileJsonOpen && actions.schemaEditorDirty && !version.schemaEditorShowDiffView && !version.isEditorReadOnly"
                 type="primary"
                 size="small"
                 round
-                :loading="schemaEditorSaveLoading"
-                @click="handleSaveSchemaEditor"
+                :loading="editor.schemaEditorSaveLoading"
+                @click="actions.handleSaveSchemaEditor"
               >
                 {{ t('templateEditor.save') }}
               </tiny-button>
               <tiny-button
                 type="text"
                 class="genui-schema-toolbar-close-btn"
-                :class="{ 'is-active': schemaHistoryVisible }"
+                :class="{ 'is-active': ui.isHistoryPanelOpen }"
                 :icon="TinyIconTime"
                 :aria-label="t('templateEditor.history')"
                 :title="t('templateEditor.history')"
-                @click="toggleSchemaHistoryPanel"
+                @click="ui.toggleHistoryPanel"
               />
               <button
                 type="button"
                 class="schema-mobile-sheet__icon-btn"
-                :class="{ 'is-active': jsonEditorOpen }"
+                :class="{ 'is-active': ui.isMobileJsonOpen }"
                 :aria-label="t('templateEditor.viewJson')"
                 :title="t('templateEditor.viewJson')"
                 @click="toggleJsonEditor"
@@ -113,33 +89,33 @@ const toggleJsonEditor = () => {
                 class="genui-schema-toolbar-close-btn"
                 :icon="TinyCloseIcon"
                 :aria-label="t('templateEditor.close')"
-                @click="closeSchemaEditorView"
+                @click="actions.closeSchemaEditorView"
               />
             </div>
           </div>
           <div
-            :class="['schema-mobile-sheet__body', { 'schema-mobile-sheet__body--with-footer': showReturnLatestButton }]"
+            :class="['schema-mobile-sheet__body', { 'schema-mobile-sheet__body--with-footer': version.showReturnLatestButton }]"
           >
             <div
-              v-if="currentPreviewSchema"
-              v-show="!jsonEditorOpen"
+              v-if="schema.currentPreviewSchema"
+              v-show="!ui.isMobileJsonOpen"
               class="schema-mobile-sheet__preview schema-mobile-sheet__preview--solo"
             >
               <schema-renderer
                 class="schema-mobile-sheet-renderer"
-                :content="currentPreviewSchema"
+                :content="schema.currentPreviewSchema"
                 :generating="false"
-                :isJsonComplete="currentPreviewSchemaComplete"
+                :isJsonComplete="schema.currentPreviewSchemaComplete"
               />
             </div>
             <Transition name="schema-mobile-json">
-              <div v-show="jsonEditorOpen" class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer">
+              <div v-show="ui.isMobileJsonOpen" class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer">
                 <schema-json-editor :theme="theme" layout="sheet" />
               </div>
             </Transition>
             <schema-version-history-panel :theme="theme" />
           </div>
-          <schema-preview-toolbar v-if="showReturnLatestButton" variant="mobile-footer" />
+          <schema-preview-toolbar v-if="version.showReturnLatestButton" variant="mobile-footer" />
         </div>
       </div>
     </Transition>

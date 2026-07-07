@@ -3,13 +3,8 @@ import { computed } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
 import SchemaVersionCard from './SchemaVersionCard.vue';
 import { useIsMobile } from '../../use-mobile';
-import { useTemplateConversation } from './composables/use-template-conversation';
-import { useSchemaVersionWrite } from './composables/use-schema-version-write';
+import { useTemplateContext } from './composables';
 import { rebuildSchemaFromCard } from './template-chat-utils';
-
-const emit = defineEmits<{
-  'schema-version-toggle': [schema: Record<string, unknown> | null, cardId: string];
-}>();
 
 const props = defineProps<{
   itemProps: any;
@@ -19,8 +14,7 @@ const props = defineProps<{
 }>();
 
 const { isMobile } = useIsMobile();
-const { messages } = useTemplateConversation();
-const { getMessageByCardId } = useSchemaVersionWrite();
+const { conversation, version, actions } = useTemplateContext();
 
 const generating = computed(() => !props.itemProps?.generatedTime);
 
@@ -41,14 +35,9 @@ const handleSchemaVersionCardClick = (cardId: string) => {
     return;
   }
 
-  const card = getMessageByCardId(cardId);
-  const schema = card ? rebuildSchemaFromCard(card, { messages: messages.value }) : null;
-  if (schema && card) {
-    emit('schema-version-toggle', schema, cardId);
-    return;
-  }
-
-  emit('schema-version-toggle', null, cardId);
+  const card = version.getMessageByCardId(cardId);
+  const schema = card ? rebuildSchemaFromCard(card, { messages: conversation.messages.value }) : null;
+  actions.handleSchemaVersionToggle(schema, cardId);
 };
 </script>
 

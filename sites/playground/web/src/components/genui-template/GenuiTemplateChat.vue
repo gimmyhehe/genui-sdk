@@ -46,10 +46,6 @@ const props = defineProps<{
   messages?: IMessage[];
 }>();
 
-const emit = defineEmits<{
-  'schema-version-toggle': [schema: Record<string, unknown> | null, cardId: string];
-}>();
-
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
@@ -205,8 +201,6 @@ const createSchemaMessageRenderer = (type: 'json-patch' | 'schema-card' | 'schem
     type,
     prevSchema: prevSchema.value,
     errorMessagesMap: errorMessagesMap.value,
-    onSchemaVersionToggle: (schema: Record<string, unknown> | null, cardId: string) =>
-      emit('schema-version-toggle', schema, cardId),
   });
 
 const messageRenderers = {

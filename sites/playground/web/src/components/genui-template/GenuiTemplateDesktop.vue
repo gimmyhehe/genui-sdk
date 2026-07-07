@@ -7,47 +7,26 @@ import GenuiTemplateChat from './GenuiTemplateChat.vue';
 import SchemaVersionHistoryPanel from './SchemaVersionHistoryPanel.vue';
 import SchemaJsonEditor from './SchemaJsonEditor.vue';
 import SchemaPreviewToolbar from './SchemaPreviewToolbar.vue';
-import { useTemplateSchema } from './composables/use-template-schema';
-import {
-  useTemplateActions,
-  useSchemaEditor,
-  useTemplateUi,
-  useTemplateConversation,
-} from './composables';
+import { useTemplateContext } from './composables';
 import { isRenderableSchema } from './template-chat-utils';
 import { t } from '../../i18n';
 
-const props = defineProps<{
+defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
 
 const TinyCloseIcon = iconClose();
-
-const { currentSchema, currentPreviewSchema, currentCardId } = useTemplateSchema();
-const {
-  schemaEditorSaveLoading,
-  isReadOnly: isSchemaEditorReadOnly,
-  schemaEditorShowDiffView,
-} = useSchemaEditor();
-const { rendererPanelVisible, schemaEditorVisible } = useTemplateUi();
-const { isTemplateInit } = useTemplateConversation();
-
-const {
-  closeSchemaEditorView,
-  handleSaveSchemaEditor,
-  handleSchemaVersionToggle,
-  schemaEditorDirty,
-} = useTemplateActions();
+const { schema, conversation, version, editor, ui, actions } = useTemplateContext();
 
 const rendererSchema = computed(() => {
-  const schema = currentPreviewSchema.value ?? currentSchema.value;
-  return isRenderableSchema(schema) ? schema : null;
+  const preview = schema.currentPreviewSchema.value ?? schema.currentSchema.value;
+  return isRenderableSchema(preview) ? preview : null;
 });
 
 const rendererSchemaKey = computed(() => {
-  const schema = rendererSchema.value as Record<string, unknown> | null;
-  const componentName = schema?.componentName ?? 'schema';
-  return `${currentCardId.value || 'preview'}-${String(componentName)}`;
+  const preview = rendererSchema.value as Record<string, unknown> | null;
+  const componentName = preview?.componentName ?? 'schema';
+  return `${schema.currentCardId.value || 'preview'}-${String(componentName)}`;
 });
 </script>
 
@@ -55,24 +34,23 @@ const rendererSchemaKey = computed(() => {
   <div class="genui-schema-template">
     <div class="genui-schema-template-item chat-container">
       <genui-template-chat
-        v-if="isTemplateInit"
-        v-show="!schemaEditorVisible"
+        v-if="conversation.isTemplateInit"
+        v-show="!ui.schemaEditorVisible"
         class="genui-template-chat"
-        @schema-version-toggle="handleSchemaVersionToggle"
       />
-      <div class="schema-version-container" v-show="schemaEditorVisible">
+      <div class="schema-version-container" v-show="ui.schemaEditorVisible">
         <div class="schema-version-container__header">
           <span class="schema-version-container__title">
-            {{ schemaEditorShowDiffView ? t('templateEditor.schemaDiffTitle') : t('templateEditor.schemaJsonTitle') }}
+            {{ version.schemaEditorShowDiffView ? t('templateEditor.schemaDiffTitle') : t('templateEditor.schemaJsonTitle') }}
           </span>
           <div class="schema-version-container__header-actions">
             <tiny-button
-              v-if="schemaEditorDirty && !isSchemaEditorReadOnly"
+              v-if="actions.schemaEditorDirty && !version.isEditorReadOnly"
               type="primary"
               size="small"
               round
-              :loading="schemaEditorSaveLoading"
-              @click="handleSaveSchemaEditor"
+              :loading="editor.schemaEditorSaveLoading"
+              @click="actions.handleSaveSchemaEditor"
             >
               {{ t('templateEditor.save') }}
             </tiny-button>
@@ -81,14 +59,14 @@ const rendererSchemaKey = computed(() => {
               class="genui-schema-toolbar-close-btn"
               :icon="TinyCloseIcon"
               :aria-label="t('templateEditor.close')"
-              @click="closeSchemaEditorView"
+              @click="actions.closeSchemaEditorView"
             />
           </div>
         </div>
         <schema-json-editor :theme="theme" layout="panel" />
       </div>
     </div>
-    <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && rendererPanelVisible">
+    <div class="genui-schema-template-item renderer-container" v-if="rendererSchema && ui.rendererPanelVisible">
       <div class="renderer-container-wrapper">
         <schema-preview-toolbar variant="desktop" />
         <div class="schema-renderer-body">

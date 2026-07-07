@@ -2,7 +2,7 @@ import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { LLMConfig } from './chat.types';
 import { useTemplateConversation } from './composables/use-template-conversation';
 import { useTemplateSchema } from './composables/use-template-schema';
-import { useSchemaVersionWrite } from './composables/use-schema-version-write';
+import { useTemplateVersionControl } from './composables/use-template-version-control';
 
 export interface UseTemplateOptions {
   url: string;
@@ -28,13 +28,12 @@ export default function useTemplate(options?: UseTemplateOptions) {
 
   const conversation = useTemplateConversation();
   const schema = useTemplateSchema();
-  const { getMessageByCardId } = useSchemaVersionWrite();
+  const { getMessageByCardId } = useTemplateVersionControl();
 
   const resetEmptyTemplateSchema = () => {
     schema.setCurrentSchema(null);
     schema.setCurrentPreviewSchema(null);
     schema.setCurrentCardId('');
-    schema.adoptedCardId.value = '';
   };
 
   const createTemplate = () => {
@@ -74,11 +73,9 @@ export default function useTemplate(options?: UseTemplateOptions) {
     currentPreviewSchema: schema.currentPreviewSchema,
     currentPreviewSchemaComplete: schema.currentPreviewSchemaComplete,
     currentCardId: schema.currentCardId,
-    adoptedCardId: schema.adoptedCardId,
     setCurrentPreviewSchema: schema.setCurrentPreviewSchema,
     setCurrentSchema: schema.setCurrentSchema,
     setCurrentCardId: schema.setCurrentCardId,
-    setAdoptedCardId: schema.setAdoptedCardId,
     getCurrentCardId: schema.getCurrentCardId,
     applySchemaFromMessages: schema.applySchemaFromMessages,
     createTemplate,

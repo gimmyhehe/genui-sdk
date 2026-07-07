@@ -1,21 +1,25 @@
 import { computed, ref } from 'vue';
-import { useIsMobile } from '../../../use-mobile';
+
+type MobileSheetMode = 'closed' | 'preview' | 'json';
+type SidePanel = 'history';
 
 const rendererPanelVisible = ref(true);
 const schemaEditorVisible = ref(false);
+const mobileSheetMode = ref<MobileSheetMode>('closed');
+const sidePanel = ref<SidePanel | null>(null);
 
 const MOBILE_SHEET_DEFAULT_HEIGHT_VH = 64;
 const MOBILE_SHEET_MIN_HEIGHT_VH = 42;
 const MOBILE_SHEET_MAX_HEIGHT_VH = 92;
 
-const sheetVisible = ref(false);
-const jsonEditorOpen = ref(false);
 const mobileSheetHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
 const mobileSheetDragStartY = ref(0);
 const mobileSheetDragStartHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
 const mobileSheetDragging = ref(false);
 
-const schemaHistoryVisible = ref(false);
+const isMobileSheetOpen = computed(() => mobileSheetMode.value !== 'closed');
+const isMobileJsonOpen = computed(() => mobileSheetMode.value === 'json');
+const isHistoryPanelOpen = computed(() => sidePanel.value === 'history');
 
 const mobileSheetPanelStyle = computed(() => ({
   height: `${mobileSheetHeightVh.value}vh`,
@@ -54,8 +58,6 @@ function handleMobileSheetDragEnd() {
 }
 
 export function useTemplateUi() {
-  const { isMobile } = useIsMobile();
-
   const openEditor = () => {
     schemaEditorVisible.value = true;
   };
@@ -68,12 +70,11 @@ export function useTemplateUi() {
     schemaEditorVisible.value = !schemaEditorVisible.value;
   };
 
-  const closeRendererPanelUi = () => {
+  const closeRendererPanel = () => {
     rendererPanelVisible.value = false;
   };
 
-  const resetEditorUi = () => {
-    schemaEditorVisible.value = false;
+  const showRendererPanel = () => {
     rendererPanelVisible.value = true;
   };
 
@@ -98,157 +99,67 @@ export function useTemplateUi() {
   };
 
   const openSheet = () => {
-    sheetVisible.value = true;
-    jsonEditorOpen.value = false;
+    mobileSheetMode.value = 'preview';
     resetMobileSheetHeight({ resetDragging: false });
   };
 
   const closeSheet = () => {
-    sheetVisible.value = false;
-    jsonEditorOpen.value = false;
+    mobileSheetMode.value = 'closed';
     resetMobileSheetHeight();
     disposeMobileSheetDrag();
   };
 
-  const setJsonEditorOpenState = (open: boolean) => {
-    jsonEditorOpen.value = open;
+  const setMobileJsonOpen = (open: boolean) => {
+    if (mobileSheetMode.value === 'closed') {
+      return;
+    }
+    mobileSheetMode.value = open ? 'json' : 'preview';
   };
 
   const onMaskClick = () => {
-    if (jsonEditorOpen.value) {
-      jsonEditorOpen.value = false;
+    if (mobileSheetMode.value === 'json') {
+      mobileSheetMode.value = 'preview';
     }
   };
 
-  const resetMobileUi = () => {
-    jsonEditorOpen.value = false;
+  const toggleHistoryPanel = () => {
+    sidePanel.value = sidePanel.value === 'history' ? null : 'history';
   };
 
-  const toggleSchemaHistoryPanel = () => {
-    schemaHistoryVisible.value = !schemaHistoryVisible.value;
-  };
-
-  const closeSchemaHistoryPanel = () => {
-    schemaHistoryVisible.value = false;
-  };
-
-  const resetHistoryUi = () => {
-    schemaHistoryVisible.value = false;
-  };
-
-  const closeSchemaEditor = (revertUnsavedChanges: () => void) => {
-    revertUnsavedChanges();
-    if (isMobile.value) {
-      closeSheet();
-    } else {
-      closeEditor();
-    }
-  };
-
-  const closeRendererPanel = (revertUnsavedChanges: () => void) => {
-    closeRendererPanelUi();
-    closeSchemaEditor(revertUnsavedChanges);
-  };
-
-  const toggleDesktopSchemaEditor = (actions: {
-    revertUnsavedChanges: () => void;
-    syncBaseline: () => void;
-  }) => {
-    if (schemaEditorVisible.value) {
-      actions.revertUnsavedChanges();
-    } else {
-      actions.syncBaseline();
-    }
-    toggleEditor();
-  };
-
-  const setJsonEditorOpen = (
-    open: boolean,
-    actions: { revertUnsavedChanges: () => void; syncBaseline: () => void },
-  ) => {
-    if (open) {
-      actions.syncBaseline();
-    } else {
-      actions.revertUnsavedChanges();
-    }
-    setJsonEditorOpenState(open);
-  };
-
-  const afterVersionPreview = (actions: { syncBaseline: () => void }) => {
-    rendererPanelVisible.value = true;
-    if (isMobile.value) {
-      openSheet();
-      actions.syncBaseline();
-      return;
-    }
-    if (schemaEditorVisible.value) {
-      actions.syncBaseline();
-    }
-  };
-
-  const openEditorAfterHistorySelect = (actions: { syncBaseline: () => void }) => {
-    actions.syncBaseline();
-    if (isMobile.value) {
-      setJsonEditorOpenState(true);
-    } else {
-      openEditor();
-    }
-  };
-
-  const handleEscape = (actions: {
-    revertUnsavedChanges: () => void;
-    closeSchemaEditorView: () => void;
-    closeJsonEditor: () => void;
-  }) => {
-    if (isMobile.value && sheetVisible.value && jsonEditorOpen.value) {
-      actions.closeJsonEditor();
-      return true;
-    }
-    if (isMobile.value && sheetVisible.value) {
-      actions.closeSchemaEditorView();
-      return true;
-    }
-    if (schemaEditorVisible.value) {
-      actions.closeSchemaEditorView();
-      return true;
-    }
-    return false;
+  const closeHistoryPanel = () => {
+    sidePanel.value = null;
   };
 
   const resetUi = () => {
-    resetEditorUi();
-    resetMobileUi();
-    closeSheet();
-    resetHistoryUi();
+    schemaEditorVisible.value = false;
+    rendererPanelVisible.value = true;
+    mobileSheetMode.value = 'closed';
+    sidePanel.value = null;
+    resetMobileSheetHeight();
+    disposeMobileSheetDrag();
   };
 
   return {
     rendererPanelVisible,
     schemaEditorVisible,
-    sheetVisible,
-    jsonEditorOpen,
+    mobileSheetMode,
+    isMobileSheetOpen,
+    isMobileJsonOpen,
+    isHistoryPanelOpen,
     mobileSheetPanelStyle,
-    schemaHistoryVisible,
     openEditor,
     closeEditor,
     toggleEditor,
-    closeRendererPanelUi,
+    closeRendererPanel,
+    showRendererPanel,
     onMobileSheetGrabTouchStart,
     openSheet,
     closeSheet,
-    setJsonEditorOpenState,
+    setMobileJsonOpen,
     onMaskClick,
     resetMobileSheetHeight,
-    toggleSchemaHistoryPanel,
-    closeSchemaHistoryPanel,
-    closeSchemaEditor,
-    closeRendererPanel,
-    toggleDesktopSchemaEditor,
-    setJsonEditorOpen,
-    afterVersionPreview,
-    openEditorAfterHistorySelect,
-    handleEscape,
+    toggleHistoryPanel,
+    closeHistoryPanel,
     resetUi,
-    resetMobileUi,
   };
 }

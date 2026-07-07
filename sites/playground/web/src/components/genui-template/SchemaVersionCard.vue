@@ -10,8 +10,7 @@ import {
 } from './template-chat-utils';
 import { resolveManualEditSaveTitle } from './template-chat-utils/schema-input-ids';
 import type { SchemaManualInputType } from './chat.types';
-import { useTemplateConversation } from './composables/use-template-conversation';
-import { useSchemaVersionWrite } from './composables/use-schema-version-write';
+import { useTemplateContext } from './composables';
 import { useIsMobile } from '../../use-mobile';
 import docCardIcon from '../../assets/images/card.svg';
 import docEditIcon from '../../assets/images/card-edit.svg';
@@ -37,8 +36,7 @@ defineOptions({ inheritAttrs: false });
 const props = defineProps<IRendererProps>();
 const emit = defineEmits(['card-select']);
 
-const { messages } = useTemplateConversation();
-const { getMessageByCardId } = useSchemaVersionWrite();
+const { conversation, version } = useTemplateContext();
 
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
@@ -75,12 +73,12 @@ const handleClick = () => {
 };
 
 const handleDev = () => {
-  const cardMessage = getMessageByCardId(props.cardId);
+  const cardMessage = version.getMessageByCardId(props.cardId);
   if (!cardMessage || cardMessage.type !== 'json-patch') {
     return;
   }
 
-  const prevSchemaStr = resolveJsonPatchPrevSchemaString(cardMessage, messages.value);
+  const prevSchemaStr = resolveJsonPatchPrevSchemaString(cardMessage, conversation.messages.value);
   const baseline = parseSchemaJson(prevSchemaStr);
   const operations = parseJsonPatchOperations(cardMessage.content);
   if (!baseline || !operations) {

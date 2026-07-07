@@ -10,7 +10,6 @@ const currentSchema = shallowRef<any>(null);
 const currentPreviewSchema = shallowRef<any>(null);
 const currentPreviewSchemaComplete = ref(true);
 const currentCardId = ref<string>('');
-const adoptedCardId = ref<string>('');
 
 export function useTemplateSchema() {
   const { setTemplateSchema } = useTemplateConversation();
@@ -31,10 +30,6 @@ export function useTemplateSchema() {
     currentCardId.value = cardId;
   };
 
-  const setAdoptedCardId = (cardId: string) => {
-    adoptedCardId.value = cardId;
-  };
-
   const getCurrentCardId = () => currentCardId.value;
 
   const applySchemaFromMessages = (
@@ -52,7 +47,6 @@ export function useTemplateSchema() {
         currentPreviewSchemaComplete.value = true;
         setTemplateSchema(resolved.schema);
         currentCardId.value = resolved.cardId;
-        adoptedCardId.value = resolved.cardId;
         return true;
       }
     }
@@ -61,7 +55,6 @@ export function useTemplateSchema() {
       currentSchema.value = null;
       currentPreviewSchema.value = null;
       currentCardId.value = '';
-      adoptedCardId.value = '';
     }
 
     return false;
@@ -72,11 +65,9 @@ export function useTemplateSchema() {
     currentPreviewSchema,
     currentPreviewSchemaComplete,
     currentCardId,
-    adoptedCardId,
     setCurrentPreviewSchema,
     setCurrentSchema,
     setCurrentCardId,
-    setAdoptedCardId,
     getCurrentCardId,
     applySchemaFromMessages,
   };

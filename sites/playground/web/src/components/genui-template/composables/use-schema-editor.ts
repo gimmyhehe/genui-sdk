@@ -1,61 +1,9 @@
-import { computed, ref } from 'vue';
-import {
-  resolveSchemaVersionDiffOriginal,
-  resolveSchemaVersionDiffModified,
-  hasUnifiedDiffChanges,
-} from '../template-chat-utils';
+import { ref } from 'vue';
 import { useTemplateSchema } from './use-template-schema';
-import { useTemplateVersionControl } from './use-template-version-control';
 
 const schemaEditorText = ref('{}');
 const schemaEditorBaseline = ref('{}');
 const schemaEditorSaveLoading = ref(false);
-
-const isReadOnly = computed(() => {
-  const { isDiffMode, showReturnLatestButton } = useTemplateVersionControl();
-  return isDiffMode.value || showReturnLatestButton.value;
-});
-
-const schemaEditorDiffOriginal = computed(() => {
-  const { currentHistoryEntry, flatSchemaVersionHistoryEntries } = useTemplateVersionControl();
-  const entry = currentHistoryEntry.value;
-  if (!entry) {
-    return '{}';
-  }
-  return resolveSchemaVersionDiffOriginal(entry, flatSchemaVersionHistoryEntries.value);
-});
-
-const schemaEditorDiffModified = computed(() => {
-  const { currentHistoryEntry } = useTemplateVersionControl();
-  const entry = currentHistoryEntry.value;
-  if (!entry) {
-    return schemaEditorText.value;
-  }
-  return resolveSchemaVersionDiffModified(entry);
-});
-
-const schemaEditorShowDiffView = computed(() => {
-  const { isDiffMode, currentHistoryEntry } = useTemplateVersionControl();
-  if (!isDiffMode.value || !currentHistoryEntry.value) {
-    return false;
-  }
-  return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
-});
-
-const editorOptions = computed(() => {
-  const readOnly = isReadOnly.value;
-  return {
-    fontSize: 14,
-    minimap: { enabled: false },
-    automaticLayout: true,
-    folding: true,
-    foldingHighlight: true,
-    foldingStrategy: 'indentation',
-    formatOnPaste: !readOnly,
-    readOnly,
-    domReadOnly: readOnly,
-  };
-});
 
 const hasUnsavedChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
 
@@ -86,8 +34,8 @@ const revertUnsavedChanges = () => {
   }
 };
 
-const applyTextToPreview = (value: string) => {
-  if (isReadOnly.value) {
+const applyTextToPreview = (value: string, readOnly = false) => {
+  if (readOnly) {
     return;
   }
   schemaEditorText.value = value;
@@ -119,16 +67,11 @@ export function useSchemaEditor() {
     schemaEditorText,
     schemaEditorBaseline,
     schemaEditorSaveLoading,
-    isReadOnly,
     hasUnsavedChanges,
     syncBaseline,
     revertUnsavedChanges,
     applyTextToPreview,
-    editorOptions,
     parseEditorSchema,
     parseBaselineSchema,
-    schemaEditorDiffOriginal,
-    schemaEditorDiffModified,
-    schemaEditorShowDiffView,
   };
 }

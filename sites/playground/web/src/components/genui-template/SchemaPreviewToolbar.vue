@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { TinyButton } from '@opentiny/vue';
 import { iconClose, iconTime } from '@opentiny/vue-icon';
-import {
-  useTemplateActions,
-  useTemplateVersionControl,
-  useTemplateUi,
-  useSchemaEditor,
-} from './composables';
+import { useTemplateContext } from './composables';
 import viewSchemaIcon from '../../assets/images/view-schema.svg';
 import { t } from '../../i18n';
 
@@ -16,55 +11,47 @@ withDefaults(defineProps<{
 
 const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
-const { showReturnLatestButton } = useTemplateVersionControl();
-const { schemaHistoryVisible, toggleSchemaHistoryPanel } = useTemplateUi();
-const { schemaEditorShowDiffView } = useSchemaEditor();
-const {
-  toggleSchemaEditor,
-  closeRendererPanel,
-  applyCurrentVersion,
-  resetToLatestVersion,
-} = useTemplateActions();
+const { version, ui, actions } = useTemplateContext();
 </script>
 
 <template>
   <div v-if="variant === 'desktop'" class="schema-preview-toolbar schema-preview-toolbar--desktop">
-    <button type="button" class="schema-toggle-text" @click="toggleSchemaEditor">
+    <button type="button" class="schema-toggle-text" @click="actions.toggleSchemaEditor">
       <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
-      {{ schemaEditorShowDiffView ? t('templateEditor.viewChanges') : t('templateEditor.viewJson') }}
+      {{ version.schemaEditorShowDiffView ? t('templateEditor.viewChanges') : t('templateEditor.viewJson') }}
     </button>
     <div class="schema-preview-toolbar__actions">
-      <template v-if="showReturnLatestButton">
-        <tiny-button round @click="applyCurrentVersion">
+      <template v-if="version.showReturnLatestButton">
+        <tiny-button round @click="actions.applyCurrentVersion">
           {{ t('templateEditor.applyVersion') }}
         </tiny-button>
-        <tiny-button type="primary" round @click="resetToLatestVersion">
+        <tiny-button type="primary" round @click="actions.resetToLatestVersion">
           {{ t('templateEditor.returnLatest') }}
         </tiny-button>
       </template>
       <tiny-button
         type="text"
         class="genui-schema-toolbar-close-btn"
-        :class="{ 'is-active': schemaHistoryVisible }"
+        :class="{ 'is-active': ui.isHistoryPanelOpen }"
         :icon="TinyIconTime"
         :aria-label="t('templateEditor.history')"
         :title="t('templateEditor.history')"
-        @click="toggleSchemaHistoryPanel"
+        @click="ui.toggleHistoryPanel"
       />
       <tiny-button
         type="text"
         class="genui-schema-toolbar-close-btn"
         :icon="TinyCloseIcon"
         :aria-label="t('templateEditor.closePreview')"
-        @click="closeRendererPanel"
+        @click="actions.closeRendererPanel"
       />
     </div>
   </div>
   <div v-else class="schema-preview-toolbar schema-preview-toolbar--mobile-footer">
-    <tiny-button round class="schema-preview-toolbar__latest-btn" @click="applyCurrentVersion">
+    <tiny-button round class="schema-preview-toolbar__latest-btn" @click="actions.applyCurrentVersion">
       {{ t('templateEditor.applyVersion') }}
     </tiny-button>
-    <tiny-button type="primary" round class="schema-preview-toolbar__latest-btn" @click="resetToLatestVersion">
+    <tiny-button type="primary" round class="schema-preview-toolbar__latest-btn" @click="actions.resetToLatestVersion">
       {{ t('templateEditor.returnLatest') }}
     </tiny-button>
   </div>

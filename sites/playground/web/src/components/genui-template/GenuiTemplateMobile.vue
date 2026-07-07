@@ -1,24 +1,21 @@
 <script setup lang="ts">
 import GenuiTemplateChat from './GenuiTemplateChat.vue';
 import GenuiTemplateMobileSheet from './GenuiTemplateMobileSheet.vue';
-import { useTemplateActions } from './composables/use-template-actions';
-import { useTemplateConversation } from './composables/use-template-conversation';
+import { useTemplateContext } from './composables';
 
 defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
 }>();
 
-const { handleSchemaVersionToggle } = useTemplateActions();
-const { isTemplateInit } = useTemplateConversation();
+const { conversation } = useTemplateContext();
 </script>
 
 <template>
   <div class="genui-schema-template is-mobile">
     <div class="genui-schema-template-item chat-container">
       <genui-template-chat
-        v-if="isTemplateInit"
+        v-if="conversation.isTemplateInit"
         class="genui-template-chat"
-        @schema-version-toggle="handleSchemaVersionToggle"
       />
     </div>
     <genui-template-mobile-sheet :theme="theme" />
