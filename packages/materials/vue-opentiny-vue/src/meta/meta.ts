@@ -13,12 +13,7 @@ const baseMetaMaterials = [bundleJson, builtinJson, extendJson] as IMaterialsPro
 
 const standardMetaMaterials = [chartJson, ...baseMetaMaterials] as IMaterialsProtocol[];
 
-const MINI_RULES = [
-  '表单必须要有 `model` 属性，表单输入项（input/select/radio 等）必须设置 `modelValue` 的 `type` 为 `JSExpression` 且 `model` 为 `true`，且必须具有对应 `state` 状态字段，否则将不能交互',
-];
-
 const STANDARD_RULES = [
-  '表单必须要有 `model` 属性，表单输入项（input/select/radio 等）必须设置 `modelValue` 的 `type` 为 `JSExpression` 且 `model` 为 `true`，且必须具有对应 `state` 状态字段，否则将不能交互',
   '禁止设置饼图的 `settings.radius`',
 ];
 
@@ -39,5 +34,5 @@ export const miniMaterialsMeta = {
   wrapperComponent: 'TinyCard',
   whiteList: miniWhiteList,
   examples: filterExamples(['form', 'grid']),
-  rules: MINI_RULES,
+  rules: [],
 };
