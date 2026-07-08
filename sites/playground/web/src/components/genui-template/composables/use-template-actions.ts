@@ -7,14 +7,14 @@ import { useSchemaEditor } from './use-schema-editor';
 import { useTemplateUi } from './use-template-ui';
 
 export interface TemplateActionsDeps {
-  version: ReturnType<typeof useTemplateVersionControl>;
+  versionControl: ReturnType<typeof useTemplateVersionControl>;
   editor: ReturnType<typeof useSchemaEditor>;
   ui: ReturnType<typeof useTemplateUi>;
 }
 
 export function useTemplateActions(deps?: TemplateActionsDeps) {
   const { isMobile } = useIsMobile();
-  const version = deps?.version ?? useTemplateVersionControl();
+  const versionControl = deps?.versionControl ?? useTemplateVersionControl();
   const editor = deps?.editor ?? useSchemaEditor();
   const ui = deps?.ui ?? useTemplateUi();
 
@@ -33,7 +33,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
     } else {
       ui.closeEditor();
     }
-    version.resetVersionPreviewMode();
+    versionControl.resetVersionPreviewMode();
   };
 
   const closeRendererPanel = () => {
@@ -67,7 +67,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
     if (editor.hasUnsavedChanges()) {
       editor.revertUnsavedChanges();
     }
-    version.previewVersion(schema, cardId, options);
+    versionControl.previewVersion(schema, cardId, options);
     ui.showRendererPanel();
     if (isMobile.value) {
       ui.openSheet();
@@ -87,7 +87,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
       toggleSchemaVersion(schema, cardId);
       return;
     }
-    version.selectVersionCard(cardId);
+    versionControl.selectVersionCard(cardId);
   };
 
   const handleHistoryEntrySelect = (entry: ISchemaVersionHistoryEntry) => {
@@ -111,7 +111,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   };
 
   const applyCurrentVersion = () => {
-    if (!version.applyCurrentVersion()) {
+    if (!versionControl.applyCurrentVersion()) {
       return;
     }
     editor.syncBaseline();
@@ -129,7 +129,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
 
     editor.schemaEditorSaveLoading.value = true;
     try {
-      const saved = version.writeNewVersion(schema, { prevSchema: editor.parseBaselineSchema() });
+      const saved = versionControl.writeNewVersion(schema, { prevSchema: editor.parseBaselineSchema() });
       if (saved) {
         editor.syncBaseline();
         closeSchemaEditorView();
@@ -140,7 +140,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   };
 
   const resetToLatestVersion = () => {
-    version.resetToLatestVersion();
+    versionControl.resetToLatestVersion();
     editor.syncBaseline();
     if (isMobile.value && ui.isMobileJsonOpen.value) {
       ui.setMobileJsonOpen(false);
@@ -170,7 +170,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   };
 
   const shouldSyncEditorBaseline = () => {
-    if (version.schemaEditorShowDiffView.value || editor.hasUnsavedChanges()) {
+    if (versionControl.schemaEditorShowDiffView.value || editor.hasUnsavedChanges()) {
       return false;
     }
     return isJsonEditorActive.value;

@@ -17,13 +17,13 @@ defineProps<{
 
 const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
-const { schema, version, editor, ui, actions } = useTemplateContext();
+const { schema, versionControl, editor, ui, actions } = useTemplateContext();
 
 const headerTitle = computed(() => {
   if (!ui.isMobileJsonOpen.value) {
     return t('templateEditor.previewRender');
   }
-  return version.schemaEditorShowDiffView.value
+  return versionControl.schemaEditorShowDiffView.value
     ? t('templateEditor.viewChanges')
     : t('templateEditor.schemaJsonTitle');
 });
@@ -43,7 +43,7 @@ const toggleJsonEditor = () => {
         aria-modal="true"
         :aria-label="
           ui.isMobileJsonOpen
-            ? version.schemaEditorShowDiffView
+            ? versionControl.schemaEditorShowDiffView
               ? t('templateEditor.jsonEditorAria')
               : t('templateEditor.jsonPreviewAria')
             : t('templateEditor.jsonPreviewAria')
@@ -56,7 +56,7 @@ const toggleJsonEditor = () => {
             <h3 class="schema-mobile-sheet__title">{{ headerTitle }}</h3>
             <div class="schema-mobile-sheet__header-actions">
               <tiny-button
-                v-if="ui.isMobileJsonOpen && actions.schemaEditorDirty && !version.schemaEditorShowDiffView && !version.isEditorReadOnly"
+                v-if="ui.isMobileJsonOpen && actions.schemaEditorDirty && !versionControl.schemaEditorShowDiffView && !versionControl.isEditorReadOnly"
                 type="primary"
                 size="small"
                 round
@@ -94,7 +94,7 @@ const toggleJsonEditor = () => {
             </div>
           </div>
           <div
-            :class="['schema-mobile-sheet__body', { 'schema-mobile-sheet__body--with-footer': version.showReturnLatestButton }]"
+            :class="['schema-mobile-sheet__body', { 'schema-mobile-sheet__body--with-footer': versionControl.showReturnLatestButton }]"
           >
             <div
               v-if="schema.currentPreviewSchema"
@@ -115,7 +115,7 @@ const toggleJsonEditor = () => {
             </Transition>
             <schema-version-history-panel :theme="theme" />
           </div>
-          <schema-preview-toolbar v-if="version.showReturnLatestButton" variant="mobile-footer" />
+          <schema-preview-toolbar v-if="versionControl.showReturnLatestButton" variant="mobile-footer" />
         </div>
       </div>
     </Transition>

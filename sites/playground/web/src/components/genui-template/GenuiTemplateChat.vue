@@ -47,7 +47,7 @@ const props = defineProps<{
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
-const { schema, conversation, version } = useTemplateContext();
+const { schema, conversation, versionControl } = useTemplateContext();
 const {
   errorMessagesMap,
   handleSchemaJsonChanged,
@@ -167,7 +167,7 @@ const handleRefresh = ({ index }: { index: number }) => {
   }
   schema.setCurrentCardId(String(lastUserMessage?.messageId ?? generateId()));
 
-  version.onSchemaRefresh();
+  versionControl.onSchemaRefresh();
   send();
 };
 

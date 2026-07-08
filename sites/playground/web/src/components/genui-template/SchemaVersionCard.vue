@@ -36,7 +36,7 @@ defineOptions({ inheritAttrs: false });
 const props = defineProps<IRendererProps>();
 const emit = defineEmits(['card-select']);
 
-const { conversation, version } = useTemplateContext();
+const { conversation, versionControl } = useTemplateContext();
 
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
@@ -73,7 +73,7 @@ const handleClick = () => {
 };
 
 const handleDev = () => {
-  const cardMessage = version.getMessageByCardId(props.cardId);
+  const cardMessage = versionControl.getMessageByCardId(props.cardId);
   if (!cardMessage || cardMessage.type !== 'json-patch') {
     return;
   }

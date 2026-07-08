@@ -11,13 +11,13 @@ const props = defineProps<{
 }>();
 
 const TinyCloseIcon = iconClose();
-const { version, ui, actions } = useTemplateContext();
+const { versionControl, ui, actions } = useTemplateContext();
 
 const isDark = computed(() => props.theme === 'dark');
 const collapsedGroups = ref<Record<string, boolean>>({});
 
 watch(
-  () => version.schemaVersionHistoryGroups.value.map((group) => group.label),
+  () => versionControl.schemaVersionHistoryGroups.value.map((group) => group.label),
   (labels) => {
     for (const label of labels) {
       if (!(label in collapsedGroups.value)) {
@@ -56,9 +56,9 @@ const toggleGroup = (label: string) => {
       </header>
 
       <div class="schema-version-history-panel__body">
-        <template v-if="version.schemaVersionHistoryGroups.length">
+        <template v-if="versionControl.schemaVersionHistoryGroups.length">
           <section
-            v-for="group in version.schemaVersionHistoryGroups"
+            v-for="group in versionControl.schemaVersionHistoryGroups"
             :key="group.label"
             class="schema-version-history-panel__section"
           >

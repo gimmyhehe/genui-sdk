@@ -16,10 +16,10 @@ const props = withDefaults(defineProps<{
 });
 
 const monacoTheme = useMonacoPlaygroundTheme(() => props.theme);
-const { schema, version, editor } = useTemplateContext();
+const { schema, versionControl, editor } = useTemplateContext();
 
 const editorOptions = computed(() => {
-  const readOnly = version.isEditorReadOnly.value;
+  const readOnly = versionControl.isEditorReadOnly.value;
   return {
     fontSize: 14,
     minimap: { enabled: false },
@@ -36,27 +36,27 @@ const editorOptions = computed(() => {
 const diffEditorKey = computed(() => {
   if (props.layout === 'sheet') {
     return schema.currentCardId.value
-      || `${version.schemaEditorDiffOriginal.value?.length}-${version.schemaEditorDiffModified.value?.length}`;
+      || `${versionControl.schemaEditorDiffOriginal.value?.length}-${versionControl.schemaEditorDiffModified.value?.length}`;
   }
   return schema.currentCardId.value;
 });
 
 const codeEditorKey = computed(() =>
-  `${schema.currentCardId.value}-${version.isEditorReadOnly.value}`,
+  `${schema.currentCardId.value}-${versionControl.isEditorReadOnly.value}`,
 );
 
-const diffOriginal = computed(() => version.schemaEditorDiffOriginal.value || '{}');
-const diffModified = computed(() => version.schemaEditorDiffModified.value || editor.schemaEditorText.value);
+const diffOriginal = computed(() => versionControl.schemaEditorDiffOriginal.value || '{}');
+const diffModified = computed(() => versionControl.schemaEditorDiffModified.value || editor.schemaEditorText.value);
 
 const handleTextUpdate = (value: string) => {
-  editor.applyTextToPreview(value, version.isEditorReadOnly.value);
+  editor.applyTextToPreview(value, versionControl.isEditorReadOnly.value);
 };
 </script>
 
 <template>
   <div :class="['schema-json-editor', `schema-json-editor--${layout}`]">
     <diff-editor
-      v-if="version.schemaEditorShowDiffView"
+      v-if="versionControl.schemaEditorShowDiffView"
       :key="diffEditorKey"
       :original="diffOriginal"
       :value="diffModified"

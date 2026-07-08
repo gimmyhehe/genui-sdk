@@ -59,14 +59,15 @@ export class CustomModelProvider extends BaseModelProvider {
   }
 
   async chatStream(request: any, handler: { onData: any; onDone: any; onError: any }) {
-    const { onDone, onData } = handler;
+    const { onDone, onData, onError } = handler;
     const requestId = Math.random().toString(36).substring(2, 10);
     let chatMessage: IChatMessage | null = null;
     let lastUserInput = '';
+    let hasError = false;
 
     const lastUserMessage = getLastUserMessage(request.messages);
     if (!lastUserMessage) {
-      handler.onError?.(new Error(t('template.noUserMessageToReply')));
+      onError?.(new Error(t('template.noUserMessageToReply')));
       return;
     }
     const { content: input, messageId } = lastUserMessage;
@@ -200,19 +201,22 @@ export class CustomModelProvider extends BaseModelProvider {
         }
       }
     } catch (error) {
-      handler.onError?.(error);
+      hasError = true;
+      onError?.(error);
       throw error;
     } finally {
-      if (chatMessage) {
-        emitter.emit('notification', {
-          type: 'done',
-          delta: {},
-          chatMessage: structuredClone(toRaw(chatMessage)),
-          cardId: requestId,
-          input: lastUserInput,
-        });
+      if (!hasError) {
+        if (chatMessage) {
+          emitter.emit('notification', {
+            type: 'done',
+            delta: {},
+            chatMessage: structuredClone(toRaw(chatMessage)),
+            cardId: requestId,
+            input: lastUserInput,
+          });
+        }
+        onDone();
       }
-      onDone();
     }
   }
 

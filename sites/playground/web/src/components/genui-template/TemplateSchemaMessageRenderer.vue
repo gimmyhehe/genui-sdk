@@ -14,7 +14,7 @@ const props = defineProps<{
 }>();
 
 const { isMobile } = useIsMobile();
-const { conversation, version, actions } = useTemplateContext();
+const { conversation, versionControl, actions } = useTemplateContext();
 
 const generating = computed(() => !props.itemProps?.generatedTime);
 
@@ -35,7 +35,7 @@ const handleSchemaVersionCardClick = (cardId: string) => {
     return;
   }
 
-  const card = version.getMessageByCardId(cardId);
+  const card = versionControl.getMessageByCardId(cardId);
   const schema = card ? rebuildSchemaFromCard(card, { messages: conversation.messages.value }) : null;
   actions.handleSchemaVersionToggle(schema, cardId);
 };

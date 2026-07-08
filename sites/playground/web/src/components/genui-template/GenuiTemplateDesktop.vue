@@ -16,7 +16,7 @@ defineProps<{
 }>();
 
 const TinyCloseIcon = iconClose();
-const { schema, conversation, version, editor, ui, actions } = useTemplateContext();
+const { schema, conversation, versionControl, editor, ui, actions } = useTemplateContext();
 
 const rendererSchema = computed(() => {
   const preview = schema.currentPreviewSchema.value ?? schema.currentSchema.value;
@@ -41,11 +41,11 @@ const rendererSchemaKey = computed(() => {
       <div class="schema-version-container" v-show="ui.schemaEditorVisible">
         <div class="schema-version-container__header">
           <span class="schema-version-container__title">
-            {{ version.schemaEditorShowDiffView ? t('templateEditor.schemaDiffTitle') : t('templateEditor.schemaJsonTitle') }}
+            {{ versionControl.schemaEditorShowDiffView ? t('templateEditor.schemaDiffTitle') : t('templateEditor.schemaJsonTitle') }}
           </span>
           <div class="schema-version-container__header-actions">
             <tiny-button
-              v-if="actions.schemaEditorDirty && !version.isEditorReadOnly"
+              v-if="actions.schemaEditorDirty && !versionControl.isEditorReadOnly"
               type="primary"
               size="small"
               round

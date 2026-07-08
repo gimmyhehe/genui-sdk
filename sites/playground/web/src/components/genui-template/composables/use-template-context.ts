@@ -9,7 +9,7 @@ import { useTemplateActions } from './use-template-actions';
 export interface TemplateContext {
   schema: ReturnType<typeof useTemplateSchema>;
   conversation: ReturnType<typeof useTemplateConversation>;
-  version: ReturnType<typeof useTemplateVersionControl>;
+  versionControl: ReturnType<typeof useTemplateVersionControl>;
   editor: ReturnType<typeof useSchemaEditor>;
   ui: ReturnType<typeof useTemplateUi>;
   actions: ReturnType<typeof useTemplateActions>;
@@ -20,15 +20,15 @@ export const TemplateContextKey: InjectionKey<TemplateContext> = Symbol('Templat
 export function createTemplateContext(): TemplateContext {
   const schema = useTemplateSchema();
   const conversation = useTemplateConversation();
-  const version = useTemplateVersionControl();
+  const versionControl = useTemplateVersionControl();
   const editor = useSchemaEditor();
   const ui = useTemplateUi();
-  const actions = useTemplateActions({ version, editor, ui });
+  const actions = useTemplateActions({ versionControl, editor, ui });
 
   return {
     schema,
     conversation,
-    version,
+    versionControl,
     editor,
     ui,
     actions,

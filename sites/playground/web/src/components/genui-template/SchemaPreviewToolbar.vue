@@ -11,17 +11,17 @@ withDefaults(defineProps<{
 
 const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
-const { version, ui, actions } = useTemplateContext();
+const { versionControl, ui, actions } = useTemplateContext();
 </script>
 
 <template>
   <div v-if="variant === 'desktop'" class="schema-preview-toolbar schema-preview-toolbar--desktop">
     <button type="button" class="schema-toggle-text" @click="actions.toggleSchemaEditor">
       <img class="button-svg-icon" :src="viewSchemaIcon" alt="" />
-      {{ version.schemaEditorShowDiffView ? t('templateEditor.viewChanges') : t('templateEditor.viewJson') }}
+      {{ versionControl.schemaEditorShowDiffView ? t('templateEditor.viewChanges') : t('templateEditor.viewJson') }}
     </button>
     <div class="schema-preview-toolbar__actions">
-      <template v-if="version.showReturnLatestButton">
+      <template v-if="versionControl.showReturnLatestButton">
         <tiny-button round @click="actions.applyCurrentVersion">
           {{ t('templateEditor.applyVersion') }}
         </tiny-button>
