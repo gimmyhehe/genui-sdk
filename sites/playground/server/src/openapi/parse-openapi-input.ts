@@ -50,7 +50,10 @@ export async function parseOpenApiInput(
 ): Promise<OpenAPIV3.Document> {
   const content = await readSpecContent(openapi, policy);
   const raw = parseRawSpec(content) as OpenAPIV3.Document;
-  return (await SwaggerParser.validate(raw, { resolve: { external: false } })) as unknown as OpenAPIV3.Document;
+  return (await SwaggerParser.dereference(raw, {
+    resolve: { external: false },
+    dereference: { circular: 'ignore' },
+  })) as unknown as OpenAPIV3.Document;
 }
 
 function normalizeBaseUrl(url: string): string {
