@@ -1,4 +1,4 @@
-export { default as GenuiDefaultChat } from './GenuiChatWithMaterials.vue';
+export { default as GenuiLegacyChat } from './GenuiChatWithMaterials.vue';
 export * from '../chat/chat.types.js';
 export * from '../chat/injection-tokens.js';
 export * from '../chat/i18n/index.js';
