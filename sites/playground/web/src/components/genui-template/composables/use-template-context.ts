@@ -18,13 +18,20 @@ export interface TemplateContext {
 export const TemplateContextKey: InjectionKey<TemplateContext> = Symbol('TemplateContext');
 
 export function createTemplateContext(): TemplateContext {
+  const schema = useTemplateSchema();
+  const conversation = useTemplateConversation();
+  const version = useTemplateVersionControl();
+  const editor = useSchemaEditor();
+  const ui = useTemplateUi();
+  const actions = useTemplateActions({ version, editor, ui });
+
   return {
-    schema: useTemplateSchema(),
-    conversation: useTemplateConversation(),
-    version: useTemplateVersionControl(),
-    editor: useSchemaEditor(),
-    ui: useTemplateUi(),
-    actions: useTemplateActions(),
+    schema,
+    conversation,
+    version,
+    editor,
+    ui,
+    actions,
   };
 }
 
@@ -37,7 +44,7 @@ export function provideTemplateContext(ctx?: TemplateContext) {
 export function useTemplateContext() {
   const ctx = inject(TemplateContextKey);
   if (!ctx) {
-    return createTemplateContext();
+    throw new Error('useTemplateContext must be used within GenuiTemplate');
   }
   return ctx;
 }
