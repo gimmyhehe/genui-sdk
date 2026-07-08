@@ -327,127 +327,13 @@ importers:
       '@opentiny/vue':
         specifier: ^3.28.0
         version: 3.28.0
-      '@opentiny/vue-button':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-card':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-carousel':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-carousel-item':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-checkbox':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-checkbox-button':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-checkbox-group':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-col':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-date-picker':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-form':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-form-item':
-        specifier: ^3.28.0
-        version: 3.28.0(patch_hash=0efe71be369a844388c7f28464c4b352cb43480c7fea7c457a96eb555ba5bd95)
-      '@opentiny/vue-grid':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-huicharts-bar':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-funnel':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-gauge':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-graph':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-histogram':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-line':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-pie':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-process':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-radar':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-ring':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-scatter':
-        specifier: ^3.28.0
-        version: 3.29.0
-      '@opentiny/vue-huicharts-waterfall':
-        specifier: ^3.28.0
-        version: 3.29.0
       '@opentiny/vue-icon':
         specifier: ^3.28.0
         version: 3.28.3
-      '@opentiny/vue-input':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-layout':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-notify':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-numeric':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-radio':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-radio-group':
-        specifier: ^3.28.0
-        version: 3.28.0
       '@opentiny/vue-renderless':
         specifier: ^3.28.2
         version: 3.28.2(patch_hash=8691f41c36a35d6d1658b5c25117cc7ae7cb4febb1c691ba33ad0408486ccb8e)
-      '@opentiny/vue-row':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-search':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-select':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-switch':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-tab-item':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-tabs':
-        specifier: ^3.28.0
-        version: 3.28.0
       '@opentiny/vue-theme':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-transfer':
-        specifier: ^3.28.0
-        version: 3.28.0
-      '@opentiny/vue-tree':
         specifier: ^3.28.0
         version: 3.28.0
       uuid:
