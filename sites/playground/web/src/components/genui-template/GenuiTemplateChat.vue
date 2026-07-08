@@ -29,9 +29,7 @@ import {
   getLastUserMessage,
 } from './template-chat-utils';
 import { generateId } from '../../utils';
-import { useTemplateConversation } from './composables/use-template-conversation';
-import { useTemplateSchema } from './composables/use-template-schema';
-import { useTemplateVersionControl } from './composables/use-template-version-control';
+import { useTemplateContext } from './composables';
 import { useTemplateStreamRender } from './composables/use-template-stream-render';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
@@ -49,16 +47,7 @@ const props = defineProps<{
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
-const { onSchemaRefresh } = useTemplateVersionControl();
-const { conversationKit, templateConversationState, updateConversationTitle: updateTemplateTitle } = useTemplateConversation();
-const {
-  currentSchema,
-  currentPreviewSchema,
-  currentCardId,
-  setCurrentSchema,
-  setCurrentPreviewSchema,
-  setCurrentCardId,
-} = useTemplateSchema();
+const { schema, conversation, version } = useTemplateContext();
 const {
   errorMessagesMap,
   handleSchemaJsonChanged,
@@ -79,7 +68,7 @@ watch(
   },
 );
 
-const messageManager = computed(() => conversationKit.value?.messageManager.value ?? null);
+const messageManager = computed(() => conversation.conversationKit.value?.messageManager.value ?? null);
 
 const messages = computed(() => messageManager.value?.messages.value ?? []);
 
@@ -153,8 +142,8 @@ const handleRefresh = ({ index }: { index: number }) => {
   prevSchema.value = cardMessage?.prevSchema ?? '';
 
   if (cardMessage?.type === 'schema-card') {
-    setCurrentSchema(null);
-    setCurrentPreviewSchema({});
+    schema.setCurrentSchema(null);
+    schema.setCurrentPreviewSchema({});
     resetLastPreviewSchema({});
   } else {
     let parsedSchema = null;
@@ -164,8 +153,8 @@ const handleRefresh = ({ index }: { index: number }) => {
       parsedSchema = null;
     }
     if (parsedSchema) {
-      setCurrentSchema(parsedSchema);
-      setCurrentPreviewSchema(parsedSchema);
+      schema.setCurrentSchema(parsedSchema);
+      schema.setCurrentPreviewSchema(parsedSchema);
       resetLastPreviewSchema(JSON.parse(JSON.stringify(parsedSchema)));
     }
   }
@@ -176,9 +165,9 @@ const handleRefresh = ({ index }: { index: number }) => {
   if (lastUserMessage && !lastUserMessage.messageId) {
     lastUserMessage.messageId = generateId();
   }
-  setCurrentCardId(String(lastUserMessage?.messageId ?? generateId()));
+  schema.setCurrentCardId(String(lastUserMessage?.messageId ?? generateId()));
 
-  onSchemaRefresh();
+  version.onSchemaRefresh();
   send();
 };
 
@@ -275,7 +264,7 @@ const clearInputMessage = () => {
 const handleSendMessage = async () => {
   const messageContent = inputMessage.value;
   const cardId = generateId();
-  setCurrentCardId(cardId);
+  schema.setCurrentCardId(cardId);
 
   const userMessage: ChatMessage = {
     role: 'user',
@@ -285,13 +274,13 @@ const handleSendMessage = async () => {
   messages.value.push(userMessage);
 
   if (messages.value.length === 1 && messages.value[0].role === 'user') {
-    const currentConversationId = templateConversationState.value?.currentId;
+    const currentConversationId = conversation.templateConversationState.value?.currentId;
     if (currentConversationId) {
-      updateTemplateTitle(currentConversationId, messageContent.substring(0, 20));
+      conversation.updateConversationTitle(currentConversationId, messageContent.substring(0, 20));
     }
   }
 
-  prevSchema.value = JSON.stringify(currentSchema.value);
+  prevSchema.value = JSON.stringify(schema.currentSchema.value);
   messageManager.value?.send();
   clearInputMessage();
   scrollToBottom();
@@ -299,15 +288,15 @@ const handleSendMessage = async () => {
 
 const finalizeStreamingSchemaCard = () => {
   finalizePendingSchemaCard(messages.value, {
-    cardId: currentCardId.value,
-    schema: currentPreviewSchema.value ?? currentSchema.value,
+    cardId: schema.currentCardId.value,
+    schema: schema.currentPreviewSchema.value ?? schema.currentSchema.value,
     prevSchema: prevSchema.value || '',
   });
 };
 
 const handleNotification = (event: INotificationPayload) => {
   if (event.type === 'done') {
-    setCurrentSchema(currentPreviewSchema.value);
+    schema.setCurrentSchema(schema.currentPreviewSchema.value);
     finalizeStreamingSchemaCard();
   }
 };
