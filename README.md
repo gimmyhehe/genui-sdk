@@ -1,8 +1,16 @@
-## GenUI SDK
+# GenUI SDK
+
+<p align="center">
+  <a href="https://opentiny.design/genui-sdk" target="_blank" rel="noopener noreferrer">
+    <img alt="OpenTiny Logo" src="logo.svg" height="100" style="max-width:100%;">
+  </a>
+</p>
 
 Language: English | [简体中文](README.zh-CN.md)
 
 GenUI SDK is a full‑stack development toolkit developed by OpenTiny for building **Generative UI**–based AI applications. It helps you quickly create AI apps and embed generative interfaces into existing products.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/opentiny/genui-sdk)
 
 ### Instruction
 
@@ -13,7 +21,7 @@ Whether you are building an AI chat application from scratch or adding generativ
 
 ### Try It Now
 
-You can visit the [Playground](https://playground.opentiny.design/genui-sdk) to experience Generative UI capabilities in action.  
+You can visit the [Playground](https://opentiny.github.io/genui-sdk/playground/) to experience Generative UI capabilities in action.  
 The playground itself is built using GenUI SDK.
 
 ### Getting Started

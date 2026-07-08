@@ -16,13 +16,17 @@ import { openaiCompatibleTransformChunk, type IOpenaiCompatibleChunk } from '@op
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
-import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
+import {
+  buildAgentTools,
+  isAllowedAgentUrl,
+  isPlaygroundDevelopment,
+  resolveAgentApiUrl,
+} from './a2a-tools/index.js';
+import type { PlaygroundAgentConfig } from './a2a-tools/index.js';
 import { buildSkillTools } from './skills/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
-
-const isDevelopment = process.env.NODE_ENV === 'development';
 
 const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
 
@@ -178,13 +182,36 @@ export async function generateLlmConfig(llmConfigParams: LLMConfigParams | undef
   const modelInfo = providerModelMapper.getModelInfo(model || '');
   const aiSDKModel = modelInfo ? providerModelMapper.getAiSDKModel(modelInfo) : undefined;
 
+  const rawExtraBody = modelInfo?.model?.extraBody;
+  const extraBody =
+    rawExtraBody && typeof rawExtraBody === 'object'
+      ? rawExtraBody
+      : undefined;
+
   return {
     ...llmConfigParams,
     ...modelInfo,
     model: aiSDKModel,
     supportJsonFormat: modelInfo?.model.supportJsonFormat || false,
     specificPrompt: modelInfo?.model.specificPrompt || '',
+    extraBody
   };
+}
+
+function filterAllowedPlaygroundAgents(rawAgents: PlaygroundAgentConfig[]): PlaygroundAgentConfig[] {
+  const agents: PlaygroundAgentConfig[] = [];
+
+  for (const agent of rawAgents) {
+    const url = resolveAgentApiUrl(agent);
+    if (!url) {
+      continue;
+    }
+    if (isPlaygroundDevelopment || isAllowedAgentUrl(url)) {
+      agents.push(agent);
+    }
+  }
+
+  return agents;
 }
 
 const getPlaygroundConfig = (playgroundStr: string) => {
@@ -199,13 +226,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     console.error('Failed to parse playground from metadata:', error);
   }
 
-  const rawAgents = playgroundConfig.agents || [];
-  const agents = rawAgents.filter((agent) => {
-    const url = agent.api?.url;
-    if (!url) return false;
-    // 开发态放开 URL 安全校验，生产态保持 SSRF 防护
-    return isDevelopment || isAllowedAgentUrl(url);
-  });
+  const agents = filterAllowedPlaygroundAgents(playgroundConfig.agents || []);
 
   return {
     mcpServers: playgroundConfig.mcpServers || [],
@@ -258,7 +279,7 @@ export function createChatGenui() {
     };
 
     const llmConfig = await generateLlmConfig(llmConfigParams);
-    const { model, temperature, specificPrompt } = llmConfig;
+    const { model, temperature, specificPrompt, provider, extraBody } = llmConfig;
     const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
       mcpServers.filter((s) => s.enabled),
       abort.signal,
@@ -283,6 +304,12 @@ export function createChatGenui() {
     const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;
     const maxSteps = 30;
     let hasError = false; // 标记是否已经处理了错误
+
+    const providerOptions =
+      provider?.name && extraBody && Object.keys(extraBody).length > 0
+        ? { [provider.name]: extraBody } as StreamTextOptions['providerOptions']
+        : undefined;
+
     const options: StreamTextOptions = {
       model,
       temperature,
@@ -299,6 +326,7 @@ export function createChatGenui() {
       tools,
       toolChoice: 'auto',
       stopWhen: stepCountIs(maxSteps),
+      ...(providerOptions ? { providerOptions } : {}),
       onError: (error: any) => {
         if (hasError) {
           return;

@@ -1,14 +1,43 @@
 <template>
   <div class="history-transfer-toolbar">
-    <button class="history-transfer-toolbar__button" type="button" @click="triggerImport">导入</button>
-    <button
-      class="history-transfer-toolbar__button"
-      type="button"
-      :disabled="conversations.length === 0"
-      @click="exportAll"
+    <span class="history-transfer-toolbar__selection-toggle" :class="{ 'active': selectionActive }" @click="toggleSelectionMode">
+      {{ selectionActive ? t('history.cancel') : t('history.selectMode') }}
+    </span>
+    <tiny-button
+      round
+      size="small"
+      :disabled="!selectionActive || selectedIds.length === 0"
+      @click="emit('batch-delete')"
     >
-      导出
-    </button>
+      {{ t('history.delete') }}
+    </tiny-button>
+    <tiny-button round size="small" @click="triggerImport">{{ t('history.import') }}</tiny-button>
+    <tiny-dropdown
+      border
+      trigger="click"
+      :title="t('history.export')"
+      size="small"
+      round
+      :hide-on-click="true"
+      :disabled="conversations.length === 0"
+      @button-click="exportAll"
+      @item-click="handleExportItemClick"
+    >
+      <template #dropdown>
+        <tiny-dropdown-menu>
+          <tiny-dropdown-item
+            :label="t('history.exportAll')"
+            :disabled="conversations.length === 0"
+            :item-data="exportItemAll"
+          />
+          <tiny-dropdown-item
+            :label="t('history.exportSelected')"
+            :disabled="!selectionActive || selectedIds.length === 0"
+            :item-data="exportItemSelected"
+          />
+        </tiny-dropdown-menu>
+      </template>
+    </tiny-dropdown>
     <input
       ref="fileInputRef"
       class="history-transfer-toolbar__file-input"
@@ -21,17 +50,41 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { TinyNotify } from '@opentiny/vue';
+import {
+  TinyNotify,
+  TinyButton,
+  TinyDropdown,
+  TinyDropdownMenu,
+  TinyDropdownItem,
+} from '@opentiny/vue';
 import type { Conversation } from '@opentiny/tiny-robot-kit';
+import { t } from '../../../i18n';
 import { downloadConversations, parseConversationFile, reconcileImportedConversationIds } from './history-transfer';
 
-const props = defineProps<{
-  conversations: Conversation[];
-}>();
+const selectionActive = defineModel<boolean>('selectionActive', { default: false });
+
+const props = withDefaults(
+  defineProps<{
+    conversations: Conversation[];
+    selectedIds?: string[];
+  }>(),
+  { selectedIds: () => [] },
+);
+
+const toggleSelectionMode = () => {
+  selectionActive.value = !selectionActive.value;
+};
 
 const emit = defineEmits<{
   'import-conversations': [conversations: Conversation[]];
+  'batch-export': [];
+  'batch-delete': [];
 }>();
+
+type ExportMenuAction = 'all' | 'selected';
+
+const exportItemAll = { action: 'all' as ExportMenuAction };
+const exportItemSelected = { action: 'selected' as ExportMenuAction };
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
@@ -49,11 +102,25 @@ const triggerImport = () => {
 
 const exportAll = () => {
   if (props.conversations.length === 0) {
-    notify('warning', '当前没有可导出的会话');
+    notify('warning', t('history.noExportable'));
     return;
   }
 
   downloadConversations(props.conversations);
+};
+
+const handleExportItemClick = (payload: { itemData?: { action: ExportMenuAction } }) => {
+  const action = payload?.itemData?.action;
+  if (action === 'all') {
+    exportAll();
+    return;
+  }
+  if (action === 'selected') {
+    if (props.selectedIds.length === 0) {
+      return;
+    }
+    emit('batch-export');
+  }
 };
 
 const handleImportFile = async (event: Event) => {
@@ -67,15 +134,15 @@ const handleImportFile = async (event: Event) => {
   try {
     const importedConversations = await parseConversationFile(file);
     if (importedConversations.length === 0) {
-      notify('warning', '未找到可导入的会话');
+      notify('warning', t('history.noImportable'));
       return;
     }
 
     const reconciledImported = reconcileImportedConversationIds(props.conversations, importedConversations);
     emit('import-conversations', reconciledImported);
-    notify('success', `已导入 ${reconciledImported.length} 条会话`);
+    notify('success', t('history.importSuccess', { count: reconciledImported.length }));
   } catch (error) {
-    const message = error instanceof Error ? error.message : '导入失败';
+    const message = error instanceof Error ? error.message : t('history.importFailed');
     notify('error', message);
   } finally {
     input.value = '';
@@ -86,35 +153,24 @@ const handleImportFile = async (event: Event) => {
 <style lang="less" scoped>
 .history-transfer-toolbar {
   display: flex;
-  justify-content: flex-end;
   gap: 8px;
-  padding: 0 20px;
+  align-items: center;
+  .tiny-button {
+    margin-left: 0;
+  }
 }
 
-.history-transfer-toolbar__button {
-  height: 28px;
-  padding: 0 14px;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
-  background: #fff;
+.history-transfer-toolbar__selection-toggle {
+  margin-left: 12px;
+  padding: 0;
+  margin-right: 8px;
+  font-size: 14px;
+  line-height: 1;
   color: #191919;
-  font-size: 13px;
-  line-height: 26px;
   cursor: pointer;
-  transition:
-    border-color 0.2s,
-    background-color 0.2s,
-    color 0.2s;
 
-  &:hover:not(:disabled) {
-    border-color: #7b7b7b;
-    background: #f7f7f7;
-  }
-
-  &:disabled {
-    color: #bfbfbf;
-    cursor: not-allowed;
-    background: #fafafa;
+  &.active {
+    color: #1476FF;
   }
 }
 
