@@ -5,64 +5,65 @@ const schemaEditorText = ref('{}');
 const schemaEditorBaseline = ref('{}');
 const schemaEditorSaveLoading = ref(false);
 
-const hasUnsavedChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
+export function useSchemaEditor() {
+  const { currentPreviewSchema, setCurrentPreviewSchema } = useTemplateSchema();
 
-const syncBaseline = () => {
-  const { currentPreviewSchema } = useTemplateSchema();
-  if (currentPreviewSchema.value) {
-    const text = JSON.stringify(currentPreviewSchema.value, null, 2);
-    schemaEditorText.value = text;
-    schemaEditorBaseline.value = text;
-  } else {
-    schemaEditorText.value = '{}';
-    schemaEditorBaseline.value = '{}';
-  }
-};
+  const hasUnsavedChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
 
-const revertUnsavedChanges = () => {
-  if (!hasUnsavedChanges()) {
-    return;
-  }
+  const syncBaseline = () => {
+    if (currentPreviewSchema.value) {
+      const text = JSON.stringify(currentPreviewSchema.value, null, 2);
+      schemaEditorText.value = text;
+      schemaEditorBaseline.value = text;
+    } else {
+      schemaEditorText.value = '{}';
+      schemaEditorBaseline.value = '{}';
+    }
+  };
 
-  schemaEditorText.value = schemaEditorBaseline.value;
+  const revertUnsavedChanges = () => {
+    if (!hasUnsavedChanges()) {
+      return;
+    }
 
-  try {
-    const schema = JSON.parse(schemaEditorBaseline.value || '{}');
-    useTemplateSchema().setCurrentPreviewSchema(schema);
-  } catch {
-    syncBaseline();
-  }
-};
+    schemaEditorText.value = schemaEditorBaseline.value;
 
-const applyTextToPreview = (value: string, readOnly = false) => {
-  if (readOnly) {
-    return;
-  }
-  schemaEditorText.value = value;
-  try {
-    const schema = JSON.parse(value || '{}');
-    useTemplateSchema().setCurrentPreviewSchema(schema);
-  } catch (error) {
-    console.error('schemaEditor parse error ===>', error);
-  }
-};
+    try {
+      const schema = JSON.parse(schemaEditorBaseline.value || '{}');
+      setCurrentPreviewSchema(schema);
+    } catch {
+      syncBaseline();
+    }
+  };
 
-const parseSchemaText = (text: string): Record<string, unknown> | null => {
-  try {
-    const parsed = JSON.parse(text || '{}');
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+  const applyTextToPreview = (value: string, readOnly = false) => {
+    if (readOnly) {
+      return;
+    }
+    schemaEditorText.value = value;
+    try {
+      const schema = JSON.parse(value || '{}');
+      setCurrentPreviewSchema(schema);
+    } catch (error) {
+      console.error('schemaEditor parse error ===>', error);
+    }
+  };
+
+  const parseSchemaText = (text: string): Record<string, unknown> | null => {
+    try {
+      const parsed = JSON.parse(text || '{}');
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return null;
+      }
+      return parsed as Record<string, unknown>;
+    } catch {
       return null;
     }
-    return parsed as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-};
+  };
 
-const parseEditorSchema = () => parseSchemaText(schemaEditorText.value);
-const parseBaselineSchema = () => parseSchemaText(schemaEditorBaseline.value);
+  const parseEditorSchema = () => parseSchemaText(schemaEditorText.value);
+  const parseBaselineSchema = () => parseSchemaText(schemaEditorBaseline.value);
 
-export function useSchemaEditor() {
   return {
     schemaEditorText,
     schemaEditorBaseline,

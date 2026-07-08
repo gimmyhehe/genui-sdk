@@ -1,8 +1,7 @@
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { LLMConfig } from './chat.types';
+import { ensureTemplateContext } from './composables/use-template-context';
 import { useTemplateConversation } from './composables/use-template-conversation';
-import { useTemplateSchema } from './composables/use-template-schema';
-import { useTemplateVersionControl } from './composables/use-template-version-control';
 
 export interface UseTemplateOptions {
   url: string;
@@ -11,24 +10,23 @@ export interface UseTemplateOptions {
 }
 
 export default function useTemplate(options?: UseTemplateOptions) {
+  const ctx = ensureTemplateContext();
+
   if (options?.url) {
-    const { url, llmConfig, onLoaded } = options;
     useTemplateConversation({
-      url,
-      llmConfig,
+      url: options.url,
+      llmConfig: options.llmConfig,
       onLoaded: (loadedMessages) => {
-        if (onLoaded) {
-          onLoaded(loadedMessages);
+        if (options.onLoaded) {
+          options.onLoaded(loadedMessages);
         } else {
-          useTemplateSchema().applySchemaFromMessages(loadedMessages);
+          ctx.schema.applySchemaFromMessages(loadedMessages);
         }
       },
     });
   }
 
-  const conversation = useTemplateConversation();
-  const schema = useTemplateSchema();
-  const { getMessageByCardId } = useTemplateVersionControl();
+  const { conversation, schema } = ctx;
 
   const resetEmptyTemplateSchema = () => {
     schema.setCurrentSchema(null);
@@ -63,26 +61,12 @@ export default function useTemplate(options?: UseTemplateOptions) {
   return {
     isTemplateInit: conversation.isTemplateInit,
     conversationKit: conversation.conversationKit,
-    conversation: conversation.conversationKit.value,
     templateConversationState: conversation.templateConversationState,
-    currentConversationId: conversation.currentConversationId,
-    templateProvider: conversation.templateProvider,
-    messages: conversation.messages,
     templateSchemaList: conversation.templateSchemaList,
-    currentSchema: schema.currentSchema,
-    currentPreviewSchema: schema.currentPreviewSchema,
-    currentPreviewSchemaComplete: schema.currentPreviewSchemaComplete,
-    currentCardId: schema.currentCardId,
-    setCurrentPreviewSchema: schema.setCurrentPreviewSchema,
-    setCurrentSchema: schema.setCurrentSchema,
-    setCurrentCardId: schema.setCurrentCardId,
-    getCurrentCardId: schema.getCurrentCardId,
-    applySchemaFromMessages: schema.applySchemaFromMessages,
     createTemplate,
     switchTemplate,
     deleteTemplate,
     changeLlmConfig: conversation.changeLlmConfig,
     updateTemplateTitle: conversation.updateConversationTitle,
-    getMessageByCardId,
   };
 }

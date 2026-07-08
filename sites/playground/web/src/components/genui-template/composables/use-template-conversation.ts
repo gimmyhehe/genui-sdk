@@ -2,6 +2,7 @@ import { ref, shallowRef, computed } from 'vue';
 import { useConversation, IndexedDBStrategy } from '@opentiny/genui-sdk-vue';
 import { AIClient, type ChatMessage } from '@opentiny/tiny-robot-kit';
 import { CustomModelProvider } from '../template-provider';
+import { getTemplateStreamEvents } from './internal/template-stream-events';
 import type { LLMConfig } from '../chat.types';
 import {
   findLatestSchemaInConversation,
@@ -31,6 +32,7 @@ export function useTemplateConversation(options?: UseTemplateConversationOptions
     templateProvider = new CustomModelProvider({
       url,
       llmConfig: llmConfig || { model: '', temperature: 0.3 },
+      streamEvents: getTemplateStreamEvents(),
     });
 
     const clientInstance = new AIClient({

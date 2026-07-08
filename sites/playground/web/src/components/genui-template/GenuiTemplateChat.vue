@@ -30,10 +30,8 @@ import {
 } from './template-chat-utils';
 import { generateId } from '../../utils';
 import { useTemplateContext } from './composables';
-import { useTemplateStreamRender } from './composables/use-template-stream-render';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
-import { emitter } from './template-chat-event-emitter';
 import useIcon from '../../use-icon';
 import { t } from '../../i18n';
 
@@ -47,12 +45,12 @@ const props = defineProps<{
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
-const { schema, conversation, versionControl } = useTemplateContext();
+const { schema, conversation, versionControl, stream, streamEvents } = useTemplateContext();
 const {
   errorMessagesMap,
   handleSchemaJsonChanged,
   resetLastPreviewSchema,
-} = useTemplateStreamRender();
+} = stream;
 
 watch(
   () => TinyGenuiConfig?.value?.theme,
@@ -113,10 +111,10 @@ const roles: Record<string, BubbleRoleConfig> = {
 };
 
 onMounted(() => {
-  emitter.on('schema-json-changed', handleSchemaJsonChanged);
+  streamEvents.on('schema-json-changed', handleSchemaJsonChanged);
 });
 onUnmounted(() => {
-  emitter.off('schema-json-changed', handleSchemaJsonChanged);
+  streamEvents.off('schema-json-changed', handleSchemaJsonChanged);
 });
 
 const getCardMessageByIndex = (index: number) => {
@@ -244,7 +242,7 @@ const showMessages = computed(() => {
             ...existingMessages,
             {
               type: 'loading-text',
-              emitter: emitter,
+              emitter: streamEvents,
               message: lastMessage,
               showThinkingResult: false,
             },
@@ -304,11 +302,11 @@ const handleNotification = (event: INotificationPayload) => {
 watch(() => messages.value, throttledScrollToBottom, { deep: true });
 
 onMounted(() => {
-  emitter.on('notification', handleNotification);
+  streamEvents.on('notification', handleNotification);
 });
 
 onUnmounted(() => {
-  emitter.off('notification', handleNotification);
+  streamEvents.off('notification', handleNotification);
 });
 </script>
 
