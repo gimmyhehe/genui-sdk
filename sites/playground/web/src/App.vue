@@ -13,13 +13,19 @@ import { useIsMobile } from './hooks';
 import useTemplate from './components/genui-template/useTemplate';
 import { getOverlapEliminatorHandler, getContinueGeneratingHandler, locationPartialSchemaJson, movePartialSchemaJsonToLastMessage } from './continue-writing';
 import useIcon from './use-icon';
+import { getMixedContentHandler } from './ng-renderer/content-response-handler';
+import { getMessageRendererAngular } from './ng-renderer/message-renderer-angular';
 
 const { topRenderer, addIcons } = useIcon();
 const TopIconsRenderer = topRenderer();
 
 addIcons(IconAi);
 
-let framework = 'Vue'; // Angular
+const framework = ref('Vue'); // Angular
+
+if (location.search.includes('framework=angular')) {
+  framework.value = 'Angular';
+}
 
 // 通过环境变量控制是否启用模板功能，默认不启用
 const ENABLE_TEMPLATE = import.meta.env.VITE_ENABLE_TEMPLATE === 'true';
@@ -27,18 +33,6 @@ const ENABLE_TEMPLATE = import.meta.env.VITE_ENABLE_TEMPLATE === 'true';
 const GenuiTemplate = ENABLE_TEMPLATE
   ? defineAsyncComponent(() => import('./components/genui-template/GenuiTemplate.vue'))
   : shallowRef(null);
-
-/**
- * tiny-schema-renderer-ng
- */
-
-if (location.search.includes('framework=angular')) {
-  const SchemaRendererNgAdapter = defineAsyncComponent(() =>
-    import('schema-renderer-ng-adpater').then((m) => m.SchemaRendererNgAdapter),
-  );
-  provide(GENUI_RENDERER, SchemaRendererNgAdapter);
-  framework = 'Angular';
-}
 
 const STORAGE_KEY = 'GENUI_SDK_VUE_PLAYGROUND_CONFIG';
 const {
@@ -175,6 +169,20 @@ const insertHandlersAfterName = (handlers, insertHandlers, name) => {
   }
   return handlers;
 }
+const insertHandlersBeforeName = (handlers, insertHandlers, name) => {
+  const index = handlers.findIndex(handler => handler.name === name);
+  if (index !== -1) {
+    handlers.splice(index, 0, ...insertHandlers);
+  }
+  return handlers;
+}
+const replaceHandlers = (handlers, replaceHandlers, name) => {
+  const index = handlers.findIndex(handler => handler.name === name);
+  if (index !== -1) {
+    handlers.splice(index, 1, ...replaceHandlers);
+  }
+  return handlers;
+}
 
 const chat = ref(null);
 const conversation = computed(() => chat.value?.getConversation());
@@ -182,6 +190,10 @@ watch(chat, (instance) => {
   if (instance) {
     const defaultResponseHandlers = instance.getResponseHandlers();
     const contentHandler = defaultResponseHandlers.find(handler => handler.name === 'content');
+    const newContentHandler = getMixedContentHandler(contentHandler, framework);
+    replaceHandlers(defaultResponseHandlers, [
+      newContentHandler,
+    ], 'content');
     const newResponseHandlers = [
       ...defaultResponseHandlers,
       getContinueGeneratingHandler(conversation.value.messageManager),
@@ -190,10 +202,13 @@ watch(chat, (instance) => {
     
     insertHandlersAfterName(newResponseHandlers, [
       movePartialSchemaJsonToLastMessage(),
-      getOverlapEliminatorHandler(contentHandler),
+      getOverlapEliminatorHandler(newContentHandler),
     ], 'init');
     instance.setResponseHandlers(newResponseHandlers);
+
+    instance.setMessageRenderer('schema-card-angular', getMessageRendererAngular(instance));
   }
+
 })
 
 // 提供给侧边栏及其子组件使用的共享上下文
@@ -265,7 +280,7 @@ const roles = computed(() => {
 
 const customFetch = createCustomFetch(() => ({
   ...llmConfig,
-  framework,
+  framework: framework.value,
 }));
 
 /**
