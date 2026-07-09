@@ -1,4 +1,4 @@
-import { computed } from 'vue';
+import { computed, unref, type UnwrapNestedRefs } from 'vue';
 import { useIsMobile } from '../../../use-mobile';
 import { isRenderableSchema, rebuildSchemaFromCard } from '../template-chat-utils';
 import type { ISchemaVersionHistoryEntry } from '../template-chat-utils/schema-version-history';
@@ -7,9 +7,9 @@ import { useSchemaEditor } from './use-schema-editor';
 import { useTemplateUi } from './use-template-ui';
 
 export interface TemplateActionsDeps {
-  versionControl: ReturnType<typeof useTemplateVersionControl>;
+  versionControl: UnwrapNestedRefs<ReturnType<typeof useTemplateVersionControl>>;
   editor: ReturnType<typeof useSchemaEditor>;
-  ui: ReturnType<typeof useTemplateUi>;
+  ui: UnwrapNestedRefs<ReturnType<typeof useTemplateUi>>;
 }
 
 export function useTemplateActions(deps?: TemplateActionsDeps) {
@@ -19,7 +19,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   const ui = deps?.ui ?? useTemplateUi();
 
   const isJsonEditorActive = computed(() =>
-    isMobile.value ? ui.isMobileJsonOpen.value : ui.schemaEditorVisible.value,
+    isMobile.value ? unref(ui.isMobileJsonOpen) : unref(ui.schemaEditorVisible),
   );
 
   const schemaEditorDirty = computed(
@@ -42,7 +42,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   };
 
   const toggleSchemaEditor = () => {
-    if (ui.schemaEditorVisible.value) {
+    if (unref(ui.schemaEditorVisible)) {
       editor.revertUnsavedChanges();
     } else {
       editor.syncBaseline();
@@ -74,7 +74,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
       editor.syncBaseline();
       return;
     }
-    if (ui.schemaEditorVisible.value) {
+    if (unref(ui.schemaEditorVisible)) {
       editor.syncBaseline();
     }
   };
@@ -142,7 +142,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   const resetToLatestVersion = () => {
     versionControl.resetToLatestVersion();
     editor.syncBaseline();
-    if (isMobile.value && ui.isMobileJsonOpen.value) {
+    if (isMobile.value && unref(ui.isMobileJsonOpen)) {
       ui.setMobileJsonOpen(false);
     }
   };
@@ -156,21 +156,21 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
     if (event.key !== 'Escape') {
       return;
     }
-    if (isMobile.value && ui.isMobileJsonOpen.value) {
+    if (isMobile.value && unref(ui.isMobileJsonOpen)) {
       handleMobileJsonEditorOpen(false);
       return;
     }
-    if (isMobile.value && ui.isMobileSheetOpen.value) {
+    if (isMobile.value && unref(ui.isMobileSheetOpen)) {
       closeSchemaEditorView();
       return;
     }
-    if (ui.schemaEditorVisible.value) {
+    if (unref(ui.schemaEditorVisible)) {
       closeSchemaEditorView();
     }
   };
 
   const shouldSyncEditorBaseline = () => {
-    if (versionControl.schemaEditorShowDiffView.value || editor.hasUnsavedChanges()) {
+    if (unref(versionControl.schemaEditorShowDiffView) || editor.hasUnsavedChanges()) {
       return false;
     }
     return isJsonEditorActive.value;

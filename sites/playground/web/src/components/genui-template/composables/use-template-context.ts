@@ -33,15 +33,21 @@ export function createTemplateContext(): TemplateContext {
   const editor = useSchemaEditor();
   const ui = useTemplateUi();
   const stream = useTemplateStreamRender();
-  const actions = useTemplateActions({ versionControl, editor, ui });
+  const reactiveVersionControl = asReactive(versionControl);
+  const reactiveUi = asReactive(ui);
+  const actions = asReactive(useTemplateActions({
+    versionControl: reactiveVersionControl,
+    editor,
+    ui: reactiveUi,
+  }));
 
   return {
     schema: asReactive(schema),
     conversation: asReactive(conversation),
-    versionControl: asReactive(versionControl),
+    versionControl: reactiveVersionControl,
     editor: asReactive(editor),
-    ui: asReactive(ui),
-    actions: asReactive(actions),
+    ui: reactiveUi,
+    actions,
     stream,
     streamEvents: events,
   };
