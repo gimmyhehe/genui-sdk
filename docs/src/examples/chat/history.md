@@ -10,12 +10,17 @@
 
 ```vue {12-19}
 <template>
+  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
   <GenuiChat ref="chatRef" :url="url" />
+
+  </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref, computed } from 'vue';
-import { GenuiChat } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 
 const url = 'https://your-chat-backend/api';
 const chatRef = ref<InstanceType<typeof GenuiChat> | null>(null);
@@ -69,6 +74,7 @@ await conversation?.saveConversations();
 
 ```vue
 <template>
+  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
   <div class="chat-with-sidebar">
     <!-- 侧边栏 -->
     <div class="sidebar">
@@ -93,11 +99,15 @@ await conversation?.saveConversations();
       <GenuiChat ref="chatRef" :url="url" />
     </div>
   </div>
+
+  </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref, computed } from 'vue';
-import { GenuiChat } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 
 const url = 'https://your-chat-backend/api';
 const chatRef = ref<InstanceType<typeof GenuiChat> | null>(null);

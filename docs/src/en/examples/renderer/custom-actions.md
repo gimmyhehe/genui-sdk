@@ -20,12 +20,17 @@ Pass actions via the `customActions` prop. Each action includes:
 
 ```vue {12-35}
 <template>
+  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
   <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
+
+  </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref } from 'vue';
-import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiRenderer } from '@opentiny/genui-sdk-vue';
 
 const generating = ref(false);
 const content = ref({});
@@ -65,12 +70,17 @@ const customActions = {
 
 ```vue {12-33}
 <template>
+  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
   <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
+
+  </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref } from 'vue';
-import { GenuiRenderer } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiRenderer } from '@opentiny/genui-sdk-vue';
 
 const generating = ref(false);
 const content = ref({});

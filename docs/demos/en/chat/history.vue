@@ -1,4 +1,5 @@
 <template>
+  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
   <div class="chat-with-sidebar">
     <!-- Sidebar -->
     <div class="sidebar">
@@ -27,11 +28,15 @@
       <GenuiChat ref="chatRef" :url="url" />
     </div>
   </div>
+
+  </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref, computed } from 'vue';
-import { GenuiChat } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 
 const url = 'https://your-chat-backend/api';
 const chatRef = ref<InstanceType<typeof GenuiChat> | null>(null);

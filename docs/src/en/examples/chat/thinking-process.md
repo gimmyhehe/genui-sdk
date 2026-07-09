@@ -8,11 +8,16 @@ Use the `thinkComponent` prop to customize the thinking-process display componen
 
 ```vue
 <template>
+  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
   <GenuiChat :url="url" model="deepseek-v3.2" :thinkComponent="CustomThinkComponent" />
+
+  </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
-import { GenuiChat } from '@opentiny/genui-sdk-vue';
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
+import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 import CustomThinkComponent from './components/custom-think-component.vue';
 
 const url = 'https://your-chat-backend/api';

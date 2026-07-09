@@ -9,7 +9,7 @@
 ```vue {22-43}
 <template>
   <div class="app">
-    <GenuiConfigProvider theme="light" id="my-custom-theme">
+    <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig" theme="light" id="my-custom-theme">
       <div class="my-custom-theme">
         <GenuiChat :url="url" model="deepseek-v3.2" :messages="messages" />
       </div>
@@ -18,6 +18,8 @@
 </template>
 
 <script setup lang="ts">
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 
 const url = 'https://your-chat-backend/api';

@@ -9,7 +9,7 @@
       </div>
     </header>
 
-    <GenuiConfigProvider :theme="currentTheme" id="schema-renderer">
+    <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig" :theme="currentTheme" id="schema-renderer">
       <div class="renderer-container" :style="{ backgroundColor: containerBgColor }">
         <GenuiRenderer :content="content" :generating="generating" />
       </div>
@@ -18,6 +18,8 @@
 </template>
 
 <script setup lang="ts">
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref, computed } from 'vue';
 import { GenuiConfigProvider, GenuiRenderer } from '@opentiny/genui-sdk-vue';
 
