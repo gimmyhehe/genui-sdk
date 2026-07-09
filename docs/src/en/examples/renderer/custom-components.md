@@ -11,8 +11,7 @@ Pass a component map via `customComponents` on `GenuiRenderer`.
 ```vue {8,13-15}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiRenderer :content="content" :generating="generating" :customComponents="customComponents" />
-
+    <GenuiRenderer :content="content" :generating="generating" :customComponents="customComponents" />
   </GenuiConfigProvider>
 </template>
 

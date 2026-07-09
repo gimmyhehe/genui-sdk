@@ -20,8 +20,7 @@ interface ImageFeatures {
 ```vue {10-16}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" :features="modelFeatures" />
-
+    <GenuiChat :url="url" :features="modelFeatures" />
   </GenuiConfigProvider>
 </template>
 

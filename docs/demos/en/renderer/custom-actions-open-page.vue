@@ -1,7 +1,6 @@
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
-
+    <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
   </GenuiConfigProvider>
 </template>
 

@@ -7,12 +7,11 @@
 ```vue { 16-43 }
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat
-    :url="url"
-    :customComponents="customComponents"
-    :messages="messages"
-  />
-
+    <GenuiChat
+      :url="url"
+      :customComponents="customComponents"
+      :messages="messages"
+    />
   </GenuiConfigProvider>
 </template>
 

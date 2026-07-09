@@ -25,8 +25,7 @@ interface IGenPromptExample {
 ```vue
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" model="deepseek-v3.2" :customExamples="customExamples" />
-
+    <GenuiChat :url="url" model="deepseek-v3.2" :customExamples="customExamples" />
   </GenuiConfigProvider>
 </template>
 

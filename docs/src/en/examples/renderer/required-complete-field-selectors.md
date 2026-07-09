@@ -87,8 +87,7 @@ Pass `requiredCompleteFieldSelectors`; custom rules are merged with defaults:
 ```vue
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiRenderer :content="content" :generating="generating" :requiredCompleteFieldSelectors="customSelectors" />
-
+    <GenuiRenderer :content="content" :generating="generating" :requiredCompleteFieldSelectors="customSelectors" />
   </GenuiConfigProvider>
 </template>
 

@@ -9,8 +9,7 @@
 ```vue {12-23}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" :roles="roles" />
-
+    <GenuiChat :url="url" :roles="roles" />
   </GenuiConfigProvider>
 </template>
 

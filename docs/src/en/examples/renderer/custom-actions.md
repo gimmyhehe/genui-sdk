@@ -21,8 +21,7 @@ Pass actions via the `customActions` prop. Each action includes:
 ```vue {12-35}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
-
+    <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
   </GenuiConfigProvider>
 </template>
 
@@ -71,8 +70,7 @@ const customActions = {
 ```vue {12-33}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
-
+    <GenuiRenderer :content="content" :generating="generating" :customActions="customActions" />
   </GenuiConfigProvider>
 </template>
 

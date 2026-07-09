@@ -1,7 +1,6 @@
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" :customFetch="customFetch" />
-
+    <GenuiChat :url="url" :customFetch="customFetch" />
   </GenuiConfigProvider>
 </template>
 

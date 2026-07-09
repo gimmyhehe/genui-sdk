@@ -15,8 +15,7 @@
 ```vue {12-18}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiRenderer :content="content" :generating="generating" :state="savedState" />
-
+    <GenuiRenderer :content="content" :generating="generating" :state="savedState" />
   </GenuiConfigProvider>
 </template>
 

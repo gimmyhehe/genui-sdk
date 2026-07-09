@@ -11,8 +11,7 @@ Access conversation management methods via a component ref:
 ```vue {12-19}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat ref="chatRef" :url="url" />
-
+    <GenuiChat ref="chatRef" :url="url" />
   </GenuiConfigProvider>
 </template>
 
@@ -75,31 +74,30 @@ The following example shows how to display and manage conversation history in a 
 ```vue
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <div class="chat-with-sidebar">
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <button class="new-chat-btn" @click="handleNewConversation">+ New Conversation</button>
-      </div>
-      <div class="conversations-list">
-        <div
-          v-for="conv in conversations"
-          :key="conv.id"
-          :class="['conversation-item', { active: conv.id === currentId }]"
-          @click="handleSwitchConversation(conv.id)"
-        >
-          <div class="conversation-title">{{ conv.title || 'New Conversation' }}</div>
-          <button class="delete-btn" @click.stop="handleDeleteConversation(conv.id)">×</button>
+    <div class="chat-with-sidebar">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <button class="new-chat-btn" @click="handleNewConversation">+ New Conversation</button>
+        </div>
+        <div class="conversations-list">
+          <div
+            v-for="conv in conversations"
+            :key="conv.id"
+            :class="['conversation-item', { active: conv.id === currentId }]"
+            @click="handleSwitchConversation(conv.id)"
+          >
+            <div class="conversation-title">{{ conv.title || 'New Conversation' }}</div>
+            <button class="delete-btn" @click.stop="handleDeleteConversation(conv.id)">×</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Chat area -->
-    <div class="chat-container">
-      <GenuiChat ref="chatRef" :url="url" />
+      <!-- Chat area -->
+      <div class="chat-container">
+        <GenuiChat ref="chatRef" :url="url" />
+      </div>
     </div>
-  </div>
-
   </GenuiConfigProvider>
 </template>
 

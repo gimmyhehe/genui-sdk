@@ -20,8 +20,7 @@ Set `supportImage.enabled` to `true` to enable and configure image upload:
 ```vue {10-16}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" :features="modelFeatures" />
-
+    <GenuiChat :url="url" :features="modelFeatures" />
   </GenuiConfigProvider>
 </template>
 

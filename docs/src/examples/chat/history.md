@@ -11,8 +11,7 @@
 ```vue {12-19}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat ref="chatRef" :url="url" />
-
+    <GenuiChat ref="chatRef" :url="url" />
   </GenuiConfigProvider>
 </template>
 
@@ -75,31 +74,30 @@ await conversation?.saveConversations();
 ```vue
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <div class="chat-with-sidebar">
-    <!-- 侧边栏 -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <button class="new-chat-btn" @click="handleNewConversation">+ 新建会话</button>
-      </div>
-      <div class="conversations-list">
-        <div
-          v-for="conv in conversations"
-          :key="conv.id"
-          :class="['conversation-item', { active: conv.id === currentId }]"
-          @click="handleSwitchConversation(conv.id)"
-        >
-          <div class="conversation-title">{{ conv.title || '新会话' }}</div>
-          <button class="delete-btn" @click.stop="handleDeleteConversation(conv.id)">×</button>
+    <div class="chat-with-sidebar">
+      <!-- 侧边栏 -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <button class="new-chat-btn" @click="handleNewConversation">+ 新建会话</button>
+        </div>
+        <div class="conversations-list">
+          <div
+            v-for="conv in conversations"
+            :key="conv.id"
+            :class="['conversation-item', { active: conv.id === currentId }]"
+            @click="handleSwitchConversation(conv.id)"
+          >
+            <div class="conversation-title">{{ conv.title || '新会话' }}</div>
+            <button class="delete-btn" @click.stop="handleDeleteConversation(conv.id)">×</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 聊天区域 -->
-    <div class="chat-container">
-      <GenuiChat ref="chatRef" :url="url" />
+      <!-- 聊天区域 -->
+      <div class="chat-container">
+        <GenuiChat ref="chatRef" :url="url" />
+      </div>
     </div>
-  </div>
-
   </GenuiConfigProvider>
 </template>
 

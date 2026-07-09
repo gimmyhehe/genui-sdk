@@ -25,8 +25,7 @@ The following example shows how to use the TinyCard component to create a develo
 ```vue
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" model="deepseek-v3.2" :customExamples="customExamples" />
-
+    <GenuiChat :url="url" model="deepseek-v3.2" :customExamples="customExamples" />
   </GenuiConfigProvider>
 </template>
 

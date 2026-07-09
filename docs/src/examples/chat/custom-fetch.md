@@ -23,8 +23,7 @@
 ```vue
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" model="deepseek-v3.2" :customFetch="customFetch" />
-
+    <GenuiChat :url="url" model="deepseek-v3.2" :customFetch="customFetch" />
   </GenuiConfigProvider>
 </template>
 
@@ -372,10 +371,9 @@ export const defaultCustomFetch = createOpenAICustomFetch({
 ```vue
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <div class="app-container">
-    <GenuiChat :customFetch="defaultCustomFetch" model="deepseek-v3.2" :temperature="0.5" :chatConfig="chatConfig" />
-  </div>
-
+    <div class="app-container">
+      <GenuiChat :customFetch="defaultCustomFetch" model="deepseek-v3.2" :temperature="0.5" :chatConfig="chatConfig" />
+    </div>
   </GenuiConfigProvider>
 </template>
 

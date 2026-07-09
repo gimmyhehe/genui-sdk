@@ -9,8 +9,7 @@
 ```vue
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" model="deepseek-v3.2" :thinkComponent="CustomThinkComponent" />
-
+    <GenuiChat :url="url" model="deepseek-v3.2" :thinkComponent="CustomThinkComponent" />
   </GenuiConfigProvider>
 </template>
 

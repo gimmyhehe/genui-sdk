@@ -1,7 +1,6 @@
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" :customSnippets="customSnippets" :messages="messages" />
-
+    <GenuiChat :url="url" :customSnippets="customSnippets" :messages="messages" />
   </GenuiConfigProvider>
 </template>
 

@@ -1,34 +1,33 @@
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <div class="chat-with-sidebar">
-    <!-- 侧边栏 -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <button class="new-chat-btn" @click="handleNewConversation">+ 新建会话</button>
-      </div>
-      <div class="conversations-list" v-if="conversations.length > 0">
-        <div
-          v-for="conv in conversations"
-          :key="conv.id"
-          :class="['conversation-item', { active: conv.id === currentId }]"
-          @click="handleSwitchConversation(conv.id)"
-        >
-          <div class="conversation-title">{{ conv.title || '新会话' }}</div>
-          <button class="delete-btn" @click.stop="handleDeleteConversation(conv.id)">×</button>
+    <div class="chat-with-sidebar">
+      <!-- 侧边栏 -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <button class="new-chat-btn" @click="handleNewConversation">+ 新建会话</button>
+        </div>
+        <div class="conversations-list" v-if="conversations.length > 0">
+          <div
+            v-for="conv in conversations"
+            :key="conv.id"
+            :class="['conversation-item', { active: conv.id === currentId }]"
+            @click="handleSwitchConversation(conv.id)"
+          >
+            <div class="conversation-title">{{ conv.title || '新会话' }}</div>
+            <button class="delete-btn" @click.stop="handleDeleteConversation(conv.id)">×</button>
+          </div>
+        </div>
+        <div class="empty-conversations" v-else>
+          <p>暂无会话记录</p>
+          <p class="hint">点击上方按钮创建新会话</p>
         </div>
       </div>
-      <div class="empty-conversations" v-else>
-        <p>暂无会话记录</p>
-        <p class="hint">点击上方按钮创建新会话</p>
+
+      <!-- 聊天区域 -->
+      <div class="chat-container">
+        <GenuiChat ref="chatRef" :url="url" />
       </div>
     </div>
-
-    <!-- 聊天区域 -->
-    <div class="chat-container">
-      <GenuiChat ref="chatRef" :url="url" />
-    </div>
-  </div>
-
   </GenuiConfigProvider>
 </template>
 

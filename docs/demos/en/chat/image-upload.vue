@@ -1,9 +1,8 @@
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <div class="chat-container">
-    <GenuiChat :url="url" :features="modelFeatures" :messages="messages" />
-  </div>
-
+    <div class="chat-container">
+      <GenuiChat :url="url" :features="modelFeatures" :messages="messages" />
+    </div>
   </GenuiConfigProvider>
 </template>
 

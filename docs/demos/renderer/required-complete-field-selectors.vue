@@ -1,11 +1,10 @@
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiRenderer
-    :content="content"
-    :generating="generating"
-    :requiredCompleteFieldSelectors="selectors"
-  />
-
+    <GenuiRenderer
+      :content="content"
+      :generating="generating"
+      :requiredCompleteFieldSelectors="selectors"
+    />
   </GenuiConfigProvider>
 </template>
 

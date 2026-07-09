@@ -29,8 +29,7 @@ The following example shows how to use `TinyTabs` and `TinyTabItem` to create a 
 ```vue {10-51}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat :url="url" :customSnippets="customSnippets" />
-
+    <GenuiChat :url="url" :customSnippets="customSnippets" />
   </GenuiConfigProvider>
 </template>
 

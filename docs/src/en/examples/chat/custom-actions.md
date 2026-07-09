@@ -7,12 +7,11 @@ In the `GenuiChat` component, a built-in continue-chat Action `continueChat` is 
 ```vue {14-36}
 <template>
   <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-  <GenuiChat 
-    :url="url" 
-    :customActions="customActions"
-    :messages="messages"
-  />
-
+    <GenuiChat 
+      :url="url" 
+      :customActions="customActions"
+      :messages="messages"
+    />
   </GenuiConfigProvider>
 </template>
 
