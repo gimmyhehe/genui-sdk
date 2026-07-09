@@ -17,16 +17,16 @@ defineProps<{
 const { isMobile } = useIsMobile();
 const { schema, conversation, actions } = provideTemplateContext();
 
-watch(schema.currentPreviewSchemaComplete, (isComplete) => {
+watch(() => schema.currentPreviewSchemaComplete, (isComplete) => {
   if (isComplete && actions.shouldSyncEditorBaseline()) {
     actions.syncBaseline();
   }
 });
 
-watch(conversation.currentConversationId, actions.resetAll);
+watch(() => conversation.currentConversationId, actions.resetAll);
 
 watch(
-  () => conversation.templateConversationState.value?.loading,
+  () => conversation.templateConversationState?.loading,
   (loading, prevLoading) => {
     if (prevLoading === true && loading === false) {
       actions.resetToLatestVersion();

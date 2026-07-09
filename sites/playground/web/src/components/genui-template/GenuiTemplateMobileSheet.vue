@@ -20,16 +20,16 @@ const TinyIconTime = iconTime();
 const { schema, versionControl, editor, ui, actions } = useTemplateContext();
 
 const headerTitle = computed(() => {
-  if (!ui.isMobileJsonOpen.value) {
+  if (!ui.isMobileJsonOpen) {
     return t('templateEditor.previewRender');
   }
-  return versionControl.schemaEditorShowDiffView.value
+  return versionControl.schemaEditorShowDiffView
     ? t('templateEditor.viewChanges')
     : t('templateEditor.schemaJsonTitle');
 });
 
 const toggleJsonEditor = () => {
-  actions.handleMobileJsonEditorOpen(!ui.isMobileJsonOpen.value);
+  actions.handleMobileJsonEditorOpen(!ui.isMobileJsonOpen);
 };
 </script>
 
@@ -105,7 +105,7 @@ const toggleJsonEditor = () => {
                 class="schema-mobile-sheet-renderer"
                 :content="schema.currentPreviewSchema"
                 :generating="false"
-                :isJsonComplete="schema.currentPreviewSchemaComplete"
+                :is-json-complete="schema.currentPreviewSchemaComplete"
               />
             </div>
             <Transition name="schema-mobile-json">

@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 type MobileSheetMode = 'closed' | 'preview' | 'json';
 type SidePanel = 'history';
 
-const rendererPanelVisible = ref(true);
+const rendererPanelVisible = ref(false);
 const schemaEditorVisible = ref(false);
 const mobileSheetMode = ref<MobileSheetMode>('closed');
 const sidePanel = ref<SidePanel | null>(null);
@@ -132,7 +132,7 @@ export function useTemplateUi() {
 
   const resetUi = () => {
     schemaEditorVisible.value = false;
-    rendererPanelVisible.value = true;
+    rendererPanelVisible.value = false;
     mobileSheetMode.value = 'closed';
     sidePanel.value = null;
     resetMobileSheetHeight();

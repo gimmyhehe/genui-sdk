@@ -19,7 +19,7 @@ const monacoTheme = useMonacoPlaygroundTheme(() => props.theme);
 const { schema, versionControl, editor } = useTemplateContext();
 
 const editorOptions = computed(() => {
-  const readOnly = versionControl.isEditorReadOnly.value;
+  const readOnly = versionControl.isEditorReadOnly;
   return {
     fontSize: 14,
     minimap: { enabled: false },
@@ -35,21 +35,21 @@ const editorOptions = computed(() => {
 
 const diffEditorKey = computed(() => {
   if (props.layout === 'sheet') {
-    return schema.currentCardId.value
-      || `${versionControl.schemaEditorDiffOriginal.value?.length}-${versionControl.schemaEditorDiffModified.value?.length}`;
+    return schema.currentCardId
+      || `${versionControl.schemaEditorDiffOriginal?.length}-${versionControl.schemaEditorDiffModified?.length}`;
   }
-  return schema.currentCardId.value;
+  return schema.currentCardId;
 });
 
 const codeEditorKey = computed(() =>
-  `${schema.currentCardId.value}-${versionControl.isEditorReadOnly.value}`,
+  `${schema.currentCardId}-${versionControl.isEditorReadOnly}`,
 );
 
-const diffOriginal = computed(() => versionControl.schemaEditorDiffOriginal.value || '{}');
-const diffModified = computed(() => versionControl.schemaEditorDiffModified.value || editor.schemaEditorText.value);
+const diffOriginal = computed(() => versionControl.schemaEditorDiffOriginal || '{}');
+const diffModified = computed(() => versionControl.schemaEditorDiffModified || editor.schemaEditorText);
 
 const handleTextUpdate = (value: string) => {
-  editor.applyTextToPreview(value, versionControl.isEditorReadOnly.value);
+  editor.applyTextToPreview(value, versionControl.isEditorReadOnly);
 };
 </script>
 

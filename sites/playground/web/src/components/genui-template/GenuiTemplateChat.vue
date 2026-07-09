@@ -66,7 +66,7 @@ watch(
   },
 );
 
-const messageManager = computed(() => conversation.conversationKit.value?.messageManager.value ?? null);
+const messageManager = computed(() => conversation.conversationKit?.messageManager.value ?? null);
 
 const messages = computed(() => messageManager.value?.messages.value ?? []);
 
@@ -272,13 +272,13 @@ const handleSendMessage = async () => {
   messages.value.push(userMessage);
 
   if (messages.value.length === 1 && messages.value[0].role === 'user') {
-    const currentConversationId = conversation.templateConversationState.value?.currentId;
+    const currentConversationId = conversation.templateConversationState?.currentId;
     if (currentConversationId) {
       conversation.updateConversationTitle(currentConversationId, messageContent.substring(0, 20));
     }
   }
 
-  prevSchema.value = JSON.stringify(schema.currentSchema.value);
+  prevSchema.value = JSON.stringify(schema.currentSchema);
   messageManager.value?.send();
   clearInputMessage();
   scrollToBottom();
@@ -286,15 +286,15 @@ const handleSendMessage = async () => {
 
 const finalizeStreamingSchemaCard = () => {
   finalizePendingSchemaCard(messages.value, {
-    cardId: schema.currentCardId.value,
-    schema: schema.currentPreviewSchema.value ?? schema.currentSchema.value,
+    cardId: schema.currentCardId,
+    schema: schema.currentPreviewSchema ?? schema.currentSchema,
     prevSchema: prevSchema.value || '',
   });
 };
 
 const handleNotification = (event: INotificationPayload) => {
   if (event.type === 'done') {
-    schema.setCurrentSchema(schema.currentPreviewSchema.value);
+    schema.setCurrentSchema(schema.currentPreviewSchema);
     finalizeStreamingSchemaCard();
   }
 };

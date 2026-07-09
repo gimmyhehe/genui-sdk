@@ -78,7 +78,7 @@ const handleDev = () => {
     return;
   }
 
-  const prevSchemaStr = resolveJsonPatchPrevSchemaString(cardMessage, conversation.messages.value);
+  const prevSchemaStr = resolveJsonPatchPrevSchemaString(cardMessage, conversation.messages);
   const baseline = parseSchemaJson(prevSchemaStr);
   const operations = parseJsonPatchOperations(cardMessage.content);
   if (!baseline || !operations) {

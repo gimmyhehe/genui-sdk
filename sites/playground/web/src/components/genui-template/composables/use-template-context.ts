@@ -1,5 +1,5 @@
 import { getTemplateStreamEvents, type TemplateStreamEvents } from './internal/template-stream-events';
-import { inject, provide, type InjectionKey } from 'vue';
+import { inject, provide, reactive, type InjectionKey, type UnwrapNestedRefs } from 'vue';
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateConversation } from './use-template-conversation';
 import { useTemplateVersionControl } from './use-template-version-control';
@@ -8,16 +8,18 @@ import { useTemplateUi } from './use-template-ui';
 import { useTemplateActions } from './use-template-actions';
 import { useTemplateStreamRender } from './use-template-stream-render';
 
-export interface TemplateContext {
-  schema: ReturnType<typeof useTemplateSchema>;
-  conversation: ReturnType<typeof useTemplateConversation>;
-  versionControl: ReturnType<typeof useTemplateVersionControl>;
-  editor: ReturnType<typeof useSchemaEditor>;
-  ui: ReturnType<typeof useTemplateUi>;
-  actions: ReturnType<typeof useTemplateActions>;
+const asReactive = <T extends object>(obj: T): UnwrapNestedRefs<T> => reactive(obj) as UnwrapNestedRefs<T>;
+
+export type TemplateContext = {
+  schema: UnwrapNestedRefs<ReturnType<typeof useTemplateSchema>>;
+  conversation: UnwrapNestedRefs<ReturnType<typeof useTemplateConversation>>;
+  versionControl: UnwrapNestedRefs<ReturnType<typeof useTemplateVersionControl>>;
+  editor: UnwrapNestedRefs<ReturnType<typeof useSchemaEditor>>;
+  ui: UnwrapNestedRefs<ReturnType<typeof useTemplateUi>>;
+  actions: UnwrapNestedRefs<ReturnType<typeof useTemplateActions>>;
   stream: ReturnType<typeof useTemplateStreamRender>;
   streamEvents: TemplateStreamEvents;
-}
+};
 
 export const TemplateContextKey: InjectionKey<TemplateContext> = Symbol('TemplateContext');
 
@@ -34,12 +36,12 @@ export function createTemplateContext(): TemplateContext {
   const actions = useTemplateActions({ versionControl, editor, ui });
 
   return {
-    schema,
-    conversation,
-    versionControl,
-    editor,
-    ui,
-    actions,
+    schema: asReactive(schema),
+    conversation: asReactive(conversation),
+    versionControl: asReactive(versionControl),
+    editor: asReactive(editor),
+    ui: asReactive(ui),
+    actions: asReactive(actions),
     stream,
     streamEvents: events,
   };

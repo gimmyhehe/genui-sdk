@@ -36,7 +36,7 @@ const handleSchemaVersionCardClick = (cardId: string) => {
   }
 
   const card = versionControl.getMessageByCardId(cardId);
-  const schema = card ? rebuildSchemaFromCard(card, { messages: conversation.messages.value }) : null;
+  const schema = card ? rebuildSchemaFromCard(card, { messages: conversation.messages }) : null;
   actions.handleSchemaVersionToggle(schema, cardId);
 };
 </script>

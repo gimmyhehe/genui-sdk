@@ -17,7 +17,7 @@ const isDark = computed(() => props.theme === 'dark');
 const collapsedGroups = ref<Record<string, boolean>>({});
 
 watch(
-  () => versionControl.schemaVersionHistoryGroups.value.map((group) => group.label),
+  () => versionControl.schemaVersionHistoryGroups.map((group) => group.label),
   (labels) => {
     for (const label of labels) {
       if (!(label in collapsedGroups.value)) {

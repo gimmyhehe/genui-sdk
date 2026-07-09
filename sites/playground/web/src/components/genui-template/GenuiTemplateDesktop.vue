@@ -19,14 +19,14 @@ const TinyCloseIcon = iconClose();
 const { schema, conversation, versionControl, editor, ui, actions } = useTemplateContext();
 
 const rendererSchema = computed(() => {
-  const preview = schema.currentPreviewSchema.value ?? schema.currentSchema.value;
+  const preview = schema.currentPreviewSchema ?? schema.currentSchema;
   return isRenderableSchema(preview) ? preview : null;
 });
 
 const rendererSchemaKey = computed(() => {
   const preview = rendererSchema.value as Record<string, unknown> | null;
   const componentName = preview?.componentName ?? 'schema';
-  return `${schema.currentCardId.value || 'preview'}-${String(componentName)}`;
+  return `${schema.currentCardId || 'preview'}-${String(componentName)}`;
 });
 </script>
 
