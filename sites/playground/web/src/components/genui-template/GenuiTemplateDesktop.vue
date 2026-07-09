@@ -75,7 +75,7 @@ const rendererSchemaKey = computed(() => {
             class="schema-renderer"
             :content="rendererSchema"
             :generating="false"
-            :is-json-complete="true"
+            :is-json-complete="schema.currentPreviewSchemaComplete"
           />
           <schema-version-history-panel :theme="theme" />
         </div>
