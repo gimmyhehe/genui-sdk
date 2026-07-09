@@ -22,9 +22,7 @@ import {
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateConversation } from './use-template-conversation';
 
-type VersionPreviewMode = 'live' | 'history-diff';
-
-const versionPreviewMode = ref<VersionPreviewMode>('live');
+const historyDiffFromPanel = ref(false);
 
 const isSameSchema = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
 
@@ -87,8 +85,6 @@ export function useTemplateVersionControl() {
     () => flatSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === currentCardId.value) ?? null,
   );
 
-  const isDiffMode = computed(() => versionPreviewMode.value === 'history-diff');
-
   const showReturnLatestButton = computed(() => {
     const cardId = currentCardId.value;
     if (!cardId || isLatestSchemaVersionCard(cardId)) {
@@ -101,8 +97,6 @@ export function useTemplateVersionControl() {
     }
     return !isSameSchema(preview, committed);
   });
-
-  const isEditorReadOnly = computed(() => isDiffMode.value || showReturnLatestButton.value);
 
   const schemaEditorDiffOriginal = computed(() => {
     const entry = currentHistoryEntry.value;
@@ -121,11 +115,13 @@ export function useTemplateVersionControl() {
   });
 
   const schemaEditorShowDiffView = computed(() => {
-    if (!isDiffMode.value || !currentHistoryEntry.value) {
+    if (!historyDiffFromPanel.value || !currentHistoryEntry.value) {
       return false;
     }
     return hasUnifiedDiffChanges(schemaEditorDiffOriginal.value, schemaEditorDiffModified.value);
   });
+
+  const isEditorReadOnly = computed(() => showReturnLatestButton.value);
 
   const getMessageByCardId = (cardId: string) => {
     if (!cardId) {
@@ -246,7 +242,7 @@ export function useTemplateVersionControl() {
   };
 
   const resetVersionPreviewMode = () => {
-    versionPreviewMode.value = 'live';
+    historyDiffFromPanel.value = false;
   };
 
   const previewVersion = (
@@ -255,7 +251,7 @@ export function useTemplateVersionControl() {
     previewOptions: { diffFromHistory?: boolean } = {},
   ) => {
     currentCardId.value = cardId;
-    versionPreviewMode.value = previewOptions.diffFromHistory ? 'history-diff' : 'live';
+    historyDiffFromPanel.value = !!previewOptions.diffFromHistory;
     setCurrentPreviewSchema(schema);
     if (isLatestSchemaVersionCard(cardId)) {
       setCurrentSchema(schema);
@@ -334,7 +330,6 @@ export function useTemplateVersionControl() {
   };
 
   return {
-    isDiffMode,
     showReturnLatestButton,
     isEditorReadOnly,
     schemaEditorDiffOriginal,
