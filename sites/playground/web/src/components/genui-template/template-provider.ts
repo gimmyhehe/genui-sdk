@@ -71,7 +71,6 @@ export class CustomModelProvider extends BaseModelProvider {
     const lastUserMessage = getLastUserMessage(request.messages);
     if (!lastUserMessage) {
       onError?.(new Error(t('template.noUserMessageToReply')));
-      onDone?.();
       return;
     }
     const { content: input, messageId } = lastUserMessage;
@@ -207,7 +206,6 @@ export class CustomModelProvider extends BaseModelProvider {
     } catch (error) {
       hasError = true;
       onError?.(error);
-      throw error;
     } finally {
       if (!hasError && chatMessage) {
         this.streamEvents.emit('notification', {
@@ -217,8 +215,8 @@ export class CustomModelProvider extends BaseModelProvider {
           cardId: requestId,
           input: lastUserInput,
         });
+        onDone?.();
       }
-      onDone?.();
     }
   }
 
