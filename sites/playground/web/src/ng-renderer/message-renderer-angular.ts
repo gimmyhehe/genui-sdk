@@ -14,14 +14,14 @@ export function getMessageRendererAngular(instance: GenuiChat) {
             {
               ...schemaCardProps,
               requiredCompleteFieldSelectors: props.requiredCompleteFieldSelectors || [],
-              generating: instance.lastSchemaCardId?.value === schemaCardProps.id ? instance.generating?.value : false,
+              generating: instance.lastSchemaCardId === schemaCardProps.id ? instance.generating : false,
               customActions: {
                 continueChat: continueChatAction,
                 saveState: saveStateAction,
               },
               key: schemaCardProps.id,
             }
-          ),
+          )
         );
       }
 }
