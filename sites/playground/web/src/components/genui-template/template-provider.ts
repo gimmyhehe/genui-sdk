@@ -2,7 +2,7 @@ import { reactive, toRaw } from 'vue';
 import { BaseModelProvider, type ChatCompletionRequest, type ChatCompletionResponse } from '@opentiny/tiny-robot-kit';
 import { PatternExtractor } from '@opentiny/genui-sdk-core';
 import type { IStreamDelta } from '@opentiny/genui-sdk-core';
-import type { TemplateStreamEvents } from './composables/internal/template-stream-events';
+import type { EventEmitter } from '@opentiny/genui-sdk-vue';
 import { templateChat } from './template-chat-api';
 import { getBackendChatMessages, getLastUserMessage } from './template-chat-utils';
 import type { LLMConfig, IChatMessage, IMessageItem } from './chat.types';
@@ -11,7 +11,7 @@ import { t } from '../../i18n';
 export interface ICustomModelProviderOptions {
   url: string;
   llmConfig: LLMConfig;
-  streamEvents: TemplateStreamEvents;
+  emitter: EventEmitter;
 }
 
 export interface IOpenaiCompatibleChunk {
@@ -33,12 +33,12 @@ export class CustomModelProvider extends BaseModelProvider {
   private url: string;
   private llmConfig: LLMConfig;
   private templateSchema: any;
-  private streamEvents: TemplateStreamEvents;
-  constructor({ url, llmConfig, streamEvents }: ICustomModelProviderOptions) {
+  private emitter: EventEmitter;
+  constructor({ url, llmConfig, emitter }: ICustomModelProviderOptions) {
     super({ provider: 'custom' });
     this.url = url;
     this.llmConfig = llmConfig;
-    this.streamEvents = streamEvents;
+    this.emitter = emitter;
   }
 
   validateRequest(_: ChatCompletionRequest) {}
@@ -102,7 +102,7 @@ export class CustomModelProvider extends BaseModelProvider {
             cardId: String(messageId ?? ''),
           });
         }
-        this.streamEvents.emit('notification', {
+        this.emitter.emit('notification', {
           type: 'markdown',
           delta,
           chatMessage: structuredClone(toRaw(chatMessage!)),
@@ -133,7 +133,7 @@ export class CustomModelProvider extends BaseModelProvider {
           });
           isNewMessage = true;
         }
-        this.streamEvents.emit('schema-json-changed', {
+        this.emitter.emit('schema-json-changed', {
           type: currentSchemaType,
           newMessage: isNewMessage,
           delta,
@@ -208,7 +208,7 @@ export class CustomModelProvider extends BaseModelProvider {
       onError?.(error);
     } finally {
       if (!hasError && chatMessage) {
-        this.streamEvents.emit('notification', {
+        this.emitter.emit('notification', {
           type: 'done',
           delta: {},
           chatMessage: structuredClone(toRaw(chatMessage)),

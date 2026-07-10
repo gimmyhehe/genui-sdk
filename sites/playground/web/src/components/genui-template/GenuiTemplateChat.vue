@@ -45,7 +45,7 @@ const props = defineProps<{
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
-const { schema, conversation, versionControl, stream, streamEvents } = useTemplateContext();
+const { schema, conversation, versionControl, stream, emitter } = useTemplateContext();
 const {
   errorMessagesMap,
   handleSchemaJsonChanged,
@@ -111,10 +111,10 @@ const roles: Record<string, BubbleRoleConfig> = {
 };
 
 onMounted(() => {
-  streamEvents.on('schema-json-changed', handleSchemaJsonChanged);
+  emitter.on('schema-json-changed', handleSchemaJsonChanged);
 });
 onUnmounted(() => {
-  streamEvents.off('schema-json-changed', handleSchemaJsonChanged);
+  emitter.off('schema-json-changed', handleSchemaJsonChanged);
 });
 
 const getCardMessageByIndex = (index: number) => {
@@ -242,7 +242,7 @@ const showMessages = computed(() => {
             ...existingMessages,
             {
               type: 'loading-text',
-              emitter: streamEvents,
+              emitter,
               message: lastMessage,
               showThinkingResult: false,
             },
@@ -302,11 +302,11 @@ const handleNotification = (event: INotificationPayload) => {
 watch(() => messages.value, throttledScrollToBottom, { deep: true });
 
 onMounted(() => {
-  streamEvents.on('notification', handleNotification);
+  emitter.on('notification', handleNotification);
 });
 
 onUnmounted(() => {
-  streamEvents.off('notification', handleNotification);
+  emitter.off('notification', handleNotification);
 });
 </script>
 

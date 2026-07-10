@@ -1,4 +1,5 @@
-import { getTemplateStreamEvents, type TemplateStreamEvents } from './internal/template-stream-events';
+import type { EventEmitter } from '@opentiny/genui-sdk-vue';
+import { emitter } from '../template-chat-event-emitter';
 import { inject, provide, reactive, type InjectionKey, type UnwrapNestedRefs } from 'vue';
 import { useTemplateSchema } from './use-template-schema';
 import { useTemplateConversation } from './use-template-conversation';
@@ -18,7 +19,7 @@ export type TemplateContext = {
   ui: UnwrapNestedRefs<ReturnType<typeof useTemplateUi>>;
   actions: UnwrapNestedRefs<ReturnType<typeof useTemplateActions>>;
   stream: ReturnType<typeof useTemplateStreamRender>;
-  streamEvents: TemplateStreamEvents;
+  emitter: EventEmitter;
 };
 
 export const TemplateContextKey: InjectionKey<TemplateContext> = Symbol('TemplateContext');
@@ -26,7 +27,6 @@ export const TemplateContextKey: InjectionKey<TemplateContext> = Symbol('Templat
 let activeContext: TemplateContext | null = null;
 
 export function createTemplateContext(): TemplateContext {
-  const events = getTemplateStreamEvents();
   const schema = useTemplateSchema();
   const conversation = useTemplateConversation();
   const versionControl = useTemplateVersionControl();
@@ -49,7 +49,7 @@ export function createTemplateContext(): TemplateContext {
     ui: reactiveUi,
     actions,
     stream,
-    streamEvents: events,
+    emitter,
   };
 }
 
