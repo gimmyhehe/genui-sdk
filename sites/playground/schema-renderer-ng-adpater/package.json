@@ -9,6 +9,7 @@
     "dist"
   ],
   "scripts": {
+    "prebuild": "pnpm --filter @opentiny/genui-sdk-angular build:element",
     "build": "vite build"
   },
   "dependencies": {
