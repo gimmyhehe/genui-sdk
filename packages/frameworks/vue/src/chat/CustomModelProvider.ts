@@ -85,8 +85,13 @@ export class CustomModelProvider extends BaseModelProvider {
     return {} as ChatCompletionResponse;
   }
 
+  protected createStreamContext(_request: ChatCompletionRequest): Record<string, unknown> {
+    const { chatConfig } = this.getChatOptions();
+    return { chatConfig };
+  }
+
   async chatStream(request: any, handler: { onData: any; onDone: any; onError: any }) {
-    const { onDone, onData, onError } = handler;
+    const { onDone } = handler;
     let response: Response;
     try {
       response = await this.getData(request);
@@ -98,9 +103,7 @@ export class CustomModelProvider extends BaseModelProvider {
     // const chunkStream = createAsyncIterableStream(getChunkStringStream(bodyStream));
     const reader = bodyStream.getReader();
 
-    const context: any = {};
-    const { chatConfig } = this.getChatOptions();
-    context.chatConfig = chatConfig;
+    const context: any = this.createStreamContext(request);
 
     const signal = request.options?.signal;
     signal?.addEventListener('abort',

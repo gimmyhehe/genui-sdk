@@ -1,7 +1,7 @@
 import { ref, shallowRef, computed } from 'vue';
 import { useConversation, IndexedDBStrategy } from '@opentiny/genui-sdk-vue';
 import { AIClient, type ChatMessage } from '@opentiny/tiny-robot-kit';
-import { CustomModelProvider } from '../template-provider';
+import { TemplateModelProvider } from '../template-provider';
 import { emitter } from '../template-chat-event-emitter';
 import type { LLMConfig } from '../chat.types';
 import {
@@ -12,7 +12,7 @@ import {
 import { t } from '../../../i18n';
 
 const conversationKit = shallowRef<ReturnType<typeof useConversation> | null>(null);
-let templateProvider: CustomModelProvider | null = null;
+let templateProvider: TemplateModelProvider | null = null;
 let templateChatUrl = '';
 let templateLlmConfig: LLMConfig = { model: '', temperature: 0.3 };
 const isTemplateInit = ref(false);
@@ -29,7 +29,7 @@ export function useTemplateConversation(options?: UseTemplateConversationOptions
     templateChatUrl = url;
     templateLlmConfig = llmConfig || templateLlmConfig;
 
-    templateProvider = new CustomModelProvider({
+    templateProvider = new TemplateModelProvider({
       url,
       llmConfig: llmConfig || { model: '', temperature: 0.3 },
       emitter,
