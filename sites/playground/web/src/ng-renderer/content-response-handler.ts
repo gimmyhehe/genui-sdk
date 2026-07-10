@@ -29,12 +29,10 @@ function onSchemaJsonForFramework(content: string, delta: IStreamDelta, chatMess
   }
 
 export function getMixedContentHandler(contentHandler, framework: Ref<string>) {
-  // TODO: framework 非固定值，应由对话发起时候记录下来，当前未实现
   return {
     ...contentHandler,
     start: (context, handlers) => {
       context.framework = framework.value;
-      console.log('context.framework', context.framework);
       contentHandler.start(context, handlers);
       context.patternExtractor.onHandledWrite = (value) => 
         onSchemaJsonForFramework(value, context.delta, context.chatMessage,context.framework);
