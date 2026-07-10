@@ -44,13 +44,13 @@ export default defineConfig(({ command }) => {
     viteGitCommitHashPlugin({
       fileName: 'version.json',
     }),
-    tsconfigPaths({
-      projects: [command === 'serve' ? './tsconfig.dev.json' : './tsconfig.app.json'],
-    }),
   ];
 
   if (command === 'serve') {
     plugins.push(
+      tsconfigPaths({
+        projects: ['./tsconfig.dev.json'],
+      }),
       nodePolyfills(), // tiny-schema-renderer 依赖 babel 间接依赖 process.env等内容
     );
   }
