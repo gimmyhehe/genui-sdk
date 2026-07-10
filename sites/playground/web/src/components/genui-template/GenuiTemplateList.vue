@@ -30,7 +30,7 @@ const {
 const selectedTemplateIds = ref<string[]>([]);
 const selectionActive = ref(false);
 
-const conversations = computed(() => templateConversationState.value?.conversations ?? []);
+const conversations = computed(() => templateConversationState?.conversations ?? []);
 
 const historyMenuItems = getHistoryMenuItems();
 
@@ -49,7 +49,7 @@ watch(
 );
 
 const handleImportConversations = (imported: Conversation[]) => {
-  const kit = conversationKit.value;
+  const kit = conversationKit;
   if (!kit) {
     return;
   }
