@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<IRendererProps>(), {
 });
 
 const schema = ref<any>({});
-const rendererInstance = ref<SchemaRenderer>(null);
+const rendererInstance = ref<SchemaRenderer | null>(null);
 
 const callAction = (actionName: string, params: any) => {
   if (!props.customActions?.[actionName]) {
