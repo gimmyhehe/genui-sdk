@@ -1,5 +1,5 @@
 import type { IGenPromptAction } from './action';
-import type { IGenPromptOptions } from './gen-prompt';
+import type { IGenPromptOptions } from './prompt';
 
 export const skillRulesPrompt = ['特别重要：除了上下文数据和工具调用结果以外，禁止使用任何Mock数据'];
 
