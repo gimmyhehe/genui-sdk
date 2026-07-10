@@ -1,5 +1,6 @@
 import * as jsonPatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 import type { JsonPatchOp } from 'jsondiffpatch/formatters/jsonpatch-apply';
+import { t } from '../../../i18n';
 import { findComponentPath, getPositionRelativePath, mergePath } from './schema-path';
 
 export type IFormattedJsonPatchOperation = JsonPatchOp & {
@@ -32,7 +33,7 @@ export const formatJsonPatch = (
     item.idToPath = componentPath;
 
     if (!componentPath) {
-      console.error(`找不到组件路径: ${item.id}`);
+      console.error(t('templateEditor.componentPathNotFound', { id: String(item.id ?? '') }));
       return item;
     }
 

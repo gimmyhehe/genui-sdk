@@ -166,6 +166,7 @@
     "createdAt": "Created: {time}",
     "debugJsonPatch": "Debug jsonPatch",
     "parseFailed": "Parse failed",
+    "componentPathNotFound": "Component path not found: {id}",
     "debugger": "Debugger",
     "jsonEditorAria": "Schema JSON editor",
     "jsonPreviewAria": "Schema JSON preview",

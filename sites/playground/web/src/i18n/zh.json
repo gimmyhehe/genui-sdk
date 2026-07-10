@@ -166,6 +166,7 @@
     "createdAt": "创建时间：{time}",
     "debugJsonPatch": "调试 jsonPatch",
     "parseFailed": "解析失败",
+    "componentPathNotFound": "找不到组件路径: {id}",
     "debugger": "调试器",
     "jsonEditorAria": "Schema JSON 编辑器",
     "jsonPreviewAria": "Schema JSON 预览",
