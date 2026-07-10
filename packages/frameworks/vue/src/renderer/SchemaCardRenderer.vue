@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide } from 'vue';
 // @ts-ignore
-import defaultSchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
+import SchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { DeltaPatcher, repairJson, RepairJsonState, type IMaterials } from '@opentiny/genui-sdk-core';
 import { requiredCompleteFieldSelectors as internalRequiredCompleteFieldSelectors } from './config';
 import {
-  GENUI_RENDERER,
   GENUI_MATERIALS,
 } from '../chat/injection-tokens';
 import type { IRendererProps } from './renderer.types';
@@ -22,7 +21,7 @@ const props = withDefaults(defineProps<IRendererProps>(), {
 });
 
 const schema = ref<any>({});
-const rendererInstance = ref<defaultSchemaRenderer>(null);
+const rendererInstance = ref<SchemaRenderer | null>(null);
 
 const callAction = (actionName: string, params: any) => {
   if (!props.customActions?.[actionName]) {
@@ -32,7 +31,6 @@ const callAction = (actionName: string, params: any) => {
   return props.customActions[actionName]?.execute(params, rendererInstance.value.getContext());
 };
 
-const SchemaRenderer = inject(GENUI_RENDERER, defaultSchemaRenderer);
 const materialRegistry = inject<IMaterials>(GENUI_MATERIALS, {});
 const vueMaterials = materialRegistry.components ?? {};
 const defaultPropsMap = materialRegistry.defaultPropsMap ?? {};
