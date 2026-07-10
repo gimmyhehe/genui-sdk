@@ -3,7 +3,7 @@ import type { ChatCompletionCreateParamsBase } from "openai/resources/chat/compl
 import type { IGenPromptCustomConfig } from "@opentiny/genui-sdk-core";
 
 export interface IGenPromptConfig extends IGenPromptCustomConfig {
-  framework?: 'Vue' | 'Angular';
+  framework?: 'Vue' | 'Angular' | string;
   strategy?: 'append' | 'override' | 'prepend';
 }
 

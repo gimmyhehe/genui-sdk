@@ -13,7 +13,7 @@ import { iconPlus, iconEllipsis, iconEdit, iconDel } from '@opentiny/vue-icon';
 import SelectTemplateDialog from './SelectTemplateDialog.vue';
 import { t } from '../../i18n';
 
-const renderConfigLabelMap = {
+const promptVariantLabelMap = {
   mini: 'model.promptVariantMini',
   standard: 'model.promptVariantStandard',
 };
@@ -44,7 +44,7 @@ const updateTemperature = (temperature) => updateConfig({ temperature });
 
 const promptVariantOptions = (['mini', 'standard']).map((key) => ({
   value: key,
-  label: t(renderConfigLabelMap[key] || key),
+  label: t(promptVariantLabelMap[key] || key),
 }));
 
 const updatePromptVariant = (promptVariant) => updateConfig({ promptVariant });

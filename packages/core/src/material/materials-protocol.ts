@@ -179,9 +179,11 @@ export interface ISnippet {
 
 export type IBlock = any;
 
+export type IMaterialsProtocolFramework = 'Vue' | 'React' | 'Angular' | string;
+
 export interface IMaterialsProtocol {
   data: {
-    framework: string;
+    framework: IMaterialsProtocolFramework;
     materials: {
       components?: IComponent[];
       packages?: IPackage[];
