@@ -1,4 +1,8 @@
-import type { IGenPromptFrameworkConfig } from './gen-framework-prompt';
+export interface IGenPromptFrameworkConfig {
+  rules?: string[];
+}
+
+export type GenPromptFramework = 'vue' | 'angular' | 'react';
 
 export const vueFrameworkConfig: IGenPromptFrameworkConfig = {
   rules: [
@@ -13,3 +17,14 @@ export const angularFrameworkConfig: IGenPromptFrameworkConfig = {
 export const reactFrameworkConfig: IGenPromptFrameworkConfig = {
   rules: [],
 };
+
+const frameworkConfigMap: Record<GenPromptFramework, IGenPromptFrameworkConfig> = {
+  vue: vueFrameworkConfig,
+  angular: angularFrameworkConfig,
+  react: reactFrameworkConfig,
+};
+
+export function getFrameworkConfig(framework: string): IGenPromptFrameworkConfig {
+  const key = framework.toLowerCase() as GenPromptFramework;
+  return frameworkConfigMap[key] ?? vueFrameworkConfig;
+}

@@ -3,6 +3,7 @@ import { genCustomActionsPrompt, type IGenPromptAction } from './action';
 import { aboutThis } from './about-this';
 import { genComponentsPrompt, type IGenPromptComponent } from './component';
 import { genExamplesPrompt, type IGenPromptExample } from './examples';
+import { getFrameworkConfig, type IGenPromptFrameworkConfig } from './framework-config';
 import { genJsonSchema, genJsonSchemaPrompt } from './json-schema';
 import { promptPrefix, skillPromptPrefix } from './prefix';
 import { genRulesPrompt } from './rules';
@@ -12,6 +13,7 @@ export type { IGenPromptAction } from './action';
 export type { IGenPromptComponent } from './component';
 export type { IGenPromptExample } from './examples';
 export type { IGenPromptSnippet } from './snippet';
+export type { GenPromptFramework, IGenPromptFrameworkConfig } from './framework-config';
 
 export interface IGenPromptCustomConfig {
   customComponents?: IGenPromptComponent[];
@@ -67,10 +69,16 @@ function buildPromptSections(
 }
 
 export function genPrompt(
+  framework: string | IGenPromptFrameworkConfig,
   materialsMeta: IMaterialsMeta,
   tgCustomConfig?: IGenPromptCustomConfig,
   options?: IGenPromptOptions,
 ) {
-  const sections = buildPromptSections(materialsMeta, tgCustomConfig, options);
+  const frameworkConfig = typeof framework === 'string' ? getFrameworkConfig(framework) : framework;
+  const mergedOptions: IGenPromptOptions = {
+    ...options,
+    rules: [...(frameworkConfig.rules ?? []), ...(options?.rules ?? [])],
+  };
+  const sections = buildPromptSections(materialsMeta, tgCustomConfig, mergedOptions);
   return sections.join('\n\n');
 }

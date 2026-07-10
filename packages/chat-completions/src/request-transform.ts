@@ -36,7 +36,7 @@ export function requestTransform(
 
   const renderConfigForFramework = framework === 'Angular' ? ngMaterialsMeta : materialsMeta;
   const systemMessages = newParams.messages?.find((message) => message.role === 'system');
-  const prompt = genPrompt(renderConfigForFramework, promptConfig);
+  const prompt = genPrompt(framework, renderConfigForFramework, promptConfig);
   if (systemMessages) {
     systemMessages.content = mergePrompt(systemMessages.content as string, prompt, strategy);
   } else {

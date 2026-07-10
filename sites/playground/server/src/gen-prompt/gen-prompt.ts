@@ -1,7 +1,5 @@
 import {
-  genAngularPrompt,
-  genReactPrompt,
-  genVuePrompt,
+  genPrompt,
   type IGenPromptCustomConfig,
   type IGenPromptOptions,
   type IMaterialsMeta,
@@ -15,26 +13,10 @@ const vueMaterialsMetaByVariant = {
   standard: materialsMeta,
 } as const;
 
-type GenPromptFn = (
-  materialsMeta: IMaterialsMeta,
-  tgCustomConfig?: IGenPromptCustomConfig,
-  options?: IGenPromptOptions,
-) => string;
-
 export function getGenPromptOptions(promptVariant?: MaterialsMetaVariantKey): IGenPromptOptions | undefined {
   if (promptVariant === 'mini') {
     return { includeJsonSchema: false, includeSnippets: false };
   }
-}
-
-export function getGenPromptByFramework(framework: string): GenPromptFn {
-  if (framework === 'Angular') {
-    return genAngularPrompt;
-  }
-  if (framework === 'React') {
-    return genReactPrompt;
-  }
-  return genVuePrompt;
 }
 
 export function getMaterialsMetaForFramework(
@@ -55,7 +37,8 @@ export function genPlaygroundPrompt(
   promptVariant: MaterialsMetaVariantKey | undefined,
   tgCustomConfig?: IGenPromptCustomConfig,
 ) {
-  return getGenPromptByFramework(framework)(
+  return genPrompt(
+    framework,
     getMaterialsMetaForFramework(framework, promptVariant),
     tgCustomConfig,
     getGenPromptOptions(promptVariant),

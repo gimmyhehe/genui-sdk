@@ -28,7 +28,7 @@ import { streamText } from 'ai';
 function buildSystemPrompt(framework: 'Vue' | 'Angular', promptConfig: LlmBenchmarkRunOptions['promptConfig']) {
   const { tgCustomConfig, specificPrompt, userAppendPrompt } = promptConfig;
   const renderConfigForFramework = framework === 'Angular' ? ngMaterialsMeta : materialsMeta;
-  return genPrompt(renderConfigForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt;
+  return genPrompt(framework, renderConfigForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt;
 }
 /**
  * 根据 `scenarios` / `scenario` 过滤要生成样本的场景。
