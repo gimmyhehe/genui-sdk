@@ -22,6 +22,8 @@ export interface IGenPromptCustomConfig {
   customActions?: IGenPromptAction[];
 }
 
+export type IGenPromptFramework = 'Vue' | 'React' | 'Angular' | string;
+
 export interface IGenPromptOptions {
   isSkill?: boolean;
   includeJsonSchema?: boolean;
@@ -69,7 +71,7 @@ function buildPromptSections(
 }
 
 export function genPrompt(
-  framework: string | IGenPromptFrameworkConfig,
+  framework: IGenPromptFramework | IGenPromptFrameworkConfig,
   materialsMeta: IMaterialsMeta,
   tgCustomConfig?: IGenPromptCustomConfig,
   options?: IGenPromptOptions,
