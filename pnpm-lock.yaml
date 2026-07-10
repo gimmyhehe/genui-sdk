@@ -495,6 +495,10 @@ importers:
         version: 3.2.4(@types/node@25.5.0)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0)
 
   packages/materials/angular-opentiny-ng:
+    dependencies:
+      '@opentiny/genui-sdk-core':
+        specifier: workspace:*
+        version: link:../../core
     devDependencies:
       escape-string-regexp:
         specifier: ^1.0.5
@@ -511,6 +515,9 @@ importers:
 
   packages/materials/vue-opentiny-vue:
     dependencies:
+      '@opentiny/genui-sdk-core':
+        specifier: workspace:*
+        version: link:../../core
       '@opentiny/vue-button':
         specifier: ^3.28.0
         version: 3.28.0

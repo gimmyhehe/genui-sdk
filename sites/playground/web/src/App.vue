@@ -15,7 +15,6 @@ import {
   shallowRef,
 } from 'vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
@@ -98,6 +97,7 @@ const llmConfig = reactive(
   cacheLLmConfig || {
     temperature: 0.5,
     model: 'qwen3-coder-30b-a3b-instruct',
+    promptVariant: 'standard',
     mcpServers: [],
     agents: [],
     skills: [],
@@ -388,7 +388,6 @@ onUnmounted(() => {
           :theme="theme"
           :locale="locale"
           :materials="materials"
-          :renderer-config="rendererConfig"
           style="height: 100%"
         >
           <GenuiChat
