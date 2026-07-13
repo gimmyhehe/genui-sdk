@@ -50,7 +50,6 @@ yarn add @opentiny/genui-sdk-vue @opentiny/genui-sdk-materials-vue-opentiny-vue
 import { GenuiChat } from '@opentiny/genui-sdk-vue/chat';
 import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 // 仅使用 Renderer
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue/renderer';
@@ -70,7 +69,7 @@ import { GenuiRenderer } from '@opentiny/genui-sdk-vue/renderer';
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat url="https://your-chat-backend/api" />
   </GenuiConfigProvider>
 </template>
@@ -79,7 +78,6 @@ import { GenuiRenderer } from '@opentiny/genui-sdk-vue/renderer';
 import { GenuiChat } from '@opentiny/genui-sdk-vue/chat';
 import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 </script>
 ```
 
@@ -116,11 +114,10 @@ createApp(App).mount('#app');
 <script setup lang="ts">
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 </script>
 
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat />
   </GenuiConfigProvider>
 </template>
@@ -165,7 +162,6 @@ npm run dev
 import { ref } from 'vue'; // [!code ++]
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const url = 'https://your-chat-backend/api'; // [!code ++]
 const model = ref('deepseek-v3.2'); // [!code ++]
@@ -173,7 +169,7 @@ const temperature = ref(0.7); // [!code ++]
 </script>
 
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat> <!-- [!code --]-->
     <GenuiChat :url="url" :model="model" :temperature="temperature" />  <!-- [!code ++]-->
   </GenuiConfigProvider>
@@ -204,7 +200,6 @@ const temperature = ref(0.7); // [!code ++]
 import { ref } from 'vue';
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const url = 'https://your-chat-backend/api';
 const model = ref('deepseek-v3.2');
@@ -212,7 +207,7 @@ const temperature = ref(0.7);
 </script>
 
 <template>
-  <GenuiConfigProvider theme="dark" :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider theme="dark" :materials="materials">
     <GenuiChat :url="url" :model="model" :temperature="temperature" />
   </GenuiConfigProvider>
 </template>
@@ -228,7 +223,7 @@ const temperature = ref(0.7);
 
 ```vue
 <template>
-  <GenuiConfigProvider theme="dark" :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider theme="dark" :materials="materials">
     <GenuiChat :url="url" :model="model" :temperature="temperature">    
       <template #empty>
         <div class="empty-text">欢迎使用生成式UI</div>
@@ -257,7 +252,6 @@ const temperature = ref(0.7);
 import { ref } from 'vue';
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const url = 'https://your-chat-backend/api';
 const model = ref('deepseek-v3.2');
@@ -266,7 +260,7 @@ const theme = ref<'dark' | 'lite' | 'light' | 'auto'>('dark');
 </script>
 
 <template>
-  <GenuiConfigProvider :theme="theme" :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :theme="theme" :materials="materials">
     <GenuiChat :url="url" :model="model" :temperature="temperature">    
       <template #empty>
         <div class="empty-text">欢迎使用生成式UI</div>

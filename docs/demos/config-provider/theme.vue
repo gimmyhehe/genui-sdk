@@ -9,7 +9,7 @@
       </div>
     </header>
 
-    <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig" :theme="currentTheme" id="main-chat">
+    <GenuiConfigProvider :materials="materials" :theme="currentTheme" id="main-chat">
       <GenuiChat :url="url" model="deepseek-v3.2" :messages="messages" />
     </GenuiConfigProvider>
   </div>
@@ -17,7 +17,6 @@
 
 <script setup lang="ts">
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref, computed } from 'vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 

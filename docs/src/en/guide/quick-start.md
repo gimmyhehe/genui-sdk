@@ -52,7 +52,6 @@ Besides the main entry, `@opentiny/genui-sdk-vue` provides subpath exports. Impo
 import { GenuiChat } from '@opentiny/genui-sdk-vue/chat';
 import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 // Renderer only
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue/renderer';
@@ -72,7 +71,7 @@ Starting from v1.3.0, `GenuiRenderer` and `GenuiChat` no longer bundle UI materi
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat url="https://your-chat-backend/api" />
   </GenuiConfigProvider>
 </template>
@@ -81,7 +80,6 @@ Starting from v1.3.0, `GenuiRenderer` and `GenuiChat` no longer bundle UI materi
 import { GenuiChat } from '@opentiny/genui-sdk-vue/chat';
 import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 </script>
 ```
 
@@ -118,11 +116,10 @@ Use `GenuiChat` with materials injected via `GenuiConfigProvider`:
 <script setup lang="ts">
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 </script>
 
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat />
   </GenuiConfigProvider>
 </template>
@@ -167,7 +164,6 @@ Configure the LLM via `url`, `model`, and `temperature`:
 import { ref } from 'vue'; // [!code ++]
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const url = 'https://your-chat-backend/api'; // [!code ++]
 const model = ref('deepseek-v3.2'); // [!code ++]
@@ -175,7 +171,7 @@ const temperature = ref(0.7); // [!code ++]
 </script>
 
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat> <!-- [!code --]-->
     <GenuiChat :url="url" :model="model" :temperature="temperature" />  <!-- [!code ++]-->
   </GenuiConfigProvider>
@@ -202,7 +198,6 @@ Wrap `GenuiChat` with `GenuiConfigProvider` to set the theme. Built-in options:
 import { ref } from 'vue';
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const url = 'https://your-chat-backend/api';
 const model = ref('deepseek-v3.2');
@@ -210,7 +205,7 @@ const temperature = ref(0.7);
 </script>
 
 <template>
-  <GenuiConfigProvider theme="dark" :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider theme="dark" :materials="materials">
     <GenuiChat :url="url" :model="model" :temperature="temperature" />
   </GenuiConfigProvider>
 </template>
@@ -226,7 +221,7 @@ Use the `empty` slot for welcome text or suggested prompts when there is no conv
 
 ```vue
 <template>
-  <GenuiConfigProvider theme="dark" :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider theme="dark" :materials="materials">
     <GenuiChat :url="url" :model="model" :temperature="temperature">    
       <template #empty>
         <div class="empty-text">Welcome to Generative UI</div>
@@ -253,7 +248,6 @@ Use the `empty` slot for welcome text or suggested prompts when there is no conv
 import { ref } from 'vue';
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const url = 'https://your-chat-backend/api';
 const model = ref('deepseek-v3.2');
@@ -262,7 +256,7 @@ const theme = ref<'dark' | 'lite' | 'light' | 'auto'>('dark');
 </script>
 
 <template>
-  <GenuiConfigProvider :theme="theme" :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :theme="theme" :materials="materials">
     <GenuiChat :url="url" :model="model" :temperature="temperature">    
       <template #empty>
         <div class="empty-text">Welcome to Generative UI</div>

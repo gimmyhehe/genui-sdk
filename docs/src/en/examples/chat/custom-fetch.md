@@ -22,14 +22,13 @@ Pass a custom fetch function via the `customFetch` prop:
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat :url="url" model="deepseek-v3.2" :customFetch="customFetch" />
   </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 import type { CustomFetch } from '@opentiny/genui-sdk-vue';
 
@@ -370,7 +369,7 @@ Finally, use the custom `customFetch` in a Vue component:
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <div class="app-container">
       <GenuiChat :customFetch="defaultCustomFetch" model="deepseek-v3.2" :temperature="0.5" :chatConfig="chatConfig" />
     </div>
@@ -379,7 +378,6 @@ Finally, use the custom `customFetch` in a Vue component:
 
 <script setup lang="ts">
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 import { defaultCustomFetch } from './api/custom-fetch';
 

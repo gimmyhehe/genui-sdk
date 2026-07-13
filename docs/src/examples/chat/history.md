@@ -10,14 +10,13 @@
 
 ```vue {12-19}
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat ref="chatRef" :url="url" />
   </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref, computed } from 'vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 
@@ -73,7 +72,7 @@ await conversation?.saveConversations();
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <div class="chat-with-sidebar">
       <!-- 侧边栏 -->
       <div class="sidebar">
@@ -103,7 +102,6 @@ await conversation?.saveConversations();
 
 <script setup lang="ts">
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref, computed } from 'vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 

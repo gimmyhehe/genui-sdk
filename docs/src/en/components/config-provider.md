@@ -107,7 +107,7 @@ See [GenuiConfigProvider - i18n Configuration](../examples/config-provider/i18n)
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiRenderer :content="content" />
   </GenuiConfigProvider>
 </template>
@@ -117,30 +117,8 @@ import { ref } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue/renderer';
 import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const content = ref({});
-</script>
-```
-
-### rendererConfig
-
-- **Type**: `IRendererConfig`
-- **Required**: No
-- **Description**: Renderer configuration used to build default props maps. Usually used together with `materials` from the same materials package.
-
-```vue
-<template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-    <GenuiChat :url="url" />
-  </GenuiConfigProvider>
-</template>
-
-<script setup lang="ts">
-import { GenuiChat } from '@opentiny/genui-sdk-vue/chat';
-import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
-import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 </script>
 ```
 

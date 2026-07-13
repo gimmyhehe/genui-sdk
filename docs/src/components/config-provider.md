@@ -107,7 +107,7 @@ const customI18n: I18nMessages = {
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiRenderer :content="content" />
   </GenuiConfigProvider>
 </template>
@@ -117,30 +117,8 @@ import { ref } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue/renderer';
 import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 
 const content = ref({});
-</script>
-```
-
-### rendererConfig
-
-- **类型**: `IRendererConfig`
-- **必填**: 否
-- **说明**: 渲染器配置，用于生成组件默认 props 映射。通常与 `materials` 配套使用，传入同一物料包导出的 `rendererConfig`。
-
-```vue
-<template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
-    <GenuiChat :url="url" />
-  </GenuiConfigProvider>
-</template>
-
-<script setup lang="ts">
-import { GenuiChat } from '@opentiny/genui-sdk-vue/chat';
-import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
-import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 </script>
 ```
 

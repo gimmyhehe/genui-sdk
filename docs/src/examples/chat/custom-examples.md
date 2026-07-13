@@ -24,14 +24,13 @@ interface IGenPromptExample {
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiChat :url="url" model="deepseek-v3.2" :customExamples="customExamples" />
   </GenuiConfigProvider>
 </template>
 
 <script setup lang="ts">
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 
 const url = 'https://your-chat-backend/api';

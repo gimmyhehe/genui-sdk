@@ -1,5 +1,5 @@
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <GenuiRenderer
       :content="content"
       :generating="generating"
@@ -10,7 +10,6 @@
 
 <script setup lang="ts">
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { ref } from 'vue';
 import { GenuiConfigProvider, GenuiRenderer } from '@opentiny/genui-sdk-vue';
 

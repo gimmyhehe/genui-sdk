@@ -136,7 +136,7 @@ Create a simple Vue component with an input, send button, and render area. Confi
 
 ```vue
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <div class="demo-container">
       <div class="input-group">
         <input v-model="inputText" placeholder="Enter your question..." @keyup.enter="handleSend" />
@@ -152,7 +152,6 @@ import { ref } from 'vue';
 import { GenuiRenderer } from '@opentiny/genui-sdk-vue/renderer';
 import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue/config-provider';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { fetchSchemaStream } from './fetch-schema-stream';
 
 const inputText = ref('');

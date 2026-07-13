@@ -1,5 +1,5 @@
 <template>
-  <GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+  <GenuiConfigProvider :materials="materials">
     <div class="chat-container">
       <GenuiChat :url="url" :features="modelFeatures" :messages="messages" />
     </div>
@@ -8,7 +8,6 @@
 
 <script setup lang="ts">
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 
 const url = 'https://your-chat-backend/api';
