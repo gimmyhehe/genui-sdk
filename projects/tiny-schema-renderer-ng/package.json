@@ -51,6 +51,7 @@
     "@angular/build": "^20.3.10",
     "@angular/cli": "^20.3.10",
     "@angular/compiler-cli": "^20.3.0",
+    "@opentiny/genui-sdk-materials-angular-opentiny-ng": "workspace:*",
     "@types/jasmine": "~5.1.0",
     "@types/lodash": "^4.17.21",
     "jasmine-core": "~5.9.0",

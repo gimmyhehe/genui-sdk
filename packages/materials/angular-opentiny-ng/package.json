@@ -14,12 +14,19 @@
       "import": "./dist/meta.js",
       "types": "./dist/meta.d.ts",
       "require": "./dist/meta.js"
+    },
+    "./materials": {
+      "import": "./dist/materials.js",
+      "types": "./dist/materials.d.ts",
+      "require": "./dist/materials.js"
     }
   },
   "scripts": {
     "build": "vite build"
   },
   "dependencies": {
+    "@angular/core": "^20.3.0",
+    "@opentiny/ng": "^1.0.3",
     "@opentiny/genui-sdk-core": "workspace:*"
   },
   "devDependencies": {
