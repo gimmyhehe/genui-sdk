@@ -131,9 +131,9 @@
             {
               "componentName": "ElButton",
               "props": {
-                "type": "primary",
-                "children": "确认"
-              }
+                "type": "primary"
+              },
+              "children": "确认"
             }
           ]
         }

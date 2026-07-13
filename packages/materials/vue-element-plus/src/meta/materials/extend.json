@@ -425,7 +425,14 @@
                   }
                 ]
               }
-            ]
+            ],
+            "events": {
+              "onUpdate:modelValue": {
+                "label": {
+                  "zh_CN": "值变化"
+                }
+              }
+            }
           }
         },
         {
@@ -472,7 +479,14 @@
                   }
                 ]
               }
-            ]
+            ],
+            "events": {
+              "onUpdate:modelValue": {
+                "label": {
+                  "zh_CN": "值变化"
+                }
+              }
+            }
           }
         },
         {
