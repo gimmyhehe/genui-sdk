@@ -37,7 +37,7 @@ import ErrorText from './ErrorText.vue';
 import { useResize } from './composable/use-resize';
 import { useConversation } from './tiny-robot-patch/useConversation';
 import { useI18n } from './i18n';
-import { GENUI_CONFIG } from '../shared/injection-tokens';
+import { GENUI_CONFIG } from '../config-provider/injection-tokens';
 import { IResponseHandler, defaultResponseHandlers } from './response-handler';
 
 const props = defineProps<IChatProps>();

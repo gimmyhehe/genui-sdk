@@ -5,7 +5,7 @@ import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/them
 import { watch, provide, computed, onMounted, ref } from 'vue';
 import type { IMaterials } from '@opentiny/genui-sdk-core';
 import { I18nMessages, useI18n } from '../chat/i18n';
-import { GENUI_I18N, GENUI_CONFIG, GENUI_MATERIALS } from '../shared/injection-tokens';
+import { GENUI_I18N, GENUI_CONFIG, GENUI_MATERIALS } from './injection-tokens';
 import { useMediaTheme } from './use-media-theme';
 
 export interface ConfigProviderProps {
