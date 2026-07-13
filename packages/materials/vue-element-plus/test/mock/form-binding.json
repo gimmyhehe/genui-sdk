@@ -1,6 +1,13 @@
 {
   "componentName": "Page",
   "state": {
+    "defaultFormData": {
+      "name": "",
+      "sex": "男",
+      "department": "",
+      "protocolStart": "",
+      "email": ""
+    },
     "formData": {
       "name": "张三",
       "sex": "男",
@@ -17,7 +24,7 @@
     },
     "handleReset": {
       "type": "JSFunction",
-      "value": "function handleReset() { this.state.formData = { name: '', sex: '男', department: '', protocolStart: '', email: '' }; this.state.submitResult = ''; }"
+      "value": "function handleReset() { this.state.formData = JSON.parse(JSON.stringify(this.state.defaultFormData)); this.state.submitResult = ''; }"
     }
   },
   "children": [

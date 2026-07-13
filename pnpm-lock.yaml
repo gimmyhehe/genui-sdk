@@ -518,12 +518,6 @@ importers:
       '@opentiny/genui-sdk-core':
         specifier: workspace:*
         version: link:../../core
-      element-plus:
-        specifier: ^2.9.0
-        version: 2.14.0(vue@3.5.26(typescript@5.9.3))
-      vue:
-        specifier: ^3.5.13
-        version: 3.5.26(typescript@5.9.3)
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^5.0.0
@@ -531,6 +525,9 @@ importers:
       '@vue/tsconfig':
         specifier: ^0.8.1
         version: 0.8.1(typescript@5.9.3)(vue@3.5.26(typescript@5.9.3))
+      element-plus:
+        specifier: ^2.9.0
+        version: 2.14.0(vue@3.5.26(typescript@5.9.3))
       escape-string-regexp:
         specifier: ^1.0.5
         version: 1.0.5
@@ -549,6 +546,9 @@ importers:
       vitest:
         specifier: ^3.0.0
         version: 3.2.4(@types/node@25.5.0)(less@4.5.1)(sass@1.97.1)(terser@5.44.1)(tsx@4.21.0)
+      vue:
+        specifier: ^3.5.13
+        version: 3.5.26(typescript@5.9.3)
 
   packages/materials/vue-opentiny-vue:
     dependencies:

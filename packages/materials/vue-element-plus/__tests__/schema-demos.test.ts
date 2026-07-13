@@ -2,6 +2,29 @@ import { describe, it, expect } from 'vitest';
 import { createContext, parseSchemaValue, runLifeCycle } from '../test/schema-context';
 import { demos } from '../test/mock';
 
+function findComponent(schema: unknown, componentName: string): Record<string, unknown> | null {
+  if (!schema || typeof schema !== 'object') {
+    return null;
+  }
+
+  const node = schema as Record<string, unknown>;
+  if (node.componentName === componentName) {
+    return node;
+  }
+
+  const children = node.children;
+  if (Array.isArray(children)) {
+    for (const child of children) {
+      const found = findComponent(child, componentName);
+      if (found) {
+        return found;
+      }
+    }
+  }
+
+  return null;
+}
+
 describe('schema demos', () => {
   demos.forEach(({ id, label, schema }) => {
     it(`${label} (${id}) has Page root`, () => {
@@ -45,9 +68,8 @@ describe('schema demos', () => {
 
   it('table demo has no action column', () => {
     const schema = demos.find((demo) => demo.id === 'table')!.schema;
-    const columns = (
-      (schema.children as any[])?.[0]?.children?.[0]?.children as any[]
-    ) ?? [];
+    const table = findComponent(schema, 'ElTable');
+    const columns = (table?.children as Array<{ props?: { label?: string } }>) ?? [];
 
     expect(columns.some((column) => column.props?.label === '操作')).toBe(false);
   });

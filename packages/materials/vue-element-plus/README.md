@@ -27,6 +27,8 @@ vue-element-plus/
 │   ├── mock/                    # JSON demo（form-binding、table、info-card、tabs）
 │   ├── App.vue                  # 本地 tab 切换渲染
 │   └── schema-context.ts        # demo 测试用 schema 解析工具
+├── vite.config.ts               # 物料包构建配置
+├── vite.config.test.ts          # 本地 demo 开发配置
 └── __tests__/
     └── schema-demos.test.ts     # 基于 mock json 的自动化测试
 ```
