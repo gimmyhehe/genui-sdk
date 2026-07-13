@@ -1,5 +1,4 @@
 export const whiteList = [
-  // Element Plus
   'ElInput',
   'ElDatePicker',
   'ElButton',
@@ -20,7 +19,6 @@ export const whiteList = [
   'ElDivider',
   'ElTabs',
   'ElTabPane',
-  // 内置 / 布局
   'a',
   'h1',
   'h2',

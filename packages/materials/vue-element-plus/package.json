@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@opentiny/genui-sdk-core": "workspace:*",
     "element-plus": "^2.9.0",
     "vue": "^3.5.13"
   },
@@ -27,16 +28,19 @@
   },
   "exports": {
     ".": {
+      "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "require": "./dist/index.js"
     },
-    "./render-config": {
-      "types": "./dist/render-config.d.ts",
-      "import": "./dist/render-config.js"
+    "./meta": {
+      "import": "./dist/meta.js",
+      "types": "./dist/meta.d.ts",
+      "require": "./dist/meta.js"
     },
     "./materials": {
+      "import": "./dist/materials.js",
       "types": "./dist/materials.d.ts",
-      "import": "./dist/materials.js"
+      "require": "./dist/materials.js"
     }
   }
 }

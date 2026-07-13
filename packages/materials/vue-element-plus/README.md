@@ -4,7 +4,7 @@
 
 ## 包结构
 
-```
+```text
 vue-element-plus/
 ├── src/
 │   ├── index.ts                 # 统一入口
@@ -14,13 +14,15 @@ vue-element-plus/
 │   │   └── components/
 │   │       ├── index.ts
 │   │       └── components.ts    # Element Plus 组件映射
-│   └── render-config/
-│       ├── bundle.json          # 核心组件物料（ElInput、ElTable 等）
-│       ├── builtin.json         # 内置节点（div、Text、Slot 等）
-│       ├── extend.json          # 扩展组件（ElCard、ElRow 等）
+│   └── meta/
+│       ├── index.ts             # 导出 materialsMeta
+│       ├── meta.ts              # 物料元数据
 │       ├── white-list.ts        # LLM 可用 componentName 白名单
 │       ├── example-schema.ts    # Prompt 示例 schema
-│       └── merge.ts             # 合并为 rendererConfig
+│       ├── examples/            # 示例 JSON
+│       └── materials/
+│           ├── bundle.json      # 核心组件物料（ElInput、ElTable 等）
+│           └── extend.json      # 扩展组件（ElCard、ElRow 等）
 ├── test/
 │   ├── mock/                    # JSON demo（form-binding、table、info-card、tabs）
 │   ├── App.vue                  # 本地 tab 切换渲染
@@ -34,7 +36,7 @@ vue-element-plus/
 | 路径 | 用途 |
 |------|------|
 | `@opentiny/genui-sdk-materials-vue-element-plus` | 统一入口 |
-| `.../render-config` | `rendererConfig`，供 `genPrompt()` / 服务端拼 system prompt |
+| `.../meta` | `materialsMeta`，供 `genPrompt()` / 服务端拼 system prompt |
 | `.../materials` | `materials`，供 `ConfigProvider` 注入 schema 渲染器 |
 
 ## 使用方式
@@ -67,12 +69,12 @@ pnpm -F @opentiny/genui-sdk-materials-vue-element-plus test
 
 ```ts
 import { genPrompt } from '@opentiny/genui-sdk-core';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-element-plus/render-config';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-element-plus/meta';
 
-const systemPrompt = genPrompt(rendererConfig, customConfig);
+const systemPrompt = genPrompt('Vue', materialsMeta, customConfig);
 ```
 
-`rendererConfig.wrapperComponent` 默认为 `ElCard`。
+`materialsMeta.wrapperComponent` 默认为 `ElCard`。
 
 ### 5. 前端渲染
 
@@ -82,11 +84,10 @@ const systemPrompt = genPrompt(rendererConfig, customConfig);
 import 'element-plus/dist/index.css';
 import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-element-plus/materials';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-element-plus';
 ```
 
 ```vue
-<GenuiConfigProvider :materials="materials" :rendererConfig="rendererConfig">
+<GenuiConfigProvider :materials="materials">
   <GenuiChat />
 </GenuiConfigProvider>
 ```
@@ -104,8 +105,8 @@ import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-element-plus';
     "@opentiny/genui-sdk-materials-vue-element-plus/materials": [
       "../../../packages/materials/vue-element-plus/src/materials/index.ts"
     ],
-    "@opentiny/genui-sdk-materials-vue-element-plus/render-config": [
-      "../../../packages/materials/vue-element-plus/src/render-config/index.ts"
+    "@opentiny/genui-sdk-materials-vue-element-plus/meta": [
+      "../../../packages/materials/vue-element-plus/src/meta/index.ts"
     ]
   }
 }
@@ -119,6 +120,6 @@ import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-element-plus';
 
 ## 扩展更多组件
 
-1. 在 `bundle.json` 或 `extend.json` 增加组件 schema 描述
-2. 在 `white-list.ts` 加入 `componentName`
+1. 在 `meta/materials/bundle.json` 或 `extend.json` 增加组件 schema 描述
+2. 在 `meta/white-list.ts` 加入 `componentName`
 3. 在 `materials/components/components.ts` 中注册对应 `element-plus` 导出
