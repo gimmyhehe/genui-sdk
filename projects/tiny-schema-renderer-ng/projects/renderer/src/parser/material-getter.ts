@@ -67,35 +67,31 @@ export const createComponent = (component: string): Type<any> => {
   return componentFactory;
 };
 
-export const autoApplyDirectivePattern: AutoApplyDirectivePattern = {
-  ngModel: (schema: any) => !!(schema?.props?.ngModel || schema?.props?.onNgModelChange),
-  defaultValueAccessor: (schema: any) => {
-    const componentType = getComponent(schema?.componentName);
-    if (!(componentType as any)?.['ɵcmp']) {
-      return false;
-    }
-    const componentSelectors = (componentType as any)?.['ɵcmp']?.selectors;
-    const selectorMatch = () => ['input', 'textarea'].includes(componentSelectors[0][0]);
-    const propsMatch = () => schema?.props?.['ngModel'] && schema?.props?.type !== 'checkbox';
-    return selectorMatch() && propsMatch();
-  },
-  checkboxValueAccessor: (schema: any) => {
-    const componentType = getComponent(schema?.componentName);
-    if (!(componentType as any)?.['ɵcmp']) {
-      return false;
-    }
-    const componentSelectors = (componentType as any)?.['ɵcmp']?.selectors;
-    const selectorMatch = () => ['input'].includes(componentSelectors[0][0]);
-    const propsMatch = () => schema?.props?.['ngModel'] && schema?.props?.type === 'checkbox';
-    return selectorMatch() && propsMatch();
-  },
-};
-
 export const getAutoApplyPatterns = (
   context: Record<PropertyKey, any> = {},
 ): AutoApplyDirectivePattern => {
   return {
-    ...autoApplyDirectivePattern,
+    ngModel: (schema: any) => !!(schema?.props?.ngModel || schema?.props?.onNgModelChange),
+    defaultValueAccessor: (schema: any) => {
+      const componentType = getComponent(schema?.componentName, context);
+      if (!(componentType as any)?.['ɵcmp']) {
+        return false;
+      }
+      const componentSelectors = (componentType as any)?.['ɵcmp']?.selectors;
+      const selectorMatch = () => ['input', 'textarea'].includes(componentSelectors[0][0]);
+      const propsMatch = () => schema?.props?.['ngModel'] && schema?.props?.type !== 'checkbox';
+      return selectorMatch() && propsMatch();
+    },
+    checkboxValueAccessor: (schema: any) => {
+      const componentType = getComponent(schema?.componentName, context);
+      if (!(componentType as any)?.['ɵcmp']) {
+        return false;
+      }
+      const componentSelectors = (componentType as any)?.['ɵcmp']?.selectors;
+      const selectorMatch = () => ['input'].includes(componentSelectors[0][0]);
+      const propsMatch = () => schema?.props?.['ngModel'] && schema?.props?.type === 'checkbox';
+      return selectorMatch() && propsMatch();
+    },
     ...(getMaterials(context).autoApplyDirectives ?? {}),
   };
 };
