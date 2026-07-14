@@ -53,14 +53,15 @@ export class TemplateModelProvider extends CustomModelProvider {
     });
   }
 
-  protected override createStreamContext(request: ChatCompletionRequest) {
+  protected override setupStreamContext(
+    context: Record<string, unknown>,
+    request: ChatCompletionRequest,
+  ) {
     const lastUserMessage = getLastUserMessage(request.messages);
-    return {
-      messageId: String(lastUserMessage?.messageId ?? ''),
-      input: String(lastUserMessage?.content ?? ''),
-      emitter: this.emitter,
-      requestId: Math.random().toString(36).substring(2, 10),
-    };
+    context.messageId = String(lastUserMessage?.messageId ?? '');
+    context.input = String(lastUserMessage?.content ?? '');
+    context.emitter = this.emitter;
+    context.requestId = Math.random().toString(36).substring(2, 10);
   }
 
   setTemplateSchema(schema: unknown) {
