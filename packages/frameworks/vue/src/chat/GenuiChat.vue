@@ -458,7 +458,7 @@ defineExpose({
   setInputMessage,
   handleNewConversation,
   // @experimental
-  getProps: () => props,
+  getProps: (): IChatProps => props,
   getConversation: () => conversation,
   // experimental, not stable
   getResponseHandlers: () => responseHandlers.value,
