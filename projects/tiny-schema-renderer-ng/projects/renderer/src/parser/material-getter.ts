@@ -77,7 +77,7 @@ export const getAutoApplyPatterns = (
         return false;
       }
       const componentSelectors = (componentType as any)?.['ɵcmp']?.selectors;
-      const selectorMatch = () => ['input', 'textarea'].includes(componentSelectors[0][0]);
+      const selectorMatch = () => ['input', 'textarea'].includes(componentSelectors?.[0]?.[0] ?? '');
       const propsMatch = () => schema?.props?.['ngModel'] && schema?.props?.type !== 'checkbox';
       return selectorMatch() && propsMatch();
     },
@@ -87,7 +87,7 @@ export const getAutoApplyPatterns = (
         return false;
       }
       const componentSelectors = (componentType as any)?.['ɵcmp']?.selectors;
-      const selectorMatch = () => ['input'].includes(componentSelectors[0][0]);
+      const selectorMatch = () => ['input'].includes(componentSelectors?.[0]?.[0] ?? '');
       const propsMatch = () => schema?.props?.['ngModel'] && schema?.props?.type === 'checkbox';
       return selectorMatch() && propsMatch();
     },
