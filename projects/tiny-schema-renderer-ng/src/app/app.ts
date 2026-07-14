@@ -1,8 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { materials } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials';
 import { RendererMain } from '../../projects/renderer/src/renderer-main';
 import { RENDERER_SETTINGS } from '../../projects/renderer/src/renderer-settings';
+import { materials } from './materials';
 
 @Component({
   selector: 'app-root',
