@@ -26,10 +26,9 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
 
   const closeSchemaEditorView = () => {
     editor.revertUnsavedChanges();
+    ui.setJsonEditorOpen(false);
     if (isMobile.value) {
-      ui.closeSheet();
-    } else {
-      ui.setJsonEditorOpen(false);
+      ui.setRendererPanelVisible(false);
     }
     versionControl.resetVersionPreviewMode();
   };
@@ -61,12 +60,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
     }
     versionControl.previewVersion(schema, cardId, options);
     ui.setRendererPanelVisible(true);
-    if (isMobile.value) {
-      ui.openSheet();
-      editor.syncBaseline();
-      return;
-    }
-    if (unref(ui.schemaEditorVisible)) {
+    if (isMobile.value || unref(ui.schemaEditorVisible)) {
       editor.syncBaseline();
     }
   };
@@ -147,7 +141,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
       setJsonEditorOpen(false);
       return;
     }
-    if (isMobile.value && unref(ui.isMobileSheetOpen)) {
+    if (isMobile.value && unref(ui.rendererPanelVisible)) {
       closeSchemaEditorView();
       return;
     }

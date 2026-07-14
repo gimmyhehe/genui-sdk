@@ -91,7 +91,7 @@ const onMaskClick = () => {
 };
 
 watch(
-  () => ui.isMobileSheetOpen,
+  () => ui.rendererPanelVisible,
   (open) => {
     if (open) {
       resetMobileSheetHeight({ resetDragging: false });
@@ -124,7 +124,7 @@ const toggleJsonEditor = () => {
   <Teleport to="body">
     <Transition name="schema-mobile-sheet">
       <div
-        v-show="ui.isMobileSheetOpen"
+        v-show="ui.rendererPanelVisible"
         class="schema-mobile-sheet"
         role="dialog"
         aria-modal="true"
