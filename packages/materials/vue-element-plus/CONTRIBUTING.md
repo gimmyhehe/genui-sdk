@@ -1,55 +1,55 @@
-# 开发指南
+# Contributing
 
-面向本物料包的本地开发与扩展说明。使用者请先看 [README.md](./README.md)。
+Local development and extension notes for this materials package. End users should start with [README.md](./README.md).
 
-## 包结构
+## Package Structure
 
 ```text
 vue-element-plus/
 ├── src/
-│   ├── index.ts                 # 统一入口
+│   ├── index.ts                 # Unified entry
 │   ├── materials/
-│   │   ├── index.ts             # 导出 materials
-│   │   ├── materials.ts         # 物料注册表
+│   │   ├── index.ts             # Export materials
+│   │   ├── materials.ts         # Materials registry
 │   │   └── components/
 │   │       ├── index.ts
-│   │       └── components.ts    # Element Plus 组件映射
+│   │       └── components.ts    # Element Plus component mapping
 │   └── meta/
-│       ├── index.ts             # 导出 materialsMeta
-│       ├── meta.ts              # 物料元数据
-│       ├── white-list.ts        # LLM 可用 componentName 白名单
-│       ├── example-schema.ts    # Prompt 示例 schema
-│       ├── examples/            # 示例 JSON
+│       ├── index.ts             # Export materialsMeta
+│       ├── meta.ts              # Materials metadata
+│       ├── white-list.ts        # LLM componentName whitelist
+│       ├── example-schema.ts    # Prompt example schemas
+│       ├── examples/            # Example JSON
 │       └── materials/
-│           └── bundle.json      # Element Plus 基础物料
+│           └── bundle.json      # Element Plus base materials
 ├── test/
-│   ├── mock/                    # JSON demo（form-binding、table、info-card、tabs）
-│   ├── App.vue                  # 本地 tab 切换渲染
-│   └── schema-context.ts        # demo 测试用 schema 解析工具
-├── vite.config.ts               # 物料包构建配置
-├── vite.config.test.ts          # 本地 demo 开发配置
+│   ├── mock/                    # JSON demos (form-binding, table, info-card, tabs)
+│   ├── App.vue                  # Local tab-switched rendering
+│   └── schema-context.ts        # Schema helpers for demos
+├── vite.config.ts               # Package build config
+├── vite.config.test.ts          # Local demo dev config
 └── __tests__/
-    └── schema-demos.test.ts     # 基于 mock json 的自动化测试
+    └── schema-demos.test.ts     # Automated tests based on mock JSON
 ```
 
-## 构建与验证
+## Build & Verify
 
 ```bash
-# 构建
+# Build
 pnpm -F @opentiny/genui-sdk-materials-vue-element-plus build
 
-# 本地 JSON Demo（test/mock/，tab 切换渲染）
+# Local JSON demos (test/mock/, tab-switched rendering)
 pnpm -F @opentiny/genui-sdk-materials-vue-element-plus dev
 
-# 自动化测试
+# Automated tests
 pnpm -F @opentiny/genui-sdk-materials-vue-element-plus test
 ```
 
-新增 demo：在 `test/mock/` 增加 json 并在 `test/mock/index.ts` 注册即可。
+To add a demo: put a JSON file under `test/mock/` and register it in `test/mock/index.ts`.
 
-## 开发态路径别名（可选）
+## Dev Path Aliases (Optional)
 
-在 `tsconfig` 中增加：
+Add to `tsconfig`:
 
 ```json
 {
@@ -67,8 +67,8 @@ pnpm -F @opentiny/genui-sdk-materials-vue-element-plus test
 }
 ```
 
-## 扩展更多组件
+## Extending Components
 
-1. 在 `meta/materials/bundle.json` 增加组件 schema 描述
-2. 在 `meta/white-list.ts` 加入 `componentName`
-3. 在 `materials/components/components.ts` 中注册对应 `element-plus` 导出
+1. Add the component schema description in `meta/materials/bundle.json`
+2. Add the `componentName` in `meta/white-list.ts`
+3. Register the corresponding `element-plus` export in `materials/components/components.ts`

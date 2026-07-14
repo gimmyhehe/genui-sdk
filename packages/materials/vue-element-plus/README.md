@@ -1,20 +1,20 @@
 # @opentiny/genui-sdk-materials-vue-element-plus
 
-基于 [Element Plus](https://element-plus.org/) 的 GenUI Vue 物料包，用于 schema 驱动的页面生成与渲染。
+A GenUI Vue materials package based on [Element Plus](https://element-plus.org/), for schema-driven page generation and rendering.
 
-## 安装
+## Install
 
 ```bash
 npm install @opentiny/genui-sdk-materials-vue-element-plus element-plus vue
 ```
 
-需同时安装 peer 依赖：`vue`、`element-plus`。
+Peer dependencies `vue` and `element-plus` must also be installed.
 
-## 快速上手
+## Quick Start
 
-### 前端渲染
+### Frontend Rendering
 
-在应用入口引入 Element Plus 样式，并通过 `ConfigProvider` 注入物料：
+Import Element Plus styles at the app entry, and inject materials via `ConfigProvider`:
 
 ```ts
 import 'element-plus/dist/index.css';
@@ -28,7 +28,7 @@ import { materials } from '@opentiny/genui-sdk-materials-vue-element-plus/materi
 </GenuiConfigProvider>
 ```
 
-### 生成 LLM Prompt（服务端）
+### Generate LLM Prompt (Server)
 
 ```ts
 import { genPrompt } from '@opentiny/genui-sdk-core';
@@ -37,32 +37,32 @@ import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-element-plus/me
 const systemPrompt = genPrompt('Vue', materialsMeta, customConfig);
 ```
 
-`materialsMeta.wrapperComponent` 默认为 `ElCard`。
+`materialsMeta.wrapperComponent` defaults to `ElCard`.
 
 ## API
 
-| 导出路径 | 导出内容 | 说明 |
-|---------|---------|------|
-| `@opentiny/genui-sdk-materials-vue-element-plus` | `materials`、`materialsMeta` | 统一入口 |
-| `.../materials` | `materials` | 供 `ConfigProvider` 注入 schema 渲染器 |
-| `.../meta` | `materialsMeta` | 供 `genPrompt()` / 服务端拼 system prompt |
+| Export Path | Exports | Description |
+|-------------|---------|-------------|
+| `@opentiny/genui-sdk-materials-vue-element-plus` | `materials`, `materialsMeta` | Unified entry |
+| `.../materials` | `materials` | Inject into `ConfigProvider` for schema rendering |
+| `.../meta` | `materialsMeta` | For `genPrompt()` / building the server system prompt |
 
 ### `materials`
 
-组件注册表，包含 Element Plus 组件映射，供渲染器按 `componentName` 解析节点。
+Component registry mapping Element Plus components, used by the renderer to resolve nodes by `componentName`.
 
 ### `materialsMeta`
 
-物料元数据，包含：
+Materials metadata, including:
 
-- `materials`：组件/区块/snippets 协议描述
-- `wrapperComponent`：默认包裹组件（`ElCard`）
-- `whiteList`：LLM 可用的 `componentName` 白名单
-- `examples`：Prompt 示例 schema（form / info / table）
-- `rules`：额外约束规则
+- `materials`: Protocol descriptions for components / blocks / snippets
+- `wrapperComponent`: Default wrapper component (`ElCard`)
+- `whiteList`: Whitelist of `componentName` values available to the LLM
+- `examples`: Prompt example schemas (form / info / table)
+- `rules`: Extra constraint rules
 
-组件库：`element-plus`。
+Component library: `element-plus`.
 
-## 更多
+## More
 
-包内开发、本地 demo 与扩展组件，见 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+For package development, local demos, and extending components, see [CONTRIBUTING.md](./CONTRIBUTING.md).
