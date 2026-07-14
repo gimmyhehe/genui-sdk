@@ -1,4 +1,4 @@
-import { inject, Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 import { RendererContextService } from './context.service';
 import { getAutoApplyPatterns, getDirective } from './parser/material-getter';
 
@@ -8,7 +8,7 @@ import { getAutoApplyPatterns, getDirective } from './parser/material-getter';
   pure: false,
 })
 export class AutoApplyDirectivesPipe implements PipeTransform {
-  private readonly contextService = inject(RendererContextService);
+  constructor(private readonly contextService: RendererContextService) {}
 
   transform(directives: {directiveName: string}[] | undefined, schema: any) {
     const context = this.contextService.getContext();

@@ -1,4 +1,4 @@
-import { Component, inject, Injector, Pipe, PipeTransform, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, Injector, Pipe, PipeTransform, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RendererContextService } from './context.service';
 import { getComponent, getModuleRef } from './parser/material-getter';
@@ -21,7 +21,7 @@ import { RendererDirective } from './renderer.directive';
   pure: false,
 })
 export class GetModuleRefPipe implements PipeTransform {
-  private readonly contextService = inject(RendererContextService);
+  constructor(private readonly contextService: RendererContextService) {}
 
   transform(componentName: string): Type<any> | undefined {
     return componentName ? getModuleRef(componentName, this.contextService.getContext()) : undefined;
@@ -34,7 +34,7 @@ export class GetModuleRefPipe implements PipeTransform {
   pure: false,
 })
 export class GetComponentPipe implements PipeTransform {
-  private readonly contextService = inject(RendererContextService);
+  constructor(private readonly contextService: RendererContextService) {}
 
   transform(componentName: string): Type<any> | null {
     return componentName ? getComponent(componentName, this.contextService.getContext()) : null;

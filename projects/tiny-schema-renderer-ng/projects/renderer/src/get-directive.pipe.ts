@@ -1,4 +1,4 @@
-import { inject, Pipe, PipeTransform, Type } from '@angular/core';
+import { Pipe, PipeTransform, Type } from '@angular/core';
 import { RendererContextService } from './context.service';
 import { getDirective } from './parser/material-getter';
 
@@ -8,7 +8,7 @@ import { getDirective } from './parser/material-getter';
   pure: false,
 })
 export class GetDirectivesPipe implements PipeTransform {
-  private readonly contextService = inject(RendererContextService);
+  constructor(private readonly contextService: RendererContextService) {}
 
   transform(directives: { directiveName: string }[] | undefined): Type<any>[] | undefined {
     if (!directives || !directives.length) return undefined;
