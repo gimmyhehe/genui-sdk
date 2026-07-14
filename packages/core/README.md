@@ -17,12 +17,10 @@ pnpm add @opentiny/genui-sdk-core
 | `protocols` | `IChatMessage`、`CardSchema`、`IMaterials` 等协议与 Zod Schema |
 | `material` | `IMaterials`、`IMaterialsMeta`、`buildMaterialDefaultValueMap` |
 | `prompt-generator` | `genPrompt`、`genRootSchema`、`genJsonSchema` |
-| `stream-pattern-extractor` | `PatternExtractor`、`SchemaJsonPattern`、`FlagWrapPattern` |
+| `stream-pattern-extractor` | `PatternExtractor`、`SchemaJsonPattern`、`getPartialStartRegString` |
 | `delta-patcher` | `DeltaPatcher` |
 | `delta-json-path-selector` | `matchJsonPath`、`jsonSelectorMatcher` |
 | `repair-json` | `repairJson`、`safeJsonParse` |
-| `injection-tokens` | `GENUI_I18N`、`GENUI_CONFIG` 等 Vue inject token |
-| `renderer-config` | `requiredCompleteFieldSelectors` |
 
 ## 使用示例
 

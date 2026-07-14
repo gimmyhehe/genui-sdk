@@ -23,14 +23,14 @@ const systemPrompt = genPrompt('Angular', materialsMeta, customConfig);
 
 ### Default Props (Angular ConfigProvider)
 
-Pass `materialsMeta` to `GenuiConfigProvider` so the renderer can derive component default props:
+Pass `materialsMeta` via `rendererConfig` so the renderer can derive component default props:
 
 ```ts
 import { materialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/meta';
 ```
 
 ```html
-<genui-config-provider [materialsMeta]="materialsMeta">
+<genui-config-provider [rendererConfig]="materialsMeta">
   <genui-renderer ... />
 </genui-config-provider>
 ```
