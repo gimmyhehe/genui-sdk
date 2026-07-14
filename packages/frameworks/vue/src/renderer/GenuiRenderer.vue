@@ -6,7 +6,7 @@ import { DeltaPatcher, repairJson, RepairJsonState, type IMaterials } from '@ope
 import { requiredCompleteFieldSelectors as internalRequiredCompleteFieldSelectors } from './config';
 import {
   GENUI_MATERIALS,
-} from '../chat/injection-tokens';
+} from '../config-provider/injection-tokens';
 import type { IRendererProps } from './renderer.types';
 import { cardIdSymbol } from '../chat/useChat';
 import { useI18n } from '../chat/i18n';
