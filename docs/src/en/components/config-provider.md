@@ -101,7 +101,7 @@ See [GenuiConfigProvider - i18n Configuration](../examples/config-provider/i18n)
 
 ### materials
 
-- **Type**: `GenuiMaterialRegistry`
+- **Type**: `IMaterials`
 - **Required**: No (recommended when using `GenuiRenderer` / `GenuiChat`)
 - **Description**: Component materials registry for the renderer. Usually pass the `materials` object from `@opentiny/genui-sdk-materials-vue-opentiny-vue`.
 

@@ -32,16 +32,16 @@
       "import": "./dist/chat.js"
     },
     "./legacy-chat": {
-      "types": "./output/dist/legacy-chat.d.ts",
-      "import": "./output/dist/legacy-chat.js"
+      "types": "./dist/legacy-chat.d.ts",
+      "import": "./dist/legacy-chat.js"
     },
     "./renderer": {
       "types": "./dist/renderer.d.ts",
       "import": "./dist/renderer.js"
     },
     "./legacy-renderer": {
-      "types": "./output/dist/legacy-renderer.d.ts",
-      "import": "./output/dist/legacy-renderer.js"
+      "types": "./dist/legacy-renderer.d.ts",
+      "import": "./dist/legacy-renderer.js"
     },
     "./config-provider": {
       "types": "./dist/config-provider.d.ts",
