@@ -6,7 +6,6 @@ import {
 } from '../renderer-materials';
 import { isHTMLTag } from './parser-utils';
 import { RendererTextComponent } from '../buildin/renderer-text.component';
-import { RendererImageComponent } from '../buildin/renderer-image.component';
 import { CheckboxControlValueAccessor, DefaultValueAccessor, NgModel } from '@angular/forms';
 import { LogDirective } from '../buildin/log.directive';
 import { nativeElementComponentFactory } from '../native-element.component';
