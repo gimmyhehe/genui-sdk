@@ -61,7 +61,10 @@ const genuiConfig = computed(() => {
 
 provide(GENUI_CONFIG, genuiConfig);
 
-provide(GENUI_MATERIALS, props.materials ?? {});
+provide(
+  GENUI_MATERIALS,
+  computed(() => props.materials ?? {}),
+);
 
 watch(
   () => [props.locale, props.i18n] as const,

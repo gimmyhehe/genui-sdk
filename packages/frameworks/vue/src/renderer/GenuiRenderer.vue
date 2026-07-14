@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef } from 'vue';
+import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef, toValue } from 'vue';
 // @ts-ignore
 import SchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { DeltaPatcher, repairJson, RepairJsonState, type IMaterials } from '@opentiny/genui-sdk-core';
@@ -29,36 +29,32 @@ const callAction = (actionName: string, params: any) => {
   return props.customActions[actionName]?.execute(params, rendererInstance.value.getContext());
 };
 
-const materials = inject<IMaterials>(GENUI_MATERIALS, {});
+const injectedMaterials = inject(GENUI_MATERIALS, {});
+const materials = computed(() => toValue(injectedMaterials) ?? ({} as IMaterials));
 const customSettings = inject(RENDERER_SETTINGS_KEY, {});
 
 provide(RENDERER_SETTINGS_KEY, {
   ...customSettings,
-  materials,
+  get materials() {
+    return materials.value;
+  },
 });
 
 const deltaPatcher = shallowRef(null);
 
 watch(
-  () => [materials.requiredCompleteFieldSelectors, props.requiredCompleteFieldSelectors],
+  () => [materials.value.requiredCompleteFieldSelectors, props.requiredCompleteFieldSelectors],
   () => {
     deltaPatcher.value = new DeltaPatcher({
       requiredCompleteFieldSelectors: [
         ...internalRequiredCompleteFieldSelectors,
-        ...(materials.requiredCompleteFieldSelectors ?? []),
+        ...(materials.value.requiredCompleteFieldSelectors ?? []),
         ...(props.requiredCompleteFieldSelectors || []),
       ],
     });
   },
+  { immediate: true },
 );
-
-deltaPatcher.value = new DeltaPatcher({
-  requiredCompleteFieldSelectors: [
-    ...internalRequiredCompleteFieldSelectors,
-    ...(materials.requiredCompleteFieldSelectors ?? []),
-    ...(props.requiredCompleteFieldSelectors || []),
-  ],
-});
 
 const { t } = useI18n();
 
