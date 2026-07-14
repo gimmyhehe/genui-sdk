@@ -1,3 +1,4 @@
+import { toRef } from 'vue';
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { LLMConfig } from './chat.types';
 import { ensureTemplateContext } from './composables/use-template-context';
@@ -59,10 +60,10 @@ export default function useTemplate(options?: UseTemplateOptions) {
   };
 
   return {
-    isTemplateInit: conversation.isTemplateInit,
-    conversationKit: conversation.conversationKit,
-    templateConversationState: conversation.templateConversationState,
-    templateSchemaList: conversation.templateSchemaList,
+    isTemplateInit: toRef(conversation, 'isTemplateInit'),
+    conversationKit: toRef(conversation, 'conversationKit'),
+    templateConversationState: toRef(conversation, 'templateConversationState'),
+    templateSchemaList: toRef(conversation, 'templateSchemaList'),
     createTemplate,
     switchTemplate,
     deleteTemplate,
