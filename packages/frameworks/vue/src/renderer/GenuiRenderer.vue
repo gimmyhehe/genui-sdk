@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef, toValue } from 'vue';
+import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef } from 'vue';
 // @ts-ignore
 import SchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { DeltaPatcher, repairJson, RepairJsonState, type IMaterials } from '@opentiny/genui-sdk-core';
@@ -29,7 +29,7 @@ const callAction = (actionName: string, params: any) => {
   return props.customActions[actionName]?.execute(params, rendererInstance.value.getContext());
 };
 
-const materials = inject(GENUI_MATERIALS, {});
+const materials = inject<IMaterials>(GENUI_MATERIALS, {});
 const customSettings = inject(RENDERER_SETTINGS_KEY, {});
 
 provide(RENDERER_SETTINGS_KEY, {
