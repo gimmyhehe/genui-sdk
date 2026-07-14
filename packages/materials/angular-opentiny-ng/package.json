@@ -6,18 +6,18 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "require": "./dist/index.js"
     },
     "./meta": {
-      "import": "./dist/meta.js",
       "types": "./dist/meta.d.ts",
+      "import": "./dist/meta.js",
       "require": "./dist/meta.js"
     },
     "./materials": {
-      "import": "./dist/materials.js",
       "types": "./dist/materials.d.ts",
+      "import": "./dist/materials.js",
       "require": "./dist/materials.js"
     }
   },
