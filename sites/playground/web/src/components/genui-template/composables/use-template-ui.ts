@@ -1,8 +1,11 @@
 import { computed, ref } from 'vue';
+import { useIsMobile } from '../../../use-mobile';
 
 type SidePanel = 'history';
 
-const rendererPanelVisible = ref(false);
+const rendererPanelVisible = ref(
+  typeof window !== 'undefined' ? window.innerWidth > 768 : true,
+);
 const schemaEditorVisible = ref(false);
 const sidePanel = ref<SidePanel | null>(null);
 
@@ -10,6 +13,8 @@ const isHistoryPanelOpen = computed(() => sidePanel.value === 'history');
 const isJsonEditorActive = computed(() => schemaEditorVisible.value);
 
 export function useTemplateUi() {
+  const { isMobile } = useIsMobile();
+
   const setRendererPanelVisible = (visible: boolean) => {
     rendererPanelVisible.value = visible;
   };
@@ -28,7 +33,7 @@ export function useTemplateUi() {
 
   const resetUi = () => {
     schemaEditorVisible.value = false;
-    rendererPanelVisible.value = false;
+    rendererPanelVisible.value = !isMobile.value;
     sidePanel.value = null;
   };
 
