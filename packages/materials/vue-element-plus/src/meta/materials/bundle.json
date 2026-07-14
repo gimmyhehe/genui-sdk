@@ -3634,6 +3634,7 @@
                   {
                     "property": "value",
                     "type": "string",
+                    "defaultValue": "",
                     "label": {
                       "text": {
                         "zh_CN": "选项值"
@@ -3678,15 +3679,6 @@
                 },
                 "content": [
                   {
-                    "property": "label",
-                    "type": "string",
-                    "label": {
-                      "text": {
-                        "zh_CN": "显示文本"
-                      }
-                    }
-                  },
-                  {
                     "property": "value",
                     "type": "string",
                     "label": {
@@ -3697,7 +3689,14 @@
                   }
                 ]
               }
-            ]
+            ],
+            "slots": {
+              "default": {
+                "label": {
+                  "zh_CN": "显示文本"
+                }
+              }
+            }
           }
         },
         {

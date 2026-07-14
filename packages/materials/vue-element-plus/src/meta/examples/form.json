@@ -68,11 +68,17 @@
               "children": [
                 {
                   "componentName": "ElRadio",
-                  "props": { "label": "男", "value": "男" }
+                  "props": {
+                    "value": "男"
+                  },
+                  "children": "男"
                 },
                 {
                   "componentName": "ElRadio",
-                  "props": { "label": "女", "value": "女" }
+                  "props": {
+                    "value": "女"
+                  },
+                  "children": "女"
                 }
               ]
             }
@@ -97,8 +103,20 @@
                 }
               },
               "children": [
-                { "componentName": "ElOption", "props": { "label": "人事部", "value": "HR" } },
-                { "componentName": "ElOption", "props": { "label": "其他部门", "value": "other" } }
+                {
+                  "componentName": "ElOption",
+                  "props": {
+                    "label": "人事部",
+                    "value": "HR"
+                  }
+                },
+                {
+                  "componentName": "ElOption",
+                  "props": {
+                    "label": "其他部门",
+                    "value": "other"
+                  }
+                }
               ]
             }
           ]
@@ -126,7 +144,9 @@
         },
         {
           "componentName": "ElFormItem",
-          "props": { "label": "" },
+          "props": {
+            "label": ""
+          },
           "children": [
             {
               "componentName": "ElButton",

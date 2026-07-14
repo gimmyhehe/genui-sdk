@@ -2,8 +2,10 @@ import { buildMaterialDefaultValueMap, type IMaterials } from '@opentiny/genui-s
 import { materialsMeta } from '../meta';
 import { components } from './components';
 
+const standardRequiredCompleteFieldSelectors = ['[componentName=ElCard] > props > shadow'];
+
 export const materials: IMaterials = {
   components,
-  requiredCompleteFieldSelectors: [],
+  requiredCompleteFieldSelectors: standardRequiredCompleteFieldSelectors,
   defaultPropsMap: buildMaterialDefaultValueMap(materialsMeta),
 };
