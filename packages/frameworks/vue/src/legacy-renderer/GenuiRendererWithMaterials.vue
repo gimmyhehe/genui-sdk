@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { provide, inject } from 'vue';
 import { materials as defaultMaterials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
-import { GENUI_MATERIALS } from '../chat/injection-tokens';
-import GenuiRenderer from '../renderer/SchemaCardRenderer.vue';
+import { GENUI_MATERIALS } from '../config-provider/injection-tokens';
+import GenuiRenderer from '../renderer/GenuiRenderer.vue';
 import type { IRendererProps, IRendererSlots } from '../renderer/renderer.types';
 
 defineProps<IRendererProps>();
