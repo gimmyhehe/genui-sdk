@@ -2,7 +2,7 @@
 import { TinyConfigProvider } from '@opentiny/vue';
 import { ThemeProvider } from '@opentiny/tiny-robot';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
-import { watch, provide, computed, onMounted, ref } from 'vue';
+import { watch, provide, computed, onMounted, ref, shallowReactive, readonly } from 'vue';
 import type { IMaterials } from '@opentiny/genui-sdk-core';
 import { I18nMessages, useI18n } from '../chat/i18n';
 import { GENUI_I18N, GENUI_CONFIG, GENUI_MATERIALS } from './injection-tokens';
@@ -61,9 +61,14 @@ const genuiConfig = computed(() => {
 
 provide(GENUI_CONFIG, genuiConfig);
 
+const internalMaterials = {};
+watch(() => props.materials, (newVal) => {
+  Object.assign(internalMaterials, newVal);
+}, { immediate: true });
+
 provide(
   GENUI_MATERIALS,
-  computed(() => props.materials ?? {}),
+  internalMaterials,
 );
 
 watch(

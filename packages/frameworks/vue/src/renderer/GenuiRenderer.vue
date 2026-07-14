@@ -29,26 +29,23 @@ const callAction = (actionName: string, params: any) => {
   return props.customActions[actionName]?.execute(params, rendererInstance.value.getContext());
 };
 
-const injectedMaterials = inject(GENUI_MATERIALS, {});
-const materials = computed(() => toValue(injectedMaterials) ?? ({} as IMaterials));
+const materials = inject(GENUI_MATERIALS, {});
 const customSettings = inject(RENDERER_SETTINGS_KEY, {});
 
 provide(RENDERER_SETTINGS_KEY, {
   ...customSettings,
-  get materials() {
-    return materials.value;
-  },
+  materials,
 });
 
 const deltaPatcher = shallowRef(null);
 
 watch(
-  () => [materials.value.requiredCompleteFieldSelectors, props.requiredCompleteFieldSelectors],
+  () => [materials?.requiredCompleteFieldSelectors, props.requiredCompleteFieldSelectors],
   () => {
     deltaPatcher.value = new DeltaPatcher({
       requiredCompleteFieldSelectors: [
         ...internalRequiredCompleteFieldSelectors,
-        ...(materials.value.requiredCompleteFieldSelectors ?? []),
+        ...(materials.requiredCompleteFieldSelectors || []),
         ...(props.requiredCompleteFieldSelectors || []),
       ],
     });
