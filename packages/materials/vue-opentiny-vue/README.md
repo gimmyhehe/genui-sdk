@@ -1,24 +1,68 @@
 # @opentiny/genui-sdk-materials-vue-opentiny-vue
 
-OpenTiny Vue 组件物料与 render-config，供 `@opentiny/genui-sdk-vue` 渲染 LLM 生成的 Schema 卡片。
+A GenUI Vue materials package based on [OpenTiny Vue](https://opentiny.design/tiny-vue/), for schema-driven page generation and rendering.
 
-## 安装
-
-通常与 Vue 框架包一起使用：
+## Install
 
 ```bash
-pnpm add @opentiny/genui-sdk-vue @opentiny/genui-sdk-core @opentiny/genui-sdk-materials-vue-opentiny-vue
+npm install @opentiny/genui-sdk-materials-vue-opentiny-vue @opentiny/genui-sdk-vue @opentiny/genui-sdk-core
 ```
 
-## 导出
+## Quick Start
 
-| 子路径 | 说明 |
-|--------|------|
-| `.` | 物料组件入口 |
-| `./render-config` | 白名单、bundle 等渲染配置 |
-| `./extend-renderer` | 扩展 mapper，注册自定义组件 |
+### Frontend Rendering
 
-## 文档
+Inject materials via `ConfigProvider`:
+
+```ts
+import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
+```
+
+```vue
+<GenuiConfigProvider :materials="materials">
+  <GenuiChat />
+</GenuiConfigProvider>
+```
+
+### Generate LLM Prompt (Server)
+
+```ts
+import { genPrompt } from '@opentiny/genui-sdk-core';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/meta';
+
+const systemPrompt = genPrompt('Vue', materialsMeta, customConfig);
+```
+
+`materialsMeta.wrapperComponent` defaults to `TinyCard`.
+
+Use `miniMaterials` / `miniMaterialsMeta` when you need a smaller component set (without charts).
+
+## API
+
+| Export Path | Exports | Description |
+|-------------|---------|-------------|
+| `@opentiny/genui-sdk-materials-vue-opentiny-vue` | `materials`, `miniMaterials`, `materialsMeta`, `miniMaterialsMeta` | Unified entry |
+| `.../materials` | `materials`, `miniMaterials` | Inject into `ConfigProvider` for schema rendering |
+| `.../meta` | `materialsMeta`, `miniMaterialsMeta` | For `genPrompt()` / building the server system prompt |
+
+### `materials` / `miniMaterials`
+
+Component registry mapping OpenTiny Vue components, used by the renderer to resolve nodes by `componentName`.
+
+### `materialsMeta` / `miniMaterialsMeta`
+
+Materials metadata, including:
+
+- `materials`: Protocol descriptions for components / blocks / snippets
+- `wrapperComponent`: Default wrapper component (`TinyCard`)
+- `whiteList`: Whitelist of `componentName` values available to the LLM
+- `examples`: Prompt example schemas (form / info / grid / tabs)
+- `rules`: Extra constraint rules
+
+Component library: `@opentiny/vue-*`.
+
+## More
 
 - [GenUI SDK](https://opentiny.design/genui-sdk)
-- [Renderer 指南](https://docs.opentiny.design/genui-sdk/components/renderer)
+- [Renderer Guide](https://docs.opentiny.design/genui-sdk/components/renderer)

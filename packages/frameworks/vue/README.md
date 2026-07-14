@@ -20,10 +20,11 @@ pnpm add @opentiny/genui-sdk-vue @opentiny/genui-sdk-core @opentiny/genui-sdk-ma
 ```vue
 <script setup>
 import { GenuiChat, GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 </script>
 
 <template>
-  <GenuiConfigProvider theme="dark">
+  <GenuiConfigProvider theme="dark" :materials="materials">
     <GenuiChat
       url="/api/chat"
       model="deepseek-chat"

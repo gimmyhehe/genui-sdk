@@ -1,20 +1,58 @@
 # @opentiny/genui-sdk-materials-angular-opentiny-ng
 
-OpenTiny Angular 组件物料与 render-config，供 Angular 版 GenUI 渲染器使用。
+A GenUI Angular materials package based on [OpenTiny NG](https://opentiny.design/tiny-ng/), providing materials metadata for schema-driven page generation.
 
-## 安装
+## Install
 
 ```bash
-pnpm add @opentiny/genui-sdk-materials-angular-opentiny-ng
+npm install @opentiny/genui-sdk-materials-angular-opentiny-ng @opentiny/genui-sdk-core
 ```
 
-## 导出
+## Quick Start
 
-| 子路径 | 说明 |
-|--------|------|
-| `.` | 物料入口 |
-| `./render-config` | 白名单与 bundle 配置 |
+### Generate LLM Prompt (Server)
 
-## 文档
+```ts
+import { genPrompt } from '@opentiny/genui-sdk-core';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/meta';
+
+const systemPrompt = genPrompt('Angular', materialsMeta, customConfig);
+```
+
+`materialsMeta.wrapperComponent` defaults to `TiCard`.
+
+### Default Props (Angular ConfigProvider)
+
+Pass `materialsMeta` to `GenuiConfigProvider` so the renderer can derive component default props:
+
+```ts
+import { materialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/meta';
+```
+
+```html
+<genui-config-provider [materialsMeta]="materialsMeta">
+  <genui-renderer ... />
+</genui-config-provider>
+```
+
+## API
+
+| Export Path | Exports | Description |
+|-------------|---------|-------------|
+| `@opentiny/genui-sdk-materials-angular-opentiny-ng` | `materialsMeta` | Unified entry |
+| `.../meta` | `materialsMeta` | For `genPrompt()` / building the server system prompt |
+
+### `materialsMeta`
+
+Materials metadata, including:
+
+- `materials`: Protocol descriptions for components / blocks / snippets
+- `wrapperComponent`: Default wrapper component (`TiCard`)
+- `whiteList`: Whitelist of `componentName` values available to the LLM
+- `examples`: Prompt example schemas
+
+Component library: `@opentiny/ng`.
+
+## More
 
 - [GenUI SDK](https://opentiny.design/genui-sdk)

@@ -1,7 +1,7 @@
 {
   "name": "@opentiny/genui-sdk-materials-angular-opentiny-ng",
   "version": "0.0.1",
-  "description": "OpenTiny Angular component materials and render-config for GenUI SDK",
+  "description": "GenUI Angular materials package based on OpenTiny NG",
   "author": "OpenTiny Team",
   "license": "MIT",
   "homepage": "https://opentiny.design/genui-sdk",

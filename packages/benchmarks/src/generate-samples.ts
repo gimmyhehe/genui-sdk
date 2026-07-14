@@ -21,14 +21,14 @@ import { streamText } from 'ai';
 
 /**
  * 与 chat-genui 一致的 system 拼接；framework 来自运行配置（env / benchmark.config），其余来自 llm.config。
- * @param framework 前端框架类型（影响 render-config）
+ * @param framework 前端框架类型（影响 materialsMeta）
  * @param promptConfig prompt 拼接配置
  * @returns 最终 system prompt
  */
 function buildSystemPrompt(framework: 'Vue' | 'Angular', promptConfig: LlmBenchmarkRunOptions['promptConfig']) {
   const { tgCustomConfig, specificPrompt, userAppendPrompt } = promptConfig;
-  const renderConfigForFramework = framework === 'Angular' ? ngMaterialsMeta : materialsMeta;
-  return genPrompt(framework, renderConfigForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt;
+  const materialsMetaForFramework = framework === 'Angular' ? ngMaterialsMeta : materialsMeta;
+  return genPrompt(framework, materialsMetaForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt;
 }
 /**
  * 根据 `scenarios` / `scenario` 过滤要生成样本的场景。

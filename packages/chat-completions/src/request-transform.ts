@@ -34,9 +34,9 @@ export function requestTransform(
 
   const { framework = 'Vue', strategy = 'append', ...promptConfig } = tgCustomConfig;
 
-  const renderConfigForFramework = framework === 'Angular' ? ngMaterialsMeta : materialsMeta;
+  const materialsMetaForFramework = framework === 'Angular' ? ngMaterialsMeta : materialsMeta;
   const systemMessages = newParams.messages?.find((message) => message.role === 'system');
-  const prompt = genPrompt(framework, renderConfigForFramework, promptConfig);
+  const prompt = genPrompt(framework, materialsMetaForFramework, promptConfig);
   if (systemMessages) {
     systemMessages.content = mergePrompt(systemMessages.content as string, prompt, strategy);
   } else {

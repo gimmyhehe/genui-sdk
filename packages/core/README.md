@@ -15,6 +15,7 @@ pnpm add @opentiny/genui-sdk-core
 | 模块 | 主要导出 |
 |------|----------|
 | `protocols` | `IChatMessage`、`CardSchema`、`IMaterials` 等协议与 Zod Schema |
+| `material` | `IMaterials`、`IMaterialsMeta`、`buildMaterialDefaultValueMap` |
 | `prompt-generator` | `genPrompt`、`genRootSchema`、`genJsonSchema` |
 | `stream-pattern-extractor` | `PatternExtractor`、`SchemaJsonPattern`、`FlagWrapPattern` |
 | `delta-patcher` | `DeltaPatcher` |
@@ -33,8 +34,9 @@ import {
   repairJson,
   type IChatMessage,
 } from '@opentiny/genui-sdk-core';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/meta';
 
-const prompt = genPrompt({ /* ... */ });
+const prompt = genPrompt('Vue', materialsMeta, customConfig);
 const { state, value } = repairJson(partialJson);
 ```
 
