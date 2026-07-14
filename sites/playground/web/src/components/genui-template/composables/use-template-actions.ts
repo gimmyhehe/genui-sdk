@@ -18,9 +18,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   const editor = deps?.editor ?? useSchemaEditor();
   const ui = deps?.ui ?? useTemplateUi();
 
-  const isJsonEditorActive = computed(() =>
-    isMobile.value ? unref(ui.isMobileJsonOpen) : unref(ui.schemaEditorVisible),
-  );
+  const isJsonEditorActive = computed(() => unref(ui.isJsonEditorActive));
 
   const schemaEditorDirty = computed(
     () => isJsonEditorActive.value && editor.hasUnsavedChanges(),
@@ -31,33 +29,27 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
     if (isMobile.value) {
       ui.closeSheet();
     } else {
-      ui.closeEditor();
+      ui.setJsonEditorOpen(false);
     }
     versionControl.resetVersionPreviewMode();
   };
 
   const closeRendererPanel = () => {
-    ui.closeRendererPanel();
+    ui.setRendererPanelVisible(false);
     closeSchemaEditorView();
   };
 
-  const toggleSchemaEditor = () => {
-    if (unref(ui.schemaEditorVisible)) {
-      editor.revertUnsavedChanges();
-    } else {
-      editor.syncBaseline();
+  const setJsonEditorOpen = (open: boolean) => {
+    if (open === isJsonEditorActive.value) {
+      return;
     }
-    ui.toggleEditor();
+    open ? editor.syncBaseline() : editor.revertUnsavedChanges();
+    ui.setJsonEditorOpen(open);
   };
 
-  const handleMobileJsonEditorOpen = (open: boolean) => {
-    if (open) {
-      editor.syncBaseline();
-    } else {
-      editor.revertUnsavedChanges();
-    }
-    ui.setMobileJsonOpen(open);
-  };
+  const toggleSchemaEditor = () => setJsonEditorOpen(!isJsonEditorActive.value);
+
+  const handleMobileJsonEditorOpen = (open: boolean) => setJsonEditorOpen(open);
 
   const toggleSchemaVersion = (
     schema: Record<string, unknown>,
@@ -68,7 +60,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
       editor.revertUnsavedChanges();
     }
     versionControl.previewVersion(schema, cardId, options);
-    ui.showRendererPanel();
+    ui.setRendererPanelVisible(true);
     if (isMobile.value) {
       ui.openSheet();
       editor.syncBaseline();
@@ -102,12 +94,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
 
     toggleSchemaVersion(schema, entry.cardId, { diffFromHistory: true });
     ui.closeHistoryPanel();
-    editor.syncBaseline();
-    if (isMobile.value) {
-      ui.setMobileJsonOpen(true);
-    } else {
-      ui.openEditor();
-    }
+    setJsonEditorOpen(true);
   };
 
   const applyCurrentVersion = () => {
@@ -142,8 +129,8 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   const resetToLatestVersion = () => {
     versionControl.resetToLatestVersion();
     editor.syncBaseline();
-    if (isMobile.value && unref(ui.isMobileJsonOpen)) {
-      ui.setMobileJsonOpen(false);
+    if (isJsonEditorActive.value) {
+      setJsonEditorOpen(false);
     }
   };
 
@@ -156,8 +143,8 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
     if (event.key !== 'Escape') {
       return;
     }
-    if (isMobile.value && unref(ui.isMobileJsonOpen)) {
-      handleMobileJsonEditorOpen(false);
+    if (isJsonEditorActive.value) {
+      setJsonEditorOpen(false);
       return;
     }
     if (isMobile.value && unref(ui.isMobileSheetOpen)) {

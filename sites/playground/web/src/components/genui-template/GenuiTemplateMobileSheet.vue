@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import { GenuiRenderer as SchemaRenderer } from '@opentiny/genui-sdk-vue';
 import { TinyButton } from '@opentiny/vue';
 import { iconClose, iconTime } from '@opentiny/vue-icon';
@@ -15,12 +15,99 @@ defineProps<{
   theme: PlaygroundColorTheme;
 }>();
 
+const MOBILE_SHEET_DEFAULT_HEIGHT_VH = 64;
+const MOBILE_SHEET_MIN_HEIGHT_VH = 42;
+const MOBILE_SHEET_MAX_HEIGHT_VH = 92;
+
 const TinyCloseIcon = iconClose();
 const TinyIconTime = iconTime();
 const { schema, versionControl, editor, ui, actions } = useTemplateContext();
 
+const mobileSheetHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
+const mobileSheetDragStartY = ref(0);
+const mobileSheetDragStartHeightVh = ref(MOBILE_SHEET_DEFAULT_HEIGHT_VH);
+const mobileSheetDragging = ref(false);
+
+const mobileSheetPanelStyle = computed(() => ({
+  height: `${mobileSheetHeightVh.value}vh`,
+}));
+
+const clampMobileSheetHeight = (heightVh: number) =>
+  Math.min(MOBILE_SHEET_MAX_HEIGHT_VH, Math.max(MOBILE_SHEET_MIN_HEIGHT_VH, heightVh));
+
+const handleMobileSheetDragMove = (event: TouchEvent) => {
+  if (!mobileSheetDragging.value) {
+    return;
+  }
+  const touch = event.touches[0];
+  if (!touch) {
+    return;
+  }
+  const deltaY = touch.clientY - mobileSheetDragStartY.value;
+  const deltaVh = (deltaY / window.innerHeight) * 100;
+  mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetDragStartHeightVh.value - deltaVh);
+  event.preventDefault();
+};
+
+const disposeMobileSheetDrag = () => {
+  window.removeEventListener('touchmove', handleMobileSheetDragMove);
+  window.removeEventListener('touchend', handleMobileSheetDragEnd);
+  window.removeEventListener('touchcancel', handleMobileSheetDragEnd);
+  mobileSheetDragging.value = false;
+};
+
+function handleMobileSheetDragEnd() {
+  if (!mobileSheetDragging.value) {
+    return;
+  }
+  disposeMobileSheetDrag();
+  mobileSheetHeightVh.value = clampMobileSheetHeight(mobileSheetHeightVh.value);
+}
+
+const resetMobileSheetHeight = (options?: { resetDragging?: boolean }) => {
+  if (options?.resetDragging !== false) {
+    mobileSheetDragging.value = false;
+  }
+  mobileSheetHeightVh.value = MOBILE_SHEET_DEFAULT_HEIGHT_VH;
+};
+
+const onMobileSheetGrabTouchStart = (event: TouchEvent) => {
+  const touch = event.touches[0];
+  if (!touch) {
+    return;
+  }
+  mobileSheetDragging.value = true;
+  mobileSheetDragStartY.value = touch.clientY;
+  mobileSheetDragStartHeightVh.value = mobileSheetHeightVh.value;
+  window.addEventListener('touchmove', handleMobileSheetDragMove, { passive: false });
+  window.addEventListener('touchend', handleMobileSheetDragEnd);
+  window.addEventListener('touchcancel', handleMobileSheetDragEnd);
+};
+
+const onMaskClick = () => {
+  if (ui.isJsonEditorActive) {
+    actions.handleMobileJsonEditorOpen(false);
+  }
+};
+
+watch(
+  () => ui.isMobileSheetOpen,
+  (open) => {
+    if (open) {
+      resetMobileSheetHeight({ resetDragging: false });
+      return;
+    }
+    resetMobileSheetHeight();
+    disposeMobileSheetDrag();
+  },
+);
+
+onUnmounted(() => {
+  disposeMobileSheetDrag();
+});
+
 const headerTitle = computed(() => {
-  if (!ui.isMobileJsonOpen) {
+  if (!ui.isJsonEditorActive) {
     return t('templateEditor.previewRender');
   }
   return versionControl.schemaEditorShowDiffView
@@ -29,7 +116,7 @@ const headerTitle = computed(() => {
 });
 
 const toggleJsonEditor = () => {
-  actions.handleMobileJsonEditorOpen(!ui.isMobileJsonOpen);
+  actions.handleMobileJsonEditorOpen(!ui.isJsonEditorActive);
 };
 </script>
 
@@ -42,21 +129,21 @@ const toggleJsonEditor = () => {
         role="dialog"
         aria-modal="true"
         :aria-label="
-          ui.isMobileJsonOpen
+          ui.isJsonEditorActive
             ? versionControl.schemaEditorShowDiffView
               ? t('templateEditor.jsonEditorAria')
               : t('templateEditor.jsonPreviewAria')
             : t('templateEditor.jsonPreviewAria')
         "
       >
-        <div class="schema-mobile-sheet__mask" @click="ui.onMaskClick" />
-        <div class="schema-mobile-sheet__panel" :style="ui.mobileSheetPanelStyle">
-          <div class="schema-mobile-sheet__grab" @touchstart="ui.onMobileSheetGrabTouchStart" />
+        <div class="schema-mobile-sheet__mask" @click="onMaskClick" />
+        <div class="schema-mobile-sheet__panel" :style="mobileSheetPanelStyle">
+          <div class="schema-mobile-sheet__grab" @touchstart="onMobileSheetGrabTouchStart" />
           <div class="schema-mobile-sheet__header">
             <h3 class="schema-mobile-sheet__title">{{ headerTitle }}</h3>
             <div class="schema-mobile-sheet__header-actions">
               <tiny-button
-                v-if="ui.isMobileJsonOpen && actions.schemaEditorDirty && !versionControl.schemaEditorShowDiffView && !versionControl.isEditorReadOnly"
+                v-if="ui.isJsonEditorActive && actions.schemaEditorDirty && !versionControl.schemaEditorShowDiffView && !versionControl.isEditorReadOnly"
                 type="primary"
                 size="small"
                 round
@@ -77,7 +164,7 @@ const toggleJsonEditor = () => {
               <button
                 type="button"
                 class="schema-mobile-sheet__icon-btn"
-                :class="{ 'is-active': ui.isMobileJsonOpen }"
+                :class="{ 'is-active': ui.isJsonEditorActive }"
                 :aria-label="t('templateEditor.viewJson')"
                 :title="t('templateEditor.viewJson')"
                 @click="toggleJsonEditor"
@@ -98,7 +185,7 @@ const toggleJsonEditor = () => {
           >
             <div
               v-if="schema.currentPreviewSchema"
-              v-show="!ui.isMobileJsonOpen"
+              v-show="!ui.isJsonEditorActive"
               class="schema-mobile-sheet__preview schema-mobile-sheet__preview--solo"
             >
               <schema-renderer
@@ -109,7 +196,7 @@ const toggleJsonEditor = () => {
               />
             </div>
             <Transition name="schema-mobile-json">
-              <div v-show="ui.isMobileJsonOpen" class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer">
+              <div v-show="ui.isJsonEditorActive" class="schema-mobile-sheet__editor schema-mobile-sheet__editor--layer">
                 <schema-json-editor :theme="theme" layout="sheet" />
               </div>
             </Transition>

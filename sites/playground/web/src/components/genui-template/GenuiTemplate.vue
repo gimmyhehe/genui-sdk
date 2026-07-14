@@ -8,7 +8,6 @@ import GenuiTemplateMobile from './GenuiTemplateMobile.vue';
 import { locale } from '../../i18n';
 import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue';
 import { provideTemplateContext } from './composables/use-template-context';
-import { disposeMobileSheetDrag } from './composables/use-template-ui';
 
 defineProps<{
   theme: 'light' | 'dark' | 'lite' | 'auto';
@@ -41,7 +40,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', actions.handleKeydown);
-  disposeMobileSheetDrag();
 });
 </script>
 
