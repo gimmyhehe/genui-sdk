@@ -1,5 +1,7 @@
 import { computed, unref, type UnwrapNestedRefs } from 'vue';
+import { TinyModal } from '@opentiny/vue';
 import { useIsMobile } from '../../../use-mobile';
+import { t } from '../../../i18n';
 import { isRenderableSchema, rebuildSchemaFromCard } from '../template-chat-utils';
 import type { ISchemaVersionHistoryEntry } from '../template-chat-utils/schema-version-history';
 import { useTemplateVersionControl } from './use-template-version-control';
@@ -50,14 +52,11 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
 
   const handleMobileJsonEditorOpen = (open: boolean) => setJsonEditorOpen(open);
 
-  const toggleSchemaVersion = (
+  const applySchemaVersionPreview = (
     schema: Record<string, unknown>,
     cardId: string,
     options: { diffFromHistory?: boolean } = {},
   ) => {
-    if (editor.hasUnsavedChanges()) {
-      editor.revertUnsavedChanges();
-    }
     versionControl.previewVersion(schema, cardId, options);
     ui.setRendererPanelVisible(true);
     if (isMobile.value || unref(ui.schemaEditorVisible)) {
@@ -65,18 +64,34 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
     }
   };
 
-  const handleSchemaVersionToggle = (
+  const toggleSchemaVersion = async (
+    schema: Record<string, unknown>,
+    cardId: string,
+    options: { diffFromHistory?: boolean } = {},
+  ) => {
+    if (editor.hasUnsavedChanges()) {
+      const type = await TinyModal.confirm(t('templateEditor.confirmDiscardUnsaved'));
+      if (type === 'cancel') {
+        return false;
+      }
+      editor.revertUnsavedChanges();
+    }
+    applySchemaVersionPreview(schema, cardId, options);
+    return true;
+  };
+
+  const handleSchemaVersionToggle = async (
     schema: Record<string, unknown> | null,
     cardId: string,
   ) => {
     if (schema) {
-      toggleSchemaVersion(schema, cardId);
+      await toggleSchemaVersion(schema, cardId);
       return;
     }
     versionControl.selectVersionCard(cardId);
   };
 
-  const handleHistoryEntrySelect = (entry: ISchemaVersionHistoryEntry) => {
+  const handleHistoryEntrySelect = async (entry: ISchemaVersionHistoryEntry) => {
     if (entry.isPending) {
       return;
     }
@@ -86,7 +101,10 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
       return;
     }
 
-    toggleSchemaVersion(schema, entry.cardId, { diffFromHistory: true });
+    const switched = await toggleSchemaVersion(schema, entry.cardId, { diffFromHistory: true });
+    if (!switched) {
+      return;
+    }
     ui.closeHistoryPanel();
     setJsonEditorOpen(true);
   };

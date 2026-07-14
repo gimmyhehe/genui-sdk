@@ -207,7 +207,8 @@
     "historyDateSameYear": "{month}/{day} {time}",
     "historyDateFull": "{year}/{month}/{day} {time}",
     "historyMonth": "{month}",
-    "historyYearMonth": "{year}/{month}"
+    "historyYearMonth": "{year}/{month}",
+    "confirmDiscardUnsaved": "You have unsaved edits. Switching versions will discard them. Continue?"
   },
   "finishInfo": {
     "title": "Conversation info",

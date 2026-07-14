@@ -207,7 +207,8 @@
     "historyDateSameYear": "{month}月{day}日 {time}",
     "historyDateFull": "{year}年{month}月{day}日 {time}",
     "historyMonth": "{month}月",
-    "historyYearMonth": "{year}年{month}月"
+    "historyYearMonth": "{year}年{month}月",
+    "confirmDiscardUnsaved": "当前有未保存的编辑，切换版本将丢弃这些更改，是否继续？"
   },
   "finishInfo": {
     "title": "对话信息",
