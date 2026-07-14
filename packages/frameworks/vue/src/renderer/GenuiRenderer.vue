@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide } from 'vue';
+import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef } from 'vue';
 // @ts-ignore
 import SchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { DeltaPatcher, repairJson, RepairJsonState, type IMaterials } from '@opentiny/genui-sdk-core';
 import { requiredCompleteFieldSelectors as internalRequiredCompleteFieldSelectors } from './config';
-import {
-  GENUI_MATERIALS,
-} from '../config-provider/injection-tokens';
+import { GENUI_MATERIALS } from '../config-provider/injection-tokens';
 import type { IRendererProps } from './renderer.types';
 import { cardIdSymbol } from '../chat/useChat';
 import { useI18n } from '../chat/i18n';
@@ -31,24 +29,33 @@ const callAction = (actionName: string, params: any) => {
   return props.customActions[actionName]?.execute(params, rendererInstance.value.getContext());
 };
 
-const materialRegistry = inject<IMaterials>(GENUI_MATERIALS, {});
-const vueMaterials = materialRegistry.components ?? {};
-const defaultPropsMap = materialRegistry.defaultPropsMap ?? {};
+const materials = inject<IMaterials>(GENUI_MATERIALS, {});
 const customSettings = inject(RENDERER_SETTINGS_KEY, {});
 
 provide(RENDERER_SETTINGS_KEY, {
   ...customSettings,
-  materials: {
-    ...vueMaterials,
-    ...props.customComponents,
-  },
-  defaultPropsMap,
+  materials,
 });
 
-const deltaPatcher = new DeltaPatcher({
+const deltaPatcher = shallowRef(null);
+
+watch(
+  () => [materials.requiredCompleteFieldSelectors, props.requiredCompleteFieldSelectors],
+  () => {
+    deltaPatcher.value = new DeltaPatcher({
+      requiredCompleteFieldSelectors: [
+        ...internalRequiredCompleteFieldSelectors,
+        ...(materials.requiredCompleteFieldSelectors ?? []),
+        ...(props.requiredCompleteFieldSelectors || []),
+      ],
+    });
+  },
+);
+
+deltaPatcher.value = new DeltaPatcher({
   requiredCompleteFieldSelectors: [
     ...internalRequiredCompleteFieldSelectors,
-    ...(materialRegistry.requiredCompleteFieldSelectors ?? []),
+    ...(materials.requiredCompleteFieldSelectors ?? []),
     ...(props.requiredCompleteFieldSelectors || []),
   ],
 });
@@ -114,7 +121,7 @@ watch(
       const { lifeCycles, ...rest } = json;
       json = rest;
     }
-    deltaPatcher.patchWithDelta(schema.value, json, isCompleted); // TODO： 速率限制
+    deltaPatcher.value.patchWithDelta(schema.value, json, isCompleted); // TODO： 速率限制
     if (!updateActionTimer) {
       updateActionTimer = nextTick(() => {
         if (!rendererInstance.value) return;
