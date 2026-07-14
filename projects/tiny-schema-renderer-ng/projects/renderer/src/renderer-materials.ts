@@ -1,5 +1,7 @@
 import { type Type } from '@angular/core';
 
+export type DefaultPropsMap = Record<string, Record<string, any>>;
+
 export type AutoApplyDirectivePattern = Record<string, (schema: any) => boolean>;
 
 export interface IRendererMaterials {
@@ -7,6 +9,7 @@ export interface IRendererMaterials {
   modules?: Record<string, Type<any>>;
   directives?: Record<string, Type<any>>;
   autoApplyDirectives?: AutoApplyDirectivePattern;
+  defaultPropsMap?: DefaultPropsMap;
 }
 
 export const MATERIALS_CONTEXT_KEY = Symbol('renderer-materials');

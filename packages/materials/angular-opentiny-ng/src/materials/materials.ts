@@ -1,5 +1,6 @@
 import type { Type } from '@angular/core';
-import type { IMaterials } from '@opentiny/genui-sdk-core';
+import { buildMaterialDefaultValueMap, type IMaterials } from '@opentiny/genui-sdk-core';
+import { materialsMeta } from '../meta';
 import { autoApplyDirectives, directives } from './directives';
 import { components, modules } from './components';
 
@@ -16,4 +17,5 @@ export const materials: INgMaterials = {
   modules,
   directives,
   autoApplyDirectives,
+  defaultPropsMap: buildMaterialDefaultValueMap(materialsMeta),
 };
