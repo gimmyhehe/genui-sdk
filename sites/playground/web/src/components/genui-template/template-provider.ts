@@ -57,6 +57,7 @@ export class TemplateModelProvider extends CustomModelProvider {
     context: Record<string, unknown>,
     request: ChatCompletionRequest,
   ) {
+    super.setupStreamContext(context, request);
     const lastUserMessage = getLastUserMessage(request.messages);
     context.messageId = String(lastUserMessage?.messageId ?? '');
     context.input = String(lastUserMessage?.content ?? '');
