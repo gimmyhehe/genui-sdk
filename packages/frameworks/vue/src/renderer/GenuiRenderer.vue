@@ -45,7 +45,7 @@ watch(
     deltaPatcher.value = new DeltaPatcher({
       requiredCompleteFieldSelectors: [
         ...internalRequiredCompleteFieldSelectors,
-        ...(materials.requiredCompleteFieldSelectors || []),
+        ...(materials?.requiredCompleteFieldSelectors || []),
         ...(props.requiredCompleteFieldSelectors || []),
       ],
     });
