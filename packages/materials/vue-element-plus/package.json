@@ -26,7 +26,8 @@
   "type": "module",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "CONTRIBUTING.md"
   ],
   "scripts": {
     "build": "vite build",
