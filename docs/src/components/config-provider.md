@@ -102,8 +102,8 @@ const customI18n: I18nMessages = {
 ### materials
 
 - **类型**: `IMaterials`
-- **必填**: 否（使用 `GenuiRenderer` / `GenuiChat` 时建议配置）
-- **说明**: 渲染器使用的组件物料注册表。通常传入 `@opentiny/genui-sdk-materials-vue-opentiny-vue` 提供的 `materials` 对象。
+- **必填**: 否（使用 `GenuiRenderer` / `GenuiChat` 时需要配置）
+- **说明**: 渲染器使用的组件物料。通常传入物料包，例如 `@opentiny/genui-sdk-materials-vue-opentiny-vue` 提供的 `materials` 对象。
 
 ```vue
 <template>
