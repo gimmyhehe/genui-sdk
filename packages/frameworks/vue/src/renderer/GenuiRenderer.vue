@@ -32,6 +32,10 @@ const callAction = (actionName: string, params: any) => {
 const materials = inject<IMaterials>(GENUI_MATERIALS, {});
 const customSettings = inject(RENDERER_SETTINGS_KEY, {});
 
+watch(() => props.customComponents, (newVal) => {
+  Object.assign(materials.components, newVal);
+}, { immediate: true });
+
 provide(RENDERER_SETTINGS_KEY, {
   ...customSettings,
   materials,
