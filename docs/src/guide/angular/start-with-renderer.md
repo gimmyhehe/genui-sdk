@@ -4,10 +4,12 @@
 
 ## 使用 fetch 请求服务，处理流式返回
 
-创建一个文件 `fetch-schema-stream.ts`, 文件中的处理逻辑都是基于 OpenAI 兼容格式处理：
+创建一个文件 `fetch-schema-stream.ts`。基于 OpenAI 兼容 SSE 解析 `delta.content`，再用 core 的 `PatternExtractor` 提取 `` ```schemaJson `` 片段（默认 `SchemaJsonPattern`）：
 
-````ts {14-18}
+````ts
 // fetch-schema-stream.ts
+import { PatternExtractor } from '@opentiny/genui-sdk-core';
+
 export async function fetchSchemaStream(
   url: string,
   userInput: string,
@@ -22,7 +24,7 @@ export async function fetchSchemaStream(
       stream: true,
       metadata: {
         tinygenui: JSON.stringify({
-          framework: 'Angular'
+          framework: 'Angular',
         }),
       },
     }),
@@ -32,33 +34,14 @@ export async function fetchSchemaStream(
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  const reader = response.body.getReader();
+  const reader = response.body!.getReader();
   const decoder = new TextDecoder('utf-8');
   let buffer = '';
 
-  let inSchemaStream = false;
-  let bufferText = '';
-  let schemaFinished = false;
-  const startFlag = '```schemaJson';
-  const endFlag = '```';
-
-  // 检测 schema 开始标记
-  const isSchemaJsonStart = (str: string): boolean => {
-    const index = str.indexOf('`');
-    if (index === -1) return false;
-    return startFlag.startsWith(str.substring(index, index + startFlag.length));
-  };
-
-  // 检测 schema 结束标记
-  const isSchemaJsonEnd = (str: string): boolean => {
-    const index = str.lastIndexOf('\n');
-    if (index === -1) return false;
-    if (str.includes(`\n${endFlag}`)) {
-      return true;
-    }
-    const newStr = str.slice(index).trim().substring(0, endFlag.length);
-    return endFlag.startsWith(newStr);
-  };
+  const patternExtractor = new PatternExtractor({
+    onNormalWrite: () => {},
+    onHandledWrite: (value) => onSchemaUpdate(value),
+  });
 
   try {
     while (true) {
@@ -78,7 +61,7 @@ export async function fetchSchemaStream(
 
         const dataStr = line.slice(6);
 
-        if (dataStr === '[DONE]' || schemaFinished) {
+        if (dataStr === '[DONE]') {
           return;
         }
 
@@ -88,43 +71,7 @@ export async function fetchSchemaStream(
 
           if (!content) continue;
 
-          const deltaPart = bufferText + content;
-
-          // 检测是否进入或退出 schema 流
-          if ((!inSchemaStream && isSchemaJsonStart(deltaPart)) || (inSchemaStream && isSchemaJsonEnd(deltaPart))) {
-            const matchFlag = inSchemaStream ? /(\n\s*)```/ : startFlag;
-            const matchPart = deltaPart.match(matchFlag)?.[0];
-
-            if (!matchPart) {
-              // 标记不完整，保留到下次
-              bufferText = deltaPart;
-              continue;
-            }
-
-            if (inSchemaStream) {
-              const trimmedDelta = deltaPart.trim();
-              const [schemaPart] = trimmedDelta.split(matchPart);
-              if (schemaPart) {
-                onSchemaUpdate(schemaPart);
-              }
-              schemaFinished = true;
-              return;
-            } else {
-              const trimmedDelta = deltaPart.trim();
-              const [, schemaPart] = trimmedDelta.split(matchPart);
-              inSchemaStream = true;
-              bufferText = '';
-              if (schemaPart) {
-                onSchemaUpdate(schemaPart);
-              }
-              continue;
-            }
-          }
-
-          bufferText = '';
-          if (inSchemaStream) {
-            onSchemaUpdate(deltaPart);
-          }
+          patternExtractor.handleContent(content);
         } catch (e) {
           console.error('解析后端数据失败:', e, dataStr);
         }
