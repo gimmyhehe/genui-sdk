@@ -14,7 +14,7 @@ import type { ChatMessage } from '@opentiny/tiny-robot-kit';
 import type { IChatMessage } from '@opentiny/genui-sdk-core';
 import { IconAi, IconUser, IconArrowDown } from '@opentiny/tiny-robot-svgs';
 import type { BubbleRoleConfig } from '@opentiny/tiny-robot';
-import { scrollEnd, throttle, GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
+import {  scrollEnd, throttle, GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import copy from 'clipboard-copy';
 import type {
@@ -311,22 +311,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="tg-chat-container"
-    :class="{ 'dark': TinyGenuiConfig?.theme === 'dark' }"
-  >
-    <div
-      class="messages-container"
-      ref="messagesContainer"
-    >
+  <div class="tg-chat-container" :class="{ 'dark': TinyGenuiConfig?.theme === 'dark' }">
+    <div class="messages-container" ref="messagesContainer">
       <tr-bubble-provider :content-renderers="messageRenderers">
-        <tr-bubble-list
-          v-if="showMessages.length"
-          :items="showMessages"
-          :roles="roles"
-          auto-scroll
-        >
-        </tr-bubble-list>
+        <tr-bubble-list v-if="showMessages.length" :items="showMessages" :roles="roles" auto-scroll> </tr-bubble-list>
       </tr-bubble-provider>
     </div>
     <div class="sender-container">

@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import { DeltaPatcher } from '@opentiny/genui-sdk-core';
-import { requiredCompleteFieldSelectors } from '@opentiny/genui-sdk-vue';
+import { requiredCompleteFieldSelectors as baseRequiredCompleteFieldSelectors } from '@opentiny/genui-sdk-vue';
+import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 import {
   textToJson,
   validateJsonPatch,
@@ -14,6 +15,11 @@ import { useTemplateSchema } from './use-template-schema';
 
 const errorMessagesMap = ref(new Map<string, string>());
 const lastPreviewSchema = ref<Record<string, unknown> | null>(null);
+
+const requiredCompleteFieldSelectors = [
+  ...baseRequiredCompleteFieldSelectors,
+  ...(materials.requiredCompleteFieldSelectors ?? []),
+];
 
 const deltaPatcher = new DeltaPatcher({
   requiredCompleteFieldSelectors,
