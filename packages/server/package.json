@@ -18,16 +18,16 @@
     "generative-ui",
     "stream-ui"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "output/dist/index.js",
+  "types": "output/dist/index.d.ts",
   "type": "module",
   "bin": {
-    "genui-sdk-server": "dist/cli.js"
+    "genui-sdk-server": "output/dist/cli.js"
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./output/dist/index.d.ts",
+      "import": "./output/dist/index.js"
     }
   },
   "files": [
@@ -40,6 +40,7 @@
     "analyze": "vite build --mode analyze",
     "prebuild:lib:npm": "pnpm prebuild",
     "build:lib:npm": "pnpm build",
+    "postbuild": "tsx scripts/post-build.ts",
     "dev": "tsx watch --tsconfig ./tsconfig.dev.json test/start.ts"
   },
   "dependencies": {

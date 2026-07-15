@@ -135,7 +135,7 @@ jobs:
         run: pnpm publish --no-git-checks --access public --tag ${{ github.event.inputs.npm_tag }}
 
       - name: Publish server to npm
-        working-directory: packages/server
+        working-directory: packages/server/output
         run: pnpm publish --no-git-checks --access public --tag ${{ github.event.inputs.npm_tag }}
 
       - name: Publish Vue to npm

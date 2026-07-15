@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
   const plugins = [
     dts({
       rollupTypes: true,
+      bundledPackages: ['@opentiny/genui-sdk-chat-completions'],
     }),
     jsconfigPaths({
       projects: ['./tsconfig.json'],
@@ -35,7 +36,7 @@ export default defineConfig(({ mode }) => {
         },
         formats: ['es'],
       },
-      outDir: 'dist',
+      outDir: 'output/dist',
       sourcemap: true,
       rollupOptions: {
         external: (id) => {
