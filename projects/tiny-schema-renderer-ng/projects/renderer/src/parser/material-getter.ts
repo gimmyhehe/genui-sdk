@@ -31,7 +31,7 @@ export const iconMap: Record<string, any> = {};
 
 export const customElements: Record<string, Type<any>> = {};
 
-const getMaterials = (context: Record<PropertyKey, any> = {}): IRendererMaterials =>
+export const getMaterials = (context: Record<PropertyKey, any> = {}): IRendererMaterials =>
   context[MATERIALS_CONTEXT_KEY] ?? {};
 
 export const getComponent = (
@@ -71,8 +71,8 @@ export const getAutoApplyPatterns = (
 ): AutoApplyDirectivePattern => {
   return {
     ngModel: (schema: any) => !!(schema?.props?.ngModel || schema?.props?.onNgModelChange),
-    defaultValueAccessor: (schema: any) => {
-      const componentType = getComponent(schema?.componentName, context);
+    defaultValueAccessor: (schema: any, ctx = {}) => {
+      const componentType = getComponent(schema?.componentName, ctx);
       if (!(componentType as any)?.['ɵcmp']) {
         return false;
       }
@@ -81,8 +81,8 @@ export const getAutoApplyPatterns = (
       const propsMatch = () => schema?.props?.['ngModel'] && schema?.props?.type !== 'checkbox';
       return selectorMatch() && propsMatch();
     },
-    checkboxValueAccessor: (schema: any) => {
-      const componentType = getComponent(schema?.componentName, context);
+    checkboxValueAccessor: (schema: any, ctx = {}) => {
+      const componentType = getComponent(schema?.componentName, ctx);
       if (!(componentType as any)?.['ɵcmp']) {
         return false;
       }

@@ -2,7 +2,10 @@ import { type Type } from '@angular/core';
 
 export type DefaultPropsMap = Record<string, Record<string, any>>;
 
-export type AutoApplyDirectivePattern = Record<string, (schema: any) => boolean>;
+export type AutoApplyDirectivePattern = Record<
+  string,
+  (schema: any, ctx?: Record<PropertyKey, any>) => boolean
+>;
 
 export interface IRendererMaterials {
   components?: Record<string, Type<any>>;

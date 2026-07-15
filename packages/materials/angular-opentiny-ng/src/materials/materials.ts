@@ -4,7 +4,10 @@ import { materialsMeta } from '../meta';
 import { autoApplyDirectives, directives } from './directives';
 import { components, modules } from './components';
 
-export type AutoApplyDirectivePattern = Record<string, (schema: any) => boolean>;
+export type AutoApplyDirectivePattern = Record<
+  string,
+  (schema: any, context?: Record<PropertyKey, any>) => boolean
+>;
 
 export interface INgMaterials extends IMaterials {
   modules?: Record<string, Type<any>>;

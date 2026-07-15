@@ -14,7 +14,7 @@ export class AutoApplyDirectivesPipe implements PipeTransform {
     const context = this.contextService.getContext();
     const patterns = getAutoApplyPatterns(context);
     const appendDirectives = Object.entries(patterns)
-      .filter(([key, fn]) => getDirective(key, context) && (fn as (schema: any) => boolean)(schema))
+      .filter(([key, fn]) => getDirective(key, context) && fn(schema, context)) // TODO  暂无法获取 context 中的 materials，缺少 Symbol 
       .reduce((acc, [key]) => {
         if (!directives?.find(d => d.directiveName === key)) {
           acc.push({directiveName: key});
