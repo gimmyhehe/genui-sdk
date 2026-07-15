@@ -11,7 +11,7 @@ A Vue 3 component library for enhanced LLM display and interaction. Stream AI-ge
 
 ## Usage
 
-安装时需同时安装 core 与 Vue 物料包（renderer 已内联在 vue 包中）：
+Install together with core and the Vue materials package (the renderer is bundled in the vue package):
 
 ```bash
 pnpm add @opentiny/genui-sdk-vue @opentiny/genui-sdk-core @opentiny/genui-sdk-materials-vue-opentiny-vue
@@ -32,6 +32,7 @@ import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materi
   </GenuiConfigProvider>
 </template>
 ```
+
 ## Documentation
 
 * [quick-start](https://docs.opentiny.design/genui-sdk/guide/quick-start)

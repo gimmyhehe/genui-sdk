@@ -1,28 +1,29 @@
 # @opentiny/genui-sdk-core
 
-GenUI SDK 核心能力包：协议类型、Prompt 生成、流式 Schema 提取、Delta 补丁、JSON 修复等，供 Vue / Angular / Server 等上层包依赖。
 
-## 安装
+Core capabilities for GenUI SDK: protocol types, prompt generation, streaming schema extraction, delta patching, JSON repair, and more. Used by Vue / Angular / Server packages.
+
+## Install
 
 ```bash
 npm install @opentiny/genui-sdk-core
-# 或
+# or
 pnpm add @opentiny/genui-sdk-core
 ```
 
-## 模块概览
+## Modules
 
-| 模块 | 主要导出 |
-|------|----------|
-| `protocols` | `IChatMessage`、`CardSchema`、`IMaterials` 等协议与 Zod Schema |
-| `material` | `IMaterials`、`IMaterialsMeta`、`buildMaterialDefaultValueMap` |
-| `prompt-generator` | `genPrompt`、`genRootSchema`、`genJsonSchema` |
-| `stream-pattern-extractor` | `PatternExtractor`、`SchemaJsonPattern`、`getPartialStartRegString` |
+| Module | Main exports |
+|--------|----------------|
+| `protocols` | `IChatMessage`, `CardSchema`, `IMaterials`, and related Zod schemas |
+| `material` | `IMaterials`, `IMaterialsMeta`, `buildMaterialDefaultValueMap` |
+| `prompt-generator` | `genPrompt`, `genRootSchema`, `genJsonSchema` |
+| `stream-pattern-extractor` | `PatternExtractor`, `SchemaJsonPattern`, `getPartialStartRegString` |
 | `delta-patcher` | `DeltaPatcher` |
-| `delta-json-path-selector` | `matchJsonPath`、`jsonSelectorMatcher` |
-| `repair-json` | `repairJson`、`safeJsonParse` |
+| `delta-json-path-selector` | `matchJsonPath`, `jsonSelectorMatcher` |
+| `repair-json` | `repairJson`, `safeJsonParse` |
 
-## 使用示例
+## Usage
 
 ```ts
 import {
@@ -38,7 +39,7 @@ const prompt = genPrompt('Vue', materialsMeta, customConfig);
 const { state, value } = repairJson(partialJson);
 ```
 
-## 文档
+## Docs
 
-- [GenUI SDK 官网](https://opentiny.design/genui-sdk)
-- [快速开始](https://docs.opentiny.design/genui-sdk/guide/quick-start)
+- [GenUI SDK](https://opentiny.design/genui-sdk)
+- [Quick Start](https://docs.opentiny.design/genui-sdk/guide/quick-start)

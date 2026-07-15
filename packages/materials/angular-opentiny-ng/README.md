@@ -1,5 +1,6 @@
 # @opentiny/genui-sdk-materials-angular-opentiny-ng
 
+
 A GenUI Angular materials package based on [OpenTiny NG](https://opentiny.design/tiny-ng/), providing materials metadata for schema-driven page generation.
 
 ## Install

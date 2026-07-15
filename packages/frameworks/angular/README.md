@@ -1,5 +1,6 @@
 # @opentiny/genui-sdk-angular
 
+
 An Angular component library for enhanced LLM display and interaction. Stream AI-generated structured output into OpenTiny interactive UI components with bidirectional conversation support.
 
 * **Streaming Rendering:** Content renders progressively as the model generates—no long waits for full responses.

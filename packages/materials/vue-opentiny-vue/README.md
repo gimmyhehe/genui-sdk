@@ -1,5 +1,6 @@
 # @opentiny/genui-sdk-materials-vue-opentiny-vue
 
+
 A GenUI Vue materials package based on [OpenTiny Vue](https://opentiny.design/tiny-vue/), for schema-driven page generation and rendering.
 
 ## Install
