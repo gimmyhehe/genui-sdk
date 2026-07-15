@@ -13,8 +13,8 @@ function filterExamples(ids: string[]) {
 
 export const materialsMeta: IMaterialsMeta = {
   materials: metaMaterials,
-  wrapperComponent: 'ElCard',
+  wrapperComponent: 'TiCard',
   whiteList,
-  examples: filterExamples(['form', 'info', 'table']),
+  examples: filterExamples(['form', 'info', 'grid', 'tabs', 'pagination']),
   rules: [],
 };

@@ -21,7 +21,7 @@ function filterExamples(ids: string[]) {
   return allExamples.filter((example): example is IExample => !!example.id && ids.includes(example.id));
 }
 
-export const materialsMeta = {
+export const materialsMeta: IMaterialsMeta = {
   materials: standardMetaMaterials,
   wrapperComponent: 'TinyCard',
   whiteList: standardWhiteList,
@@ -29,7 +29,7 @@ export const materialsMeta = {
   rules: STANDARD_RULES,
 };
 
-export const miniMaterialsMeta = {
+export const miniMaterialsMeta: IMaterialsMeta = {
   materials: baseMetaMaterials,
   wrapperComponent: 'TinyCard',
   whiteList: miniWhiteList,
