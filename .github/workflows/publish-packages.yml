@@ -143,7 +143,7 @@ jobs:
         run: pnpm publish --no-git-checks --access public --tag ${{ github.event.inputs.npm_tag }}
 
       - name: Publish Angular to npm
-        working-directory: packages/frameworks/angular
+        working-directory: packages/frameworks/angular/output
         run: pnpm publish --no-git-checks --access public --tag ${{ github.event.inputs.npm_tag }}
 
       - name: Create and push tags

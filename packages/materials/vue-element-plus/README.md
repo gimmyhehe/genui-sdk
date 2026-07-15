@@ -19,7 +19,7 @@ Import Element Plus styles at the app entry, and inject materials via `ConfigPro
 
 ```ts
 import 'element-plus/dist/index.css';
-import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-element-plus/materials';
 ```
 

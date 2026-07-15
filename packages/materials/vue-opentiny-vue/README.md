@@ -16,7 +16,7 @@ npm install @opentiny/genui-sdk-materials-vue-opentiny-vue @opentiny/genui-sdk-v
 Inject materials via `ConfigProvider`:
 
 ```ts
-import { GenuiConfigProvider } from '@opentiny/genui-sdk-vue';
+import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 ```
 

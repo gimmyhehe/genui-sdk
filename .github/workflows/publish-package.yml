@@ -79,7 +79,7 @@ jobs:
               echo "pkg_json=packages/frameworks/angular/package.json" >> "$GITHUB_OUTPUT"
               echo "filter=@opentiny/genui-sdk-angular" >> "$GITHUB_OUTPUT"
               echo "build_script=build:lib:npm" >> "$GITHUB_OUTPUT"
-              echo "publish_dir=packages/frameworks/angular" >> "$GITHUB_OUTPUT"
+              echo "publish_dir=packages/frameworks/angular/output" >> "$GITHUB_OUTPUT"
               ;;
             @opentiny/genui-sdk-core)
               echo "pkg_json=packages/core/package.json" >> "$GITHUB_OUTPUT"
