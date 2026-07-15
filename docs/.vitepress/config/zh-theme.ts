@@ -57,6 +57,14 @@ export const zhThemeConfig: DefaultTheme.Config = {
         text: 'Core 库文档',
         items: [{ text: 'API 文档', link: '/components/core/api' }],
       },
+      {
+        text: '物料包文档',
+        items: [
+          { text: 'Vue OpenTiny Vue', link: '/components/materials/vue-opentiny-vue' },
+          { text: 'Vue Element Plus', link: '/components/materials/vue-element-plus' },
+          { text: 'Angular OpenTiny NG', link: '/components/materials/angular-opentiny-ng' },
+        ],
+      },
     ],
     '/examples/': [
       {
