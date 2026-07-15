@@ -143,7 +143,7 @@ const formatToolSummary = (tool: OpenApiPreviewTool) => {
     :visible="visible"
     :title="serviceFormData.index > -1 ? t('openApi.edit') : t('openApi.add')"
     width="600px"
-    height="480px"
+    height="560px"
     class="openapi-service-dialog"
     :append-to-body="true"
     @update:visible="emit('update:visible', $event)"
@@ -213,6 +213,19 @@ const formatToolSummary = (tool: OpenApiPreviewTool) => {
           @update:model-value="updateField('name', $event)"
         />
       </tiny-form-item>
+      <tiny-form-item :label="t('openApi.apiHeaders')">
+        <tiny-input
+          type="textarea"
+          :model-value="serviceFormData.apiHeaders || ''"
+          :rows="4"
+          :placeholder="t('openApi.apiHeadersPlaceholder')"
+          class="openapi-service-headers-input"
+          @update:model-value="updateField('apiHeaders', $event)"
+        />
+        <div class="openapi-service-hint openapi-service-hint--info openapi-service-headers-hint">
+          {{ t('openApi.apiHeadersHint') }}
+        </div>
+      </tiny-form-item>
     </tiny-form>
       <div v-if="previewStatus === 'loading'" class="openapi-service-hint openapi-service-hint--info">
         {{ t('openApi.parsing') }}
@@ -260,7 +273,7 @@ const formatToolSummary = (tool: OpenApiPreviewTool) => {
 }
 
 .openapi-service-dialog-body {
-  height: 360px;
+  height: 420px;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 4px;
@@ -346,6 +359,18 @@ const formatToolSummary = (tool: OpenApiPreviewTool) => {
 .openapi-service-parse-row {
   display: flex;
   justify-content: flex-end;
+}
+
+.openapi-service-headers-input {
+  :deep(textarea) {
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+.openapi-service-headers-hint {
+  margin-top: 6px;
 }
 
 .openapi-service-preview {

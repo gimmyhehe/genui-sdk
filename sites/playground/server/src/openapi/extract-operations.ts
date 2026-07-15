@@ -1,4 +1,5 @@
 import type { OpenAPIV3 } from 'openapi-types';
+import { resolveOperationServerUrl } from './parse-openapi-input.js';
 import type { ApiOperation, ApiParameter, OpenApiToolsBuildConfig } from './types.js';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const;
@@ -118,6 +119,7 @@ export function extractOperations(
         toolName,
         method: method.toUpperCase(),
         path,
+        baseUrl: resolveOperationServerUrl(spec, pathItem, operation),
         summary: operation.summary,
         description: operation.description ?? operation.summary,
         parameters: [...parametersMap.values()],

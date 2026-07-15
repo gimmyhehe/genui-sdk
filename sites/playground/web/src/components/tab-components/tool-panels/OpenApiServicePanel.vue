@@ -3,7 +3,7 @@ import { ref, inject } from 'vue';
 import { TinyButton, TinySwitch, TinyPopover, TinyCollapseItem, TinyNotify } from '@opentiny/vue';
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
 import OpenApiServiceDialog from './OpenApiServiceDialog.vue';
-import { detectOpenApiInputMode, formatOpenApiSourceLabel } from '../../openapi-tools';
+import { detectOpenApiInputMode, formatOpenApiSourceLabel, parseApiHeadersText, formatApiHeadersObject } from '../../openapi-tools';
 import { t } from '../../../i18n';
 
 const playgroundContext = inject('playgroundContext');
@@ -28,6 +28,7 @@ const emptyServiceFormData = () => ({
   openapi: '',
   openapiInputMode: 'url',
   openapiFileName: '',
+  apiHeaders: '',
   index: -1,
 });
 
@@ -80,6 +81,7 @@ const editOpenApiService = (service, index) => {
     openapi: openApiDocument,
     openapiInputMode: detectOpenApiInputMode(openApiDocument, openApiFileName),
     openapiFileName: openApiFileName,
+    apiHeaders: formatApiHeadersObject(service.apiHeaders),
     index,
   };
   previewStatus.value = 'success';
@@ -165,7 +167,7 @@ const parseOpenApi = async () => {
 };
 
 const confirmOpenApiService = async () => {
-  const { name, openapi, openapiFileName, index } = serviceFormData.value;
+  const { name, openapi, openapiFileName, apiHeaders, index } = serviceFormData.value;
   const openApiTrimmed = (openapi || '').trim();
   const nameTrimmed = (name || '').trim();
 
@@ -206,6 +208,7 @@ const confirmOpenApiService = async () => {
     }
 
     const enabledValue = index > -1 ? (services[index]?.enabled ?? true) : true;
+    const parsedApiHeaders = parseApiHeadersText(apiHeaders);
     const nextService = {
       name: nameTrimmed,
       openapi: openApiTrimmed,
@@ -216,6 +219,7 @@ const confirmOpenApiService = async () => {
       toolNames: previewData.value.toolNames,
       tools: previewData.value.tools || [],
       enabled: enabledValue,
+      ...(Object.keys(parsedApiHeaders).length > 0 ? { apiHeaders: parsedApiHeaders } : {}),
     };
 
     if (index > -1) {

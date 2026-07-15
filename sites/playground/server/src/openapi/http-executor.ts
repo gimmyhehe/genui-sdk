@@ -69,6 +69,14 @@ function mergeCookieHeader(
   }
 }
 
+function hasDefaultHeader(
+  defaultHeaders: Record<string, string>,
+  name: string,
+): boolean {
+  const lower = name.toLowerCase();
+  return Object.keys(defaultHeaders).some((key) => key.toLowerCase() === lower);
+}
+
 export async function executeApiOperation(
   operation: ApiOperation,
   baseUrl: string,
@@ -85,6 +93,12 @@ export async function executeApiOperation(
     const value = args[param.name];
     if (value === undefined || value === null) {
       if (param.required) {
+        if (
+          (param.in === 'header' || param.in === 'cookie') &&
+          hasDefaultHeader(defaultHeaders, param.name)
+        ) {
+          continue;
+        }
         throw new Error(`Missing required parameter: ${param.name}`);
       }
       continue;
@@ -115,11 +129,20 @@ export async function executeApiOperation(
 
   const headers: Record<string, string> = {
     Accept: 'application/json',
-    ...defaultHeaders,
     ...Object.fromEntries(
       Object.entries(headerArgs).map(([k, v]) => [k, String(v)]),
     ),
   };
+
+  for (const [key, value] of Object.entries(defaultHeaders)) {
+    const existingKey = Object.keys(headers).find(
+      (headerName) => headerName.toLowerCase() === key.toLowerCase(),
+    );
+    if (existingKey) {
+      delete headers[existingKey];
+    }
+    headers[key] = value;
+  }
 
   mergeCookieHeader(headers, cookieArgs);
 

@@ -45,6 +45,7 @@ export interface OpenApiToolServiceFormData {
   openapi: string;
   openapiInputMode: OpenApiInputMode;
   openapiFileName?: string;
+  apiHeaders?: string;
   index: number;
 }
 

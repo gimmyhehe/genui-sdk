@@ -21,6 +21,7 @@ export type ApiOperation = {
   toolName: string;
   method: string;
   path: string;
+  baseUrl?: string;
   summary?: string;
   description?: string;
   parameters: ApiParameter[];

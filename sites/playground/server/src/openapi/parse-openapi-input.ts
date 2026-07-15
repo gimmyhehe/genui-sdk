@@ -56,8 +56,45 @@ export async function parseOpenApiInput(
   })) as unknown as OpenAPIV3.Document;
 }
 
+const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'] as const;
+
 function normalizeBaseUrl(url: string): string {
   return url.replace(/\/$/, '');
+}
+
+function pickAbsoluteServerUrl(servers?: OpenAPIV3.ServerObject[]): string | undefined {
+  const url = servers?.[0]?.url;
+  if (!url || url.startsWith('/')) return undefined;
+  return normalizeBaseUrl(url);
+}
+
+export function resolveOperationServerUrl(
+  spec: OpenAPIV3.Document,
+  pathItem: OpenAPIV3.PathItemObject,
+  operation: OpenAPIV3.OperationObject,
+): string | undefined {
+  return (
+    pickAbsoluteServerUrl(operation.servers) ??
+    pickAbsoluteServerUrl(pathItem.servers) ??
+    pickAbsoluteServerUrl(spec.servers)
+  );
+}
+
+function findFirstServerUrlInPaths(spec: OpenAPIV3.Document): string | undefined {
+  for (const pathItem of Object.values(spec.paths ?? {})) {
+    if (!pathItem || '$ref' in pathItem) continue;
+
+    const pathUrl = pickAbsoluteServerUrl(pathItem.servers);
+    if (pathUrl) return pathUrl;
+
+    for (const method of HTTP_METHODS) {
+      const operation = pathItem[method] as OpenAPIV3.OperationObject | undefined;
+      if (!operation) continue;
+      const opUrl = pickAbsoluteServerUrl(operation.servers);
+      if (opUrl) return opUrl;
+    }
+  }
+  return undefined;
 }
 
 export function resolveBaseUrl(spec: OpenAPIV3.Document, override?: string): string {
@@ -65,14 +102,16 @@ export function resolveBaseUrl(spec: OpenAPIV3.Document, override?: string): str
     return normalizeBaseUrl(override);
   }
 
-  const serverUrl = spec.servers?.[0]?.url;
-  if (serverUrl && !serverUrl.startsWith('/')) {
-    return normalizeBaseUrl(serverUrl);
+  const docUrl = pickAbsoluteServerUrl(spec.servers);
+  if (docUrl) return docUrl;
+
+  const relativeDocUrl = spec.servers?.[0]?.url;
+  if (relativeDocUrl?.startsWith('/')) {
+    throw new Error(`Relative server URL "${relativeDocUrl}" requires baseUrl parameter`);
   }
 
-  if (serverUrl?.startsWith('/')) {
-    throw new Error(`Relative server URL "${serverUrl}" requires baseUrl parameter`);
-  }
+  const pathUrl = findFirstServerUrlInPaths(spec);
+  if (pathUrl) return pathUrl;
 
   throw new Error('No base URL: provide baseUrl or define servers in the OpenAPI spec');
 }

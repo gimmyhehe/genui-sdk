@@ -16,14 +16,22 @@ export type OpenApiOperationToolDefinition = {
   }>;
 };
 
+function hasInjectedApiHeader(apiHeaders: Record<string, string>, name: string): boolean {
+  const lower = name.toLowerCase();
+  return Object.keys(apiHeaders).some((key) => key.toLowerCase() === lower);
+}
+
 function buildOperationToolDefinition(
   operation: ApiOperation,
   baseUrl: string,
   apiHeaders: Record<string, string>,
   requestTimeoutMs: number,
 ): OpenApiOperationToolDefinition {
+  const toolParameters = operation.parameters.filter(
+    (param) => param.in !== 'header' || !hasInjectedApiHeader(apiHeaders, param.name),
+  );
   const paramShape = parametersToZodShape(
-    operation.parameters.map((p) => ({
+    toolParameters.map((p) => ({
       name: p.name,
       schema: p.schema,
       required: p.required,
@@ -96,6 +104,11 @@ export function listOpenApiOperationToolDefinitions(
   const requestTimeoutMs = Math.min(config.requestTimeoutMs ?? envTimeoutMs, envTimeoutMs);
 
   return operations.map((operation) =>
-    buildOperationToolDefinition(operation, baseUrl, apiHeaders, requestTimeoutMs),
+    buildOperationToolDefinition(
+      operation,
+      config.baseUrl ?? operation.baseUrl ?? baseUrl,
+      apiHeaders,
+      requestTimeoutMs,
+    ),
   );
 }

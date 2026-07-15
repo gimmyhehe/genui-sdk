@@ -48,6 +48,28 @@ export function readOpenApiFile(file: File): Promise<string> {
   });
 }
 
+export function parseApiHeadersText(text?: string): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (!text?.trim()) return headers;
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+    const eqIndex = line.indexOf('=');
+    if (eqIndex === -1) continue;
+    const key = line.slice(0, eqIndex).trim();
+    const value = line.slice(eqIndex + 1).trim();
+    if (key) headers[key] = value;
+  }
+  return headers;
+}
+
+export function formatApiHeadersObject(headers?: Record<string, string>): string {
+  if (!headers) return '';
+  return Object.entries(headers)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('\n');
+}
+
 export function formatOpenApiSourceLabel(service: {
   openapi?: string;
   openapiFileName?: string;
