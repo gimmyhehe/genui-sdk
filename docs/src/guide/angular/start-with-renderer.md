@@ -140,22 +140,25 @@ export async function fetchSchemaStream(
 
 创建一个简单的组件，包含输入框、发送按钮和渲染区域，配置一下能够生成 schemaJson 的 LLM 服务：
 
-```ts {8, 15,61-63}
+```ts {8, 15, 61-63}
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GenuiRenderer } from '@opentiny/genui-sdk-angular';
+import { GenuiConfigProvider, GenuiRenderer } from '@opentiny/genui-sdk-angular';
+import { materials } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials';
 import { fetchSchemaStream } from '../fetch-schema-stream';
 
 @Component({
   selector: 'genui-example',
-  imports: [FormsModule, GenuiRenderer],
+  imports: [FormsModule, GenuiConfigProvider, GenuiRenderer],
   template: `
   <div class="demo-container">
     <div class="input-group">
       <input [(ngModel)]="inputText" type="text" placeholder="请输入问题..." (keyup.enter)="handleSend()" />
       <button (click)="handleSend()">发送</button>
     </div>
-    <genui-renderer [content]="schema"> </genui-renderer>
+    <genui-config-provider [materials]="activeMaterials">
+      <genui-renderer [content]="schema"> </genui-renderer>
+    </genui-config-provider>
   </div>
   `,
   styles: [`
@@ -192,6 +195,7 @@ export class GenuiExample {
   schema = '';
   rendererKey = '';
   generating = false;
+  protected readonly activeMaterials = materials;
   async handleSend() {
     if (!this.inputText.trim() || this.generating) return;
 
@@ -216,6 +220,10 @@ export class GenuiExample {
 }
 
 ```
+
+::: tip GenuiLegacyRenderer
+若无需单独配置物料、需兼容旧版用法，见 [GenuiRenderer Legacy 兼容说明](../../components/angular/renderer#兼容组件-genuilegacyrenderer)。
+:::
 
 ## 输入问题立即体验
 

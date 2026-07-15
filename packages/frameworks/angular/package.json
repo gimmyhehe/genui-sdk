@@ -18,7 +18,7 @@
     "postbuild:lib": "vite build --config ./build-from-dist/vite.config.lib.ts",
     "prebuild:element": "pnpm build:lib",
     "build:element": "ng build --project renderer-element",
-    "prebuild:lib:npm": "pnpm prebuild:lib",
+    "prebuild:lib:npm": "pnpm -F @opentiny/genui-sdk-materials-angular-opentiny-ng build && pnpm prebuild:lib",
     "build:lib:npm": "pnpm build:lib",
     "postbuild:element": "tsx ./projects/renderer-element/scripts/postbuild.ts",
     "watch": "ng build --watch --configuration development",

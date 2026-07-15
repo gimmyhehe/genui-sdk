@@ -2,7 +2,7 @@ import { createApplication } from '@angular/platform-browser';
 import { createCustomElement } from '@angular/elements';
 import { provideZoneChangeDetection } from '@angular/core';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { GenuiRenderer } from '@opentiny/genui-sdk-angular';
+import { GenuiLegacyRenderer } from '@opentiny/genui-sdk-angular';
 
 const ELEMENT_TAG = 'genui-renderer-ng-element';
 createApplication({
@@ -11,7 +11,7 @@ createApplication({
     provideAnimations(),
   ]
 }).then((appRef) => {
-  const elementCtor = createCustomElement(GenuiRenderer, {
+  const elementCtor = createCustomElement(GenuiLegacyRenderer, {
     injector: appRef.injector,
   });
   if (!customElements.get(ELEMENT_TAG)) {

@@ -11,27 +11,32 @@ An Angular component library for enhanced LLM display and interaction. Stream AI
 ## Usage
 
 ```typescript
-// app.component.ts
 import { Component } from '@angular/core';
-import { GenuiRenderer } from '@opentiny/genui-sdk-angular';
+import { GenuiConfigProvider, GenuiRenderer } from '@opentiny/genui-sdk-angular';
+import { materials } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials';
 
 @Component({
   standalone: true,
-  imports: [GenuiRenderer],
+  imports: [GenuiConfigProvider, GenuiRenderer],
   template: `
-    <genui-renderer
-      [content]="schemaContent"
-      [state]="state"
-      [generating]="isGenerating"
-    />
+    <genui-config-provider [materials]="materials">
+      <genui-renderer
+        [content]="schemaContent"
+        [state]="state"
+        [generating]="isGenerating"
+      />
+    </genui-config-provider>
   `,
 })
 export class AppComponent {
+  materials = materials;
   schemaContent = '{}';
   state: Record<string, any> = {};
   isGenerating = false;
 }
 ```
+
+For drop-in compatibility with built-in materials, use `GenuiLegacyRenderer` instead of wrapping `GenuiRenderer` with `GenuiConfigProvider`.
 
 ## Documentation
 
