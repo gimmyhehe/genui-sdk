@@ -53,6 +53,10 @@ export const zhThemeConfig: DefaultTheme.Config = {
           { text: 'CLI', link: '/components/server/cli' },
         ],
       },
+      {
+        text: 'Core 库文档',
+        items: [{ text: 'API 文档', link: '/components/core/api' }],
+      },
     ],
     '/examples/': [
       {

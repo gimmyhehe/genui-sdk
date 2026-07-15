@@ -57,6 +57,10 @@ export const enThemeConfig: DefaultTheme.Config = {
           { text: 'CLI', link: '/en/components/server/cli' },
         ],
       },
+      {
+        text: 'Core',
+        items: [{ text: 'API Docs', link: '/en/components/core/api' }],
+      },
     ],
     '/en/examples/': [
       {
