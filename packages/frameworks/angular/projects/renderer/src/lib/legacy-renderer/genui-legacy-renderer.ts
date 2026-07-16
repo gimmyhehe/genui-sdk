@@ -1,7 +1,7 @@
 import { Component, Input, Type } from '@angular/core';
 import { materials as defaultMaterials } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials';
 import { GenuiRenderer, type ICustomAction } from '../genui-renderer';
-import { GENUI_MATERIALS } from '../injection-tokens';
+import { GENUI_MATERIALS } from '../config-provider/injection-tokens';
 
 @Component({
   selector: 'genui-legacy-renderer',
