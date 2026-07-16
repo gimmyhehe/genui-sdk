@@ -1,6 +1,6 @@
-import type { IRendererConfig } from '@opentiny/genui-sdk-core';
-import { generateCode as generateVueCode, GENUI_RENDERER_CONFIG } from '@opentiny/genui-sdk-vue';
-import { inject } from 'vue';
+import type { IMaterialsMeta, IMaterialsProtocol } from '@opentiny/genui-sdk-core';
+import { generateCode as generateVueCode } from '@opentiny/genui-sdk-vue';
+import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/meta';
 
 type IComponentMapItem = {
   componentName: string;
@@ -9,18 +9,18 @@ type IComponentMapItem = {
   exportName: string;
 };
 
-const generateComponentsMap = (materialsList: any): IComponentMapItem[] => {
+const generateComponentsMap = (materialsList: IMaterialsProtocol[] | undefined): IComponentMapItem[] => {
   if (!Array.isArray(materialsList)) {
     return [];
   }
 
   const deduped = new Map<string, IComponentMapItem>();
-  materialsList.forEach((material: any) => {
+  materialsList.forEach((material) => {
     const components = material?.data?.materials?.components;
     if (!Array.isArray(components)) {
       return;
     }
-    components.forEach((item: any) => {
+    components.forEach((item) => {
       const componentName = item?.component || item?.npm?.exportName;
       const pkg = item?.npm?.package;
       if (!componentName || !pkg) {
@@ -38,16 +38,16 @@ const generateComponentsMap = (materialsList: any): IComponentMapItem[] => {
   return [...deduped.values()];
 };
 
-const componentsMapCache = new WeakMap<IRendererConfig, IComponentMapItem[]>();
+const componentsMapCache = new WeakMap<object, IComponentMapItem[]>();
 
-const getComponentsMap = (rendererConfig?: IRendererConfig) => {
-  if (!rendererConfig) {
+const getComponentsMap = (meta?: IMaterialsMeta) => {
+  if (!meta) {
     return generateComponentsMap(undefined);
   }
-  let map = componentsMapCache.get(rendererConfig);
+  let map = componentsMapCache.get(meta);
   if (!map) {
-    map = generateComponentsMap(rendererConfig.materialsList);
-    componentsMapCache.set(rendererConfig, map);
+    map = generateComponentsMap(meta.materials);
+    componentsMapCache.set(meta, map);
   }
   return map;
 };
@@ -65,10 +65,8 @@ const downloadTextFile = (filename: string, text: string): void => {
   URL.revokeObjectURL(url);
 };
 
-export const useExportVueCode = (rendererConfig?: IRendererConfig) => {
-  const injectedRendererConfig = inject(GENUI_RENDERER_CONFIG, undefined);
-  const resolvedRendererConfig = rendererConfig ?? injectedRendererConfig;
-  const componentsMap = getComponentsMap(resolvedRendererConfig);
+export const useExportVueCode = (meta: IMaterialsMeta = materialsMeta) => {
+  const componentsMap = getComponentsMap(meta);
 
   const exportVueCode = async (schema: any): Promise<void> => {
     const { panelValue: code, panelName: fileName, errors } = await generateVueCode({
