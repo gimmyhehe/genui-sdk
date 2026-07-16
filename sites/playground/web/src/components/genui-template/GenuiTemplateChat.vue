@@ -27,6 +27,7 @@ import type {
 import {
   finalizePendingSchemaCard,
   getLastUserMessage,
+  isManualSchemaSaveMessage,
 } from './template-chat-utils';
 import { generateId } from '../../utils';
 import { useTemplateContext } from './composables';
@@ -86,6 +87,13 @@ const roles: Record<string, BubbleRoleConfig> = {
     customContentField: 'messages',
     slots: {
       trailer: (slotProps: { bubbleProps: any; index?: number }) => {
+        const chatMessage = slotProps.index !== undefined
+          ? messageManager.value?.messages.value[slotProps.index]
+          : undefined;
+        if (chatMessage && isManualSchemaSaveMessage(chatMessage)) {
+          return null;
+        }
+
         const isFinished =
           slotProps.bubbleProps.role !== 'assistant' ||
           (slotProps.index !== undefined && slotProps.index !== messages.value.length - 1) ||
