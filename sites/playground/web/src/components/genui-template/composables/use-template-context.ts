@@ -9,7 +9,9 @@ import { useTemplateUi } from './use-template-ui';
 import { useTemplateActions } from './use-template-actions';
 import { useTemplateStreamRender } from './use-template-stream-render';
 
-const asReactive = <T extends object>(obj: T): UnwrapNestedRefs<T> => reactive(obj) as UnwrapNestedRefs<T>;
+function asReactive<T extends object>(obj: T): UnwrapNestedRefs<T> {
+  return reactive(obj) as UnwrapNestedRefs<T>;
+}
 
 export type TemplateContext = {
   schema: UnwrapNestedRefs<ReturnType<typeof useTemplateSchema>>;

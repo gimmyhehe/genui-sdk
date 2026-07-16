@@ -99,33 +99,35 @@ export function useTemplateConversation(options?: UseTemplateConversationOptions
     });
   });
 
-  const getTemplateChatBaseConfig = () => ({
-    url: templateChatUrl,
-    llmConfig: templateLlmConfig,
-  });
+  function getTemplateChatBaseConfig() {
+    return {
+      url: templateChatUrl,
+      llmConfig: templateLlmConfig,
+    };
+  }
 
-  const changeLlmConfig = (llmConfig: LLMConfig) => {
+  function changeLlmConfig(llmConfig: LLMConfig) {
     templateLlmConfig = llmConfig;
     templateProvider?.changeLlmConfig(llmConfig);
-  };
+  }
 
-  const saveConversations = () => {
+  function saveConversations() {
     conversationKit.value?.saveConversations();
-  };
+  }
 
-  const createConversation = () => {
+  function createConversation() {
     if (!conversationKit.value) {
       return;
     }
     conversationKit.value.createConversation(t('template.defaultTitle'));
     saveConversations();
-  };
+  }
 
-  const switchConversation = (id: string) => {
+  function switchConversation(id: string) {
     conversationKit.value?.switchConversation(id);
-  };
+  }
 
-  const deleteConversation = (id: string) => {
+  function deleteConversation(id: string) {
     if (!conversationKit.value) {
       return false;
     }
@@ -134,19 +136,27 @@ export function useTemplateConversation(options?: UseTemplateConversationOptions
     remove(id);
     save();
     return state.conversations.length === 0;
-  };
+  }
 
-  const updateConversationTitle = (id: string, title: string) => {
+  function updateConversationTitle(id: string, title: string) {
     if (!conversationKit.value) {
       return;
     }
     conversationKit.value.updateTitle(id, title);
     saveConversations();
-  };
+  }
 
-  const getMessageManager = () => conversationKit.value?.messageManager.value ?? null;
+  function getMessageManager() {
+    return conversationKit.value?.messageManager.value ?? null;
+  }
 
-  const getCurrentConversation = () => conversationKit.value?.getCurrentConversation() ?? null;
+  function getCurrentConversation() {
+    return conversationKit.value?.getCurrentConversation() ?? null;
+  }
+
+  function setTemplateSchema(schema: unknown) {
+    templateProvider?.setTemplateSchema(schema);
+  }
 
   return {
     isTemplateInit,
@@ -165,8 +175,6 @@ export function useTemplateConversation(options?: UseTemplateConversationOptions
     updateConversationTitle,
     getMessageManager,
     getCurrentConversation,
-    setTemplateSchema: (schema: unknown) => {
-      templateProvider?.setTemplateSchema(schema);
-    },
+    setTemplateSchema,
   };
 }

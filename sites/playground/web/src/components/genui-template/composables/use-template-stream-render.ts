@@ -25,10 +25,10 @@ const deltaPatcher = new DeltaPatcher({
   requiredCompleteFieldSelectors,
 });
 
-const schemaCardRenderer = async (props: {
+async function schemaCardRenderer(props: {
   content: string;
   cardId: string;
-}) => {
+}) {
   const {
     currentPreviewSchema,
     currentCardId,
@@ -62,20 +62,22 @@ const schemaCardRenderer = async (props: {
     console.error('schemaCardRenderer error ===>', error);
     errorMessagesMap.value.set(props.cardId, (error as Error).message);
   }
-};
+}
 
-const isStreamOperation = (operation: Record<string, unknown>) => (
-  (operation.op === 'add' || operation.op === 'replace')
-  && typeof operation.id === 'string' && operation.id !== ''
-  && typeof operation.path === 'string' && operation.path !== ''
-  && 'value' in operation
-);
+function isStreamOperation(operation: Record<string, unknown>) {
+  return (
+    (operation.op === 'add' || operation.op === 'replace')
+    && typeof operation.id === 'string' && operation.id !== ''
+    && typeof operation.path === 'string' && operation.path !== ''
+    && 'value' in operation
+  );
+}
 
-const jsonPatchRenderer = async (props: {
+async function jsonPatchRenderer(props: {
   content: string;
   cardId: string;
   newMessage?: boolean;
-}) => {
+}) {
   const {
     currentSchema,
     currentPreviewSchema,
@@ -146,14 +148,14 @@ const jsonPatchRenderer = async (props: {
     errorMessagesMap.value.set(props.cardId, (error as Error).message);
     console.error('jsonPatch error ===>', error);
   }
-};
+}
 
-const handleSchemaJsonChanged = (event: {
+function handleSchemaJsonChanged(event: {
   type: 'schema-card' | 'json-patch';
   cardId: string;
   content: string;
   newMessage: boolean;
-}) => {
+}) {
   const { type, cardId, content, newMessage } = event;
   if (type === 'schema-card') {
     schemaCardRenderer({ content, cardId });
@@ -162,11 +164,11 @@ const handleSchemaJsonChanged = (event: {
   if (type === 'json-patch') {
     jsonPatchRenderer({ content, cardId, newMessage });
   }
-};
+}
 
-const resetLastPreviewSchema = (schema: Record<string, unknown> | null) => {
+function resetLastPreviewSchema(schema: Record<string, unknown> | null) {
   lastPreviewSchema.value = schema;
-};
+}
 
 export function useTemplateStreamRender() {
   return {

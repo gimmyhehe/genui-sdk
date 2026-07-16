@@ -14,28 +14,30 @@ const currentCardId = ref<string>('');
 export function useTemplateSchema() {
   const { setTemplateSchema } = useTemplateConversation();
 
-  const setCurrentPreviewSchema = (schema: any, isComplete: boolean = true) => {
+  function setCurrentPreviewSchema(schema: any, isComplete: boolean = true) {
     currentPreviewSchema.value = schema;
     if (isComplete !== currentPreviewSchemaComplete.value) {
       currentPreviewSchemaComplete.value = isComplete;
     }
-  };
+  }
 
-  const setCurrentSchema = (schema: any) => {
+  function setCurrentSchema(schema: any) {
     currentSchema.value = schema;
     setTemplateSchema(schema);
-  };
+  }
 
-  const setCurrentCardId = (cardId: string) => {
+  function setCurrentCardId(cardId: string) {
     currentCardId.value = cardId;
-  };
+  }
 
-  const getCurrentCardId = () => currentCardId.value;
+  function getCurrentCardId() {
+    return currentCardId.value;
+  }
 
-  const applySchemaFromMessages = (
+  function applySchemaFromMessages(
     messages: ChatMessage[] | undefined,
     options: { clearIfMissing?: boolean } = {},
-  ) => {
+  ) {
     const { clearIfMissing = true } = options;
     const latestSchemaInfo = findLatestSchemaInConversation(messages);
 
@@ -58,7 +60,7 @@ export function useTemplateSchema() {
     }
 
     return false;
-  };
+  }
 
   return {
     currentSchema,

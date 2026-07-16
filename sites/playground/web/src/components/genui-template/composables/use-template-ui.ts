@@ -15,27 +15,27 @@ const isJsonEditorActive = computed(() => schemaEditorVisible.value);
 export function useTemplateUi() {
   const { isMobile } = useIsMobile();
 
-  const setRendererPanelVisible = (visible: boolean) => {
+  function setRendererPanelVisible(visible: boolean) {
     rendererPanelVisible.value = visible;
-  };
+  }
 
-  const setJsonEditorOpen = (open: boolean) => {
+  function setJsonEditorOpen(open: boolean) {
     schemaEditorVisible.value = open;
-  };
+  }
 
-  const toggleHistoryPanel = () => {
+  function toggleHistoryPanel() {
     sidePanel.value = sidePanel.value === 'history' ? null : 'history';
-  };
+  }
 
-  const closeHistoryPanel = () => {
+  function closeHistoryPanel() {
     sidePanel.value = null;
-  };
+  }
 
-  const resetUi = () => {
+  function resetUi() {
     schemaEditorVisible.value = false;
     rendererPanelVisible.value = !isMobile.value;
     sidePanel.value = null;
-  };
+  }
 
   return {
     schemaEditorVisible,

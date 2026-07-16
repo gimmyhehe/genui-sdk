@@ -6,10 +6,10 @@ export type PlaygroundColorTheme = 'light' | 'dark' | 'lite' | 'auto';
 function useSystemPrefersDark() {
   const prefersDark = ref(false);
   let mql: MediaQueryList | null = null;
-  const sync = () => {
+  function sync() {
     if (!mql) return;
     prefersDark.value = mql.matches;
-  };
+  }
   onMounted(() => {
     if (typeof window === 'undefined') return;
     mql = window.matchMedia('(prefers-color-scheme: dark)');

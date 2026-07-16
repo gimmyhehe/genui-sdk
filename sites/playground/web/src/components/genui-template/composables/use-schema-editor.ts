@@ -8,9 +8,11 @@ const schemaEditorSaveLoading = ref(false);
 export function useSchemaEditor() {
   const { currentPreviewSchema, setCurrentPreviewSchema } = useTemplateSchema();
 
-  const hasUnsavedChanges = () => schemaEditorText.value !== schemaEditorBaseline.value;
+  function hasUnsavedChanges() {
+    return schemaEditorText.value !== schemaEditorBaseline.value;
+  }
 
-  const syncBaseline = () => {
+  function syncBaseline() {
     if (currentPreviewSchema.value) {
       const text = JSON.stringify(currentPreviewSchema.value, null, 2);
       schemaEditorText.value = text;
@@ -19,9 +21,9 @@ export function useSchemaEditor() {
       schemaEditorText.value = '{}';
       schemaEditorBaseline.value = '{}';
     }
-  };
+  }
 
-  const revertUnsavedChanges = () => {
+  function revertUnsavedChanges() {
     if (!hasUnsavedChanges()) {
       return;
     }
@@ -34,9 +36,9 @@ export function useSchemaEditor() {
     } catch {
       syncBaseline();
     }
-  };
+  }
 
-  const applyTextToPreview = (value: string, readOnly = false) => {
+  function applyTextToPreview(value: string, readOnly = false) {
     if (readOnly) {
       return;
     }
@@ -47,9 +49,9 @@ export function useSchemaEditor() {
     } catch (error) {
       console.error('schemaEditor parse error ===>', error);
     }
-  };
+  }
 
-  const parseSchemaText = (text: string): Record<string, unknown> | null => {
+  function parseSchemaText(text: string): Record<string, unknown> | null {
     try {
       const parsed = JSON.parse(text || '{}');
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
@@ -59,10 +61,15 @@ export function useSchemaEditor() {
     } catch {
       return null;
     }
-  };
+  }
 
-  const parseEditorSchema = () => parseSchemaText(schemaEditorText.value);
-  const parseBaselineSchema = () => parseSchemaText(schemaEditorBaseline.value);
+  function parseEditorSchema() {
+    return parseSchemaText(schemaEditorText.value);
+  }
+
+  function parseBaselineSchema() {
+    return parseSchemaText(schemaEditorBaseline.value);
+  }
 
   return {
     schemaEditorText,
