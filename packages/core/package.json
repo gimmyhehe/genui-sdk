@@ -43,7 +43,6 @@
     "test": "vitest"
   },
   "dependencies": {
-    "ai": "6.0.116",
     "flat": "^6.0.1",
     "jsondiffpatch": "^0.7.3",
     "jsonrepair": "^3.13.3",
@@ -52,6 +51,7 @@
     "zod-to-json-schema": "^3.24.6"
   },
   "devDependencies": {
+    "ai": "6.0.116",
     "vite-plugin-dts": "^4.0.0",
     "typescript": "^5.9.3",
     "escape-string-regexp": "^1.0.5",

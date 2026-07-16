@@ -6,8 +6,6 @@ import extendJson from './materials/extend.json' with { type: 'json' };
 import { examples as allExamples } from './example-schema';
 import { miniWhiteList, standardWhiteList } from './white-list';
 
-export type { IMaterialsMeta, IExample } from '@opentiny/genui-sdk-core';
-
 // TODO: 优化物料协议后，删除 as IMaterialsProtocol[]
 const baseMetaMaterials = [bundleJson, builtinJson, extendJson] as IMaterialsProtocol[];
 

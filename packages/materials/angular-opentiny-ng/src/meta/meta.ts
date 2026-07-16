@@ -3,8 +3,6 @@ import bundleJson from './materials/bundle.json' with { type: 'json' };
 import { examples as allExamples } from './example-schema';
 import { whiteList } from './white-list';
 
-export type { IMaterialsMeta, IExample } from '@opentiny/genui-sdk-core';
-
 const metaMaterials = [bundleJson] as IMaterialsProtocol[];
 
 function filterExamples(ids: string[]) {
