@@ -1,6 +1,7 @@
 import { Component, Injector, Pipe, PipeTransform, TemplateRef, Type, ViewChild, ViewContainerRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RendererContextService } from './context.service';
+import { getComponent, getModuleRef } from './parser/material-getter';
 
 import { EmbeddedViewPipe } from './embedded-view.pipe';
 import { LoopScopePipe } from './loop-scope.pipe';
@@ -9,28 +10,34 @@ import { PropsFilterPipe } from './props-filter.pipe';
 import { GetDirectivesPipe } from './get-directive.pipe';
 import { ComponentOutlet } from './component-outlet';
 import { ParseDataPipe } from './parse-data.pipe';
+import { ApplyDefaultPropsPipe } from './apply-default-props.pipe';
 import { MergeObjectPipe } from './merge-object.pipe';
 import { AutoApplyDirectivesPipe } from './auto-apply-directives.pipe';
-import { getComponent, getModuleRef } from './parser/material-getter';
 import { RendererDirective } from './renderer.directive';
 
 @Pipe({
   name: 'getModuleRef',
   standalone: true,
+  pure: false,
 })
 export class GetModuleRefPipe implements PipeTransform {
+  constructor(private readonly contextService: RendererContextService) {}
+
   transform(componentName: string): Type<any> | undefined {
-    return componentName ? getModuleRef(componentName) : undefined;
+    return componentName ? getModuleRef(componentName, this.contextService.getContext()) : undefined;
   }
 }
 
 @Pipe({
   name: 'getComponent',
   standalone: true,
+  pure: false,
 })
 export class GetComponentPipe implements PipeTransform {
+  constructor(private readonly contextService: RendererContextService) {}
+
   transform(componentName: string): Type<any> | null {
-    return componentName ? getComponent(componentName) : null;
+    return componentName ? getComponent(componentName, this.contextService.getContext()) : null;
   }
 }
 
@@ -71,6 +78,7 @@ export class IsStringPipe implements PipeTransform {
     GetDirectivesPipe,
     ComponentOutlet,
     ParseDataPipe,
+    ApplyDefaultPropsPipe,
     MergeObjectPipe,
     AutoApplyDirectivesPipe,
   ],

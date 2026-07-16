@@ -16,7 +16,7 @@ import { CustomModelProvider } from './CustomModelProvider';
 import { scrollEnd, throttle, toSlotFunction } from './chat-utils';
 import { useFileUpload } from './useFileUpload';
 import AttachmentsRenderer from './renderer/AttachmentsRenderer.vue';
-import TemplateDataRenderer from './renderer/TemplateDataRenderer.vue';
+import TemplateDataRenderer from './renderer/TemplateDataRenderer.vue'; 
 import ReasoningRenderer from './renderer/ReasoningRenderer.vue';
 import ToolRenderer from './renderer/ToolRenderer.vue';
 import { type FileMeta, MIME_TYPE_MAP } from './file-upload/file-utils';
@@ -32,7 +32,7 @@ import ErrorText from './ErrorText.vue';
 import { useResize } from './composable/use-resize';
 import { useConversation } from './tiny-robot-patch/useConversation';
 import { useI18n } from './i18n';
-import { GENUI_CONFIG, CUSTOM_CONTEXT } from './injection-tokens';
+import { GENUI_CONFIG } from '../config-provider/injection-tokens';
 import { IResponseHandler, defaultResponseHandlers } from './response-handler';
 
 const props = defineProps<IChatProps>();
@@ -152,16 +152,8 @@ const chat = ({ llmFriendlyMessage, humanFriendlyMessage, context }: any) => {
   messageManager.value.send();
 };
 
-const customContext = computed(() => {
-  return {
-    chat,
-    generating: generating.value,
-  };
-});
+const { continueChatAction, saveStateAction } = useChatAction({chat, saveState}); //TODO: Refactor
 
-provide(CUSTOM_CONTEXT, customContext);
-
-const { continueChatAction, saveStateAction } = useChatAction({ chat, saveState }); //TODO: Refactor
 
 const generating = computed(() => GeneratingStatus.includes(messageManager.value.messageState.status));
 
@@ -467,6 +459,8 @@ watch(
 defineExpose({
   setInputMessage,
   handleNewConversation,
+  // @experimental
+  getProps: (): IChatProps => props,
   getConversation: () => conversation,
   // experimental, not stable
   getResponseHandlers: () => responseHandlers.value,
@@ -479,6 +473,11 @@ defineExpose({
   setMessageRenderer: (key: string, renderer: Component<IRendererProps>) => {
     messageRenderers[key] = renderer;
   },
+  generating,
+  // @experimental
+  lastSchemaCardId,
+  continueChatAction,
+  saveStateAction,
 });
 </script>
 
