@@ -1,7 +1,4 @@
 import { ref } from 'vue';
-import { DeltaPatcher } from '@opentiny/genui-sdk-core';
-import { requiredCompleteFieldSelectors as baseRequiredCompleteFieldSelectors } from '@opentiny/genui-sdk-vue';
-import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 import {
   textToJson,
   validateJsonPatch,
@@ -15,15 +12,6 @@ import { useTemplateSchema } from './use-template-schema';
 
 const errorMessagesMap = ref(new Map<string, string>());
 const lastPreviewSchema = ref<Record<string, unknown> | null>(null);
-
-const requiredCompleteFieldSelectors = [
-  ...baseRequiredCompleteFieldSelectors,
-  ...(materials.requiredCompleteFieldSelectors ?? []),
-];
-
-const deltaPatcher = new DeltaPatcher({
-  requiredCompleteFieldSelectors,
-});
 
 async function schemaCardRenderer(props: {
   content: string;
@@ -42,19 +30,18 @@ async function schemaCardRenderer(props: {
       return;
     }
 
-    let json = null;
-    let isCompleted = true;
-    let target = {};
-    if (typeof content === 'string' && content) {
-      const { value, state } = await textToJson(content);
-      isCompleted = state === PARSE_PARTIAL_JSON_STATE.SUCCESSFUL_PARSE;
-      if (!value) {
-        return;
-      }
-      json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
+    if (typeof content !== 'string' || !content) {
+      return;
     }
-    deltaPatcher.patchWithDelta(target, json, isCompleted);
-    const schemaWithId = generateIdForComponents(target, {
+
+    const { value, state } = await textToJson(content);
+    const isCompleted = state === PARSE_PARTIAL_JSON_STATE.SUCCESSFUL_PARSE;
+    if (!value) {
+      return;
+    }
+
+    const json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
+    const schemaWithId = generateIdForComponents(json, {
       previousSchema: currentPreviewSchema.value,
     });
     setCurrentPreviewSchema(schemaWithId, isCompleted);
