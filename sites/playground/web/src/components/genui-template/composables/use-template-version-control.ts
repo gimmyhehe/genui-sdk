@@ -24,7 +24,9 @@ import { useTemplateConversation } from './use-template-conversation';
 
 const historyDiffFromPanel = ref(false);
 
-const isSameSchema = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
+function isSameSchema(left: unknown, right: unknown) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
 
 export function useTemplateVersionControl() {
   const {
@@ -67,7 +69,7 @@ export function useTemplateVersionControl() {
     return groupSchemaVersionHistory(scopedEntries);
   });
 
-  const isLatestSchemaVersionCard = (cardId: string) => {
+  function isLatestSchemaVersionCard(cardId: string) {
     if (!cardId || !latestSchemaCardId.value) {
       return false;
     }
@@ -75,7 +77,7 @@ export function useTemplateVersionControl() {
       return true;
     }
     return allSchemaVersionHistoryEntries.value.some((entry) => entry.isLatest && entry.cardId === cardId);
-  };
+  }
 
   const flatSchemaVersionHistoryEntries = computed(() =>
     schemaVersionHistoryGroups.value.flatMap((group) => group.items),
@@ -123,7 +125,7 @@ export function useTemplateVersionControl() {
 
   const isEditorReadOnly = computed(() => showReturnLatestButton.value);
 
-  const getMessageByCardId = (cardId: string) => {
+  function getMessageByCardId(cardId: string) {
     if (!cardId) {
       return;
     }
@@ -141,9 +143,9 @@ export function useTemplateVersionControl() {
 
     const matchedEdit = getManualEdits(manualCard).find((edit) => edit.editId === cardId);
     return matchedEdit ? manualEditToCardSnapshot(manualCard, matchedEdit) : manualCard;
-  };
+  }
 
-  const writeNewVersion = (
+  function writeNewVersion(
     schemaPayload: Record<string, unknown>,
     options: {
       prevSchema?: Record<string, unknown>;
@@ -152,7 +154,7 @@ export function useTemplateVersionControl() {
       sourceCardGeneratedTime?: string;
       sourceCardInput?: string;
     } = {},
-  ) => {
+  ) {
     const messageMgr = getMessageManager();
     const currentConversation = getCurrentConversation();
     if (!messageMgr || !currentConversation) {
@@ -173,7 +175,7 @@ export function useTemplateVersionControl() {
       inputType: userInput ? 'user' : 'manual_edit_save',
     };
 
-    const attachSourceMetadata = (sourceCardId: string) => {
+    function attachSourceMetadata(sourceCardId: string) {
       editRecord.sourceCardId = sourceCardId;
       if (options.sourceCardInput?.trim()) {
         editRecord.sourceCardInput = options.sourceCardInput.trim();
@@ -188,7 +190,7 @@ export function useTemplateVersionControl() {
       if (!editRecord.sourceCardGeneratedTime?.trim() && sourceCard?.generatedTime?.trim()) {
         editRecord.sourceCardGeneratedTime = sourceCard.generatedTime;
       }
-    };
+    }
 
     if (options.sourceCardId) {
       attachSourceMetadata(options.sourceCardId);
@@ -239,34 +241,34 @@ export function useTemplateVersionControl() {
     saveConversations();
 
     return cardId;
-  };
+  }
 
-  const resetVersionPreviewMode = () => {
+  function resetVersionPreviewMode() {
     historyDiffFromPanel.value = false;
-  };
+  }
 
-  const previewVersion = (
+  function previewVersion(
     schema: Record<string, unknown>,
     cardId: string,
     previewOptions: { diffFromHistory?: boolean } = {},
-  ) => {
+  ) {
     currentCardId.value = cardId;
     historyDiffFromPanel.value = !!previewOptions.diffFromHistory;
     setCurrentPreviewSchema(schema);
     if (isLatestSchemaVersionCard(cardId)) {
       setCurrentSchema(schema);
     }
-  };
+  }
 
-  const selectVersionCard = (cardId: string) => {
+  function selectVersionCard(cardId: string) {
     if (!cardId) {
       return;
     }
     currentCardId.value = cardId;
     resetVersionPreviewMode();
-  };
+  }
 
-  const resolvePrevSchema = () => {
+  function resolvePrevSchema() {
     const effectiveSchema = currentSchema.value;
     if (
       effectiveSchema
@@ -277,18 +279,18 @@ export function useTemplateVersionControl() {
       return effectiveSchema as Record<string, unknown>;
     }
     return undefined;
-  };
+  }
 
-  const resolveSourceMetadata = () => {
+  function resolveSourceMetadata() {
     const cardId = currentCardId.value;
     const fallbackEntry = allSchemaVersionHistoryEntries.value.find((entry) => entry.cardId === cardId);
     return {
       sourceCardGeneratedTime: currentHistoryEntry.value?.generatedTime ?? fallbackEntry?.generatedTime,
       sourceCardInput: currentHistoryEntry.value?.input ?? fallbackEntry?.input,
     };
-  };
+  }
 
-  const applyCurrentVersion = () => {
+  function applyCurrentVersion() {
     if (!showReturnLatestButton.value) {
       return false;
     }
@@ -309,9 +311,9 @@ export function useTemplateVersionControl() {
 
     resetVersionPreviewMode();
     return true;
-  };
+  }
 
-  const resetToLatestVersion = () => {
+  function resetToLatestVersion() {
     const conversationState = templateConversationState.value;
     if (!conversationState) {
       return;
@@ -323,11 +325,11 @@ export function useTemplateVersionControl() {
       clearIfMissing: !conversationState.loading,
     });
     resetVersionPreviewMode();
-  };
+  }
 
-  const onSchemaRefresh = () => {
+  function onSchemaRefresh() {
     resetVersionPreviewMode();
-  };
+  }
 
   return {
     showReturnLatestButton,
