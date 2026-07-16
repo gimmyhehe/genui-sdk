@@ -1,5 +1,4 @@
-import { Component, Input, Optional, SkipSelf, Type } from '@angular/core';
-import type { IMaterials } from '@opentiny/genui-sdk-core';
+import { Component, Input, Type } from '@angular/core';
 import { materials as defaultMaterials } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials';
 import { GenuiRenderer, type ICustomAction } from '../genui-renderer';
 import { GENUI_MATERIALS } from '../injection-tokens';
@@ -8,13 +7,7 @@ import { GENUI_MATERIALS } from '../injection-tokens';
   selector: 'genui-legacy-renderer',
   standalone: true,
   imports: [GenuiRenderer],
-  providers: [
-    {
-      provide: GENUI_MATERIALS,
-      useFactory: (parent: IMaterials | null) => parent ?? defaultMaterials,
-      deps: [[new Optional(), new SkipSelf(), GENUI_MATERIALS]],
-    },
-  ],
+  providers: [{ provide: GENUI_MATERIALS, useValue: defaultMaterials }],
   template: `
     <genui-renderer
       [id]="id"

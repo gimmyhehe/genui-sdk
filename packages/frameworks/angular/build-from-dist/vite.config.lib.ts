@@ -33,13 +33,7 @@ export default defineConfig(({ mode }) => {
             '../dist/renderer': ['../../dist/renderer/index.d.ts'] // hack for fix relative path for 'output/dist'
           },
         },
-        bundledPackages: [
-          '@opentiny/tiny-schema-renderer-ng',
-          '@opentiny/genui-sdk-core',
-          '@opentiny/genui-sdk-materials-angular-opentiny-ng',
-          'jsondiffpatch',
-          '@dmsnell/diff-match-patch',
-        ],
+        bundledPackages: ['@opentiny/tiny-schema-renderer-ng', '@opentiny/genui-sdk-core', 'jsondiffpatch', '@dmsnell/diff-match-patch'],
       }),
       viteStaticCopy({
         targets: [
@@ -51,21 +45,20 @@ export default defineConfig(({ mode }) => {
               newPackageJson.exports = {
                 '.': {
                   ...newPackageJson.exports['.'],
-                  types: './dist/index.d.ts',
-                  default: './dist/index.mjs',
+                  'types': './dist/index.d.ts',
+                  'default': './dist/index.mjs',
                 },
               };
               newPackageJson.module = './dist/index.mjs';
               newPackageJson.typings = './dist/index.d.ts';
               newPackageJson.version = packageJson.version;
-              delete newPackageJson.dependencies?.['@opentiny/genui-sdk-materials-angular-opentiny-ng'];
               return JSON.stringify(newPackageJson, null, 2);
             },
           },
           {
             src: '../README.md',
             dest: '../',
-          },
+          }
         ],
       }),
     ],
@@ -83,15 +76,11 @@ export default defineConfig(({ mode }) => {
           toplevel: true,
         },
         format: {
-          comments: false,
+          comments: false
         },
       },
       rollupOptions: {
-        external: [
-          ...Object.keys(packageJson.dependencies || {}).map(
-            (name) => new RegExp(`^${escapeStringRegexp(name)}(/|$)`),
-          ),
-        ],
+        external: [...Object.keys(packageJson.dependencies || {}).map(name => new RegExp(`^${escapeStringRegexp(name)}(/|$)`))],
       },
     },
   };
