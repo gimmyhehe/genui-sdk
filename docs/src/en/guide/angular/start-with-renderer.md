@@ -87,22 +87,25 @@ export async function fetchSchemaStream(
 
 Create a simple component with an input, send button, and render area. Configure an LLM service that can generate `schemaJson`:
 
-```ts {8, 15,61-63}
+```ts {8, 15, 61-63}
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GenuiRenderer } from '@opentiny/genui-sdk-angular';
+import { GenuiConfigProvider, GenuiRenderer } from '@opentiny/genui-sdk-angular';
+import { materials } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials';
 import { fetchSchemaStream } from '../fetch-schema-stream';
 
 @Component({
   selector: 'genui-example',
-  imports: [FormsModule, GenuiRenderer],
+  imports: [FormsModule, GenuiConfigProvider, GenuiRenderer],
   template: `
   <div class="demo-container">
     <div class="input-group">
       <input [(ngModel)]="inputText" type="text" placeholder="Enter your question..." (keyup.enter)="handleSend()" />
       <button (click)="handleSend()">Send</button>
     </div>
-    <genui-renderer [content]="schema"> </genui-renderer>
+    <genui-config-provider [materials]="activeMaterials">
+      <genui-renderer [content]="schema"> </genui-renderer>
+    </genui-config-provider>
   </div>
   `,
   styles: [`
@@ -139,6 +142,7 @@ export class GenuiExample {
   schema = '';
   rendererKey = '';
   generating = false;
+  protected readonly activeMaterials = materials;
   async handleSend() {
     if (!this.inputText.trim() || this.generating) return;
 
@@ -163,6 +167,10 @@ export class GenuiExample {
 }
 
 ```
+
+::: tip GenuiLegacyRenderer
+For drop-in compatibility without configuring materials, see [GenuiRenderer Legacy compatibility](../../components/angular/renderer#compatibility-component-genuilegacyrenderer).
+:::
 
 ## Try it now
 
