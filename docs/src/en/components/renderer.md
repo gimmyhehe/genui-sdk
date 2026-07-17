@@ -34,8 +34,6 @@ const schemaContent = {
 </script>
 ```
 
-If `GenuiConfigProvider` is used with `materials` in an ancestor, `GenuiLegacyRenderer` prefers those materials.
-
 ## Props
 
 ### content

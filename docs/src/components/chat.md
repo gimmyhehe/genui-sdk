@@ -31,8 +31,6 @@ function sendMessage() {
 </script>
 ```
 
-若外层已配置 `GenuiConfigProvider` 并传入 `materials`，`GenuiLegacyChat` 会优先使用 Provider 中的物料。
-
 ## Props
 
 ### url

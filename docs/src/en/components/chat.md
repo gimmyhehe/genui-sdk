@@ -31,8 +31,6 @@ function sendMessage() {
 </script>
 ```
 
-If `GenuiConfigProvider` is used with `materials` in an ancestor, `GenuiLegacyChat` prefers those materials.
-
 ## Props
 
 ### url
