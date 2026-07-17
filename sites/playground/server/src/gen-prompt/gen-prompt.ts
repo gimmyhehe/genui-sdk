@@ -13,6 +13,15 @@ const vueMaterialsMetaByVariant = {
   standard: materialsMeta,
 } as const;
 
+const MATERIALS_META_BY_FRAMEWORK: Record<
+  string,
+  (promptVariant?: MaterialsMetaVariantKey) => IMaterialsMeta
+> = {
+  Angular: () => ngMaterialsMeta,
+  Vue: (promptVariant) =>
+    promptVariant ? vueMaterialsMetaByVariant[promptVariant] : materialsMeta,
+};
+
 export function getGenPromptOptions(promptVariant?: MaterialsMetaVariantKey): IGenPromptOptions | undefined {
   if (promptVariant === 'mini') {
     return { includeJsonSchema: false, includeSnippets: false };
@@ -23,13 +32,8 @@ export function getMaterialsMetaForFramework(
   framework: string,
   promptVariant?: MaterialsMetaVariantKey,
 ): IMaterialsMeta {
-  if (framework === 'Angular') {
-    return ngMaterialsMeta;
-  }
-  if (promptVariant) {
-    return vueMaterialsMetaByVariant[promptVariant];
-  }
-  return materialsMeta;
+  const resolve = MATERIALS_META_BY_FRAMEWORK[framework] ?? MATERIALS_META_BY_FRAMEWORK.Vue;
+  return resolve(promptVariant);
 }
 
 export function genPlaygroundPrompt(

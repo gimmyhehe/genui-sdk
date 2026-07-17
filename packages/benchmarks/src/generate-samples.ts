@@ -19,6 +19,11 @@ import {
 import { computeTpotMs } from './utils';
 import { streamText } from 'ai';
 
+const MATERIALS_META_BY_FRAMEWORK = {
+  Vue: materialsMeta,
+  Angular: ngMaterialsMeta,
+} as const;
+
 /**
  * 与 chat-genui 一致的 system 拼接；framework 来自运行配置（env / benchmark.config），其余来自 llm.config。
  * @param framework 前端框架类型（影响 materialsMeta）
@@ -27,7 +32,7 @@ import { streamText } from 'ai';
  */
 function buildSystemPrompt(framework: 'Vue' | 'Angular', promptConfig: LlmBenchmarkRunOptions['promptConfig']) {
   const { tgCustomConfig, specificPrompt, userAppendPrompt } = promptConfig;
-  const materialsMetaForFramework = framework === 'Angular' ? ngMaterialsMeta : materialsMeta;
+  const materialsMetaForFramework = MATERIALS_META_BY_FRAMEWORK[framework];
   return genPrompt(framework, materialsMetaForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt;
 }
 /**
