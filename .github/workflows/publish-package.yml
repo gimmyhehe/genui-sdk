@@ -27,6 +27,15 @@ on:
           - latest
           - beta
           - alpha
+      fetch_npm_tag:
+        description: '发包前从 npm 拉取版本替换 workspace 依赖所使用的 tag（通常为 latest）'
+        required: true
+        default: latest
+        type: choice
+        options:
+          - latest
+          - beta
+          - alpha
 
 jobs:
   publish:
@@ -138,7 +147,7 @@ jobs:
       - name: Sync workspace deps for publish
         env:
           PUBLISH_PKG_JSONS: ${{ steps.pkg.outputs.sync_pkg_json }}
-          NPM_TAG: ${{ github.event.inputs.npm_tag }}
+          FETCH_NPM_TAG: ${{ github.event.inputs.fetch_npm_tag }}
         run: node ./scripts/ci-replace-workspace-deps.js
 
       - name: Setup .npmrc for publish

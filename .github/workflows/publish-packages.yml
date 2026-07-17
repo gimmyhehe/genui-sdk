@@ -16,6 +16,15 @@ on:
           - latest
           - beta
           - alpha
+      fetch_npm_tag:
+        description: '发包前从 npm 拉取版本替换 workspace 依赖所使用的 tag（通常为 latest）'
+        required: true
+        default: latest
+        type: choice
+        options:
+          - latest
+          - beta
+          - alpha
       publish_optional_packages:
         description: '同时发布 core 与物料包（vue / angular）'
         required: false
@@ -106,7 +115,7 @@ jobs:
 
       - name: Sync workspace deps for publish
         env:
-          NPM_TAG: ${{ github.event.inputs.npm_tag }}
+          FETCH_NPM_TAG: ${{ github.event.inputs.fetch_npm_tag }}
           PUBLISH_VERSION: ${{ github.event.inputs.version }}
         run: |
           PUBLISH_PKG_JSONS="packages/server/output/package.json,packages/frameworks/vue/package.json,packages/frameworks/angular/output/package.json"

@@ -145,7 +145,7 @@ function replaceWorkspaceDeps(pkgPathArg, workspacePackageNames, publishNames, p
 
 function main() {
   const publishPkgJsons = parseListEnv('PUBLISH_PKG_JSONS');
-  const npmTag = process.env.NPM_TAG || 'latest';
+  const fetchNpmTag = process.env.FETCH_NPM_TAG || 'latest';
   const publishVersion = process.env.PUBLISH_VERSION || '';
 
   if (publishPkgJsons.length === 0) {
@@ -154,12 +154,12 @@ function main() {
 
 环境变量:
   PUBLISH_PKG_JSONS   本次发布的 package.json 路径（逗号分隔）
-  NPM_TAG             从 npm 拉取依赖版本的 tag，默认 latest
+  FETCH_NPM_TAG       从 npm 拉取依赖版本的 tag，默认 latest
   PUBLISH_VERSION     多包同批发布时传入，与 workflow 输入的版本号一致
 
 规则:
   - 依赖也在 PUBLISH_PKG_JSONS 且设置了 PUBLISH_VERSION → 用 PUBLISH_VERSION
-  - 其余 workspace 内部依赖 → 从 npm@NPM_TAG 拉取
+  - 其余 workspace 内部依赖 → 从 npm@FETCH_NPM_TAG 拉取（默认 latest）
   - 单包发布时不设 PUBLISH_VERSION，依赖一律走 npm
 `);
     process.exit(1);
@@ -178,7 +178,7 @@ function main() {
     );
 
     for (const pkgJsonPath of publishPkgJsons) {
-      replaceWorkspaceDeps(pkgJsonPath, workspacePackageNames, publishNames, publishVersion, npmTag);
+      replaceWorkspaceDeps(pkgJsonPath, workspacePackageNames, publishNames, publishVersion, fetchNpmTag);
     }
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
