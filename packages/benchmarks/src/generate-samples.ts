@@ -19,7 +19,7 @@ import {
 import { computeTpotMs } from './utils';
 import { streamText } from 'ai';
 
-const MATERIALS_META_BY_FRAMEWORK = {
+const metaMap = {
   Vue: materialsMeta,
   Angular: ngMaterialsMeta,
 } as const;
@@ -32,7 +32,7 @@ const MATERIALS_META_BY_FRAMEWORK = {
  */
 function buildSystemPrompt(framework: 'Vue' | 'Angular', promptConfig: LlmBenchmarkRunOptions['promptConfig']) {
   const { tgCustomConfig, specificPrompt, userAppendPrompt } = promptConfig;
-  const materialsMetaForFramework = MATERIALS_META_BY_FRAMEWORK[framework];
+  const materialsMetaForFramework = metaMap[framework];
   return genPrompt(framework, materialsMetaForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt;
 }
 /**

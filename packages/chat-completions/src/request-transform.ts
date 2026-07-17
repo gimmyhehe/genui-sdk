@@ -3,7 +3,7 @@ import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/me
 import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/meta';
 import { IChatCompletionCreateParams, ChatCompletionCreateParamsBase, type IGenPromptConfig } from './types';
 
-const MATERIALS_META_BY_FRAMEWORK = {
+const metaMap = {
   Vue: materialsMeta,
   Angular: ngMaterialsMeta,
 } as const;
@@ -40,7 +40,7 @@ export function requestTransform(
   const { framework = 'Vue', strategy = 'append', ...promptConfig } = tgCustomConfig;
 
   const materialsMetaForFramework =
-    MATERIALS_META_BY_FRAMEWORK[framework as keyof typeof MATERIALS_META_BY_FRAMEWORK] ?? materialsMeta;
+    metaMap[framework as keyof typeof metaMap] ?? materialsMeta;
   const systemMessages = newParams.messages?.find((message) => message.role === 'system');
   const prompt = genPrompt(framework, materialsMetaForFramework, promptConfig);
   if (systemMessages) {
