@@ -245,6 +245,7 @@ const playgroundContext = {
   themeData,
   conversation,
   customExamples,
+  framework,
 };
 
 provide('playgroundContext', playgroundContext);
