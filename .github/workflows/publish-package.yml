@@ -65,36 +65,42 @@ jobs:
           case "${{ github.event.inputs.package }}" in
             @opentiny/genui-sdk-server)
               echo "pkg_json=packages/server/package.json" >> "$GITHUB_OUTPUT"
+              echo "sync_pkg_json=packages/server/output/package.json" >> "$GITHUB_OUTPUT"
               echo "filter=@opentiny/genui-sdk-server" >> "$GITHUB_OUTPUT"
               echo "build_script=build:lib:npm" >> "$GITHUB_OUTPUT"
               echo "publish_dir=packages/server/output" >> "$GITHUB_OUTPUT"
               ;;
             @opentiny/genui-sdk-vue)
               echo "pkg_json=packages/frameworks/vue/package.json" >> "$GITHUB_OUTPUT"
+              echo "sync_pkg_json=packages/frameworks/vue/package.json" >> "$GITHUB_OUTPUT"
               echo "filter=@opentiny/genui-sdk-vue" >> "$GITHUB_OUTPUT"
               echo "build_script=build:lib:npm" >> "$GITHUB_OUTPUT"
               echo "publish_dir=packages/frameworks/vue" >> "$GITHUB_OUTPUT"
               ;;
             @opentiny/genui-sdk-angular)
               echo "pkg_json=packages/frameworks/angular/package.json" >> "$GITHUB_OUTPUT"
+              echo "sync_pkg_json=packages/frameworks/angular/output/package.json" >> "$GITHUB_OUTPUT"
               echo "filter=@opentiny/genui-sdk-angular" >> "$GITHUB_OUTPUT"
               echo "build_script=build:lib:npm" >> "$GITHUB_OUTPUT"
               echo "publish_dir=packages/frameworks/angular/output" >> "$GITHUB_OUTPUT"
               ;;
             @opentiny/genui-sdk-core)
               echo "pkg_json=packages/core/package.json" >> "$GITHUB_OUTPUT"
+              echo "sync_pkg_json=packages/core/package.json" >> "$GITHUB_OUTPUT"
               echo "filter=@opentiny/genui-sdk-core" >> "$GITHUB_OUTPUT"
               echo "build_script=build" >> "$GITHUB_OUTPUT"
               echo "publish_dir=packages/core" >> "$GITHUB_OUTPUT"
               ;;
             @opentiny/genui-sdk-materials-vue-opentiny-vue)
               echo "pkg_json=packages/materials/vue-opentiny-vue/package.json" >> "$GITHUB_OUTPUT"
+              echo "sync_pkg_json=packages/materials/vue-opentiny-vue/package.json" >> "$GITHUB_OUTPUT"
               echo "filter=@opentiny/genui-sdk-materials-vue-opentiny-vue" >> "$GITHUB_OUTPUT"
               echo "build_script=build" >> "$GITHUB_OUTPUT"
               echo "publish_dir=packages/materials/vue-opentiny-vue" >> "$GITHUB_OUTPUT"
               ;;
             @opentiny/genui-sdk-materials-angular-opentiny-ng)
               echo "pkg_json=packages/materials/angular-opentiny-ng/package.json" >> "$GITHUB_OUTPUT"
+              echo "sync_pkg_json=packages/materials/angular-opentiny-ng/package.json" >> "$GITHUB_OUTPUT"
               echo "filter=@opentiny/genui-sdk-materials-angular-opentiny-ng" >> "$GITHUB_OUTPUT"
               echo "build_script=build" >> "$GITHUB_OUTPUT"
               echo "publish_dir=packages/materials/angular-opentiny-ng" >> "$GITHUB_OUTPUT"
@@ -131,7 +137,7 @@ jobs:
 
       - name: Sync workspace deps for publish
         env:
-          PUBLISH_PKG_JSONS: ${{ steps.pkg.outputs.pkg_json }}
+          PUBLISH_PKG_JSONS: ${{ steps.pkg.outputs.sync_pkg_json }}
           NPM_TAG: ${{ github.event.inputs.npm_tag }}
         run: node ./scripts/ci-replace-workspace-deps.js
 
