@@ -1,6 +1,7 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
 import type { OpenApiToolServiceConfig } from '../components/common.types';
 
+type MaterialsMetaVariantKey = 'mini' | 'standard';
 export interface IMcpServerConfig {
   name: string;
   url: string;
@@ -47,6 +48,7 @@ export interface IPlaygroundConfig {
   agents: IAgentConfig[];
   skills: ISkillConfig[];
   openApiTools: IOpenApiToolServiceConfig[];
+  promptVariant?: MaterialsMetaVariantKey;
 }
 
 /** 仅序列化已启用的 Skill，并去掉 enabled 字段以减小 metadata 体积 */
@@ -77,6 +79,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       agents = [],
       skills = [],
       openApiTools = [],
+      promptVariant
     } = config;
 
     const playgroundConfig = {
@@ -88,6 +91,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       agents: agents.filter((agent) => agent.enabled),
       skills: skillsPayloadForChat(skills),
       openApiTools: openApiTools.filter((tool) => tool.enabled !== false),
+      promptVariant,
     };
 
     return fetch(url, {
