@@ -131,7 +131,15 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
 
   protected buildScriptSetupMethods(ctx: IScriptSetupBuildContext): string {
     const { methods = {} } = ctx.schema as CardSchema & { methods?: Record<string, { value: string }> };
-    const methodLines = Object.entries(methods).map(([key, item]) => `const ${key} = ${this.replaceThis(item.value)}`);
+    const methodLines = Object.entries(methods).map(([key, item]) => {
+      const info = this.getFunctionInfo(item.value);
+      if (!info) {
+        return `const ${key} = ${this.replaceThis(item.value)}`;
+      }
+      const asyncPrefix = info.type ? `${info.type} ` : '';
+      const body = info.body.replace(/this\.(props\.)?/g, '');
+      return `${asyncPrefix}function ${key}(${info.params.join(', ')}) {${body}}`;
+    });
     return methodLines.join('\n\n');
   }
 
