@@ -2605,6 +2605,7 @@
                     "description": {
                       "zh_CN": "单选框类型"
                     },
+                    "defaultValue": "radio",
                     "required": true,
                     "readOnly": true,
                     "disabled": true,
