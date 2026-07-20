@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => {
             '../dist/renderer': ['../../dist/renderer/index.d.ts'] // hack for fix relative path for 'output/dist'
           },
         },
-        bundledPackages: ['@opentiny/tiny-schema-renderer-ng'],
+        bundledPackages: ['@opentiny/tiny-schema-renderer-ng', '@opentiny/genui-sdk-core', 'jsondiffpatch', '@dmsnell/diff-match-patch'],
       }),
       viteStaticCopy({
         targets: [
@@ -70,7 +70,7 @@ export default defineConfig(({ mode }) => {
       },
       outDir: path.resolve(__dirname, '../output/dist'),
       emptyOutDir: true,
-      sourcemap: false,
+      sourcemap: true,
       terserOptions: {
         mangle: {
           toplevel: true,

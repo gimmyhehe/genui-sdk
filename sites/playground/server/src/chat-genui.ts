@@ -5,9 +5,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { z } from 'zod';
 import { fileURLToPath } from 'node:url';
-import { rendererConfig } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/render-config';
-import { ngRendererConfig } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/render-config';
-import { genPrompt, type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
+import { type IGenPromptCustomConfig } from '@opentiny/genui-sdk-core';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
@@ -16,10 +14,40 @@ import { openaiCompatibleTransformChunk, type IOpenaiCompatibleChunk } from '@op
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { JsonSchema } from 'json-schema-to-zod';
 import { jsonSchemaToZod } from 'json-schema-to-zod';
-import { buildAgentTools, isAllowedAgentUrl } from './a2a-tools/index.js';
+import {
+  buildAgentTools,
+  isAllowedAgentUrl,
+  isPlaygroundDevelopment,
+  resolveAgentApiUrl,
+} from './a2a-tools/index.js';
+import type { PlaygroundAgentConfig } from './a2a-tools/index.js';
+import { buildSkillTools } from './skills/index.js';
 import type { IPlaygroundConfig, LLMConfig, LLMConfigParams, McpServer, McpServersConfig } from './types/index.js';
+import { genPlaygroundPrompt } from './gen-prompt/index.js';
 
 type StreamTextOptions = Parameters<typeof streamText>[0];
+
+const BUSY_ERROR_MESSAGE = '算力繁忙，请切换其他模型或稍后重试';
+
+function extractStatusCode(error: any): number | undefined {
+  if (!error) {
+    return undefined;
+  }
+  if (typeof error.statusCode === 'number') {
+    return error.statusCode;
+  }
+  if (typeof error?.lastError?.statusCode === 'number') {
+    return error.lastError.statusCode;
+  }
+  if (Array.isArray(error.errors)) {
+    for (const item of error.errors) {
+      if (typeof item?.statusCode === 'number') {
+        return item.statusCode;
+      }
+    }
+  }
+  return undefined;
+}
 
 const initClients = async (
   serverName: string,
@@ -153,13 +181,36 @@ export async function generateLlmConfig(llmConfigParams: LLMConfigParams | undef
   const modelInfo = providerModelMapper.getModelInfo(model || '');
   const aiSDKModel = modelInfo ? providerModelMapper.getAiSDKModel(modelInfo) : undefined;
 
+  const rawExtraBody = modelInfo?.model?.extraBody;
+  const extraBody =
+    rawExtraBody && typeof rawExtraBody === 'object'
+      ? rawExtraBody
+      : undefined;
+
   return {
     ...llmConfigParams,
     ...modelInfo,
     model: aiSDKModel,
     supportJsonFormat: modelInfo?.model.supportJsonFormat || false,
     specificPrompt: modelInfo?.model.specificPrompt || '',
+    extraBody
   };
+}
+
+function filterAllowedPlaygroundAgents(rawAgents: PlaygroundAgentConfig[]): PlaygroundAgentConfig[] {
+  const agents: PlaygroundAgentConfig[] = [];
+
+  for (const agent of rawAgents) {
+    const url = resolveAgentApiUrl(agent);
+    if (!url) {
+      continue;
+    }
+    if (isPlaygroundDevelopment || isAllowedAgentUrl(url)) {
+      agents.push(agent);
+    }
+  }
+
+  return agents;
 }
 
 const getPlaygroundConfig = (playgroundStr: string) => {
@@ -174,13 +225,7 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     console.error('Failed to parse playground from metadata:', error);
   }
 
-  const rawAgents = playgroundConfig.agents || [];
-  // 解析后立刻过滤掉指向本地/内网等不安全目标的 Agent，降低 SSRF 风险
-  const agents = rawAgents.filter((agent) => {
-    const url = agent.api?.url;
-    if (!url) return false;
-    return isAllowedAgentUrl(url);
-  });
+  const agents = filterAllowedPlaygroundAgents(playgroundConfig.agents || []);
 
   return {
     mcpServers: playgroundConfig.mcpServers || [],
@@ -189,6 +234,8 @@ const getPlaygroundConfig = (playgroundStr: string) => {
     model: playgroundConfig.model || '',
     temperature: playgroundConfig.temperature || 0.3,
     agents,
+    skills: playgroundConfig.skills || [],
+    promptVariant: playgroundConfig.promptVariant,
   };
 };
 
@@ -222,35 +269,63 @@ export function createChatGenui() {
     }
 
     const playgroundConfig = getPlaygroundConfig(playgroundStr);
-    const { mcpServers, framework, userAppendPrompt, agents } = playgroundConfig;
+    const { mcpServers, framework, userAppendPrompt, agents, skills, promptVariant } = playgroundConfig;
 
     const llmConfigParams: LLMConfigParams = {
       model: playgroundConfig.model,
       temperature: playgroundConfig.temperature,
       mcpServers,
+      skills,
     };
 
     const llmConfig = await generateLlmConfig(llmConfigParams);
-    const { model, temperature, specificPrompt } = llmConfig;
+    const { model, temperature, specificPrompt, provider, extraBody } = llmConfig;
     const { tools: mcpTools, clientsMap } = await generateAiSdkTools(
       mcpServers.filter((s) => s.enabled),
       abort.signal,
     );
     const agentTools = buildAgentTools(agents, abort.signal);
-    const tools = { ...mcpTools, ...agentTools };
+    const { tools: skillTools, systemPrompt: skillPrompt } = buildSkillTools(skills);
+    const duplicateToolNames = new Set<string>();
+    const seenToolNames = new Set<string>();
+    for (const name of [
+      ...Object.keys(mcpTools),
+      ...Object.keys(agentTools),
+      ...Object.keys(skillTools),
+    ]) {
+      if (seenToolNames.has(name)) duplicateToolNames.add(name);
+      seenToolNames.add(name);
+    }
+    if (duplicateToolNames.size) {
+      console.warn(`Duplicate tool names detected: ${[...duplicateToolNames].join(', ')}`);
+    }
+    const tools = { ...mcpTools, ...agentTools, ...skillTools };
 
-    const renderConfigForFramework = framework === 'Angular' ? ngRendererConfig : rendererConfig;
     const maxSteps = 30;
     let hasError = false; // 标记是否已经处理了错误
+
+    const providerOptions =
+      provider?.name && extraBody && Object.keys(extraBody).length > 0
+        ? { [provider.name]: extraBody } as StreamTextOptions['providerOptions']
+        : undefined;
+
     const options: StreamTextOptions = {
       model,
       temperature,
-      system: genPrompt(renderConfigForFramework, tgCustomConfig) + '\n' + specificPrompt + '\n' + userAppendPrompt,
+      system:
+        genPlaygroundPrompt(framework, promptVariant, tgCustomConfig) +
+        '\n' +
+        specificPrompt +
+        '\n' +
+        userAppendPrompt +
+        '\n' +
+        skillPrompt,
       messages: body.messages,
       abortSignal: abort.signal,
       tools,
       toolChoice: 'auto',
       stopWhen: stepCountIs(maxSteps),
+      ...(providerOptions ? { providerOptions } : {}),
       onError: (error: any) => {
         if (hasError) {
           return;
@@ -259,10 +334,25 @@ export function createChatGenui() {
 
         console.error('Error in chat-genui onError:', error);
         const actualError = error?.error?.cause ?? error?.error ?? error;
-        const statusCode = actualError?.statusCode ?? 500;
-        const responseBody = actualError?.responseBody || null;
+        const rawStatusCode = extractStatusCode(actualError);
+        const statusCode =
+          typeof rawStatusCode === 'number' &&
+          Number.isInteger(rawStatusCode) &&
+          rawStatusCode >= 100 &&
+          rawStatusCode <= 599
+            ? rawStatusCode
+            : 500;
+        const responseBody = actualError?.responseBody ?? null;
+        const detailsPart = responseBody
+          ? `; error details: ${typeof responseBody === 'string' ? responseBody : JSON.stringify(responseBody)}`
+          : '';
+        const built = (actualError?.message ?? '') + detailsPart;
         const message =
-          actualError?.message + (responseBody ? `; error details: ${responseBody}` : '') || 'Unknown Error Type';
+          statusCode === 429
+            ? BUSY_ERROR_MESSAGE
+            : built.trim() !== ''
+              ? built
+              : 'Unknown Error Type';
         const type = actualError?.name || actualError?.type || 'Unknown Error Type';
         const param = actualError?.param || null;
         const code = statusCode;

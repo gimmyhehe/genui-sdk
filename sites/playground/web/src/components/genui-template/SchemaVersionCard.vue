@@ -2,18 +2,28 @@
 import { ref, computed } from 'vue';
 import { iconRichTextCodeView } from '@opentiny/vue-icon';
 import JsonPatchDev from './JsonPatchDev.vue';
-import { formatJsonPatch } from './template-chat-utils';
-import useTemplate from './useTemplate';
+import {
+  formatJsonPatch,
+  parseSchemaJson,
+  parseJsonPatchOperations,
+  resolveJsonPatchPrevSchemaString,
+} from './template-chat-utils';
+import { resolveManualEditSaveTitle } from './template-chat-utils/schema-input-ids';
+import type { SchemaManualInputType } from './chat.types';
+import { useTemplateContext } from './composables';
 import { useIsMobile } from '../../use-mobile';
 import docCardIcon from '../../assets/images/card.svg';
 import docEditIcon from '../../assets/images/card-edit.svg';
+import docIncrementalEditorIcon from '../../assets/images/card-manual-editor.svg';
+import { t } from '../../i18n';
 
 const TinyIconRichTextCodeView = iconRichTextCodeView();
 
 export interface IRendererProps {
-  type: 'json-patch' | 'schema-card';
+  type: 'json-patch' | 'schema-card' | 'schema-manual';
   cardId: string;
   input: string;
+  inputType?: SchemaManualInputType;
   content: string;
   generatedTime: string;
   schema: string;
@@ -21,17 +31,34 @@ export interface IRendererProps {
   errorMessagesMap?: Map<string, string>;
 }
 
-const props = defineProps<IRendererProps>();
-const emit = defineEmits(['click']);
+defineOptions({ inheritAttrs: false });
 
-const { getMessageByCardId } = useTemplate();
+const props = defineProps<IRendererProps>();
+const emit = defineEmits(['card-select']);
+
+const { conversation, versionControl } = useTemplateContext();
 
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
 
-const docIcon = computed(() => (props.type === 'schema-card' ? docCardIcon : docEditIcon));
+const cardTitle = computed(() => {
+  const title =
+    props.type === 'schema-manual'
+      ? resolveManualEditSaveTitle(props)
+      : props.input?.trim() || '';
+  return title.length > 20 ? `${title.substring(0, 20)}...` : title;
+});
 
-// 判断当前为开发环境
+const docIcon = computed(() => {
+  if (props.type === 'schema-card') {
+    return docCardIcon;
+  }
+  if (props.type === 'schema-manual') {
+    return docIncrementalEditorIcon;
+  }
+  return docEditIcon;
+});
+
 const isDev = import.meta.env.MODE === 'development';
 const { isMobile } = useIsMobile();
 
@@ -42,21 +69,31 @@ const prevSchema = ref<string>('');
 const errorMessage = computed(() => props.errorMessagesMap?.get(props.cardId) ?? '');
 
 const handleClick = () => {
-  emit('click', props.cardId);
+  emit('card-select', props.cardId);
 };
 
 const handleDev = () => {
-  const cardMessage = getMessageByCardId(props.cardId);
-  const { prevSchema: prevSchemaStr, content: contentStr, schema: schemaStr } = cardMessage;
-  const formattedJsonPatch = formatJsonPatch(JSON.parse(prevSchemaStr), JSON.parse(contentStr));
-  jsonPatch.value = JSON.stringify(formattedJsonPatch, null, 2);
+  const cardMessage = versionControl.getMessageByCardId(props.cardId);
+  if (!cardMessage || cardMessage.type !== 'json-patch') {
+    return;
+  }
+
+  const prevSchemaStr = resolveJsonPatchPrevSchemaString(cardMessage, conversation.messages);
+  const baseline = parseSchemaJson(prevSchemaStr);
+  const operations = parseJsonPatchOperations(cardMessage.content);
+  if (!baseline || !operations) {
+    return;
+  }
+
+  jsonPatch.value = JSON.stringify(formatJsonPatch(baseline, operations), null, 2);
   prevSchema.value = prevSchemaStr;
-  currentSchema.value = schemaStr;
+  currentSchema.value = cardMessage.schema ?? '';
   visible.value = true;
 };
 </script>
 
 <template>
+  <div class="schema-version-card-root">
   <div :class="['schema-version-card', isMobile ? 'is-mobile' : '']" @click="handleClick">
     <div class="schema-version-card-main">
       <div class="schema-version-card-icon">
@@ -64,21 +101,21 @@ const handleDev = () => {
       </div>
       <div class="schema-version-card-content">
         <div class="schema-version-card-content-title">
-          {{ props.input.substring(0, 20) }}{{ props.input.length > 20 ? '...' : '' }}
+          {{ cardTitle }}
         </div>
         <div class="schema-version-card-content-time">
-          <template v-if="generating">生成中...</template>
-          <template v-else>创建时间：{{ generatedTime }}</template>
+          <template v-if="generating">{{ t('templateEditor.generating') }}</template>
+          <template v-else>{{ t('templateEditor.createdAt', { time: generatedTime }) }}</template>
         </div>
       </div>
     </div>
     <div class="schema-version-card-footer">
       <div v-if="isDev && props.type === 'json-patch' && !generating && !isMobile" class="icons-wrap">
-        <div class="icon-item" title="调试 jsonPatch" @click.stop="handleDev">
+        <div class="icon-item" :title="t('templateEditor.debugJsonPatch')" @click.stop="handleDev">
           <TinyIconRichTextCodeView />
         </div>
       </div>
-      <div v-if="errorMessage" class="error-message">解析失败</div>
+      <div v-if="errorMessage" class="error-message">{{ t('templateEditor.parseFailed') }}</div>
     </div>
   </div>
   <JsonPatchDev
@@ -87,9 +124,14 @@ const handleDev = () => {
     :jsonPatch="jsonPatch"
     :prevSchema="prevSchema"
   />
+  </div>
 </template>
 
 <style scoped lang="less">
+.schema-version-card-root {
+  display: contents;
+}
+
 .schema-version-card {
   width: 330px;
   max-width: 330px;
@@ -97,7 +139,8 @@ const handleDev = () => {
   border-radius: 12px;
   position: relative;
   cursor: pointer;
-  background-color: #fff;
+
+  background-color: var(--tr-bubble-content-bg, #fff);
   display: flex;
   flex-direction: column;
   padding: 16px;
@@ -137,7 +180,7 @@ const handleDev = () => {
       font-size: 14px;
       font-weight: 600;
       line-height: 22px;
-      color: rgb(25, 25, 25);
+      color: var(--tr-text-primary, rgb(25, 25, 25));
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -146,7 +189,7 @@ const handleDev = () => {
     &-time {
       font-size: 12px;
       line-height: 18px;
-      color: rgb(128, 128, 128);
+      color: var(--tr-text-secondary, rgb(128, 128, 128));
     }
   }
 
@@ -170,11 +213,22 @@ const handleDev = () => {
     }
 
     .icon-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 12px;
       text-align: right;
+      cursor: pointer;
+      color: var(--tr-text-secondary, rgb(128, 128, 128));
+
+      :deep(svg),
+      :deep(svg path) {
+        fill: currentColor;
+      }
 
       &:hover {
-        background-color: #f0f0f0;
+        color: var(--tr-text-primary, rgb(25, 25, 25));
+        background-color: var(--tr-container-bg-default-2, #f0f0f0);
       }
     }
   }

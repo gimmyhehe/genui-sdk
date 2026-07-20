@@ -37,7 +37,7 @@ export default defineConfig(({ command }) => {
     vue({
       template: {
         compilerOptions: {
-          isCustomElement: (tag) => tag === 'tiny-schema-renderer-element-ng',
+          isCustomElement: (tag) => tag === 'genui-renderer-ng-element',
         },
       },
     }),
@@ -58,6 +58,9 @@ export default defineConfig(({ command }) => {
   return {
     envDir: './env',
     plugins,
+    optimizeDeps: {
+      exclude: ['monaco-editor', 'monaco-editor-vue3'],
+    },
     build: {
       rollupOptions: {
         output: {

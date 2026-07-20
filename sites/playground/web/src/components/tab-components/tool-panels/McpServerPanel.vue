@@ -4,7 +4,6 @@ import {
   TinyButton,
   TinySwitch,
   TinyPopover,
-  TinyCheckbox,
   TinyCollapseItem,
   TinyDialogBox,
   TinyForm,
@@ -13,9 +12,10 @@ import {
   TinyNotify,
 } from '@opentiny/vue';
 import { iconDel, iconEdit, iconPlus, iconEllipsis } from '@opentiny/vue-icon';
+import { t } from '../../../i18n';
 
 const playgroundContext = inject('playgroundContext');
-const { llmConfig, chatConfig } = playgroundContext;
+const { llmConfig } = playgroundContext;
 
 const IconPlus = iconPlus();
 const IconDel = iconDel();
@@ -91,14 +91,6 @@ const updateServerEnabled = (server, enabled) => {
   llmConfig.mcpServers = mcpServers.map((s) => (s.name === server.name ? { ...s, enabled } : s));
 };
 
-const updateAddToolCallContext = (value) => {
-  chatConfig.addToolCallContext = value;
-};
-
-const updateShowThinkingResult = (value) => {
-  chatConfig.showThinkingResult = value;
-};
-
 const confirmMCPServer = async () => {
   addToolLoading.value = true;
   try {
@@ -161,7 +153,7 @@ const confirmMCPServer = async () => {
 </script>
 
 <template>
-  <tiny-collapse-item name="mcp" title="MCP 服务">
+  <tiny-collapse-item name="mcp" :title="t('mcp.title')">
     <template #title-right>
       <tiny-button type="text" :icon="IconPlus" @click.stop="addMCPServer"></tiny-button>
     </template>
@@ -178,11 +170,11 @@ const confirmMCPServer = async () => {
                 <div class="mcp-server-item-actions">
                   <div @click="editMCPServer(server, index)">
                     <component :is="IconEdit" />
-                    <span>编辑</span>
+                    <span>{{ t('common.edit') }}</span>
                   </div>
                   <div @click="deleteMCPServer(server)">
                     <component :is="IconDel" />
-                    <span>移除</span>
+                    <span>{{ t('common.remove') }}</span>
                   </div>
                 </div>
               </template>
@@ -195,42 +187,41 @@ const confirmMCPServer = async () => {
         <div class="mcp-server-item-description">{{ server.description }}</div>
       </div>
     </div>
-    <div class="mcp-server-tool-call-context">
-      <tiny-checkbox :model-value="chatConfig.addToolCallContext" @update:model-value="updateAddToolCallContext">
-        调用结果添加到上下文
-      </tiny-checkbox>
-    </div>
-    <div class="mcp-server-tool-call-context" style="margin-top: 12px">
-      <tiny-checkbox :model-value="chatConfig.showThinkingResult" @update:model-value="updateShowThinkingResult">
-        调用结果展示在界面中
-      </tiny-checkbox>
+    <div v-if="!llmConfig.mcpServers || llmConfig.mcpServers.length === 0" class="mcp-server-list-empty">
+      <div class="mcp-server-item-empty">
+        <div class="mcp-server-item-empty-icon">
+          {{ t('common.emptyHintPrefix') }}
+          <component :is="IconPlus" class="mcp-server-item-empty-plus-icon" />
+          {{ t('mcp.emptyAction') }}
+        </div>
+      </div>
     </div>
     <tiny-dialog-box
       v-model:visible="showToolFormDialog"
-      :title="mcpServerData.index > -1 ? '编辑 MCP 服务' : '添加 MCP 服务'"
+      :title="mcpServerData.index > -1 ? t('mcp.edit') : t('mcp.add')"
       width="500px"
       @close="closeToolFormDialog"
       :append-to-body="true"
     >
       <tiny-form ref="mcpServerFormRef" :model="mcpServerData" label-width="120px" label-position="left">
-        <tiny-form-item label="名称" prop="name" required>
-          <tiny-input v-model="mcpServerData.name" placeholder="MCP 服务"></tiny-input>
+        <tiny-form-item :label="t('common.name')" prop="name" required>
+          <tiny-input v-model="mcpServerData.name" :placeholder="t('mcp.namePlaceholder')"></tiny-input>
         </tiny-form-item>
         <tiny-form-item label="URL" prop="url" required>
           <tiny-input v-model="mcpServerData.url" placeholder="http://localhost:3000/mcp"></tiny-input>
         </tiny-form-item>
-        <tiny-form-item label="请求头" prop="headers">
+        <tiny-form-item :label="t('mcp.headers')" prop="headers">
           <tiny-input v-model="mcpServerData.headers" :placeholder="headersPlaceholder" type="textarea"></tiny-input>
         </tiny-form-item>
-        <tiny-form-item label="超时（毫秒）" prop="timeout">
+        <tiny-form-item :label="t('mcp.timeout')" prop="timeout">
           <tiny-input v-model="mcpServerData.timeout" :placeholder="String(DEFAULT_TIMEOUT_SECONDS)" type="number"></tiny-input>
         </tiny-form-item>
-        <tiny-form-item label="描述" prop="description">
-          <tiny-input type="textarea" v-model="mcpServerData.description" placeholder="描述"></tiny-input>
+        <tiny-form-item :label="t('common.description')" prop="description">
+          <tiny-input type="textarea" v-model="mcpServerData.description" :placeholder="t('mcp.descPlaceholder')"></tiny-input>
         </tiny-form-item>
       </tiny-form>
       <template #footer>
-        <tiny-button type="primary" :loading="addToolLoading" @click="confirmMCPServer">确认</tiny-button>
+        <tiny-button type="primary" :loading="addToolLoading" @click="confirmMCPServer">{{ t('common.confirm') }}</tiny-button>
       </template>
     </tiny-dialog-box>
   </tiny-collapse-item>
@@ -238,7 +229,6 @@ const confirmMCPServer = async () => {
 
 <style scoped lang="less">
 .mcp-server-list {
-  margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -246,7 +236,7 @@ const confirmMCPServer = async () => {
   .mcp-server-item {
     border: none;
     border-radius: 6px;
-    padding: 6px 10px;
+    padding: 10px;
     transition: background-color 0.2s ease;
 
     &:hover {
@@ -257,7 +247,6 @@ const confirmMCPServer = async () => {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
     }
 
     &-name {
@@ -270,6 +259,7 @@ const confirmMCPServer = async () => {
       font-size: 12px;
       color: #999;
       overflow-wrap: break-word;
+      margin-top: 4px;
     }
 
     &-enabled {
@@ -278,17 +268,35 @@ const confirmMCPServer = async () => {
   }
 }
 
-.mcp-server-tool-call-context {
+.mcp-server-list-empty {
   margin-top: 12px;
+}
+
+.mcp-server-item-empty {
+  border: 1px dashed #d9d9d9;
+  border-radius: 8px;
+  min-height: 72px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  font-size: 14px;
-  color: #595959;
+  justify-content: center;
+  background: #fafafa;
+}
 
-  &:last-child {
-    margin-bottom: 16px;
-  }
+.mcp-server-item-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #8c8c8c;
+  font-size: 13px;
+  line-height: 20px;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+.mcp-server-item-empty-plus-icon {
+  width: 12px;
+  height: 12px;
+  color: #595959;
 }
 
 :deep(.mcp-server-item-actions-popover) {

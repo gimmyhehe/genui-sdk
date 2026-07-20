@@ -2,9 +2,6 @@
 import { ref, watch, computed, h, inject, onMounted, onUnmounted } from 'vue';
 import type { Ref } from 'vue';
 import '@opentiny/tiny-robot/dist/style.css';
-import * as jsonPatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
-import type { JsonPatchOp } from 'jsondiffpatch/formatters/jsonpatch-apply';
-import { DeltaPatcher, type IChatMessage } from '@opentiny/genui-sdk-core';
 import {
   TrBubbleList,
   TrSender,
@@ -14,27 +11,30 @@ import {
 } from '@opentiny/tiny-robot';
 import { GeneratingStatus, STATUS } from '@opentiny/tiny-robot-kit';
 import type { ChatMessage } from '@opentiny/tiny-robot-kit';
+import type { IChatMessage } from '@opentiny/genui-sdk-core';
 import { IconAi, IconUser, IconArrowDown } from '@opentiny/tiny-robot-svgs';
 import type { BubbleRoleConfig } from '@opentiny/tiny-robot';
-import { requiredCompleteFieldSelectors, scrollEnd, throttle, GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
+import {  scrollEnd, throttle, GENUI_CONFIG } from '@opentiny/genui-sdk-vue';
 import type { IMessage } from '@opentiny/genui-sdk-vue';
 import copy from 'clipboard-copy';
-import type { INotificationPayload, IMessageItem, IJsonPatchMessageItem, ISchemaCardMessageItem } from './chat.types';
+import type {
+  INotificationPayload,
+  IMessageItem,
+  IJsonPatchMessageItem,
+  ISchemaCardMessageItem,
+  ISchemaManualMessageItem,
+} from './chat.types';
 import {
-  textToJson,
-  validateJsonPatch,
-  PARSE_PARTIAL_JSON_STATE,
-  formatJsonPatch,
-  formatDateTime,
-  generateIdForComponents,
-  generateId,
+  finalizePendingSchemaCard,
+  getLastUserMessage,
+  isManualSchemaSaveMessage,
 } from './template-chat-utils';
-import { jsonPatchDeduplicator } from './json-patch-deduplicator';
-import useTemplate from './useTemplate';
+import { generateId } from '../../utils';
+import { useTemplateContext } from './composables';
 import AssistantFooter from './TemplateAssistantFooter.vue';
 import TemplateSchemaMessageRenderer from './TemplateSchemaMessageRenderer.vue';
-import { emitter } from './template-chat-event-emitter';
 import useIcon from '../../use-icon';
+import { t } from '../../i18n';
 
 const { addIcons } = useIcon();
 addIcons(IconAi, IconUser, IconArrowDown);
@@ -43,23 +43,15 @@ const props = defineProps<{
   messages?: IMessage[];
 }>();
 
-const emit = defineEmits(['schema-version-toggle']);
-
 const TinyGenuiConfig: any = inject(GENUI_CONFIG, null);
 const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
-const errorMessagesMap = ref<Map<string, string>>(new Map());
+const { schema, conversation, versionControl, stream, emitter } = useTemplateContext();
 const {
-  conversation,
-  templateConversationState,
-  currentSchema,
-  currentPreviewSchema,
-  currentCardId,
-  setCurrentSchema,
-  setCurrentPreviewSchema,
-  updateTemplateTitle,
-  setCurrentCardId,
-} = useTemplate();
+  errorMessagesMap,
+  handleSchemaJsonChanged,
+  resetLastPreviewSchema,
+} = stream;
 
 watch(
   () => TinyGenuiConfig?.value?.theme,
@@ -75,12 +67,17 @@ watch(
   },
 );
 
-const { messageManager } = conversation;
+const messageManager = computed(() => conversation.conversationKit?.messageManager.value ?? null);
 
-// 当前会话的 messages 代理
-const messages = computed(() => messageManager.value.messages.value);
+const messages = computed(() => messageManager.value?.messages.value ?? []);
 
-const generating = computed(() => GeneratingStatus.includes(conversation.messageManager.value.messageState.status));
+const generating = computed(() =>
+  messageManager.value
+    ? GeneratingStatus.includes(messageManager.value.messageState.status)
+    : false,
+);
+
+const messagesContainer: Ref<HTMLElement | undefined> = ref();
 
 const roles: Record<string, BubbleRoleConfig> = {
   assistant: {
@@ -90,6 +87,13 @@ const roles: Record<string, BubbleRoleConfig> = {
     customContentField: 'messages',
     slots: {
       trailer: (slotProps: { bubbleProps: any; index?: number }) => {
+        const chatMessage = slotProps.index !== undefined
+          ? messageManager.value?.messages.value[slotProps.index]
+          : undefined;
+        if (chatMessage && isManualSchemaSaveMessage(chatMessage)) {
+          return null;
+        }
+
         const isFinished =
           slotProps.bubbleProps.role !== 'assistant' ||
           (slotProps.index !== undefined && slotProps.index !== messages.value.length - 1) ||
@@ -98,8 +102,8 @@ const roles: Record<string, BubbleRoleConfig> = {
           bubbleProps: slotProps.bubbleProps,
           index: slotProps.index,
           isFinished,
-          messageManager: messageManager.value,
-          chatMessage: (messageManager.value.messages.value[slotProps.index] || {}) as IChatMessage,
+          messageManager: messageManager.value!,
+          chatMessage: (messageManager.value?.messages.value[slotProps.index] || {}) as IChatMessage,
           onRefresh: handleRefresh,
           onCopy: handleCopy,
         });
@@ -114,123 +118,62 @@ const roles: Record<string, BubbleRoleConfig> = {
   },
 };
 
-const deltaPatcher = new DeltaPatcher({
-  requiredCompleteFieldSelectors,
+onMounted(() => {
+  emitter.on('schema-json-changed', handleSchemaJsonChanged);
 });
-
-const schemaCardRenderer = async (props: any) => {
-  try {
-    const { content, cardId } = props;
-
-    if (cardId !== currentCardId.value) {
-      return;
-    }
-
-    let json = null;
-    let isCompleted = true;
-    let target = {};
-    if (typeof content === 'string' && content) {
-      const { value, state } = await textToJson(content);
-      isCompleted = state === PARSE_PARTIAL_JSON_STATE.SUCCESSFUL_PARSE;
-      if (!value) {
-        return;
-      }
-      json = value;
-    }
-    deltaPatcher.patchWithDelta(target, json, isCompleted);
-    // 给每个组件添加 id
-    const schemaWithId = generateIdForComponents(target);
-    setCurrentPreviewSchema(schemaWithId);
-  } catch (error) {
-    console.error('schemaCardRenderer error ===>', error);
-    errorMessagesMap.value.set(props.cardId, error.message);
-  }
-};
-
-/**
- * Applies streamed JSON Patch operations to the current schema.
- * Path resolution is formatted against the immutable pre-request
- * snapshot to avoid drift when payloads replay prior operations.
- */
-const jsonPatchRenderer = async (props: any) => {
-  try {
-    const { content, cardId } = props;
-
-    if (cardId !== currentCardId.value) {
-      return;
-    }
-
-    const valid = validateJsonPatch(content);
-
-    if (!valid) return;
-
-    const { value } = await textToJson(content);
-
-    if (!value || !Array.isArray(value)) return;
-
-    // Prefer pre-request schema for stable id-to-path resolution.
-    let prePatchSchema = currentSchema.value;
-    if (prevSchema.value) {
-      try {
-        prePatchSchema = JSON.parse(prevSchema.value);
-      } catch (error) {
-        prePatchSchema = currentSchema.value;
-      }
-    }
-    const formattedValue = formatJsonPatch(prePatchSchema, value);
-    // 如果没有 cardId，使用默认的 key 来记录（避免重复执行）
-    const operationKey = cardId || '__default__';
-    // 过滤掉已执行的操作
-    const newOperations = jsonPatchDeduplicator.filterExecutedOperations(operationKey, formattedValue);
-
-    if (newOperations.length === 0) {
-      return;
-    }
-
-    const standardOperations: JsonPatchOp[] = newOperations.map((op) => {
-      const { id, idToPath, relativePath, ...standardOp } = op as any;
-      return standardOp as JsonPatchOp;
-    });
-
-    // 增量 patch 需要基于“当前预览态”持续叠加，避免每个 chunk 都从已应用态重建导致丢操作。
-    const patchBaseline = currentPreviewSchema.value ?? currentSchema.value;
-    const targetSchema = JSON.parse(JSON.stringify(patchBaseline));
-    jsonPatchFormatter.patch(targetSchema, standardOperations);
-    setCurrentPreviewSchema(generateIdForComponents(targetSchema));
-    // 标记所有操作（包括已过滤的）为已执行，避免重复执行
-    jsonPatchDeduplicator.markAllOperationsExecuted(operationKey, formattedValue);
-  } catch (error) {
-    errorMessagesMap.value.set(props.cardId, error.message);
-    console.error('jsonPatch error ===>', error);
-  }
-};
+onUnmounted(() => {
+  emitter.off('schema-json-changed', handleSchemaJsonChanged);
+});
 
 const getCardMessageByIndex = (index: number) => {
   return (
     (messages.value[index]?.messages as IMessageItem[] | undefined)?.find(
-      (message): message is IJsonPatchMessageItem | ISchemaCardMessageItem =>
-        message.type === 'schema-card' || message.type === 'json-patch',
+      (
+        message,
+      ): message is IJsonPatchMessageItem | ISchemaCardMessageItem | ISchemaManualMessageItem =>
+        message.type === 'schema-card'
+        || message.type === 'json-patch'
+        || message.type === 'schema-manual',
     ) || ({} as IJsonPatchMessageItem | ISchemaCardMessageItem)
   );
 };
 
 const handleRefresh = ({ index }: { index: number }) => {
+  if (!messageManager.value) {
+    return;
+  }
   const { messages, send } = messageManager.value;
   const cardMessage = getCardMessageByIndex(index);
 
-  prevSchema.value = cardMessage?.prevSchema;
-  let currentSchema = null;
-  try {
-    currentSchema = JSON.parse(prevSchema.value);
-  } catch (error) {
-    currentSchema = null;
+  prevSchema.value = cardMessage?.prevSchema ?? '';
+
+  if (cardMessage?.type === 'schema-card') {
+    schema.setCurrentSchema(null);
+    schema.setCurrentPreviewSchema({});
+    resetLastPreviewSchema({});
+  } else {
+    let parsedSchema = null;
+    try {
+      parsedSchema = JSON.parse(prevSchema.value);
+    } catch (error) {
+      parsedSchema = null;
+    }
+    if (parsedSchema) {
+      schema.setCurrentSchema(parsedSchema);
+      schema.setCurrentPreviewSchema(parsedSchema);
+      resetLastPreviewSchema(JSON.parse(JSON.stringify(parsedSchema)));
+    }
   }
-  if (currentSchema) {
-    setCurrentSchema(currentSchema);
-    setCurrentPreviewSchema(currentSchema);
-  }
+
   messages.value = messages.value.slice(0, index);
-  setCurrentCardId(messages.value[messages.value.length - 1].messageId as string);
+
+  const lastUserMessage = getLastUserMessage(messages.value);
+  if (lastUserMessage && !lastUserMessage.messageId) {
+    lastUserMessage.messageId = generateId();
+  }
+  schema.setCurrentCardId(String(lastUserMessage?.messageId ?? generateId()));
+
+  versionControl.onSchemaRefresh();
   send();
 };
 
@@ -247,41 +190,27 @@ const markdownRenderer = new BubbleMarkdownContentRenderer({
   mdConfig: { html: true },
 });
 
+const createSchemaMessageRenderer = (type: 'json-patch' | 'schema-card' | 'schema-manual') => (props: unknown) =>
+  h(TemplateSchemaMessageRenderer, {
+    itemProps: props,
+    type,
+    prevSchema: prevSchema.value,
+    errorMessagesMap: errorMessagesMap.value,
+  });
+
 const messageRenderers = {
   markdown: markdownRenderer,
-  'json-patch': (props) => {
-    jsonPatchRenderer(props);
-
-    return h(TemplateSchemaMessageRenderer, {
-      itemProps: props,
-      type: 'json-patch',
-      prevSchema: prevSchema.value,
-      errorMessagesMap: errorMessagesMap.value,
-      messages: messages.value,
-      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
-        emit('schema-version-toggle', schema, cardId),
-    });
-  },
-  'schema-card': (props) => {
-    schemaCardRenderer(props);
-
-    return h(TemplateSchemaMessageRenderer, {
-      itemProps: props,
-      type: 'schema-card',
-      prevSchema: prevSchema.value,
-      errorMessagesMap: errorMessagesMap.value,
-      messages: messages.value,
-      onSchemaVersionToggle: (schema: Record<string, unknown>, cardId: string) =>
-        emit('schema-version-toggle', schema, cardId),
-    });
-  },
+  'json-patch': createSchemaMessageRenderer('json-patch'),
+  'schema-card': createSchemaMessageRenderer('schema-card'),
+  'schema-manual': createSchemaMessageRenderer('schema-manual'),
 };
 
-// 当前会话的 inputMessage 代理，给 v-model 使用
 const inputMessage = computed({
-  get: () => messageManager.value.inputMessage.value,
+  get: () => messageManager.value?.inputMessage.value ?? '',
   set: (v: string) => {
-    messageManager.value.inputMessage.value = v;
+    if (messageManager.value) {
+      messageManager.value.inputMessage.value = v;
+    }
   },
 });
 
@@ -289,15 +218,18 @@ if (props.messages?.length) {
   messages.value.splice(0, messages.value.length, ...(props.messages as any));
 }
 
-const showMessages = computed(() => {
-  let showMessages = messages.value;
+const { scrollToBottom, autoScrollToBottom, isLastMessageInBottom } = scrollEnd(messagesContainer);
+const throttledScrollToBottom = throttle(autoScrollToBottom, 400);
 
-  if (messageManager.value.messageState.status === STATUS.PROCESSING) {
+const showMessages = computed(() => {
+  let list = messages.value;
+
+  if (messageManager.value?.messageState.status === STATUS.PROCESSING) {
     return [
-      ...showMessages,
+      ...list,
       {
         role: 'assistant',
-        content: '正在思考中...',
+        content: t('loading.thinking'),
         loading: true,
       },
     ];
@@ -305,22 +237,20 @@ const showMessages = computed(() => {
 
   const lastMessage = messages.value[messages.value.length - 1];
 
-  // 在流式返回过程中，为最后一条助手消息添加 loading-text 组件
   if (generating.value && lastMessage?.role === 'assistant') {
     const existingMessages = Array.isArray((lastMessage as any)?.messages) ? (lastMessage as any).messages : [];
-    // 检查是否已经存在 loading-text，避免重复添加
     const hasLoadingText = existingMessages.some((msg: any) => msg.type === 'loading-text');
 
     if (!hasLoadingText) {
       return [
-        ...showMessages.slice(0, -1),
+        ...list.slice(0, -1),
         {
           ...lastMessage,
           messages: [
             ...existingMessages,
             {
               type: 'loading-text',
-              emitter: emitter,
+              emitter,
               message: lastMessage,
               showThinkingResult: false,
             },
@@ -330,18 +260,17 @@ const showMessages = computed(() => {
     }
   }
 
-  return showMessages;
+  return list;
 });
 
 const clearInputMessage = () => {
   inputMessage.value = '';
 };
 
-// 发送消息
 const handleSendMessage = async () => {
   const messageContent = inputMessage.value;
   const cardId = generateId();
-  setCurrentCardId(cardId);
+  schema.setCurrentCardId(cardId);
 
   const userMessage: ChatMessage = {
     role: 'user',
@@ -350,41 +279,33 @@ const handleSendMessage = async () => {
   };
   messages.value.push(userMessage);
 
-  // 如果是第一条 user 消息，更新当前 title
   if (messages.value.length === 1 && messages.value[0].role === 'user') {
-    const currentConversationId = templateConversationState.value?.currentId;
+    const currentConversationId = conversation.templateConversationState?.currentId;
     if (currentConversationId) {
-      updateTemplateTitle(currentConversationId, messageContent.substring(0, 20));
+      conversation.updateConversationTitle(currentConversationId, messageContent.substring(0, 20));
     }
   }
 
-  prevSchema.value = JSON.stringify(currentSchema.value);
-  messageManager.value.send();
+  prevSchema.value = JSON.stringify(schema.currentSchema);
+  messageManager.value?.send();
   clearInputMessage();
   scrollToBottom();
 };
 
-const handleNotification = (event: INotificationPayload) => {
-  if (event.type === 'done') {
-    setCurrentSchema(currentPreviewSchema.value);
-    // 将 schema 缓存到卡片中
-    const lastMessage = messages.value[messages.value.length - 1];
-    const lastMessageCard = (lastMessage as any).messages.find(
-      (msg: any) => msg.type === 'schema-card' || msg.type === 'json-patch',
-    );
-
-    if (lastMessageCard) {
-      lastMessageCard.schema = JSON.stringify(currentSchema.value);
-      lastMessageCard.prevSchema = prevSchema.value || '';
-      lastMessageCard.generatedTime = formatDateTime(new Date());
-    }
-  }
+const finalizeStreamingSchemaCard = () => {
+  finalizePendingSchemaCard(messages.value, {
+    cardId: schema.currentCardId,
+    schema: schema.currentPreviewSchema ?? schema.currentSchema,
+    prevSchema: prevSchema.value || '',
+  });
 };
 
-const messagesContainer: Ref<HTMLElement | undefined> = ref();
-
-const { scrollToBottom, autoScrollToBottom, isLastMessageInBottom } = scrollEnd(messagesContainer);
-const throttledScrollToBottom = throttle(autoScrollToBottom, 400);
+const handleNotification = (event: INotificationPayload) => {
+  if (event.type === 'done') {
+    schema.setCurrentSchema(schema.currentPreviewSchema);
+    finalizeStreamingSchemaCard();
+  }
+};
 
 watch(() => messages.value, throttledScrollToBottom, { deep: true });
 
@@ -398,22 +319,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="tg-chat-container"
-    :class="{ 'dark': TinyGenuiConfig?.theme === 'dark' }"
-  >
-    <div
-      class="messages-container"
-      ref="messagesContainer"
-    >
+  <div class="tg-chat-container" :class="{ 'dark': TinyGenuiConfig?.theme === 'dark' }">
+    <div class="messages-container" ref="messagesContainer">
       <tr-bubble-provider :content-renderers="messageRenderers">
-        <tr-bubble-list
-          v-if="showMessages.length"
-          :items="showMessages"
-          :roles="roles"
-          auto-scroll
-        >
-        </tr-bubble-list>
+        <tr-bubble-list v-if="showMessages.length" :items="showMessages" :roles="roles" auto-scroll> </tr-bubble-list>
       </tr-bubble-provider>
     </div>
     <div class="sender-container">
@@ -426,18 +335,17 @@ onUnmounted(() => {
       </div>
       <tr-sender
         v-model="inputMessage"
-        :placeholder="
-          GeneratingStatus.includes(messageManager.messageState.status) ? '正在思考中...' : '请输入您的问题～'
-        "
+        :placeholder="generating ? t('loading.thinking') : t('template.inputPlaceholder')"
         :clearable="true"
-        :loading="GeneratingStatus.includes(messageManager.messageState.status)"
+        :loading="generating"
         :showWordLimit="true"
         :maxLength="5000"
         @clear="clearInputMessage"
         @submit="handleSendMessage"
-        @cancel="messageManager.abortRequest"
+        @cancel="() => messageManager?.abortRequest()"
       >
       </tr-sender>
+      <div class="footer-text">{{ t('footer.aiGenerated') }}</div>
     </div>
   </div>
 </template>
@@ -446,7 +354,7 @@ onUnmounted(() => {
 .tg-chat-container {
   --ti-gen-chat-container-bg-color: #f0f0f0;
   --thinking-display: initial;
-  --sender-bg: url('./assets/sender-light.svg') no-repeat center;
+  --sender-bg: url('../../assets/images/sender-light.svg') no-repeat center;
   --sender-border-color: #e5e5e5;
   --generating-bg-before: linear-gradient(90deg, #fff, #a2c7f4);
   --generating-bg-after: #fff;
@@ -460,7 +368,7 @@ onUnmounted(() => {
   overflow: auto;
   &.dark {
     --ti-gen-chat-container-bg-color: #191919;
-    --sender-bg: url('./assets/sender-dark.svg') no-repeat center;
+    --sender-bg: url('../../assets/images/sender-dark.svg') no-repeat center;
     --sender-border-color: #333;
     --generating-bg-before: linear-gradient(90deg, #262626, #808080);
     --generating-bg-after: #191919;
@@ -493,9 +401,18 @@ onUnmounted(() => {
   }
 }
 
+:deep(.tr-bubble.placement-start:has(.schema-version-card)),
+:deep(.tr-bubble.placement-end:has(.schema-version-card)) {
+  .tr-bubble__content {
+    padding: 0;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
 :deep(.tr-bubble[data-role='assistant'] .tr-bubble__content-items) {
-  // 匹配：type非空 + 排除 schema-card/loading-text 这两个值
-  > [type]:not([type='']):not([type='schema-card']):not([type='loading-text']) {
+  > [type]:not([type='']):not([type='schema-card']):not([type='schema-manual']):not([type='loading-text']) {
     display: var(--thinking-display, initial);
   }
 }
@@ -631,5 +548,12 @@ onUnmounted(() => {
 .tiny-sender {
   width: 80%;
   margin: 0 auto;
+}
+
+.footer-text {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin-top: 16px;
 }
 </style>

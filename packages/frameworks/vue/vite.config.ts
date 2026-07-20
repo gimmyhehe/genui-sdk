@@ -12,7 +12,9 @@ export default defineConfig(({ mode }) => {
     root: path.resolve(__dirname, './'),
     plugins: [
       vue(),
-      cssInjectedByJsPlugin(),
+      cssInjectedByJsPlugin({
+        relativeCSSInjection: true,
+      }),
       mode === 'analyze'
         ? visualizer({
             open: true,
@@ -21,8 +23,6 @@ export default defineConfig(({ mode }) => {
       dts({
         rollupTypes: true,
         bundledPackages: [
-          '@opentiny/genui-sdk-core',
-          '@opentiny/genui-sdk-materials-vue-opentiny-vue',
           '@opentiny/tiny-schema-renderer',
           'zod',
           'zod-to-json-schema',
@@ -31,19 +31,29 @@ export default defineConfig(({ mode }) => {
           paths: {
             // 临时规避此包无.d.ts文件的问题
             '@opentiny/tiny-schema-renderer': ['../src/types/tiny-schema-renderer.d.ts'],
+            '@opentiny/tiny-schema-renderer/transform-jsx': ['../src/types/tiny-schema-renderer.d.ts'],
           },
           include: ['../src/types/tiny-schema-renderer.d.ts'],
         },
       }),
     ],
     build: {
+      cssCodeSplit: true,
       lib: {
-        entry: path.resolve(__dirname, './src/index.ts'),
+        entry: {
+          index: path.resolve(__dirname, './src/index.ts'),
+          chat: path.resolve(__dirname, './src/chat/index.ts'),
+          'legacy-chat': path.resolve(__dirname, './src/legacy-chat/index.ts'),
+          renderer: path.resolve(__dirname, './src/renderer/index.ts'),
+          'legacy-renderer': path.resolve(__dirname, './src/legacy-renderer/index.ts'),
+          'config-provider': path.resolve(__dirname, './src/config-provider/index.ts'),
+          'transform-jsx': path.resolve(__dirname, './src/transform-jsx.ts'),
+        },
         formats: ['es'],
-        fileName: `index`,
+        fileName: (_, entryName) => `${entryName}.js`,
       },
-      outDir: path.resolve(__dirname, './output/dist'),
-      sourcemap: false,
+      outDir: path.resolve(__dirname, './dist'),
+      sourcemap: true,
       terserOptions: {
         mangle: {
           toplevel: true,
@@ -55,7 +65,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         external: [
           ...Object.keys(packageJson.dependencies || {}).map((name) => new RegExp(`^${escapeStringRegexp(name)}(/|$)`)),
-        ],
+        ]
       },
     },
   };

@@ -1,4 +1,5 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
+type MaterialsMetaVariantKey = 'mini' | 'standard';
 
 export interface IMcpServerConfig {
   name: string;
@@ -28,6 +29,13 @@ export interface IAgentConfig {
   capabilities?: string[];
 }
 
+export interface ISkillConfig {
+  name: string;
+  description?: string;
+  modules?: Record<string, string>;
+  enabled?: boolean;
+}
+
 export interface IPlaygroundConfig {
   mcpServers: IMcpServerConfig[];
   framework: string;
@@ -35,6 +43,15 @@ export interface IPlaygroundConfig {
   model: string;
   temperature: number;
   agents: IAgentConfig[];
+  skills: ISkillConfig[];
+  promptVariant?: MaterialsMetaVariantKey;
+}
+
+/** 仅序列化已启用的 Skill，并去掉 enabled 字段以减小 metadata 体积 */
+export function skillsPayloadForChat(skills: ISkillConfig[]): Omit<ISkillConfig, 'enabled'>[] {
+  return skills
+    .filter((skill) => skill.enabled !== false)
+    .map(({ enabled: _enabled, ...rest }) => rest);
 }
 
 export const modifyBody = (body: any) => {
@@ -49,7 +66,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
     
     const body = JSON.parse(options.body);
     const config = getConfig();
-    const { mcpServers, framework, promptList, model, temperature, agents = [] } = config;
+    const { mcpServers, framework, promptList, model, temperature, agents = [], skills = [], promptVariant } = config;
 
     const playgroundConfig = {
       mcpServers,
@@ -58,6 +75,8 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       model,
       temperature,
       agents: agents.filter((agent) => agent.enabled),
+      skills: skillsPayloadForChat(skills),
+      promptVariant,
     };
 
     return fetch(url, {

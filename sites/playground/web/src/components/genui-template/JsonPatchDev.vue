@@ -2,10 +2,12 @@
 import { ref, watch } from 'vue';
 import { TinyDialogBox, TinyButton } from '@opentiny/vue';
 import { CodeEditor } from 'monaco-editor-vue3';
+import { useMonacoPlaygroundTheme } from './composables/use-monaco-playground-theme';
 import * as jsonDiffPatch from 'jsondiffpatch';
 import * as jsonPatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 import type { JsonPatchOp } from 'jsondiffpatch/formatters/jsonpatch-apply';
 import { textToJson } from './template-chat-utils';
+import { t } from '../../i18n';
 
 const props = defineProps<{
   currentSchema: string;
@@ -14,6 +16,8 @@ const props = defineProps<{
 }>();
 
 const visible = defineModel<boolean>({ default: false });
+
+const monacoTheme = useMonacoPlaygroundTheme();
 
 const editorOptions = {
   fontSize: 14,
@@ -35,10 +39,8 @@ const handlePatch = () => {
     const patchData = JSON.parse(jsonPatch.value);
     const target = structuredClone(leftData);
 
-    // 应用 patch
     jsonPatchFormatter.patch(target, patchData as JsonPatchOp[]);
 
-    // 更新 right 显示结果
     right.value = JSON.stringify(target as any, null, 2);
   } catch (error) {
     console.error('Patch 失败:', error);
@@ -50,16 +52,12 @@ const handleDiff = () => {
     const leftData = JSON.parse(left.value);
     const rightData = JSON.parse(right.value);
 
-    // 创建 diffPatcher 实例
     const diffPatcher = jsonDiffPatch.create();
 
-    // 计算 diff
     const delta = diffPatcher.diff(leftData, rightData);
 
-    // 将 delta 格式化为 JSON Patch 格式
     const patch = jsonPatchFormatter.format(delta);
 
-    // 更新 jsonPatch 显示结果
     jsonPatch.value = JSON.stringify(patch, null, 2);
   } catch (error) {
     console.error('Diff 失败:', error);
@@ -86,7 +84,7 @@ watch(
 </script>
 
 <template>
-  <tiny-dialog-box v-model:visible="visible" title="调试器" width="80%" height="600px">
+  <tiny-dialog-box v-model:visible="visible" :title="t('templateEditor.debugger')" width="80%" height="600px">
     <!-- footer 居中 -->
     <template #footer>
       <div class="json-patch-dev-footer">
@@ -101,7 +99,7 @@ watch(
           class="json-patch-dev-content-editor"
           v-model:value="left"
           language="json"
-          theme="vs"
+          :theme="monacoTheme"
           :options="editorOptions"
         />
       </div>
@@ -111,7 +109,7 @@ watch(
           class="json-patch-dev-content-editor"
           v-model:value="jsonPatch"
           language="json"
-          theme="vs"
+          :theme="monacoTheme"
           :options="editorOptions"
         />
       </div>
@@ -121,7 +119,7 @@ watch(
           class="json-patch-dev-content-editor"
           v-model:value="right"
           language="json"
-          theme="vs"
+          :theme="monacoTheme"
           :options="editorOptions"
         />
       </div>
