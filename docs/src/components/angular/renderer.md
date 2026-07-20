@@ -36,8 +36,6 @@ export class GenuiExample {
 }
 ```
 
-若外层已配置 `GenuiConfigProvider` 并传入 `materials`，`GenuiLegacyRenderer` 会优先使用 Provider 中的物料。
-
 ## Input
 
 ### content
