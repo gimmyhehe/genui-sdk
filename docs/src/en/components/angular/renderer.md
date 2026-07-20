@@ -36,8 +36,6 @@ export class GenuiExample {
 }
 ```
 
-If `GenuiConfigProvider` is used with `materials` in an ancestor, `GenuiLegacyRenderer` prefers those materials.
-
 ## Input
 
 ### content

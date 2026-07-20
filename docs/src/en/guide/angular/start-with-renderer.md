@@ -4,10 +4,12 @@ The core renderer component `GenuiRenderer` lets you compose logic more freely a
 
 ## Fetch the service and handle streaming responses
 
-Create a file `fetch-schema-stream.ts`. The logic inside is based on the OpenAI-compatible format:
+Create a file `fetch-schema-stream.ts`. Parse OpenAI-compatible SSE `delta.content`, then use core `PatternExtractor` to extract `` ```schemaJson `` chunks (default `SchemaJsonPattern`):
 
-````ts {14-18}
+````ts
 // fetch-schema-stream.ts
+import { PatternExtractor } from '@opentiny/genui-sdk-core';
+
 export async function fetchSchemaStream(
   url: string,
   userInput: string,
@@ -22,7 +24,7 @@ export async function fetchSchemaStream(
       stream: true,
       metadata: {
         tinygenui: JSON.stringify({
-          framework: 'Angular'
+          framework: 'Angular',
         }),
       },
     }),
@@ -32,33 +34,14 @@ export async function fetchSchemaStream(
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  const reader = response.body.getReader();
+  const reader = response.body!.getReader();
   const decoder = new TextDecoder('utf-8');
   let buffer = '';
 
-  let inSchemaStream = false;
-  let bufferText = '';
-  let schemaFinished = false;
-  const startFlag = '```schemaJson';
-  const endFlag = '```';
-
-  // Detect schema start marker
-  const isSchemaJsonStart = (str: string): boolean => {
-    const index = str.indexOf('`');
-    if (index === -1) return false;
-    return startFlag.startsWith(str.substring(index, index + startFlag.length));
-  };
-
-  // Detect schema end marker
-  const isSchemaJsonEnd = (str: string): boolean => {
-    const index = str.lastIndexOf('\n');
-    if (index === -1) return false;
-    if (str.includes(`\n${endFlag}`)) {
-      return true;
-    }
-    const newStr = str.slice(index).trim().substring(0, endFlag.length);
-    return endFlag.startsWith(newStr);
-  };
+  const patternExtractor = new PatternExtractor({
+    onNormalWrite: () => {},
+    onHandledWrite: (value) => onSchemaUpdate(value),
+  });
 
   try {
     while (true) {
@@ -78,7 +61,7 @@ export async function fetchSchemaStream(
 
         const dataStr = line.slice(6);
 
-        if (dataStr === '[DONE]' || schemaFinished) {
+        if (dataStr === '[DONE]') {
           return;
         }
 
@@ -88,43 +71,7 @@ export async function fetchSchemaStream(
 
           if (!content) continue;
 
-          const deltaPart = bufferText + content;
-
-          // Detect entering or exiting the schema stream
-          if ((!inSchemaStream && isSchemaJsonStart(deltaPart)) || (inSchemaStream && isSchemaJsonEnd(deltaPart))) {
-            const matchFlag = inSchemaStream ? /(\n\s*)```/ : startFlag;
-            const matchPart = deltaPart.match(matchFlag)?.[0];
-
-            if (!matchPart) {
-              // Incomplete marker; keep for next chunk
-              bufferText = deltaPart;
-              continue;
-            }
-
-            if (inSchemaStream) {
-              const trimmedDelta = deltaPart.trim();
-              const [schemaPart] = trimmedDelta.split(matchPart);
-              if (schemaPart) {
-                onSchemaUpdate(schemaPart);
-              }
-              schemaFinished = true;
-              return;
-            } else {
-              const trimmedDelta = deltaPart.trim();
-              const [, schemaPart] = trimmedDelta.split(matchPart);
-              inSchemaStream = true;
-              bufferText = '';
-              if (schemaPart) {
-                onSchemaUpdate(schemaPart);
-              }
-              continue;
-            }
-          }
-
-          bufferText = '';
-          if (inSchemaStream) {
-            onSchemaUpdate(deltaPart);
-          }
+          patternExtractor.handleContent(content);
         } catch (e) {
           console.error('Failed to parse backend data:', e, dataStr);
         }
