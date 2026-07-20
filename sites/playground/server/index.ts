@@ -106,10 +106,7 @@ app.post('/check-openapi-tools', checkOpenApiToolsHandler);
 app.post('/fetch-agent-card', fetchAgentCardHandler);
 app.post('/chat-template', chatTemplateHandler);
 
-const port = Number(process.env.PORT);
-if (!Number.isFinite(port) || port <= 0) {
-  throw new Error('PORT is required. Set it in .env (see .env.example).');
-}
+const port = process.env.PORT || 3008
 
 // 启动时先做一次刷新，避免在首次请求前 mapper 为空
 updateProviderModels().finally(() => {
