@@ -1,12 +1,16 @@
-import { genPrompt } from '@opentiny/genui-sdk-core';
+import { genPrompt, type IMaterialsMeta } from '@opentiny/genui-sdk-core';
 import { materialsMeta } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/meta';
 import { materialsMeta as ngMaterialsMeta } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/meta';
 import { IChatCompletionCreateParams, ChatCompletionCreateParamsBase, type IGenPromptConfig } from './types';
 
-const metaMap = {
+
+type IFrameworkKey = 'Vue' | 'Angular';
+type IMetaMap = Record<IFrameworkKey, IMaterialsMeta>;
+
+const metaMap: IMetaMap = {
   Vue: materialsMeta,
   Angular: ngMaterialsMeta,
-} as const;
+};
 
 function mergePrompt( 
   initialPrompt: string,
@@ -40,7 +44,7 @@ export function requestTransform(
   const { framework = 'Vue', strategy = 'append', ...promptConfig } = tgCustomConfig;
 
   const materialsMetaForFramework =
-    metaMap[framework as keyof typeof metaMap] ?? materialsMeta;
+    metaMap[framework] ?? materialsMeta;
   const systemMessages = newParams.messages?.find((message) => message.role === 'system');
   const prompt = genPrompt(framework, materialsMetaForFramework, promptConfig);
   if (systemMessages) {
