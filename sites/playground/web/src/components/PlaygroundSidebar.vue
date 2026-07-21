@@ -29,13 +29,12 @@ const ENABLE_TEMPLATE = import.meta.env.VITE_ENABLE_TEMPLATE === 'true';
 const GenuiTemplateList = ENABLE_TEMPLATE
   ? defineAsyncComponent(() => import('./genui-template/GenuiTemplateList.vue'))
   : shallowRef(null);
-// 从上层注入共享的 playground 上下文（这里只需要主题&会话相关）
+// 从上层注入共享的 playground 上下文（framework / 会话等）
 const playgroundContext = inject('playgroundContext');
-const { conversation } = playgroundContext;
+const { conversation, framework } = playgroundContext;
 
 const TinyIconPlus = iconPlus();
 const activeName = ref('model');
-const framework = ref('Vue');
 const componentLib = ref('TinyVue');
 const frameworkOptions = [
   { name: 'Vue', icon: 'V' },
@@ -52,6 +51,10 @@ const materialThemeColorMap = {
   light: THEME_PREVIEW_COLOR_PRESETS.light,
   dark: THEME_PREVIEW_COLOR_PRESETS.dark,
   lite: THEME_PREVIEW_COLOR_PRESETS.lite,
+};
+
+const setFramework = (name) => {
+  framework.value = name;
 };
 
 const { isMobile } = useIsMobile();
@@ -209,11 +212,11 @@ const updateCustomExamples = (list) => {
               :key="item.name"
               class="framework-btn"
               :class="{ 'framework-btn--active': framework === item.name }"
-              @click="framework = item.name"
+              @click="setFramework(item.name)"
               role="button"
               tabindex="0"
-              @keydown.enter="framework = item.name"
-              @keydown.space.prevent="framework = item.name"
+              @keydown.enter="setFramework(item.name)"
+              @keydown.space.prevent="setFramework(item.name)"
             >
               <span class="framework-btn__icon">{{ item.icon }}</span>
               <span class="framework-btn__name">{{ item.name }}</span>

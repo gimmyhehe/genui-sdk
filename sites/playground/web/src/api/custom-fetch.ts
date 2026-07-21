@@ -76,7 +76,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       temperature,
       agents: agents.filter((agent) => agent.enabled),
       skills: skillsPayloadForChat(skills),
-      promptVariant,
+      promptVariant: promptVariant || 'standard',
     };
 
     return fetch(url, {
