@@ -246,16 +246,25 @@ async function syncAllSkills({ ssotDir, enabledTools, syncMethod, overrides, pro
 
   for (const directory of directories) {
     for (const toolId of enabledTools) {
-      results.push(
-        await syncSkillToTool({
-          ssotDir,
-          directory,
+      try {
+        results.push(
+          await syncSkillToTool({
+            ssotDir,
+            directory,
+            toolId,
+            method: syncMethod,
+            overrides,
+            projectRoot,
+          }),
+        );
+      } catch (err) {
+        results.push({
           toolId,
-          method: syncMethod,
-          overrides,
-          projectRoot,
-        }),
-      );
+          directory,
+          method: 'error',
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     }
   }
 
@@ -447,10 +456,25 @@ async function cmdSync(config) {
     projectRoot: config.projectRoot,
   });
 
-  console.log(`Synced ${results.length} skill×tool projection(s) (method: ${config.syncMethod})`);
+  const failed = results.filter((r) => r.method === 'error');
+  const succeeded = results.length - failed.length;
+
+  console.log(
+    `Synced ${succeeded} skill×tool projection(s) (method: ${config.syncMethod}` +
+      (failed.length ? `, ${failed.length} failed` : '') +
+      ')',
+  );
   for (const r of results) {
+    if (r.method === 'error') {
+      console.log(`  ✗ ${r.directory} → ${r.toolId} [error] ${r.error}`);
+      continue;
+    }
     const extra = r.reason ? ` (${r.reason})` : '';
     console.log(`  ✓ ${r.directory} → ${r.toolId} [${r.method}]${extra}`);
+  }
+
+  if (failed.length) {
+    throw new Error(`${failed.length} skill×tool projection(s) failed`);
   }
 }
 
