@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { homedir, platform } from 'os';
-import { join, isAbsolute, resolve, dirname } from 'path';
+import { join, isAbsolute, resolve, dirname, relative } from 'path';
 import { readFileSync, existsSync, constants } from 'fs';
 import {
   cp,
@@ -38,6 +38,7 @@ const DEFAULT_CONFIG = {
     opencode_config_dir: '.config/opencode',
     hermes_config_dir: '.hermes',
     openclaw_config_dir: '.openclaw',
+    agents_config_dir: '.agents',
   },
 };
 
@@ -49,36 +50,54 @@ const TOOL_REGISTRY = {
   opencode: { overrideKey: 'opencode_config_dir', defaultConfigRoot: ['.config', 'opencode'] },
   hermes: { overrideKey: 'hermes_config_dir', defaultConfigRoot: ['.hermes'] },
   openclaw: { overrideKey: 'openclaw_config_dir', defaultConfigRoot: ['.openclaw'] },
-  agents: { overrideKey: null, defaultConfigRoot: ['.agents'] },
+  agents: { overrideKey: 'agents_config_dir', defaultConfigRoot: ['.agents'] },
 };
 
 function getHomeDir() {
   return process.env.APP_TEST_HOME ?? homedir();
 }
 
-function resolveOverridePath(raw) {
-  const home = getHomeDir();
-  const trimmed = raw.trim();
-  if (trimmed === '~') return home;
-  if (trimmed.startsWith('~/') || trimmed.startsWith('~\\')) {
-    return join(home, trimmed.slice(2));
-  }
-  return trimmed;
+function isPathInside(child, parent) {
+  const rel = relative(resolve(parent), resolve(child));
+  return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
 }
 
-function getOverrideDir(toolId, overrides = {}) {
+function resolveOverridePath(raw, projectRoot) {
+  const home = getHomeDir();
+  const trimmed = raw.trim();
+  let candidate;
+  if (trimmed === '~') {
+    candidate = home;
+  } else if (trimmed.startsWith('~/') || trimmed.startsWith('~\\')) {
+    candidate = join(home, trimmed.slice(2));
+  } else if (isAbsolute(trimmed)) {
+    candidate = resolve(trimmed);
+  } else {
+    candidate = resolve(projectRoot, trimmed);
+  }
+
+  const resolved = resolve(candidate);
+  if (!isPathInside(resolved, projectRoot) && !isPathInside(resolved, home)) {
+    throw new Error(
+      `Override path escapes approved bases (project or home): ${raw} → ${resolved}`,
+    );
+  }
+  return resolved;
+}
+
+function getOverrideDir(toolId, overrides = {}, projectRoot = process.cwd()) {
   const config = TOOL_REGISTRY[toolId];
   if (!config?.overrideKey) return null;
   const raw = overrides[config.overrideKey]?.trim();
   if (!raw) return null;
-  return resolveOverridePath(raw);
+  return resolveOverridePath(raw, projectRoot);
 }
 
-function getAppSkillsDir(toolId, overrides = {}) {
+function getAppSkillsDir(toolId, overrides = {}, projectRoot = process.cwd()) {
   const config = TOOL_REGISTRY[toolId];
   if (!config) throw new Error(`Unknown tool: ${toolId}`);
 
-  const override = getOverrideDir(toolId, overrides);
+  const override = getOverrideDir(toolId, overrides, projectRoot);
   if (override) return join(override, 'skills');
 
   const home = getHomeDir();
@@ -89,10 +108,10 @@ function resolveSsotDir(ssotDir, projectRoot = process.cwd()) {
   return isAbsolute(ssotDir) ? resolve(ssotDir) : resolve(projectRoot, ssotDir);
 }
 
-function getAllScanSources(overrides = {}, ssotDir) {
+function getAllScanSources(overrides = {}, ssotDir, projectRoot = process.cwd()) {
   const sources = SYNCABLE_TOOL_IDS.map((toolId) => ({
     toolId,
-    path: getAppSkillsDir(toolId, overrides),
+    path: getAppSkillsDir(toolId, overrides, projectRoot),
   }));
   if (ssotDir) sources.push({ toolId: 'ssot', path: ssotDir });
   return sources;
@@ -179,11 +198,18 @@ async function replaceDestWithCopy(source, dest, directory) {
   }
 }
 
-async function syncSkillToTool({ ssotDir, directory, toolId, method, overrides = {} }) {
+async function syncSkillToTool({
+  ssotDir,
+  directory,
+  toolId,
+  method,
+  overrides = {},
+  projectRoot = process.cwd(),
+}) {
   const source = join(ssotDir, directory);
   await validateSkillSource(source, directory);
 
-  const appDir = getAppSkillsDir(toolId, overrides);
+  const appDir = getAppSkillsDir(toolId, overrides, projectRoot);
   await mkdir(appDir, { recursive: true });
   const dest = join(appDir, directory);
 
@@ -214,14 +240,21 @@ async function syncSkillToTool({ ssotDir, directory, toolId, method, overrides =
   }
 }
 
-async function syncAllSkills({ ssotDir, enabledTools, syncMethod, overrides }) {
+async function syncAllSkills({ ssotDir, enabledTools, syncMethod, overrides, projectRoot }) {
   const directories = await listSkillDirectories(ssotDir);
   const results = [];
 
   for (const directory of directories) {
     for (const toolId of enabledTools) {
       results.push(
-        await syncSkillToTool({ ssotDir, directory, toolId, method: syncMethod, overrides }),
+        await syncSkillToTool({
+          ssotDir,
+          directory,
+          toolId,
+          method: syncMethod,
+          overrides,
+          projectRoot,
+        }),
       );
     }
   }
@@ -306,8 +339,8 @@ async function listSkillDirectories(ssotDir) {
   return (await listSkillEntries(ssotDir)).map((e) => e.directory);
 }
 
-async function scanSkills({ ssotDir, overrides = {} }) {
-  const sources = getAllScanSources(overrides, ssotDir);
+async function scanSkills({ ssotDir, overrides = {}, projectRoot = process.cwd() }) {
+  const sources = getAllScanSources(overrides, ssotDir, projectRoot);
   const ssotSkills = new Set((await listSkillEntries(ssotDir)).map((s) => s.directory));
   const aggregated = new Map();
 
@@ -337,14 +370,14 @@ async function scanSkills({ ssotDir, overrides = {} }) {
   return [...aggregated.values()].sort((a, b) => a.directory.localeCompare(b.directory));
 }
 
-async function getSyncStatus({ ssotDir, enabledTools, overrides }) {
+async function getSyncStatus({ ssotDir, enabledTools, overrides, projectRoot = process.cwd() }) {
   const status = [];
 
   for (const skill of await listSkillEntries(ssotDir)) {
     const toolStatus = [];
 
     for (const toolId of enabledTools) {
-      const dest = join(getAppSkillsDir(toolId, overrides), skill.directory);
+      const dest = join(getAppSkillsDir(toolId, overrides, projectRoot), skill.directory);
       const exists = await pathExists(dest);
       const symlinked = exists ? await isSymlink(dest) : false;
 
@@ -411,6 +444,7 @@ async function cmdSync(config) {
     enabledTools: config.enabledTools,
     syncMethod: config.syncMethod,
     overrides: config.overrides,
+    projectRoot: config.projectRoot,
   });
 
   console.log(`Synced ${results.length} skill×tool projection(s) (method: ${config.syncMethod})`);
@@ -424,6 +458,7 @@ async function cmdScan(config) {
   const results = await scanSkills({
     ssotDir: config.ssotDir,
     overrides: config.overrides,
+    projectRoot: config.projectRoot,
   });
 
   console.log(`Found ${results.length} skill(s):`);
@@ -439,6 +474,7 @@ async function cmdStatus(config) {
     ssotDir: config.ssotDir,
     enabledTools: config.enabledTools,
     overrides: config.overrides,
+    projectRoot: config.projectRoot,
   });
 
   console.log(`SSOT: ${config.ssotDir}`);
