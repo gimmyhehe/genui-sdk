@@ -1,6 +1,7 @@
 import { modifyChatBody as continueGeneratingBodyModifier } from "../continue-writing";
-type MaterialsMetaVariantKey = 'mini' | 'standard';
+import type { OpenApiToolServiceConfig } from '../components/common.types';
 
+type MaterialsMetaVariantKey = 'mini' | 'standard';
 export interface IMcpServerConfig {
   name: string;
   url: string;
@@ -36,6 +37,8 @@ export interface ISkillConfig {
   enabled?: boolean;
 }
 
+export type IOpenApiToolServiceConfig = OpenApiToolServiceConfig;
+
 export interface IPlaygroundConfig {
   mcpServers: IMcpServerConfig[];
   framework: string;
@@ -44,6 +47,7 @@ export interface IPlaygroundConfig {
   temperature: number;
   agents: IAgentConfig[];
   skills: ISkillConfig[];
+  openApiTools: IOpenApiToolServiceConfig[];
   promptVariant?: MaterialsMetaVariantKey;
 }
 
@@ -66,7 +70,17 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
     
     const body = JSON.parse(options.body);
     const config = getConfig();
-    const { mcpServers, framework, promptList, model, temperature, agents = [], skills = [], promptVariant } = config;
+    const {
+      mcpServers,
+      framework,
+      promptList,
+      model,
+      temperature,
+      agents = [],
+      skills = [],
+      openApiTools = [],
+      promptVariant
+    } = config;
 
     const playgroundConfig = {
       mcpServers,
@@ -76,6 +90,7 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       temperature,
       agents: agents.filter((agent) => agent.enabled),
       skills: skillsPayloadForChat(skills),
+      openApiTools: openApiTools.filter((tool) => tool.enabled !== false),
       promptVariant,
     };
 
