@@ -1,5 +1,5 @@
 <script setup>
-import { TinyTabs, TinyTabItem, TinyRadioGroup, TinyRadio, TinyCheckbox } from '@opentiny/vue';
+import { TinyTabs, TinyTabItem } from '@opentiny/vue';
 import { iconPlus } from '@opentiny/vue-icon';
 import { ref, watch, computed, inject, defineAsyncComponent, shallowRef } from 'vue';
 import NewSvg from '../assets/images/new.svg?raw';
@@ -12,7 +12,7 @@ import GenuiHistory from './tab-components/GenuiHistory.vue';
 import LanguageSwitcher from './LanguageSwitcher.vue';
 import { useIsMobile } from '../hooks';
 import useTemplate from './genui-template/useTemplate';
-import { ThemePreviewCard, THEME_PREVIEW_COLOR_PRESETS } from './theme-preview';
+import { MaterialsTab } from './materials-tab';
 import { t } from '../i18n';
 
 const props = defineProps({
@@ -31,31 +31,10 @@ const GenuiTemplateList = ENABLE_TEMPLATE
   : shallowRef(null);
 // 从上层注入共享的 playground 上下文（framework / 会话等）
 const playgroundContext = inject('playgroundContext');
-const { conversation, framework } = playgroundContext;
+const { conversation } = playgroundContext;
 
 const TinyIconPlus = iconPlus();
 const activeName = ref('model');
-const componentLib = ref('TinyVue');
-const frameworkOptions = [
-  { name: 'Vue', icon: 'V' },
-  { name: 'Angular', icon: 'A' },
-];
-const componentLibOptions = ['TinyVue', 'ElementUI'];
-const materialThemeOptions = [
-  { text: '亮色', value: 'light' },
-  { text: '暗黑', value: 'dark' },
-  { text: '清新', value: 'lite' },
-  { text: '跟随系统', value: 'auto' },
-];
-const materialThemeColorMap = {
-  light: THEME_PREVIEW_COLOR_PRESETS.light,
-  dark: THEME_PREVIEW_COLOR_PRESETS.dark,
-  lite: THEME_PREVIEW_COLOR_PRESETS.lite,
-};
-
-const setFramework = (name) => {
-  framework.value = name;
-};
 
 const { isMobile } = useIsMobile();
 
@@ -204,68 +183,8 @@ const updateCustomExamples = (list) => {
         <tiny-tab-item :title="t('sidebar.tabTools')" name="tools">
           <McpTools />
         </tiny-tab-item>
-        <tiny-tab-item title="物料" name="theme">
-          <div class="config-title">框架</div>
-          <div class="framework-group">
-            <div
-              v-for="item in frameworkOptions"
-              :key="item.name"
-              class="framework-btn"
-              :class="{ 'framework-btn--active': framework === item.name }"
-              @click="setFramework(item.name)"
-              role="button"
-              tabindex="0"
-              @keydown.enter="setFramework(item.name)"
-              @keydown.space.prevent="setFramework(item.name)"
-            >
-              <span class="framework-btn__icon">{{ item.icon }}</span>
-              <span class="framework-btn__name">{{ item.name }}</span>
-            </div>
-          </div>
-
-          <div class="config-title">组件库</div>
-          <div class="library-radio-group" role="radiogroup" aria-label="组件库">
-            <tiny-radio-group v-model="componentLib" class="library-radio-group__inner">
-              <tiny-radio v-for="item in componentLibOptions" :key="item" :label="item">{{ item }}</tiny-radio>
-            </tiny-radio-group>
-          </div>
-
-          <div class="config-title">主题</div>
-          <div class="theme-card-group" role="radiogroup" aria-label="主题">
-            <div
-              v-for="item in materialThemeOptions"
-              :key="item.value"
-              class="theme-card-item"
-            >
-              <div
-                class="theme-card"
-                :class="[ `theme-card--${item.value}`, { 'theme-card--active': theme === item.value } ]"
-                role="radio"
-                :aria-checked="theme === item.value"
-                tabindex="0"
-                @click="emit('update:theme', item.value)"
-                @keydown.enter="emit('update:theme', item.value)"
-                @keydown.space.prevent="emit('update:theme', item.value)"
-              >
-                <tiny-checkbox
-                  v-if="theme === item.value"
-                  class="theme-card__check"
-                  :model-value="true"
-                  @click.stop
-                />
-                <ThemePreviewCard
-                  :theme-variant="item.value"
-                  :theme-colors="materialThemeColorMap[item.value]"
-                />
-              </div>
-              <span
-                class="theme-card__label"
-                :class="{ 'theme-card__label--active': theme === item.value }"
-              >
-                {{ item.text }}
-              </span>
-            </div>
-          </div>
+        <tiny-tab-item :title="t('sidebar.tabMaterials')" name="theme">
+          <MaterialsTab :theme="theme" @update:theme="emit('update:theme', $event)" />
         </tiny-tab-item>
         <tiny-tab-item :title="t('sidebar.tabHistory')" name="history" class="history-tab">
           <GenuiHistory v-if="conversation" :conversation="conversation" />
@@ -379,134 +298,6 @@ const updateCustomExamples = (list) => {
     }
     :deep(.tiny-button-group .tiny-group-item li button) {
       padding: 0 20px;
-    }
-
-    .framework-group {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .framework-btn {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 12px 0;
-      border: 1px solid #e6e6e6;
-      border-radius: 8px;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    .framework-btn__icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #f5f5f5;
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .framework-btn__name {
-      font-size: 12px;
-      line-height: 1;
-      color: #595959;
-    }
-
-    .framework-btn--active {
-      border-color: #191919;
-      background: transparent;
-    }
-
-    .framework-btn--active .framework-btn__icon {
-      background: #1476ff;
-      color: #fff;
-    }
-
-    .framework-btn--active .framework-btn__name {
-      color: #1476ff;
-    }
-
-    .library-radio-group {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    :deep(.library-radio-group__inner) {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .theme-card-group {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 20px;
-      box-sizing: border-box;
-    }
-
-    .theme-card-item {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 8px;
-      min-width: 0;
-      box-sizing: border-box;
-    }
-
-    .theme-card {
-      position: relative;
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid #e6e6e6;
-      border-radius: 8px;
-      padding: 8px 8px 0;
-      cursor: pointer;
-      user-select: none;
-      overflow: hidden;
-    }
-
-    .theme-card__check {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      z-index: 1;
-      pointer-events: none;
-
-      :deep(.tiny-checkbox) {
-        margin: 0;
-      }
-
-      :deep(.tiny-checkbox__label) {
-        display: none;
-      }
-    }
-
-    .theme-card__label {
-      font-size: 12px;
-      line-height: 1;
-      color: #595959;
-      text-align: center;
-    }
-
-    .theme-card__label--active {
-      color: #191919;
-      font-weight: 500;
-    }
-
-    .theme-card--active {
-      border-color: #191919;
     }
 
     :deep(.tiny-tabs__header.is-top) {
