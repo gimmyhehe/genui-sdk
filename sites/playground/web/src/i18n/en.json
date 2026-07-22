@@ -25,7 +25,9 @@
     "tabTools": "Tools",
     "tabTheme": "Theme",
     "tabHistory": "History",
-    "tabTemplate": "Templates (experimental)"
+    "tabTemplate": "Templates (experimental)",
+    "modeChat": "Chat",
+    "modeBuilder": "Builder"
   },
   "model": {
     "select": "Model",
