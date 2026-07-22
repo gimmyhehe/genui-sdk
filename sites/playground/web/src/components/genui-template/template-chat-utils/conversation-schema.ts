@@ -77,10 +77,95 @@ export function parseJsonPatchOperations(content: string): unknown[] | null {
   }
 }
 
+const jsonPatchApplyFailedCache = new Map<string, { fingerprint: string; failed: boolean }>();
+
+function getJsonPatchApplyFailedFingerprint(card: ISchemaCardLikeMessage): string {
+  return `${card.content ?? ''}\0${'prevSchema' in card ? card.prevSchema ?? '' : ''}`;
+}
+
+export function isJsonPatchApplyFailed(
+  card: ISchemaCardLikeMessage,
+  messages?: ChatMessage[],
+): boolean {
+  if (card.type !== 'json-patch' || !card.content?.trim() || !card.generatedTime?.trim()) {
+    return false;
+  }
+
+  if (typeof card.applyFailed === 'boolean') {
+    return card.applyFailed;
+  }
+
+  const fingerprint = getJsonPatchApplyFailedFingerprint(card);
+  const cached = jsonPatchApplyFailedCache.get(card.cardId);
+  if (cached && cached.fingerprint === fingerprint) {
+    return cached.failed;
+  }
+
+  const operations = parseJsonPatchOperations(card.content);
+  let failed = false;
+  if (!operations) {
+    failed = false;
+  } else {
+    const prevSchemaStr = resolveJsonPatchPrevSchemaString(card, messages);
+    const baseline = parseSchemaJson(prevSchemaStr);
+    failed = !baseline || applyJsonPatchOperations(baseline, operations) === null;
+  }
+
+  jsonPatchApplyFailedCache.set(card.cardId, { fingerprint, failed });
+  return failed;
+}
+
+export function backfillJsonPatchApplyFailedFlags(messages?: ChatMessage[]): boolean {
+  if (!messages?.length) {
+    return false;
+  }
+
+  let updated = false;
+  for (const chatMessage of messages) {
+    const items = (chatMessage as { messages?: ISchemaCardLikeMessage[] }).messages;
+    if (!Array.isArray(items)) {
+      continue;
+    }
+    for (const item of items) {
+      if (item.type !== 'json-patch' || typeof item.applyFailed === 'boolean') {
+        continue;
+      }
+      if (!item.generatedTime?.trim() || !item.content?.trim()) {
+        continue;
+      }
+      item.applyFailed = isJsonPatchApplyFailed(item, messages);
+      updated = true;
+    }
+  }
+  return updated;
+}
+
+export function setJsonPatchApplyFailedFlag(
+  messages: ChatMessage[] | undefined,
+  cardId: string,
+  applyFailed: boolean,
+): void {
+  if (!messages?.length || !cardId) {
+    return;
+  }
+  const card = findSchemaCardByCardId(messages, cardId);
+  if (card?.type === 'json-patch') {
+    card.applyFailed = applyFailed;
+  }
+}
+
 export function rebuildSchemaFromCard(
   card: ISchemaCardLikeMessage,
   options: { messages?: ChatMessage[] } = {},
 ): Record<string, unknown> | null {
+  const schemaString = resolveSchemaStringFromCard(card);
+  if (schemaString) {
+    const parsed = parseSchemaJson(schemaString);
+    if (parsed) {
+      return parsed;
+    }
+  }
+
   if (card.type === 'json-patch' && card.content?.trim()) {
     const prevSchemaStr = resolveJsonPatchPrevSchemaString(card, options.messages);
     const baseline = parseSchemaJson(prevSchemaStr);
@@ -90,14 +175,6 @@ export function rebuildSchemaFromCard(
       if (fromPatch && typeof fromPatch === 'object') {
         return fromPatch as Record<string, unknown>;
       }
-    }
-  }
-
-  const schemaString = resolveSchemaStringFromCard(card);
-  if (schemaString) {
-    const parsed = parseSchemaJson(schemaString);
-    if (parsed) {
-      return parsed;
     }
   }
 
@@ -282,7 +359,7 @@ export function findLatestSchemaCardInConversation(
 
 function applyPendingCardFinalization(
   card: IStreamingSchemaCardMessage,
-  options: { schema?: unknown; prevSchema?: string },
+  options: { schema?: unknown; prevSchema?: string; applyFailed?: boolean },
 ): void {
   const schemaPayload = options.schema ?? rebuildSchemaFromCard(card);
   if (schemaPayload && !card.schema?.trim()) {
@@ -290,6 +367,9 @@ function applyPendingCardFinalization(
   }
   if (options.prevSchema !== undefined) {
     card.prevSchema = options.prevSchema;
+  }
+  if (card.type === 'json-patch' && typeof options.applyFailed === 'boolean') {
+    card.applyFailed = options.applyFailed;
   }
   card.generatedTime = formatDate(new Date());
 }
@@ -300,6 +380,7 @@ export function finalizePendingSchemaCard(
     cardId?: string;
     schema?: unknown;
     prevSchema?: string;
+    applyFailed?: boolean;
   } = {},
 ): boolean {
   const pendingCard =

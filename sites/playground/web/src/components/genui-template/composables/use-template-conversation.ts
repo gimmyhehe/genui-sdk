@@ -8,6 +8,7 @@ import {
   findLatestSchemaInConversation,
   repairAllStalePendingSchemaCards,
   normalizeManualSchemaSaveMessages,
+  backfillJsonPatchApplyFailedFlags,
 } from '../template-chat-utils';
 import { t } from '../../../i18n';
 
@@ -58,7 +59,8 @@ export function useTemplateConversation(options?: UseTemplateConversationOptions
           const loadedMessages = conversationKit.value!.getCurrentConversation()?.messages;
           const repairedPending = repairAllStalePendingSchemaCards(loadedMessages);
           const normalizedManual = normalizeManualSchemaSaveMessages(loadedMessages);
-          if (repairedPending || normalizedManual) {
+          const backfilledApplyFailed = backfillJsonPatchApplyFailedFlags(loadedMessages);
+          if (repairedPending || normalizedManual || backfilledApplyFailed) {
             conversationKit.value!.saveConversations();
           }
           onLoaded?.(loadedMessages);

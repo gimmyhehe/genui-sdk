@@ -219,9 +219,29 @@ function buildAuthor(card: ISchemaCardLikeMessage): { authorLabel: string; autho
   return { authorLabel: t('templateEditor.authorAi'), authorType: 'ai' };
 }
 
+export function markSchemaVersionHistoryCurrent(
+  entries: ISchemaVersionHistoryEntry[],
+  currentCardId?: string,
+): ISchemaVersionHistoryEntry[] {
+  if (!entries.length) {
+    return entries;
+  }
+
+  return entries.map((entry) => {
+    let isCurrent = Boolean(currentCardId) && entry.cardId === currentCardId;
+    if (!isCurrent && currentCardId && entry.type === 'schema-manual') {
+      const manualCard = entry.cardMessage as ISchemaManualMessageItem;
+      const edits = getManualEdits(manualCard);
+      const isLastEdit = edits[edits.length - 1]?.editId === entry.cardId;
+      isCurrent = currentCardId === manualCard.cardId && isLastEdit;
+    }
+    return entry.isCurrent === isCurrent ? entry : { ...entry, isCurrent };
+  });
+}
+
 export function collectSchemaVersionHistory(
   messages: ChatMessage[] | undefined,
-  options: { currentCardId?: string; latestCardId?: string } = {},
+  options: { latestCardId?: string } = {},
 ): ISchemaVersionHistoryEntry[] {
   if (!messages?.length) {
     return [];
@@ -246,7 +266,7 @@ export function collectSchemaVersionHistory(
       if (isManualCard) {
         const manualCard = item as ISchemaManualMessageItem;
         const edits = getManualEdits(manualCard);
-        edits.forEach((edit, editIndex) => {
+        edits.forEach((edit) => {
           const isPending = !edit.generatedTime?.trim();
           const snapshot = manualEditToCardSnapshot(manualCard, edit);
           if (!isPending && !isSchemaVersionHistoryCollectible(snapshot, messages)) {
@@ -254,7 +274,6 @@ export function collectSchemaVersionHistory(
           }
           const createdAtMs = parseGeneratedTimeMs(edit.generatedTime);
           const { authorLabel, authorType } = buildAuthor(manualCard);
-          const isLastEdit = editIndex === edits.length - 1;
 
           entries.push({
             cardId: edit.editId,
@@ -270,9 +289,7 @@ export function collectSchemaVersionHistory(
             authorLabel,
             authorType,
             isLatest: false,
-            isCurrent:
-              options.currentCardId === edit.editId
-              || (options.currentCardId === manualCard.cardId && isLastEdit),
+            isCurrent: false,
             isPending,
             cardMessage: snapshot,
           });
@@ -301,7 +318,7 @@ export function collectSchemaVersionHistory(
         authorLabel,
         authorType,
         isLatest: false,
-        isCurrent: item.cardId === options.currentCardId,
+        isCurrent: false,
         isPending,
         cardMessage: item,
       });

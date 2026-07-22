@@ -26,6 +26,7 @@ export interface IJsonPatchMessageItem {
   generatedTime: string;
   schema: string;
   prevSchema: string;
+  applyFailed?: boolean;
 }
 
 export type SchemaManualInputType = 'manual_edit_save' | 'user';

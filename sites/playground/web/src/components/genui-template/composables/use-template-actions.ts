@@ -2,7 +2,7 @@ import { computed, unref, type UnwrapNestedRefs } from 'vue';
 import { TinyModal } from '@opentiny/vue';
 import { useIsMobile } from '../../../use-mobile';
 import { t } from '../../../i18n';
-import { isRenderableSchema, rebuildSchemaFromCard } from '../template-chat-utils';
+import { isRenderableSchema, rebuildSchemaFromCard, generateIdForComponents } from '../template-chat-utils';
 import type { ISchemaVersionHistoryEntry } from '../template-chat-utils/schema-version-history';
 import { useTemplateVersionControl } from './use-template-version-control';
 import { useSchemaEditor } from './use-schema-editor';
@@ -61,7 +61,7 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
     cardId: string,
     options: { diffFromHistory?: boolean } = {},
   ) {
-    versionControl.previewVersion(schema, cardId, options);
+    versionControl.previewVersion(generateIdForComponents(schema), cardId, options);
     ui.setRendererPanelVisible(true);
     if (isMobile.value || unref(ui.schemaEditorVisible)) {
       editor.syncBaseline();

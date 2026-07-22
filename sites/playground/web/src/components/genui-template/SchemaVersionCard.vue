@@ -85,7 +85,12 @@ const handleDev = () => {
     return;
   }
 
-  jsonPatch.value = JSON.stringify(formatJsonPatch(baseline, operations), null, 2);
+  try {
+    jsonPatch.value = JSON.stringify(formatJsonPatch(baseline, operations), null, 2);
+  } catch (error) {
+    console.error(error);
+    jsonPatch.value = JSON.stringify(operations, null, 2);
+  }
   prevSchema.value = prevSchemaStr;
   currentSchema.value = cardMessage.schema ?? '';
   visible.value = true;
