@@ -24,6 +24,7 @@ pnpm add @opentiny/genui-sdk-core
 | `getPartialStartRegString` | Build partial-match regex string for stream start flags |
 | `DeltaPatcher` | Apply incremental JSON patches with field buffering |
 | `matchJsonPath` | Match a JSON path against a CSS-like selector |
+| `jsonSelectorMatcher` | Match delta path against buffered field selectors |
 | `repairJson` / `safeJsonParse` | Parse or repair incomplete / invalid JSON |
 | `buildMaterialDefaultValueMap` | Extract default props map from materials meta |
 
