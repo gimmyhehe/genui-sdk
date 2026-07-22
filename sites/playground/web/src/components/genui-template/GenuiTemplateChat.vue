@@ -26,6 +26,7 @@ import type {
 } from './chat.types';
 import {
   finalizePendingSchemaCard,
+  findLatestPendingSchemaCard,
   getLastUserMessage,
   isManualSchemaSaveMessage,
 } from './template-chat-utils';
@@ -293,10 +294,13 @@ const handleSendMessage = async () => {
 };
 
 const finalizeStreamingSchemaCard = () => {
-  const cardId = schema.currentCardId;
-  const applyFailed = cardId ? errorMessagesMap.value.has(cardId) : undefined;
+  const cardId =
+    schema.currentCardId
+    || findLatestPendingSchemaCard(messages.value)?.cardId
+    || '';
+  const applyFailed = Boolean(cardId && errorMessagesMap.value.has(cardId));
   finalizePendingSchemaCard(messages.value, {
-    cardId,
+    cardId: cardId || undefined,
     ...(applyFailed ? {} : { schema: schema.currentPreviewSchema ?? schema.currentSchema }),
     prevSchema: prevSchema.value || '',
     applyFailed,
