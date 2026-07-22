@@ -140,7 +140,7 @@ importers:
         specifier: ^0.7.3
         version: 0.7.3
       jsonrepair:
-        specifier: ^3.13.3
+        specifier: 3.14.0
         version: 3.14.0
       radash:
         specifier: ^12.1.1
