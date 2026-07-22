@@ -16,18 +16,18 @@ const errorMessagesMap = ref(new Map<string, string>());
 const lastPreviewSchema = ref<Record<string, unknown> | null>(null);
 
 function setErrorMessage(cardId: string, message: string) {
-  const next = new Map(errorMessagesMap.value);
-  next.set(cardId, message);
-  errorMessagesMap.value = next;
+  const updatedErrorMessages = new Map(errorMessagesMap.value);
+  updatedErrorMessages.set(cardId, message);
+  errorMessagesMap.value = updatedErrorMessages;
 }
 
 function clearErrorMessage(cardId: string) {
   if (!errorMessagesMap.value.has(cardId)) {
     return;
   }
-  const next = new Map(errorMessagesMap.value);
-  next.delete(cardId);
-  errorMessagesMap.value = next;
+  const updatedErrorMessages = new Map(errorMessagesMap.value);
+  updatedErrorMessages.delete(cardId);
+  errorMessagesMap.value = updatedErrorMessages;
 }
 
 function getMutableMessages() {
