@@ -23,9 +23,19 @@
     "newTask": "新建会话",
     "tabModel": "模型配置",
     "tabTools": "工具",
+    "tabMaterials": "物料",
     "tabTheme": "主题",
     "tabHistory": "历史会话",
     "tabTemplate": "模板（实验特性）"
+  },
+  "materials": {
+    "framework": "框架",
+    "componentLib": "组件库",
+    "theme": "主题",
+    "themeLight": "亮色",
+    "themeDark": "暗黑",
+    "themeLite": "清新",
+    "themeAuto": "跟随系统"
   },
   "model": {
     "select": "模型选择",

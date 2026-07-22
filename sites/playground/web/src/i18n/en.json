@@ -23,9 +23,19 @@
     "newTask": "New conversation",
     "tabModel": "Model",
     "tabTools": "Tools",
+    "tabMaterials": "Materials",
     "tabTheme": "Theme",
     "tabHistory": "History",
     "tabTemplate": "Templates (experimental)"
+  },
+  "materials": {
+    "framework": "Framework",
+    "componentLib": "Component library",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeLite": "Lite",
+    "themeAuto": "System"
   },
   "model": {
     "select": "Model",
