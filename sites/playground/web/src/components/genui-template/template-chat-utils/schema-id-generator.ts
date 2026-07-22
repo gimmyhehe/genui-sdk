@@ -15,12 +15,19 @@ function collectExistingIds(node: any, ids: Set<string> = new Set()): Set<string
   return ids;
 }
 
+function canBorrowId(node: any, prevNode: any, usedIds: Set<string>): boolean {
+  if (node.id || !prevNode.id || usedIds.has(prevNode.id)) {
+    return false;
+  }
+  return node.componentName === prevNode.componentName;
+}
+
 const mergeIdsFromPrevious = (node: any, prevNode: any, usedIds: Set<string>) => {
   if (!node || typeof node !== 'object' || !prevNode || typeof prevNode !== 'object') {
     return;
   }
 
-  if (!node.id && prevNode.id && !usedIds.has(prevNode.id)) {
+  if (canBorrowId(node, prevNode, usedIds)) {
     node.id = prevNode.id;
     usedIds.add(prevNode.id);
   }
@@ -28,9 +35,11 @@ const mergeIdsFromPrevious = (node: any, prevNode: any, usedIds: Set<string>) =>
   if (!Array.isArray(node.children) || !Array.isArray(prevNode.children)) {
     return;
   }
+  if (node.children.length !== prevNode.children.length) {
+    return;
+  }
 
-  const limit = Math.min(node.children.length, prevNode.children.length);
-  for (let i = 0; i < limit; i++) {
+  for (let i = 0; i < node.children.length; i++) {
     mergeIdsFromPrevious(node.children[i], prevNode.children[i], usedIds);
   }
 };
