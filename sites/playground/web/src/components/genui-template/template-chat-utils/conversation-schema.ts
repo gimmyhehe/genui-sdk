@@ -159,7 +159,8 @@ export function rebuildSchemaFromCard(
   options: { messages?: ChatMessage[] } = {},
 ): Record<string, unknown> | null {
   if (card.type === 'json-patch' && card.applyFailed === true) {
-    return null;
+    const prevSchemaStr = resolveJsonPatchPrevSchemaString(card, options.messages);
+    return parseSchemaJson(prevSchemaStr);
   }
 
   const schemaString = resolveSchemaStringFromCard(card);
