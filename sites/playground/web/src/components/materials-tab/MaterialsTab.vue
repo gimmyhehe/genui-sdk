@@ -21,6 +21,10 @@ const componentLib = ref('TinyVue');
 
 const setFramework = (name) => {
   framework.value = name;
+  // Angular 不支持主题切换, 默认设置为 light 主题
+  if(name === 'Angular') {
+    emit('update:theme', MATERIAL_THEME_OPTIONS[0].value)
+  }
 };
 </script>
 
@@ -52,35 +56,29 @@ const setFramework = (name) => {
       </tiny-radio-group>
     </div> -->
 
-    <div class="config-title">{{ t('materials.theme') }}</div>
-    <div class="theme-card-group" role="radiogroup" :aria-label="t('materials.theme')">
-      <div v-for="item in MATERIAL_THEME_OPTIONS" :key="item.value" class="theme-card-item">
-        <div
-          class="theme-card"
-          :class="[`theme-card--${item.value}`, { 'theme-card--active': theme === item.value }]"
-          role="radio"
-          :aria-checked="theme === item.value"
-          tabindex="0"
-          @click="emit('update:theme', item.value)"
-          @keydown.enter="emit('update:theme', item.value)"
-          @keydown.space.prevent="emit('update:theme', item.value)"
-        >
-          <tiny-checkbox
-            v-if="theme === item.value"
-            class="theme-card__check"
-            :model-value="true"
-            @click.stop
-          />
-          <ThemePreviewCard
-            :theme="item.value"
-            :theme-colors="MATERIAL_THEME_COLOR_MAP[item.value]"
-          />
+    <template v-if="framework === 'Vue'">
+      <div class="config-title">{{ t('materials.theme') }}</div>
+      <div class="theme-card-group" role="radiogroup" :aria-label="t('materials.theme')">
+        <div v-for="item in MATERIAL_THEME_OPTIONS" :key="item.value" class="theme-card-item">
+          <div
+            class="theme-card"
+            :class="[`theme-card--${item.value}`, { 'theme-card--active': theme === item.value }]"
+            role="radio"
+            :aria-checked="theme === item.value"
+            tabindex="0"
+            @click="emit('update:theme', item.value)"
+            @keydown.enter="emit('update:theme', item.value)"
+            @keydown.space.prevent="emit('update:theme', item.value)"
+          >
+            <tiny-checkbox v-if="theme === item.value" class="theme-card__check" :model-value="true" @click.stop />
+            <ThemePreviewCard :theme="item.value" :theme-colors="MATERIAL_THEME_COLOR_MAP[item.value]" />
+          </div>
+          <span class="theme-card__label" :class="{ 'theme-card__label--active': theme === item.value }">
+            {{ t(item.textKey) }}
+          </span>
         </div>
-        <span class="theme-card__label" :class="{ 'theme-card__label--active': theme === item.value }">
-          {{ t(item.textKey) }}
-        </span>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
