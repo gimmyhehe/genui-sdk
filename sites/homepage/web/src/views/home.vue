@@ -13,6 +13,7 @@ import { useMobile } from '@/composables/useMobile';
 import HomeAbility from '@/components/HomeAbility.vue';
 import HomeGuide from '@/components/HomeGuide.vue';
 import HomeFeature from '@/components/HomeFeature.vue';
+import HomeBuilderContent from '@/components/HomeBuilderContent.vue';
 import HomeLink from '@/components/HomeLink.vue';
 import HomeExtend from '@/components/HomeExtend.vue';
 import HomeMcpToolMobile from '@/components/HomeMcpToolMobile.vue';
@@ -152,6 +153,7 @@ const buttonSize = computed(() => {
 
     <home-guide></home-guide>
     <home-feature></home-feature>
+    <home-builder-content />
     <home-link></home-link>
   </div>
 </template>
