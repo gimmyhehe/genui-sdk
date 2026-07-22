@@ -44,12 +44,13 @@ const setFramework = (name) => {
       </div>
     </div>
 
-    <div class="config-title">{{ t('materials.componentLib') }}</div>
+    <!-- TODO: 组件库切换暂时不支持 -->
+    <!-- <div class="config-title">{{ t('materials.componentLib') }}</div>
     <div class="library-radio-group" role="radiogroup" :aria-label="t('materials.componentLib')">
       <tiny-radio-group v-model="componentLib" class="library-radio-group__inner">
         <tiny-radio v-for="item in COMPONENT_LIB_OPTIONS" :key="item" :label="item">{{ item }}</tiny-radio>
       </tiny-radio-group>
-    </div>
+    </div> -->
 
     <div class="config-title">{{ t('materials.theme') }}</div>
     <div class="theme-card-group" role="radiogroup" :aria-label="t('materials.theme')">
