@@ -178,7 +178,7 @@ class DeltaPatcher {
 
 - **Details**
 
-While streaming, paths matching `requiredCompleteFieldSelectors` are buffered until complete. Selector syntax matches [`matchJsonPath`](#matchjsonpath) / [`jsonSelectorMatcher`](#jsonselectormatcher).
+While streaming, paths matching `requiredCompleteFieldSelectors` are buffered until complete. Selector syntax matches [`matchJsonPath`](#matchjsonpath).
 
 See [Renderer - Buffer Field Configuration](../../examples/renderer/required-complete-field-selectors) for selector syntax and defaults.
 
@@ -223,32 +223,6 @@ function matchJsonPath(
 Supports attribute selectors `[key=val]`, `^=` / `$=` / `*=`, pseudos `:empty` / `:object` / `:array` / `:string` / `:number` / `:boolean` / `:null`, and child combinator `>`.
 
 See [Renderer - Buffer Field Configuration](../../examples/renderer/required-complete-field-selectors) for detailed usage and selector syntax.
-
-### jsonSelectorMatcher()
-
-Checks whether a delta path hits a buffer-field selector and returns the longest match path.
-
-- **Type**
-
-```typescript
-function jsonSelectorMatcher(
-  json: Record<string, any>,
-  selector: string,
-  lastDeltaKeys: string,
-): { isMatch: boolean; matchPath: string }
-```
-
-- **Parameters**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `json` | `Record<string, any>` | Yes | Current JSON object |
-| `selector` | `string` | Yes | Buffer-field selector |
-| `lastDeltaKeys` | `string` | Yes | Path of the current delta change |
-
-Used mainly by `DeltaPatcher`; reusable in custom patch logic. Also exports `findGroupSelector`, `matchSelector`, `matchGroup`.
-
-See [Renderer - Buffer Field Configuration](../../examples/renderer/required-complete-field-selectors) for selector syntax.
 
 ### repairJson()
 
