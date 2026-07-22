@@ -72,7 +72,7 @@ const setFramework = (name) => {
             @click.stop
           />
           <ThemePreviewCard
-            :theme-variant="item.value"
+            :theme="item.value"
             :theme-colors="MATERIAL_THEME_COLOR_MAP[item.value]"
           />
         </div>

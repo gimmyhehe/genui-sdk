@@ -4,9 +4,9 @@ import { THEME_PREVIEW_COLOR_PRESETS } from './theme-colors';
 import ThemePreviewContent from './ThemePreviewContent.vue';
 
 const props = defineProps({
-  themeVariant: {
+  theme: {
     type: String,
-    default: 'lite',
+    default: 'light',
   },
   themeColors: {
     type: Object,
@@ -14,9 +14,9 @@ const props = defineProps({
   },
 });
 
-const resolvePreset = (variant) => {
-  const presetVariant = variant === 'auto' ? 'light' : variant;
-  return THEME_PREVIEW_COLOR_PRESETS[presetVariant] || THEME_PREVIEW_COLOR_PRESETS.light;
+const resolvePreset = (theme) => {
+  const presetTheme = theme === 'auto' ? 'light' : theme;
+  return THEME_PREVIEW_COLOR_PRESETS[presetTheme] || THEME_PREVIEW_COLOR_PRESETS.light;
 };
 
 const toStyleVars = (colors) => ({
@@ -33,7 +33,7 @@ const toStyleVars = (colors) => ({
 });
 
 const themeStyleVars = computed(() => {
-  const preset = resolvePreset(props.themeVariant);
+  const preset = resolvePreset(props.theme);
   const colors = { ...preset, ...props.themeColors };
   return toStyleVars(colors);
 });
