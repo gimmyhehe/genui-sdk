@@ -158,6 +158,10 @@ export function rebuildSchemaFromCard(
   card: ISchemaCardLikeMessage,
   options: { messages?: ChatMessage[] } = {},
 ): Record<string, unknown> | null {
+  if (card.type === 'json-patch' && card.applyFailed === true) {
+    return null;
+  }
+
   const schemaString = resolveSchemaStringFromCard(card);
   if (schemaString) {
     const parsed = parseSchemaJson(schemaString);
@@ -361,15 +365,17 @@ function applyPendingCardFinalization(
   card: IStreamingSchemaCardMessage,
   options: { schema?: unknown; prevSchema?: string; applyFailed?: boolean },
 ): void {
-  const schemaPayload = options.schema ?? rebuildSchemaFromCard(card);
-  if (schemaPayload && !card.schema?.trim()) {
-    card.schema = JSON.stringify(schemaPayload);
+  if (card.type === 'json-patch' && typeof options.applyFailed === 'boolean') {
+    card.applyFailed = options.applyFailed;
+  }
+  if (options.applyFailed !== true) {
+    const schemaPayload = options.schema ?? rebuildSchemaFromCard(card);
+    if (schemaPayload && !card.schema?.trim()) {
+      card.schema = JSON.stringify(schemaPayload);
+    }
   }
   if (options.prevSchema !== undefined) {
     card.prevSchema = options.prevSchema;
-  }
-  if (card.type === 'json-patch' && typeof options.applyFailed === 'boolean') {
-    card.applyFailed = options.applyFailed;
   }
   card.generatedTime = formatDate(new Date());
 }

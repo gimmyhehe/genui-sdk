@@ -294,11 +294,12 @@ const handleSendMessage = async () => {
 
 const finalizeStreamingSchemaCard = () => {
   const cardId = schema.currentCardId;
+  const applyFailed = cardId ? errorMessagesMap.value.has(cardId) : undefined;
   finalizePendingSchemaCard(messages.value, {
     cardId,
-    schema: schema.currentPreviewSchema ?? schema.currentSchema,
+    ...(applyFailed ? {} : { schema: schema.currentPreviewSchema ?? schema.currentSchema }),
     prevSchema: prevSchema.value || '',
-    applyFailed: cardId ? errorMessagesMap.value.has(cardId) : undefined,
+    applyFailed,
   });
 };
 

@@ -80,14 +80,11 @@ export function applyJsonPatchOperations(
 
   try {
     const formatted = formatJsonPatch(baseline, operations);
-    const standardOperations = formatted
-      .filter((op) => op.idToPath)
-      .map((op) => toStandardPatchOp(op));
-
-    if (standardOperations.length === 0) {
+    if (formatted.some((op) => !op.idToPath)) {
       return null;
     }
 
+    const standardOperations = formatted.map((op) => toStandardPatchOp(op));
     const target = clonePlainJson(baseline as Record<string, unknown>);
     if (!target) {
       return null;
