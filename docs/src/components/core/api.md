@@ -177,7 +177,7 @@ class DeltaPatcher {
 
 - **详细信息**
 
-流式未完成时，命中 `requiredCompleteFieldSelectors` 的路径会被缓冲，直到字段完整再写入。选择器语法与 [`matchJsonPath`](#matchjsonpath) 一致。
+流式未完成时，命中 `requiredCompleteFieldSelectors` 的路径会被缓冲，直到字段完整再写入。选择器语法与 [`matchJsonPath`](#matchjsonpath) / [`jsonSelectorMatcher`](#jsonselectormatcher) 一致。
 
 查看 [Renderer 配置缓冲字段](../../examples/renderer/required-complete-field-selectors) 了解选择器语法与默认规则。
 
@@ -222,6 +222,32 @@ function matchJsonPath(
 支持属性选择器 `[key=val]`、`^=` / `$=` / `*=`，伪类 `:empty` / `:object` / `:array` / `:string` / `:number` / `:boolean` / `:null`，以及子组合 `>`。
 
 查看 [Renderer 配置缓冲字段](../../examples/renderer/required-complete-field-selectors) 了解详细用法和选择器语法。
+
+### jsonSelectorMatcher()
+
+判断 delta 路径是否命中缓冲字段选择器，并返回最长匹配路径。
+
+- **类型**
+
+```typescript
+function jsonSelectorMatcher(
+  json: Record<string, any>,
+  selector: string,
+  lastDeltaKeys: string,
+): { isMatch: boolean; matchPath: string }
+```
+
+- **参数**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `json` | `Record<string, any>` | 是 | 当前 JSON 对象 |
+| `selector` | `string` | 是 | 缓冲字段选择器 |
+| `lastDeltaKeys` | `string` | 是 | 本次 delta 变更的路径 |
+
+主要由 `DeltaPatcher` 内部使用，也可在自定义 patch 逻辑中复用。另导出 `findGroupSelector`、`matchSelector`、`matchGroup`。
+
+查看 [Renderer 配置缓冲字段](../../examples/renderer/required-complete-field-selectors) 了解选择器语法。
 
 ### repairJson()
 
