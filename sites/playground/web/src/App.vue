@@ -92,15 +92,18 @@ const normalizeCustomExamples = (examples) => {
 const isOpen = ref(true);
 const llmConfig = reactive(
   cacheLLmConfig || {
-    temperature: 0.5,
-    model: 'qwen3-coder-30b-a3b-instruct',
-    promptVariant: 'standard',
-    mcpServers: [],
-    agents: [],
-    skills: [],
-    promptList: [],
-  },
-);
+  temperature: 0.5,
+  model: 'qwen3-coder-30b-a3b-instruct',
+  promptVariant: 'standard',
+  mcpServers: [],
+  agents: [],
+  skills: [],
+  openApiTools: [],
+  promptList: [],
+});
+if (!Array.isArray(llmConfig.openApiTools)) {
+  llmConfig.openApiTools = [];
+}
 const customExamples = ref(normalizeCustomExamples(cacheCustomExamples));
 
 const chatConfig = reactive(
