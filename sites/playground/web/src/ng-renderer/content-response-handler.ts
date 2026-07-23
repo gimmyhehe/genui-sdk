@@ -1,17 +1,17 @@
 import type { IChatMessage, IStreamDelta } from '@opentiny/genui-sdk-core';
 import { v4 as uuidv4 } from 'uuid';
 
-import { toRaw, type Ref } from 'vue';
+import { readonly, type Ref } from 'vue';
 import { emitter } from '@opentiny/genui-sdk-vue';
 
 function emitNotification(delta: IStreamDelta, chatMessage: IChatMessage) {
   const lastMessage = chatMessage.messages[chatMessage.messages.length - 1];
-  const notificationType = lastMessage.type.startsWith('schema-card') ? 'schema-card' : 'markdown';
+  const notificationType = lastMessage.type?.startsWith('schema-card-') ? 'schema-card' : lastMessage.type;
   if (lastMessage) {
     emitter.emit('notification', {
       type: notificationType,
       delta,
-      chatMessage: structuredClone(toRaw(chatMessage)),
+      chatMessage: readonly(chatMessage),
     });
   }
 }
