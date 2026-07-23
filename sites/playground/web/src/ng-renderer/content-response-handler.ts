@@ -6,16 +6,22 @@ import { emitter } from "@opentiny/genui-sdk-vue";
 
 function emitNotification(delta: IStreamDelta, chatMessage: IChatMessage) {
     const lastMessage = chatMessage.messages[chatMessage.messages.length - 1];
+    const notificationType = lastMessage.type.startsWith('schema-card') ? 'schema-card' : 'markdown';
     if (lastMessage) {
         emitter.emit('notification', {
-        type: lastMessage.type as 'markdown' | 'schema-card', // TODO: 后续支持其他类型
+        type: notificationType,
         delta,
         chatMessage: structuredClone(toRaw(chatMessage)),
       });
     }
   };
+const cardTypeMap: Record<string, string> = {
+  Angular: 'schema-card-angular',
+  Vue: 'schema-card',
+};
+
 function onSchemaJsonForFramework(content: string, delta: IStreamDelta, chatMessage: IChatMessage, framework: string) {
-    const currentSchemaType = framework === 'Angular' ? 'schema-card-angular' as 'schema-card' : 'schema-card';
+    const currentSchemaType = cardTypeMap[framework] ?? 'schema-card';
     if (chatMessage.messages.length > 0 && chatMessage.messages[chatMessage.messages.length - 1].type === currentSchemaType) {
       chatMessage.messages[chatMessage.messages.length - 1].content += content;
     } else {
