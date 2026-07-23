@@ -138,7 +138,7 @@ async function jsonPatchRenderer(props: {
 
     const isStreamComplete = isSuccessfulParse || lastOperationComplete;
     const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
-    setCurrentPreviewSchema(strippedSchema, isSuccessfulParse);
+    setCurrentPreviewSchema(strippedSchema, isStreamComplete);
   } catch (error) {
     setErrorMessage(props.cardId, (error as Error).message);
     console.error('jsonPatch error ===>', error);
