@@ -6,7 +6,6 @@ import {
   isRenderableSchema,
   findLatestSchemaCardInConversation,
   collectSchemaVersionHistory,
-  markSchemaVersionHistoryCurrent,
   groupSchemaVersionHistory,
   filterSchemaVersionHistoryForCard,
   resolveSchemaCardScopeId,
@@ -66,9 +65,7 @@ export function useTemplateVersionControl() {
       currentHistoryScopeCardId.value,
       currentCardId.value,
     );
-    return groupSchemaVersionHistory(
-      markSchemaVersionHistoryCurrent(scopedEntries, currentCardId.value),
-    );
+    return groupSchemaVersionHistory(scopedEntries);
   });
 
   function isLatestSchemaVersionCard(cardId: string) {

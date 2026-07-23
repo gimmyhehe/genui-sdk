@@ -89,7 +89,7 @@ const toggleGroup = (label: string) => {
                 :key="entry.cardId"
                 type="button"
                 class="schema-version-history-panel__item"
-                :class="{ 'is-active': entry.isCurrent, 'is-pending': entry.isPending }"
+                :class="{ 'is-pending': entry.isPending }"
                 @click="actions.handleHistoryEntrySelect(entry)"
               >
                 <div class="schema-version-history-panel__item-main">
