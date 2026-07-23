@@ -197,7 +197,6 @@ const createSchemaMessageRenderer = (type: 'json-patch' | 'schema-card' | 'schem
     itemProps: props,
     type,
     prevSchema: prevSchema.value,
-    errorMessagesMap: errorMessagesMap.value,
   });
 
 const messageRenderers = {

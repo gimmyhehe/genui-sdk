@@ -13,16 +13,11 @@ const errorMessagesMap = ref(new Map<string, string>());
 const lastPreviewSchema = ref<Record<string, unknown> | null>(null);
 
 function setErrorMessage(cardId: string, message: string) {
-  errorMessagesMap.value = new Map(errorMessagesMap.value).set(cardId, message);
+  errorMessagesMap.value.set(cardId, message);
 }
 
 function clearErrorMessage(cardId: string) {
-  if (!errorMessagesMap.value.has(cardId)) {
-    return;
-  }
-  const next = new Map(errorMessagesMap.value);
-  next.delete(cardId);
-  errorMessagesMap.value = next;
+  errorMessagesMap.value.delete(cardId);
 }
 
 async function schemaCardRenderer(props: {

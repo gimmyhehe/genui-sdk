@@ -29,7 +29,6 @@ export interface IRendererProps {
   schema: string;
   prevSchema: string;
   applyFailed?: boolean;
-  errorMessagesMap?: Map<string, string>;
 }
 
 defineOptions({ inheritAttrs: false });
@@ -37,7 +36,7 @@ defineOptions({ inheritAttrs: false });
 const props = defineProps<IRendererProps>();
 const emit = defineEmits(['card-select']);
 
-const { conversation, versionControl } = useTemplateContext();
+const { conversation, versionControl, stream } = useTemplateContext();
 
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
@@ -68,7 +67,7 @@ const currentSchema = ref<string>('');
 const jsonPatch = ref<string>('');
 const prevSchema = ref<string>('');
 const errorMessage = computed(() =>
-  props.errorMessagesMap?.get(props.cardId)
+  stream.errorMessagesMap.value.get(props.cardId)
   || (props.applyFailed ? 'jsonPatch apply failed' : '')
 );
 
