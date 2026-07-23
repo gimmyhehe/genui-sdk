@@ -77,42 +77,16 @@ export function parseJsonPatchOperations(content: string): unknown[] | null {
   }
 }
 
-const jsonPatchApplyFailedCache = new Map<string, { fingerprint: string; failed: boolean }>();
-
-function getJsonPatchApplyFailedFingerprint(card: ISchemaCardLikeMessage): string {
-  return `${card.content ?? ''}\0${'prevSchema' in card ? card.prevSchema ?? '' : ''}`;
-}
-
-export function isJsonPatchApplyFailed(
-  card: ISchemaCardLikeMessage,
+function detectJsonPatchApplyFailed(
+  card: IJsonPatchMessageItem,
   messages?: ChatMessage[],
 ): boolean {
-  if (card.type !== 'json-patch' || !card.content?.trim() || !card.generatedTime?.trim()) {
+  const operations = parseJsonPatchOperations(card.content);
+  if (!operations) {
     return false;
   }
-
-  if (typeof card.applyFailed === 'boolean') {
-    return card.applyFailed;
-  }
-
-  const fingerprint = getJsonPatchApplyFailedFingerprint(card);
-  const cached = jsonPatchApplyFailedCache.get(card.cardId);
-  if (cached && cached.fingerprint === fingerprint) {
-    return cached.failed;
-  }
-
-  const operations = parseJsonPatchOperations(card.content);
-  let failed = false;
-  if (!operations) {
-    failed = false;
-  } else {
-    const prevSchemaStr = resolveJsonPatchPrevSchemaString(card, messages);
-    const baseline = parseSchemaJson(prevSchemaStr);
-    failed = !baseline || applyJsonPatchOperations(baseline, operations) === null;
-  }
-
-  jsonPatchApplyFailedCache.set(card.cardId, { fingerprint, failed });
-  return failed;
+  const baseline = parseSchemaJson(resolveJsonPatchPrevSchemaString(card, messages));
+  return !baseline || applyJsonPatchOperations(baseline, operations) === null;
 }
 
 export function backfillJsonPatchApplyFailedFlags(messages?: ChatMessage[]): boolean {
@@ -133,25 +107,11 @@ export function backfillJsonPatchApplyFailedFlags(messages?: ChatMessage[]): boo
       if (!item.generatedTime?.trim() || !item.content?.trim()) {
         continue;
       }
-      item.applyFailed = isJsonPatchApplyFailed(item, messages);
+      item.applyFailed = detectJsonPatchApplyFailed(item, messages);
       updated = true;
     }
   }
   return updated;
-}
-
-export function setJsonPatchApplyFailedFlag(
-  messages: ChatMessage[] | undefined,
-  cardId: string,
-  applyFailed: boolean,
-): void {
-  if (!messages?.length || !cardId) {
-    return;
-  }
-  const card = findSchemaCardByCardId(messages, cardId);
-  if (card?.type === 'json-patch') {
-    card.applyFailed = applyFailed;
-  }
 }
 
 export function rebuildSchemaFromCard(

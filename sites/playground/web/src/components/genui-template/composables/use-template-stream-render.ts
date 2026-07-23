@@ -4,34 +4,25 @@ import {
   validateJsonPatch,
   PARSE_PARTIAL_JSON_STATE,
   applyJsonPatchOperations,
-  setJsonPatchApplyFailedFlag,
 } from '../template-chat-utils';
 import { clonePlainJson } from '../template-chat-utils/json-patch-format';
 import { stripSchemaFieldsWhileStreaming } from '../../../utils';
 import { useTemplateSchema } from './use-template-schema';
-import { useTemplateConversation } from './use-template-conversation';
 
 const errorMessagesMap = ref(new Map<string, string>());
 const lastPreviewSchema = ref<Record<string, unknown> | null>(null);
 
 function setErrorMessage(cardId: string, message: string) {
-  const updatedErrorMessages = new Map(errorMessagesMap.value);
-  updatedErrorMessages.set(cardId, message);
-  errorMessagesMap.value = updatedErrorMessages;
+  errorMessagesMap.value = new Map(errorMessagesMap.value).set(cardId, message);
 }
 
 function clearErrorMessage(cardId: string) {
   if (!errorMessagesMap.value.has(cardId)) {
     return;
   }
-  const updatedErrorMessages = new Map(errorMessagesMap.value);
-  updatedErrorMessages.delete(cardId);
-  errorMessagesMap.value = updatedErrorMessages;
-}
-
-function getMutableMessages() {
-  const { getCurrentConversation, messages } = useTemplateConversation();
-  return getCurrentConversation()?.messages ?? messages.value;
+  const next = new Map(errorMessagesMap.value);
+  next.delete(cardId);
+  errorMessagesMap.value = next;
 }
 
 async function schemaCardRenderer(props: {
@@ -139,20 +130,17 @@ async function jsonPatchRenderer(props: {
     if (!targetSchema) {
       if (isSuccessfulParse) {
         setErrorMessage(cardId, 'jsonPatch apply failed');
-        setJsonPatchApplyFailedFlag(getMutableMessages(), cardId, true);
       }
       return;
     }
 
     clearErrorMessage(cardId);
-    setJsonPatchApplyFailedFlag(getMutableMessages(), cardId, false);
 
     const isStreamComplete = isSuccessfulParse || lastOperationComplete;
     const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
     setCurrentPreviewSchema(strippedSchema, isSuccessfulParse);
   } catch (error) {
     setErrorMessage(props.cardId, (error as Error).message);
-    setJsonPatchApplyFailedFlag(getMutableMessages(), props.cardId, true);
     console.error('jsonPatch error ===>', error);
   }
 }

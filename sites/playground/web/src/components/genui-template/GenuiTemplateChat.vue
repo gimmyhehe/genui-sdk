@@ -311,7 +311,7 @@ const handleNotification = (event: INotificationPayload) => {
   schema.setCurrentSchema(preview);
   finalizePendingSchemaCard(messages.value, {
     cardId: cardId || undefined,
-    ...(applyFailed ? {} : { schema: preview ?? schema.currentSchema }),
+    ...(applyFailed || !preview ? {} : { schema: preview }),
     prevSchema: prevSchema.value || '',
     applyFailed,
   });

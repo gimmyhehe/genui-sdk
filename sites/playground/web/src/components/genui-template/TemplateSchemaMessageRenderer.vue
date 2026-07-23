@@ -30,22 +30,6 @@ const schemaVersionCardProps = computed(() => ({
   prevSchema: props.prevSchema || props.itemProps?.prevSchema || '',
 }));
 
-const resolvedErrorMessagesMap = computed(() => {
-  const cardId = props.itemProps?.cardId;
-  if (props.type !== 'json-patch' || !cardId) {
-    return props.errorMessagesMap;
-  }
-  if (props.errorMessagesMap.has(cardId)) {
-    return props.errorMessagesMap;
-  }
-  if (props.itemProps?.applyFailed !== true) {
-    return props.errorMessagesMap;
-  }
-  const next = new Map(props.errorMessagesMap);
-  next.set(cardId, 'jsonPatch apply failed');
-  return next;
-});
-
 const handleSchemaVersionCardClick = (cardId: string) => {
   if (!cardId) {
     return;
@@ -65,7 +49,7 @@ const handleSchemaVersionCardClick = (cardId: string) => {
     v-else
     :key="itemProps?.cardId"
     :type="type"
-    :error-messages-map="resolvedErrorMessagesMap"
+    :error-messages-map="errorMessagesMap"
     v-bind="schemaVersionCardProps"
     @card-select="handleSchemaVersionCardClick"
   />

@@ -28,6 +28,7 @@ export interface IRendererProps {
   generatedTime: string;
   schema: string;
   prevSchema: string;
+  applyFailed?: boolean;
   errorMessagesMap?: Map<string, string>;
 }
 
@@ -66,7 +67,10 @@ const visible = ref(false);
 const currentSchema = ref<string>('');
 const jsonPatch = ref<string>('');
 const prevSchema = ref<string>('');
-const errorMessage = computed(() => props.errorMessagesMap?.get(props.cardId) ?? '');
+const errorMessage = computed(() =>
+  props.errorMessagesMap?.get(props.cardId)
+  || (props.applyFailed ? 'jsonPatch apply failed' : '')
+);
 
 const handleClick = () => {
   emit('card-select', props.cardId);
