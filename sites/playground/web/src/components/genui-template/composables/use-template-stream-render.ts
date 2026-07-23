@@ -20,6 +20,10 @@ function clearErrorMessage(cardId: string) {
   errorMessagesMap.value.delete(cardId);
 }
 
+function clearErrorMessages() {
+  errorMessagesMap.value.clear();
+}
+
 async function schemaCardRenderer(props: {
   content: string;
   cardId: string;
@@ -166,5 +170,6 @@ export function useTemplateStreamRender() {
     lastPreviewSchema,
     handleSchemaJsonChanged,
     resetLastPreviewSchema,
+    clearErrorMessages,
   };
 }
