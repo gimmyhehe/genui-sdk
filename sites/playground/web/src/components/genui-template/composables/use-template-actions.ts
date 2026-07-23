@@ -7,7 +7,6 @@ import type { ISchemaVersionHistoryEntry } from '../template-chat-utils/schema-v
 import { useTemplateVersionControl } from './use-template-version-control';
 import { useSchemaEditor } from './use-schema-editor';
 import { useTemplateUi } from './use-template-ui';
-import { useTemplateStreamRender } from './use-template-stream-render';
 
 export interface TemplateActionsDeps {
   versionControl: UnwrapNestedRefs<ReturnType<typeof useTemplateVersionControl>>;
@@ -20,7 +19,6 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   const versionControl = deps?.versionControl ?? useTemplateVersionControl();
   const editor = deps?.editor ?? useSchemaEditor();
   const ui = deps?.ui ?? useTemplateUi();
-  const { clearErrorMessages } = useTemplateStreamRender();
 
   const isJsonEditorActive = computed(() => unref(ui.isJsonEditorActive));
 
@@ -153,7 +151,6 @@ export function useTemplateActions(deps?: TemplateActionsDeps) {
   }
 
   function resetAll() {
-    clearErrorMessages();
     ui.resetUi();
     resetToLatestVersion();
   }

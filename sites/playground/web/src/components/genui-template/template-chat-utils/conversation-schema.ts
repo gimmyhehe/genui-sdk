@@ -114,6 +114,17 @@ export function backfillJsonPatchApplyFailedFlags(messages?: ChatMessage[]): boo
   return updated;
 }
 
+export function setJsonPatchApplyFailed(
+  messages: ChatMessage[] | undefined,
+  cardId: string,
+  applyFailed: boolean,
+): void {
+  const card = findSchemaCardByCardId(messages, cardId);
+  if (card?.type === 'json-patch') {
+    card.applyFailed = applyFailed;
+  }
+}
+
 export function rebuildSchemaFromCard(
   card: ISchemaCardLikeMessage,
   options: { messages?: ChatMessage[] } = {},
@@ -324,13 +335,14 @@ export function findLatestSchemaCardInConversation(
 
 function applyPendingCardFinalization(
   card: IStreamingSchemaCardMessage,
-  options: { schema?: unknown; prevSchema?: string; applyFailed?: boolean },
+  options: { schema?: unknown; prevSchema?: string },
+  messages?: ChatMessage[],
 ): void {
-  if (card.type === 'json-patch' && typeof options.applyFailed === 'boolean') {
-    card.applyFailed = options.applyFailed;
+  if (card.type === 'json-patch' && typeof card.applyFailed !== 'boolean') {
+    card.applyFailed = detectJsonPatchApplyFailed(card, messages);
   }
-  if (options.applyFailed !== true) {
-    const schemaPayload = options.schema ?? rebuildSchemaFromCard(card);
+  if (card.type !== 'json-patch' || card.applyFailed !== true) {
+    const schemaPayload = options.schema ?? rebuildSchemaFromCard(card, { messages });
     if (schemaPayload && !card.schema?.trim()) {
       card.schema = JSON.stringify(schemaPayload);
     }
@@ -347,7 +359,6 @@ export function finalizePendingSchemaCard(
     cardId?: string;
     schema?: unknown;
     prevSchema?: string;
-    applyFailed?: boolean;
   } = {},
 ): boolean {
   const pendingCard =
@@ -358,7 +369,7 @@ export function finalizePendingSchemaCard(
     return false;
   }
 
-  applyPendingCardFinalization(pendingCard, options);
+  applyPendingCardFinalization(pendingCard, options, messages);
   return true;
 }
 
@@ -370,7 +381,7 @@ export function repairAllStalePendingSchemaCards(messages: ChatMessage[] | undef
     if (!pending) {
       break;
     }
-    applyPendingCardFinalization(pending, {});
+    applyPendingCardFinalization(pending, {}, messages);
     updated = true;
   }
 

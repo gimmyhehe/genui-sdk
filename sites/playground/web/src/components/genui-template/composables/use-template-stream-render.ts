@@ -4,25 +4,14 @@ import {
   validateJsonPatch,
   PARSE_PARTIAL_JSON_STATE,
   applyJsonPatchOperations,
+  setJsonPatchApplyFailed,
 } from '../template-chat-utils';
 import { clonePlainJson } from '../template-chat-utils/json-patch-format';
 import { stripSchemaFieldsWhileStreaming } from '../../../utils';
 import { useTemplateSchema } from './use-template-schema';
+import { useTemplateConversation } from './use-template-conversation';
 
-const errorMessagesMap = ref(new Map<string, string>());
 const lastPreviewSchema = ref<Record<string, unknown> | null>(null);
-
-function setErrorMessage(cardId: string, message: string) {
-  errorMessagesMap.value.set(cardId, message);
-}
-
-function clearErrorMessage(cardId: string) {
-  errorMessagesMap.value.delete(cardId);
-}
-
-function clearErrorMessages() {
-  errorMessagesMap.value.clear();
-}
 
 async function schemaCardRenderer(props: {
   content: string;
@@ -52,12 +41,8 @@ async function schemaCardRenderer(props: {
 
     const json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
     setCurrentPreviewSchema(json, isCompleted);
-    if (isCompleted) {
-      clearErrorMessage(cardId);
-    }
   } catch (error) {
     console.error('schemaCardRenderer error ===>', error);
-    setErrorMessage(props.cardId, (error as Error).message);
   }
 }
 
@@ -81,6 +66,7 @@ async function jsonPatchRenderer(props: {
     currentCardId,
     setCurrentPreviewSchema,
   } = useTemplateSchema();
+  const { messages } = useTemplateConversation();
 
   try {
     const { content, cardId, newMessage } = props;
@@ -128,18 +114,18 @@ async function jsonPatchRenderer(props: {
     const targetSchema = applyJsonPatchOperations(patchBaseline, operations as never[]);
     if (!targetSchema) {
       if (isSuccessfulParse) {
-        setErrorMessage(cardId, 'jsonPatch apply failed');
+        setJsonPatchApplyFailed(messages.value, cardId, true);
       }
       return;
     }
 
-    clearErrorMessage(cardId);
+    setJsonPatchApplyFailed(messages.value, cardId, false);
 
     const isStreamComplete = isSuccessfulParse || lastOperationComplete;
     const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
     setCurrentPreviewSchema(strippedSchema, isStreamComplete);
   } catch (error) {
-    setErrorMessage(props.cardId, (error as Error).message);
+    setJsonPatchApplyFailed(messages.value, props.cardId, true);
     console.error('jsonPatch error ===>', error);
   }
 }
@@ -166,10 +152,8 @@ function resetLastPreviewSchema(schema: Record<string, unknown> | null) {
 
 export function useTemplateStreamRender() {
   return {
-    errorMessagesMap,
     lastPreviewSchema,
     handleSchemaJsonChanged,
     resetLastPreviewSchema,
-    clearErrorMessages,
   };
 }

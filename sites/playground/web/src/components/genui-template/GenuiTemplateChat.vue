@@ -27,6 +27,7 @@ import type {
 import {
   finalizePendingSchemaCard,
   findLatestPendingSchemaCard,
+  findSchemaCardByCardId,
   generateIdForComponents,
   getLastUserMessage,
   isManualSchemaSaveMessage,
@@ -50,7 +51,6 @@ const { setColorMode } = useTheme();
 const prevSchema = ref<string>('');
 const { schema, conversation, versionControl, stream, emitter } = useTemplateContext();
 const {
-  errorMessagesMap,
   handleSchemaJsonChanged,
   resetLastPreviewSchema,
 } = stream;
@@ -302,7 +302,8 @@ const handleNotification = (event: INotificationPayload) => {
     schema.currentCardId
     || findLatestPendingSchemaCard(messages.value)?.cardId
     || '';
-  const applyFailed = Boolean(cardId && errorMessagesMap.value.has(cardId));
+  const card = cardId ? findSchemaCardByCardId(messages.value, cardId) : null;
+  const applyFailed = card?.type === 'json-patch' && card.applyFailed === true;
   const preview = schema.currentPreviewSchema;
   if (preview && !applyFailed) {
     generateIdForComponents(preview);
@@ -312,7 +313,6 @@ const handleNotification = (event: INotificationPayload) => {
     cardId: cardId || undefined,
     ...(applyFailed || !preview ? {} : { schema: preview }),
     prevSchema: prevSchema.value || '',
-    applyFailed,
   });
 };
 

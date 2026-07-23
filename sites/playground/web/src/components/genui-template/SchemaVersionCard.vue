@@ -36,7 +36,7 @@ defineOptions({ inheritAttrs: false });
 const props = defineProps<IRendererProps>();
 const emit = defineEmits(['card-select']);
 
-const { conversation, versionControl, stream } = useTemplateContext();
+const { conversation, versionControl } = useTemplateContext();
 
 const generatedTime = computed(() => props.generatedTime ?? '');
 const generating = computed(() => !generatedTime.value);
@@ -67,8 +67,7 @@ const currentSchema = ref<string>('');
 const jsonPatch = ref<string>('');
 const prevSchema = ref<string>('');
 const errorMessage = computed(() =>
-  stream.errorMessagesMap.value.get(props.cardId)
-  || (props.applyFailed ? 'jsonPatch apply failed' : '')
+  props.applyFailed ? 'jsonPatch apply failed' : ''
 );
 
 const handleClick = () => {
