@@ -27,6 +27,7 @@ import type {
 import {
   finalizePendingSchemaCard,
   findLatestPendingSchemaCard,
+  generateIdForComponents,
   getLastUserMessage,
   isManualSchemaSaveMessage,
 } from './template-chat-utils';
@@ -293,25 +294,27 @@ const handleSendMessage = async () => {
   scrollToBottom();
 };
 
-const finalizeStreamingSchemaCard = () => {
+const handleNotification = (event: INotificationPayload) => {
+  if (event.type !== 'done') {
+    return;
+  }
+
   const cardId =
     schema.currentCardId
     || findLatestPendingSchemaCard(messages.value)?.cardId
     || '';
   const applyFailed = Boolean(cardId && errorMessagesMap.value.has(cardId));
+  const preview = schema.currentPreviewSchema;
+  if (preview && !applyFailed) {
+    generateIdForComponents(preview);
+  }
+  schema.setCurrentSchema(preview);
   finalizePendingSchemaCard(messages.value, {
     cardId: cardId || undefined,
-    ...(applyFailed ? {} : { schema: schema.currentPreviewSchema ?? schema.currentSchema }),
+    ...(applyFailed ? {} : { schema: preview ?? schema.currentSchema }),
     prevSchema: prevSchema.value || '',
     applyFailed,
   });
-};
-
-const handleNotification = (event: INotificationPayload) => {
-  if (event.type === 'done') {
-    schema.setCurrentSchema(schema.currentPreviewSchema);
-    finalizeStreamingSchemaCard();
-  }
 };
 
 watch(() => messages.value, throttledScrollToBottom, { deep: true });

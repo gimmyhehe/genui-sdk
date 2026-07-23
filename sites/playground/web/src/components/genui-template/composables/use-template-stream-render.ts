@@ -4,7 +4,6 @@ import {
   validateJsonPatch,
   PARSE_PARTIAL_JSON_STATE,
   applyJsonPatchOperations,
-  generateIdForComponents,
   setJsonPatchApplyFailedFlag,
 } from '../template-chat-utils';
 import { clonePlainJson } from '../template-chat-utils/json-patch-format';
@@ -40,7 +39,6 @@ async function schemaCardRenderer(props: {
   cardId: string;
 }) {
   const {
-    currentPreviewSchema,
     currentCardId,
     setCurrentPreviewSchema,
   } = useTemplateSchema();
@@ -63,10 +61,7 @@ async function schemaCardRenderer(props: {
     }
 
     const json = stripSchemaFieldsWhileStreaming(value as Record<string, unknown>, isCompleted);
-    const schemaWithId = generateIdForComponents(json, {
-      previousSchema: currentPreviewSchema.value,
-    });
-    setCurrentPreviewSchema(schemaWithId, isCompleted);
+    setCurrentPreviewSchema(json, isCompleted);
     if (isCompleted) {
       clearErrorMessage(cardId);
     }
@@ -94,7 +89,6 @@ async function jsonPatchRenderer(props: {
     currentSchema,
     currentPreviewSchema,
     currentCardId,
-    setCurrentSchema,
     setCurrentPreviewSchema,
   } = useTemplateSchema();
 
@@ -155,14 +149,7 @@ async function jsonPatchRenderer(props: {
 
     const isStreamComplete = isSuccessfulParse || lastOperationComplete;
     const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
-    const schemaWithId = generateIdForComponents(strippedSchema, {
-      previousSchema: currentPreviewSchema.value,
-    });
-
-    setCurrentPreviewSchema(schemaWithId, isStreamComplete);
-    if (isStreamComplete) {
-      setCurrentSchema(clonePlainJson(schemaWithId));
-    }
+    setCurrentPreviewSchema(strippedSchema, isSuccessfulParse);
   } catch (error) {
     setErrorMessage(props.cardId, (error as Error).message);
     setJsonPatchApplyFailedFlag(getMutableMessages(), props.cardId, true);
