@@ -31,6 +31,7 @@ import {
   generateIdForComponents,
   getLastUserMessage,
   isManualSchemaSaveMessage,
+  resolveJsonPatchApplyFailed,
 } from './template-chat-utils';
 import { generateId } from '../../utils';
 import { useTemplateContext } from './composables';
@@ -303,7 +304,8 @@ const handleNotification = (event: INotificationPayload) => {
     || findLatestPendingSchemaCard(messages.value)?.cardId
     || '';
   const card = cardId ? findSchemaCardByCardId(messages.value, cardId) : null;
-  const applyFailed = card?.type === 'json-patch' && card.applyFailed === true;
+  const applyFailed =
+    card?.type === 'json-patch' && resolveJsonPatchApplyFailed(card, messages.value);
   const preview = schema.currentPreviewSchema;
   if (preview && !applyFailed) {
     generateIdForComponents(preview);

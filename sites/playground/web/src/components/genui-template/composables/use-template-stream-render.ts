@@ -111,17 +111,16 @@ async function jsonPatchRenderer(props: {
       return;
     }
 
+    const isStreamComplete = isSuccessfulParse || lastOperationComplete;
     const targetSchema = applyJsonPatchOperations(patchBaseline, operations as never[]);
     if (!targetSchema) {
-      if (isSuccessfulParse) {
+      if (isStreamComplete) {
         setJsonPatchApplyFailed(messages.value, cardId, true);
       }
       return;
     }
 
     setJsonPatchApplyFailed(messages.value, cardId, false);
-
-    const isStreamComplete = isSuccessfulParse || lastOperationComplete;
     const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
     setCurrentPreviewSchema(strippedSchema, isStreamComplete);
   } catch (error) {

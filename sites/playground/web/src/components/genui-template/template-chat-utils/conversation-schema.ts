@@ -77,7 +77,7 @@ export function parseJsonPatchOperations(content: string): unknown[] | null {
   }
 }
 
-function detectJsonPatchApplyFailed(
+export function detectJsonPatchApplyFailed(
   card: IJsonPatchMessageItem,
   messages?: ChatMessage[],
 ): boolean {
@@ -87,6 +87,17 @@ function detectJsonPatchApplyFailed(
   }
   const baseline = parseSchemaJson(resolveJsonPatchPrevSchemaString(card, messages));
   return !baseline || applyJsonPatchOperations(baseline, operations) === null;
+}
+
+export function resolveJsonPatchApplyFailed(
+  card: IJsonPatchMessageItem,
+  messages?: ChatMessage[],
+): boolean {
+  if (typeof card.applyFailed === 'boolean') {
+    return card.applyFailed;
+  }
+  card.applyFailed = detectJsonPatchApplyFailed(card, messages);
+  return card.applyFailed;
 }
 
 export function backfillJsonPatchApplyFailedFlags(messages?: ChatMessage[]): boolean {
@@ -338,8 +349,8 @@ function applyPendingCardFinalization(
   options: { schema?: unknown; prevSchema?: string },
   messages?: ChatMessage[],
 ): void {
-  if (card.type === 'json-patch' && typeof card.applyFailed !== 'boolean') {
-    card.applyFailed = detectJsonPatchApplyFailed(card, messages);
+  if (card.type === 'json-patch') {
+    resolveJsonPatchApplyFailed(card, messages);
   }
   if (card.type !== 'json-patch' || card.applyFailed !== true) {
     const schemaPayload = options.schema ?? rebuildSchemaFromCard(card, { messages });
