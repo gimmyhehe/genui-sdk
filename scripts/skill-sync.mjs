@@ -198,6 +198,35 @@ async function replaceDestWithCopy(source, dest, directory) {
   }
 }
 
+async function replaceDestWithSymlink(source, dest, directory) {
+  const parent = dirname(dest);
+  await mkdir(parent, { recursive: true });
+
+  const safeName = directory.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const stamp = `${process.pid}-${Date.now()}`;
+  const tmp = join(parent, `.${safeName}.link-${stamp}`);
+  const bak = join(parent, `.${safeName}.bak-${stamp}`);
+
+  if (await pathExists(tmp)) await removePath(tmp);
+  if (await pathExists(bak)) await removePath(bak);
+
+  try {
+    await symlink(source, tmp, 'dir');
+    const destExists = (await pathExists(dest)) || (await isSymlink(dest));
+    if (destExists) await rename(dest, bak);
+    try {
+      await rename(tmp, dest);
+    } catch (err) {
+      if (destExists && (await pathExists(bak))) await rename(bak, dest);
+      throw err;
+    }
+    if (await pathExists(bak)) await removePath(bak);
+  } catch (err) {
+    if (await pathExists(tmp)) await removePath(tmp);
+    throw err;
+  }
+}
+
 async function syncSkillToTool({
   ssotDir,
   directory,
@@ -219,8 +248,7 @@ async function syncSkillToTool({
   }
 
   if (method === 'symlink') {
-    if ((await pathExists(dest)) || (await isSymlink(dest))) await removePath(dest);
-    await symlink(source, dest, 'dir');
+    await replaceDestWithSymlink(source, dest, directory);
     return { toolId, directory, method: 'symlink' };
   }
 
