@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { homedir, platform } from 'os';
+import { platform } from 'os';
 import { join, isAbsolute, resolve, dirname, relative } from 'path';
 import { readFileSync, existsSync, constants } from 'fs';
 import {
@@ -23,11 +23,10 @@ const SYNCABLE_TOOL_IDS = [
   'opencode',
   'hermes',
   'openclaw',
-  'agents',
 ];
 
 const DEFAULT_CONFIG = {
-  ssotDir: 'skills',
+  ssotDir: '.agents/skills',
   syncMethod: 'auto',
   enabledTools: ['claude', 'cursor', 'gemini', 'codex', 'opencode', 'hermes', 'openclaw'],
   overrides: {
@@ -38,7 +37,6 @@ const DEFAULT_CONFIG = {
     opencode_config_dir: '.config/opencode',
     hermes_config_dir: '.hermes',
     openclaw_config_dir: '.openclaw',
-    agents_config_dir: '.agents',
   },
 };
 
@@ -50,39 +48,29 @@ const TOOL_REGISTRY = {
   opencode: { overrideKey: 'opencode_config_dir', defaultConfigRoot: ['.config', 'opencode'] },
   hermes: { overrideKey: 'hermes_config_dir', defaultConfigRoot: ['.hermes'] },
   openclaw: { overrideKey: 'openclaw_config_dir', defaultConfigRoot: ['.openclaw'] },
-  agents: { overrideKey: 'agents_config_dir', defaultConfigRoot: ['.agents'] },
 };
-
-function getHomeDir() {
-  return process.env.APP_TEST_HOME ?? homedir();
-}
 
 function isPathInside(child, parent) {
   const rel = relative(resolve(parent), resolve(child));
   return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel));
 }
 
-function resolveOverridePath(raw, projectRoot) {
-  const home = getHomeDir();
+function resolveProjectPath(raw, projectRoot, label = 'Path') {
   const trimmed = raw.trim();
-  let candidate;
-  if (trimmed === '~') {
-    candidate = home;
-  } else if (trimmed.startsWith('~/') || trimmed.startsWith('~\\')) {
-    candidate = join(home, trimmed.slice(2));
-  } else if (isAbsolute(trimmed)) {
-    candidate = resolve(trimmed);
-  } else {
-    candidate = resolve(projectRoot, trimmed);
+  if (trimmed === '~' || trimmed.startsWith('~/') || trimmed.startsWith('~\\')) {
+    throw new Error(`${label} must be inside the project (home paths are not allowed): ${raw}`);
   }
 
+  const candidate = isAbsolute(trimmed) ? resolve(trimmed) : resolve(projectRoot, trimmed);
   const resolved = resolve(candidate);
-  if (!isPathInside(resolved, projectRoot) && !isPathInside(resolved, home)) {
-    throw new Error(
-      `Override path escapes approved bases (project or home): ${raw} → ${resolved}`,
-    );
+  if (!isPathInside(resolved, projectRoot)) {
+    throw new Error(`${label} escapes project root: ${raw} → ${resolved}`);
   }
   return resolved;
+}
+
+function resolveOverridePath(raw, projectRoot) {
+  return resolveProjectPath(raw, projectRoot, 'Override path');
 }
 
 function getOverrideDir(toolId, overrides = {}, projectRoot = process.cwd()) {
@@ -100,16 +88,15 @@ function getAppSkillsDir(toolId, overrides = {}, projectRoot = process.cwd()) {
   const override = getOverrideDir(toolId, overrides, projectRoot);
   if (override) return join(override, 'skills');
 
-  const home = getHomeDir();
-  return join(home, ...config.defaultConfigRoot, 'skills');
+  return join(projectRoot, ...config.defaultConfigRoot, 'skills');
 }
 
 function resolveSsotDir(ssotDir, projectRoot = process.cwd()) {
-  return isAbsolute(ssotDir) ? resolve(ssotDir) : resolve(projectRoot, ssotDir);
+  return resolveProjectPath(ssotDir, projectRoot, 'SSOT path');
 }
 
-function getAllScanSources(overrides = {}, ssotDir, projectRoot = process.cwd()) {
-  const sources = SYNCABLE_TOOL_IDS.map((toolId) => ({
+function getAllScanSources(overrides = {}, ssotDir, projectRoot = process.cwd(), enabledTools = []) {
+  const sources = enabledTools.map((toolId) => ({
     toolId,
     path: getAppSkillsDir(toolId, overrides, projectRoot),
   }));
@@ -127,12 +114,12 @@ function loadConfig(configPath) {
 
 function resolveConfig(config, projectRoot = process.cwd()) {
   return {
-    ssotDir: resolveSsotDir(config.ssotDir ?? 'skills', projectRoot),
+    ssotDir: resolveSsotDir(config.ssotDir ?? DEFAULT_CONFIG.ssotDir, projectRoot),
     syncMethod: config.syncMethod ?? 'auto',
-    enabledTools: (config.enabledTools ?? SYNCABLE_TOOL_IDS).filter((id) =>
+    enabledTools: (config.enabledTools ?? DEFAULT_CONFIG.enabledTools).filter((id) =>
       SYNCABLE_TOOL_IDS.includes(id),
     ),
-    overrides: config.overrides ?? {},
+    overrides: { ...DEFAULT_CONFIG.overrides, ...(config.overrides ?? {}) },
     projectRoot,
   };
 }
@@ -270,6 +257,7 @@ async function syncSkillToTool({
 
 async function syncAllSkills({ ssotDir, enabledTools, syncMethod, overrides, projectRoot }) {
   const directories = await listSkillDirectories(ssotDir);
+  const ssotSet = new Set(directories);
   const results = [];
 
   for (const directory of directories) {
@@ -289,6 +277,25 @@ async function syncAllSkills({ ssotDir, enabledTools, syncMethod, overrides, pro
         results.push({
           toolId,
           directory,
+          method: 'error',
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+  }
+
+  for (const toolId of enabledTools) {
+    const appDir = getAppSkillsDir(toolId, overrides, projectRoot);
+    for (const skill of await listSkillEntries(appDir)) {
+      if (ssotSet.has(skill.directory)) continue;
+      const dest = join(appDir, skill.directory);
+      try {
+        await removePath(dest);
+        results.push({ toolId, directory: skill.directory, method: 'removed' });
+      } catch (err) {
+        results.push({
+          toolId,
+          directory: skill.directory,
           method: 'error',
           error: err instanceof Error ? err.message : String(err),
         });
@@ -376,8 +383,13 @@ async function listSkillDirectories(ssotDir) {
   return (await listSkillEntries(ssotDir)).map((e) => e.directory);
 }
 
-async function scanSkills({ ssotDir, overrides = {}, projectRoot = process.cwd() }) {
-  const sources = getAllScanSources(overrides, ssotDir, projectRoot);
+async function scanSkills({
+  ssotDir,
+  overrides = {},
+  projectRoot = process.cwd(),
+  enabledTools = [],
+}) {
+  const sources = getAllScanSources(overrides, ssotDir, projectRoot, enabledTools);
   const ssotSkills = new Set((await listSkillEntries(ssotDir)).map((s) => s.directory));
   const aggregated = new Map();
 
@@ -485,16 +497,22 @@ async function cmdSync(config) {
   });
 
   const failed = results.filter((r) => r.method === 'error');
-  const succeeded = results.length - failed.length;
+  const removed = results.filter((r) => r.method === 'removed');
+  const synced = results.filter((r) => r.method !== 'error' && r.method !== 'removed');
 
   console.log(
-    `Synced ${succeeded} skill×tool projection(s) (method: ${config.syncMethod}` +
+    `Synced ${synced.length} skill×tool projection(s) (method: ${config.syncMethod}` +
+      (removed.length ? `, ${removed.length} removed` : '') +
       (failed.length ? `, ${failed.length} failed` : '') +
       ')',
   );
   for (const r of results) {
     if (r.method === 'error') {
       console.log(`  ✗ ${r.directory} → ${r.toolId} [error] ${r.error}`);
+      continue;
+    }
+    if (r.method === 'removed') {
+      console.log(`  − ${r.directory} → ${r.toolId} [removed]`);
       continue;
     }
     const extra = r.reason ? ` (${r.reason})` : '';
@@ -511,6 +529,7 @@ async function cmdScan(config) {
     ssotDir: config.ssotDir,
     overrides: config.overrides,
     projectRoot: config.projectRoot,
+    enabledTools: config.enabledTools,
   });
 
   console.log(`Found ${results.length} skill(s):`);
