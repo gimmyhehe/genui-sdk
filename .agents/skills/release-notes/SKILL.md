@@ -22,13 +22,13 @@ description: >-
 2. **Tag 信息**：明确本次发布的 tag（如 `v1.3.0`）
 3. **上一正式版**：不含 `alpha` / `beta` 的最近 tag（如 `v1.2.0`）。用 `git tag --sort=-v:refname` 筛选
 
-```
+```text
 正式版判定：匹配 ^v\d+\.\d+\.\d+$，排除 alpha/beta 预发布
 ```
 
 ## 工作流
 
-```
+```text
 进度：
 - [ ] 1. 确定 new_tag 与 previous_tag
 - [ ] 2. 拉取 PR 列表与原始 Release notes
@@ -42,21 +42,23 @@ description: >-
 
 ```bash
 git fetch --tags
-git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$'
+git tag --merged <new_tag> --sort=-v:refname \
+  | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+  | grep -vx '<new_tag>'
 ```
 
 - `new_tag`：用户指定或最新待发布 tag
-- `previous_tag`：new_tag 之前最近的正式版 tag
+- `previous_tag`：上述列表第一条（已合入 new_tag、且排除自身的最近正式版）
 
 ### Step 2：拉取 PR 数据
 
-优先用脚本（在仓库根目录执行）：
+优先用本 skill 目录下的脚本：
 
 ```bash
-.cursor/skills/release-notes/scripts/fetch-release-data.sh <new_tag> <previous_tag>
+scripts/fetch-release-data.sh <new_tag> <previous_tag>
 ```
 
-脚本输出 JSON，包含每个 PR 的 number、title、author、url、changed_files、commits。
+脚本输出 JSON，包含每个 PR 的 number、title、author、url、files、commits。
 
 若无 `gh`，备选方案：
 
@@ -117,13 +119,13 @@ gh api repos/opentiny/genui-sdk/releases/generate-notes \
 
 #### 条目格式
 
-```
+```text
 - {润色后的标题} by @{author} in https://github.com/opentiny/genui-sdk/pull/{number}
 ```
 
 同一 PR 有多条独立 commit 需分别列出时，末尾追加 commit hash：
 
-```
+```text
 - {标题} by @{author} in https://github.com/opentiny/genui-sdk/pull/{number} - {full_sha}
 ```
 
@@ -177,7 +179,7 @@ gh api repos/opentiny/genui-sdk/releases/generate-notes \
 
 规则：
 
-- 版本号去掉 `v` 前缀写入标题（`v1.2.0` → `v1.2.0` 保留在标题中）
+- 标题保留 `v` 前缀（如 `Genui SDK v1.2.0 Release Notes`）
 - 子区按固定顺序：Components → Playground → Test → Build → Docs → Site → Benchmarks
 - 空子区省略；空章节省略
 - 大章节之间用 `---` 分隔
@@ -205,7 +207,7 @@ releaseNote.md
 
 ```bash
 gh release create <new_tag> \
-  --title "Genui SDK <version>" \
+  --title "Genui SDK <new_tag>" \
   --notes-file releaseNote.md \
   --repo opentiny/genui-sdk
 ```

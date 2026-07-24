@@ -22,7 +22,7 @@
 - feat(genui-template): implement conversation import/export by @yy-wow in https://github.com/opentiny/genui-sdk/pull/147
 - feat: update template styles and mobile styles by @yy-wow in https://github.com/opentiny/genui-sdk/pull/127
 - feat: json patch zod by @yy-wow in https://github.com/opentiny/genui-sdk/pull/141
-- feat: add jsonPath streamable patch support by @rhlin https://github.com/opentiny/genui-sdk/pull/146 - 661655e4fcbb5ebfecc426a3f4d9dd87e32d8bf2
+- feat: add jsonPath streamable patch support by @rhlin in https://github.com/opentiny/genui-sdk/pull/146 - 661655e4fcbb5ebfecc426a3f4d9dd87e32d8bf2
 
 ---
 
@@ -71,7 +71,7 @@
 **Docs**
 - docs: update docs for chunk splitting by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/161
 - docs: update playground link in README by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/166
-- docs: add isJsonComplete docs by @rhlin https://github.com/opentiny/genui-sdk/pull/146 - 946b06b99f225239a6d9f188f89d63e2702f3e50
+- docs: add isJsonComplete docs by @rhlin in https://github.com/opentiny/genui-sdk/pull/146 - 946b06b99f225239a6d9f188f89d63e2702f3e50
 
 **Site**
 - fix(homepage): fix video paths for "Order Milk Tea" and "Search Ticket" by @lhuans in https://github.com/opentiny/genui-sdk/pull/163

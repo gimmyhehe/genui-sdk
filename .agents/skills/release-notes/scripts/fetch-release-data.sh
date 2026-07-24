@@ -31,24 +31,26 @@ else
 fi
 
 PR_NUMBERS=$(git log "${PREV_TAG}..${NEW_TAG}" --merges --pretty=format:'%s' \
-  | grep -oE '#[0-9]+' | tr -d '#' | sort -un)
+  | grep -oE '#[0-9]+' | tr -d '#' | sort -un || true)
 
-if [[ -z "$PR_NUMBERS" ]]; then
-  echo '{"new_tag":"'"$NEW_TAG"'","previous_tag":"'"$PREV_TAG"'","github_notes":"","pull_requests":[]}'
-  exit 0
+PRS='[]'
+if [[ -n "$PR_NUMBERS" ]]; then
+  PRS='['
+  FIRST=true
+  for NUM in $PR_NUMBERS; do
+    PR_JSON=$(gh pr view "$NUM" --repo "$REPO" --json number,title,author,url,commits,files 2>/dev/null) || continue
+    if $FIRST; then FIRST=false; else PRS+=','; fi
+    PRS+="$PR_JSON"
+  done
+  PRS+=']'
 fi
 
-RESULT='{"new_tag":"'"$NEW_TAG"'","previous_tag":"'"$PREV_TAG"'","github_notes":'
-RESULT+=$(printf '%s' "$NOTES" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))')
-RESULT+=',"pull_requests":['
-
-FIRST=true
-for NUM in $PR_NUMBERS; do
-  PR_JSON=$(gh pr view "$NUM" --repo "$REPO" --json number,title,author,url,commits,files 2>/dev/null) || continue
-  if $FIRST; then FIRST=false; else RESULT+=','; fi
-  RESULT+="$PR_JSON"
-done
-
-RESULT+=']}'
-
-printf '%s\n' "$RESULT" | python3 -m json.tool 2>/dev/null || printf '%s\n' "$RESULT"
+NEW_TAG="$NEW_TAG" PREV_TAG="$PREV_TAG" NOTES="$NOTES" PRS="$PRS" python3 -c '
+import json, os
+print(json.dumps({
+  "new_tag": os.environ["NEW_TAG"],
+  "previous_tag": os.environ["PREV_TAG"],
+  "github_notes": os.environ["NOTES"],
+  "pull_requests": json.loads(os.environ["PRS"]),
+}, ensure_ascii=False))
+'
