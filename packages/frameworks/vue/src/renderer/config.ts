@@ -10,4 +10,5 @@ export const requiredCompleteFieldSelectors = [
   'type',
   ':empty:object',
   '[componentName] > props > ngModel',
+  '[componentName] > props > ref',
 ];
