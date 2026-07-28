@@ -35,7 +35,7 @@
     "@vue/tsconfig": "^0.7.0",
     "gridstack": "^12.2.1",
     "jsondiffpatch": "^0.7.3",
-    "typescript": "~5.8.3",
+    "typescript": "^5.9.3",
     "vite": "^7.1.2",
     "vite-jsconfig-paths": "^2.0.1",
     "vite-plugin-node-polyfills": "^0.24.0",
