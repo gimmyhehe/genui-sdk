@@ -679,16 +679,16 @@ importers:
         specifier: ^7.23.0
         version: 7.28.5
       '@opentiny/vue':
-        specifier: ~3.28.0
+        specifier: ^3.28.0
         version: 3.28.0
       '@opentiny/vue-huicharts':
-        specifier: ~3.28.0
+        specifier: ^3.28.0
         version: 3.28.0(echarts@5.4.1)
       '@opentiny/vue-icon':
-        specifier: ~3.28.0
+        specifier: ^3.28.0
         version: 3.28.3
       '@opentiny/vue-notify':
-        specifier: ~3.28.0
+        specifier: ^3.28.0
         version: 3.28.0
       '@vitejs/plugin-vue':
         specifier: ^5.1.2
