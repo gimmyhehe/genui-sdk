@@ -19,12 +19,4 @@ export interface IRendererSettings {
 
 export const RENDERER_SETTINGS = new InjectionToken<IRendererSettings>('RENDERER_SETTINGS');
 
-let currentSettings: IRendererSettings = {};
-
-export function setRendererSettings(settings: IRendererSettings | null | undefined): void {
-  currentSettings = settings ?? {};
-}
-
-export function getRendererSettings(): IRendererSettings {
-  return currentSettings;
-}
+export const NOTIFY_CONTEXT_KEY = Symbol('renderer-notify');

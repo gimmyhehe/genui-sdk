@@ -115,7 +115,7 @@ const parseJSXFunction = (data: any, ctx: any) => {
       type: 'warning',
       title: '函数声明解析报错',
       message: (error as Error)?.message || '函数声明解析报错，请检查语法',
-    });
+    }, ctx);
 
     return newFn();
   }

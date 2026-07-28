@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
 import { LoadingComponent } from './loading.component';
 import { RendererTemplateComponent } from './renderer-template.component';
 import { RendererDirective } from './renderer.directive';
-import { RENDERER_SETTINGS, setRendererSettings } from './renderer-settings';
+import { RENDERER_SETTINGS } from './renderer-settings';
 
 function reset(obj: any) {
   Object.keys(obj).forEach((key) => delete obj[key]);
@@ -67,7 +67,7 @@ export class RendererMain implements OnDestroy {
   ) {
     this.cssScopeId = `data-schema-${Math.random().toString(36).slice(2, 8)}`;
     this.contextService.setMaterials(this.rendererSettings?.materials ?? {});
-    setRendererSettings(this.rendererSettings);
+    this.contextService.setNotify(this.rendererSettings?.notify);
   }
 
   ngAfterViewInit() {

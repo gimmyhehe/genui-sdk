@@ -1,10 +1,12 @@
 import {
-  getRendererSettings,
+  NOTIFY_CONTEXT_KEY,
+  type NotifyHandler,
   type NotifyOptions,
   type NotifyType,
 } from '../renderer-settings';
 
 export type { NotifyOptions, NotifyType, NotifyHandler } from '../renderer-settings';
+export { NOTIFY_CONTEXT_KEY };
 
 const ROOT_ID = 'genui-notify-root';
 const STYLE_ID = 'genui-notify-style';
@@ -111,9 +113,9 @@ function showDomToast(options: NotifyOptions): void {
   bindAutoDismiss(el, options.duration ?? DEFAULT_DURATION, closeBtn);
 }
 
-export function Notify(options: NotifyOptions): void {
+export function Notify(options: NotifyOptions, ctx?: Record<PropertyKey, any>): void {
   try {
-    const custom = getRendererSettings().notify;
+    const custom = ctx?.[NOTIFY_CONTEXT_KEY] as NotifyHandler | undefined;
     if (custom) {
       custom(options);
       return;
