@@ -3,7 +3,6 @@ export const requiredCompleteFieldSelectors = [ // TODO: move to core & material
   'style',
   '[type=JSFunction]',
   '[type=JSExpression]',
-  '[type=JSSlot][value=]',
   'type',
   ':empty:object',
   // ng
