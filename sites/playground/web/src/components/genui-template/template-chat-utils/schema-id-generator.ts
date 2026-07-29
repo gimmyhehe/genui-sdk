@@ -17,8 +17,12 @@ export const generateIdForComponents = (schema: any) => {
       claimedIds.add(node.id);
       return;
     }
-    node.id = generateId();
-    claimedIds.add(node.id);
+    let nextId: string;
+    do {
+      nextId = generateId();
+    } while (claimedIds.has(nextId));
+    node.id = nextId;
+    claimedIds.add(nextId);
   };
 
   traverse(schema);
