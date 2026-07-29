@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef } from 'vue';
+import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef, reactive } from 'vue';
 // @ts-ignore
 import SchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { DeltaPatcher, repairJson, RepairJsonState, type IMaterials } from '@opentiny/genui-sdk-core';
@@ -30,7 +30,7 @@ const callAction = (actionName: string, params: any) => {
 };
 
 const materials = inject<IMaterials>(GENUI_MATERIALS, {});
-const customSettings = inject(RENDERER_SETTINGS_KEY, {});
+const customSettings = inject(RENDERER_SETTINGS_KEY, {}) as Record<string, any>;
 
 watch(() => props.customComponents, (newVal) => {
   // TODO:  1、materials.components更新后，customComponents会丢失 2、旧的customComponents没有被移除
@@ -39,10 +39,18 @@ watch(() => props.customComponents, (newVal) => {
   }
 }, { immediate: true });
 
-provide(RENDERER_SETTINGS_KEY, {
+const rendererSettings = reactive({
   ...customSettings,
   materials,
 });
+watch(
+  () => customSettings?.notify,
+  (notify) => {
+    rendererSettings.notify = notify;
+  },
+  { immediate: true },
+);
+provide(RENDERER_SETTINGS_KEY, rendererSettings);
 
 const deltaPatcher = shallowRef(null);
 

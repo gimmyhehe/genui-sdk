@@ -126,6 +126,38 @@ export class GenuiExample {
 }
 ```
 
+## 自定义 Notify
+
+Schema 中 `JSFunction` 解析失败或执行报错时，可通过 `GenuiConfigProvider` 的 `notify` 接入业务侧通知（未配置时使用内置 DOM toast）。
+
+```ts
+import { Component } from '@angular/core';
+import {
+  GenuiConfigProvider,
+  GenuiRenderer,
+  type NotifyHandler,
+} from '@opentiny/genui-sdk-angular';
+import { materials } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials';
+
+@Component({
+  imports: [GenuiConfigProvider, GenuiRenderer],
+  template: `
+    <genui-config-provider [materials]="materials" [notify]="notify">
+      <genui-renderer [content]="schema"></genui-renderer>
+    </genui-config-provider>
+  `,
+})
+export class GenuiExample {
+  materials = materials;
+  schema = '';
+
+  notify: NotifyHandler = (options) => {
+    // 接入业务侧消息组件，例如 TiModal / 自研 toast
+    console.log(options.type, options.title, options.message);
+  };
+}
+```
+
 ::: tip GenuiLegacyRenderer
 若无需单独配置物料、需兼容旧版用法，见 [GenuiRenderer Legacy 兼容说明](../../components/angular/renderer#兼容组件-genuilegacyrenderer)。
 :::
