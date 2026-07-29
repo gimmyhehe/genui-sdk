@@ -13,8 +13,6 @@ export interface ISchemaCardMessageItem {
   cardId: string;
   generatedTime: string;
   schema: string;
-  id?: string;
-  state?: Record<string, any>;
   prevSchema: string;
 }
 
