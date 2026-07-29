@@ -125,14 +125,14 @@ export function backfillJsonPatchApplyFailedFlags(messages?: ChatMessage[]): boo
   return updated;
 }
 
-export function setJsonPatchApplyFailed(
+export function setJsonPatchApplyResult(
+  result: 'success' | 'failed',
   messages: ChatMessage[] | undefined,
   cardId: string,
-  applyFailed: boolean,
 ): void {
   const card = findSchemaCardByCardId(messages, cardId);
   if (card?.type === 'json-patch') {
-    card.applyFailed = applyFailed;
+    card.applyFailed = result === 'failed';
   }
 }
 

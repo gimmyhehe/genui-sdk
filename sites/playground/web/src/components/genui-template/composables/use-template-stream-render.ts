@@ -4,7 +4,7 @@ import {
   validateJsonPatch,
   PARSE_PARTIAL_JSON_STATE,
   applyJsonPatchOperations,
-  setJsonPatchApplyFailed,
+  setJsonPatchApplyResult,
 } from '../template-chat-utils';
 import { clonePlainJson } from '../template-chat-utils/json-patch-format';
 import { stripSchemaFieldsWhileStreaming } from '../../../utils';
@@ -115,16 +115,15 @@ async function jsonPatchRenderer(props: {
     const targetSchema = applyJsonPatchOperations(patchBaseline, operations as never[]);
     if (!targetSchema) {
       if (isStreamComplete) {
-        setJsonPatchApplyFailed(messages.value, cardId, true);
+        setJsonPatchApplyResult('failed', messages.value, cardId);
       }
       return;
     }
 
-    setJsonPatchApplyFailed(messages.value, cardId, false);
     const strippedSchema = stripSchemaFieldsWhileStreaming(targetSchema, isStreamComplete);
     setCurrentPreviewSchema(strippedSchema, isStreamComplete);
   } catch (error) {
-    setJsonPatchApplyFailed(messages.value, props.cardId, true);
+    setJsonPatchApplyResult('failed', messages.value, props.cardId);
     console.error('jsonPatch error ===>', error);
   }
 }
