@@ -13,6 +13,7 @@ import GenuiHistory from './tab-components/GenuiHistory.vue';
 import LanguageSwitcher from './LanguageSwitcher.vue';
 import { useIsMobile } from '../hooks';
 import useTemplate from './genui-template/useTemplate';
+import { MaterialsTab } from './materials-tab';
 import { t } from '../i18n';
 import { PlaygroundMode } from '../constants';
 
@@ -29,8 +30,9 @@ const ENABLE_TEMPLATE = import.meta.env.VITE_ENABLE_TEMPLATE === 'true';
 const GenuiTemplateList = ENABLE_TEMPLATE
   ? defineAsyncComponent(() => import('./genui-template/GenuiTemplateList.vue'))
   : shallowRef(null);
+// 从上层注入共享的 playground 上下文（framework / 会话等）
 const playgroundContext = inject('playgroundContext');
-const { themeData, conversation } = playgroundContext;
+const { conversation } = playgroundContext;
 
 const route = useRoute();
 const router = useRouter();
@@ -223,14 +225,8 @@ const updateCustomExamples = (list) => {
         <tiny-tab-item :title="t('sidebar.tabTools')" name="tools">
           <McpTools />
         </tiny-tab-item>
-        <tiny-tab-item :title="t('sidebar.tabTheme')" name="theme">
-          <div class="config-title">{{ t('theme.switchTitle') }}</div>
-          <tiny-button-group
-            size="small"
-            :data="themeData"
-            :model-value="theme"
-            @update:model-value="emit('update:theme', $event)"
-          />
+        <tiny-tab-item :title="t('sidebar.tabMaterials')" name="theme">
+          <MaterialsTab :theme="theme" @update:theme="emit('update:theme', $event)" />
         </tiny-tab-item>
         <tiny-tab-item v-if="currentMode === PlaygroundMode.Chat" :title="t('sidebar.tabHistory')" name="history" class="history-tab">
           <GenuiHistory v-if="conversation" :conversation="conversation" />
@@ -391,6 +387,7 @@ const updateCustomExamples = (list) => {
       font-size: 14px;
       color: #595959;
       margin-bottom: 12px;
+      margin-top: 16px;
       line-height: 32px;
     }
     :deep(.tiny-button-group .tiny-group-item li button) {
@@ -406,7 +403,7 @@ const updateCustomExamples = (list) => {
       flex: 1;
       min-height: 0;
       overflow: auto;
-      padding: 0 24px 90px;
+      padding: 0 24px 0;
     }
 
     &--tools :deep(.tiny-tabs__content) {
