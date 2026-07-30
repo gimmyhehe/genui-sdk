@@ -5,6 +5,17 @@
 ```markdown
 # Genui SDK v1.2.0 Release Notes
 
+## 🚀 Highlights
+
+- **Conversation history** - import/export history records (#142, #147) with time grouping and batch export (#157).
+- **Skills & agents** - added skills support (#150) and agents-as-tools (#111), with the template schema moved into user messages (#135).
+- **JSON patch streaming** - added jsonPath streamable patch support (#141, #146) and enforced strict JSON output for schemaJson (#158).
+- **Renderer** - split components into multiple chunks (#139) and added the isJsonComplete option (#146).
+- **DeepSeek** - patched the ai-sdk deepseek provider for missing reasoning_content in deepseek-v4-flash/pro (#153).
+- **Benchmarks** - added a benchmarks package (#112).
+
+---
+
 ## ✨ Features
 
 **Components**
@@ -79,4 +90,10 @@
 
 **Benchmarks**
 - feat: benchmarks by @yy-wow in https://github.com/opentiny/genui-sdk/pull/112
+
+---
+
+**Full Changelog**: https://github.com/opentiny/genui-sdk/compare/v1.1.2...v1.2.0
 ```
+
+> 注：v1.2.0 无首次贡献者，`## 🎉 New Contributors` 章节省略。有首次贡献者时，于 `## 🔧 Other Changes` 之后、`**Full Changelog**` 之前插入该章节，每行格式为 `- @{login} made their first contribution in https://github.com/opentiny/genui-sdk/pull/{number}`。

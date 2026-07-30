@@ -33,7 +33,7 @@ description: >-
 - [ ] 1. 确定 new_tag 与 previous_tag
 - [ ] 2. 拉取 PR 列表与原始 Release notes
 - [ ] 3. 修复 PR 标题的语法错误并进行适当润色
-- [ ] 4. 按规则分类并格式化
+- [ ] 4. 提炼 Highlights、按规则分类并格式化
 - [ ] 5. 写入 releaseNote.md 并请用户确认
 - [ ] 6. 发布 Release
 ```
@@ -58,7 +58,7 @@ git tag --merged <new_tag> --sort=-v:refname \
 scripts/fetch-release-data.sh <new_tag> <previous_tag>
 ```
 
-脚本输出 JSON，包含每个 PR 的 number、title、author、url、files、commits。
+脚本输出 JSON，包含 `new_tag`、`previous_tag`、`full_changelog_url`、`new_contributors`、`github_notes`，以及每个 PR 的 `number`、`title`、`author`、`url`、`files`、`commits`。
 
 若无 `gh`，备选方案：
 
@@ -85,6 +85,15 @@ gh api repos/opentiny/genui-sdk/releases/generate-notes \
 - 同一 PR 多条 commit 时，分别润色每条描述
 
 ### Step 4：分类与格式化
+
+#### Highlights 摘要
+
+在标题之后、Features 之前撰写 3–7 条 Highlights，提炼本版本的主线变更：
+
+- 每条以 **粗体主题** 起头，简述变更与影响，末尾用括号附主要 PR 编号
+- 将关联 PR 归并为一组（如「多框架渲染」「生命周期增强」），不要逐条罗列所有 PR
+- 仅收录有用户可见影响或架构意义的变更；纯 chore / ci 不进 Highlights
+- 格式：`- **{主题}** - {描述} (#xxx, #yyy).`
 
 #### 变更类型（第一级）
 
@@ -136,6 +145,13 @@ gh api repos/opentiny/genui-sdk/releases/generate-notes \
 ```markdown
 # Genui SDK v{version} Release Notes
 
+## 🚀 Highlights
+
+- **{主题}** - {描述} (#xxx, #yyy).
+- ...
+
+---
+
 ## ✨ Features
 
 **Components**
@@ -175,6 +191,14 @@ gh api repos/opentiny/genui-sdk/releases/generate-notes \
 
 **Benchmarks**
 - ...
+
+---
+
+## 🎉 New Contributors
+
+- @{login} made their first contribution in https://github.com/opentiny/genui-sdk/pull/{number}
+
+**Full Changelog**: https://github.com/opentiny/genui-sdk/compare/{previous_tag}...{new_tag}
 ```
 
 规则：
@@ -183,6 +207,9 @@ gh api repos/opentiny/genui-sdk/releases/generate-notes \
 - 子区按固定顺序：Components → Playground → Test → Build → Docs → Site → Benchmarks
 - 空子区省略；空章节省略
 - 大章节之间用 `---` 分隔
+- **Highlights**：标题后、Features 前放 3–7 条主线变更；每条以 **粗体主题** 起头，简述影响并附主要 PR 编号；仅收录有用户可见影响或架构意义的变更，纯 chore / ci 不进 Highlights
+- **New Contributors**：取自脚本输出的 `new_contributors`（GitHub 首次贡献者），格式为 `- @{login} made their first contribution in https://github.com/opentiny/genui-sdk/pull/{pr}`；无首次贡献者则省略整个章节
+- **Full Changelog**：固定取脚本输出的 `full_changelog_url`，置于文档最末
 
 完整示例见 [examples.md](examples.md)。
 
