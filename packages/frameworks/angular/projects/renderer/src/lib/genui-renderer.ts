@@ -164,7 +164,7 @@ export class GenuiRenderer implements OnInit {
 
   updateContextAndState() {
     this.rendererSettingsService.syncFromParent();
-    this.instance?.setNotify(this.rendererSettingsService.settings.notify);
+    this.instance?.setNotify(this.rendererSettingsService.settings);
     this.instance?.setContext({
       callAction: this.callAction.bind(this),
     });

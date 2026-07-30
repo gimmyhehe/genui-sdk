@@ -2,7 +2,7 @@
 import { TinyConfigProvider } from '@opentiny/vue';
 import { ThemeProvider } from '@opentiny/tiny-robot';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
-import { watch, provide, computed, onMounted, ref, inject, reactive } from 'vue';
+import { watch, provide, computed, onMounted, ref, inject } from 'vue';
 import type { IMaterials } from '@opentiny/genui-sdk-core';
 import { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { I18nMessages, useI18n } from '../chat/i18n';
@@ -76,14 +76,14 @@ provide(
   internalMaterials,
 );
 
-const parentRendererSettings = inject(RENDERER_SETTINGS_KEY, {});
-const rendererSettings = reactive({
+const parentRendererSettings = inject(RENDERER_SETTINGS_KEY, {}) as Record<string, any>;
+const rendererSettings = {
   ...(parentRendererSettings && typeof parentRendererSettings === 'object' ? parentRendererSettings : {}),
-});
+};
 watch(
   () => props.notify,
   (notify) => {
-    rendererSettings.notify = notify;
+    rendererSettings.notify = notify ?? parentRendererSettings?.notify;
   },
   { immediate: true },
 );

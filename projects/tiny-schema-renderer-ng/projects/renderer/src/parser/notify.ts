@@ -1,6 +1,6 @@
 import {
   NOTIFY_CONTEXT_KEY,
-  type NotifyHandler,
+  type IRendererSettings,
   type NotifyOptions,
   type NotifyType,
 } from '../renderer-settings';
@@ -147,7 +147,8 @@ function showDomToast(options: NotifyOptions): void {
 
 export function Notify(options: NotifyOptions, ctx?: Record<PropertyKey, any>): void {
   try {
-    const custom = ctx?.[NOTIFY_CONTEXT_KEY] as NotifyHandler | undefined;
+    const settings = ctx?.[NOTIFY_CONTEXT_KEY] as IRendererSettings | undefined;
+    const custom = settings?.notify;
     if (typeof custom === 'function') {
       custom(options);
       return;

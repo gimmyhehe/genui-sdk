@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef, reactive } from 'vue';
+import { ref, watch, computed, inject, nextTick, onErrorCaptured, provide, shallowRef } from 'vue';
 // @ts-ignore
 import SchemaRenderer, { RENDERER_SETTINGS_KEY } from '@opentiny/tiny-schema-renderer';
 import { DeltaPatcher, repairJson, RepairJsonState, type IMaterials } from '@opentiny/genui-sdk-core';
@@ -39,18 +39,8 @@ watch(() => props.customComponents, (newVal) => {
   }
 }, { immediate: true });
 
-const rendererSettings = reactive({
-  ...customSettings,
-  materials,
-});
-watch(
-  () => customSettings?.notify,
-  (notify) => {
-    rendererSettings.notify = notify;
-  },
-  { immediate: true },
-);
-provide(RENDERER_SETTINGS_KEY, rendererSettings);
+customSettings.materials = materials;
+provide(RENDERER_SETTINGS_KEY, customSettings);
 
 const deltaPatcher = shallowRef(null);
 
