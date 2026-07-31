@@ -1,99 +1,116 @@
 # Release Notes 示例
 
-以下为 `v1.2.0`（对比 `v1.1.2`）的格式参考。
+以下为 `v1.3.0`（对比 `v1.2.0`）的格式参考。
 
 ```markdown
-# Genui SDK v1.2.0 Release Notes
+# Genui SDK v1.3.0 Release Notes
 
 ## 🚀 Highlights
 
-- **Conversation history** - import/export history records (#142, #147) with time grouping and batch export (#157).
-- **Skills & agents** - added skills support (#150) and agents-as-tools (#111), with the template schema moved into user messages (#135).
-- **JSON patch streaming** - added jsonPath streamable patch support (#141, #146) and enforced strict JSON output for schemaJson (#158).
-- **Renderer** - split components into multiple chunks (#139) and added the isJsonComplete option (#146).
-- **DeepSeek** - patched the ai-sdk deepseek provider for missing reasoning_content in deepseek-v4-flash/pro (#153).
-- **Benchmarks** - added a benchmarks package (#112).
+- **Core package release** - `@opentiny/genui-sdk-core` is now published to npm as a standalone package, exposing the protocols, prompt generation, stream schema extraction, delta patching, and JSON repair modules (#206).
+- **Materials decoupling & new material packages** - materials are split into independently publishable packages, including the new `@opentiny/genui-sdk-materials-vue-element-plus` (#174) alongside the decoupled `vue-opentiny-vue` and `angular-opentiny-ng` material packages (#125, #206, #213).
+- **Multi-framework rendering** - framework switching in the playground (#143), and mixin renderer support (#208).
+- **A2A protocol v1.0** - added support for A2A protocol v1.0, with automatic fallback to 0.3 when a 1.0 invoke fails (#187, #219).
+- **Lifecycle enhancements** - lifeCycles are now deferred until schema streaming completes (#182), backed by an explicit Zod schema (#194), with `onMounted`/`onUnmounted` support for the ng-renderer (#197).
+- **Custom actions & refs** - custom actions now support return values and async (#184), plus a new refs feature (#183) and prompt variants (#202).
+- **Default props apply** - unified across the Vue and Angular renderers (#149, #196, #218).
+- **Internationalization** - playground and docs/site i18n with persisted locale settings (#172, #176, #189, #192).
 
 ---
 
 ## ✨ Features
 
 **Components**
-- feat: add isJsonComplete option by @rhlin in https://github.com/opentiny/genui-sdk/pull/146 - 06b01d8856244cd0991c95c8426d245566188f3c
-- feat(genui-sdk-vue): split components into multiple chunks by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/139
+- feat: materials decoupling by @yy-wow in https://github.com/opentiny/genui-sdk/pull/125
+- feat: add apply default props by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/149
+- feat: add new vue-element-plus package by @lhuans in https://github.com/opentiny/genui-sdk/pull/174
+- feat: defer lifeCycles until schema streaming is complete by @yy-wow in https://github.com/opentiny/genui-sdk/pull/182
+- feat: add refs feature and form validate demo by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/183
+- feat: add returns and async support to custom actions by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/184
+- feat(core): add explicit Zod schema for lifeCycles hooks by @yy-wow in https://github.com/opentiny/genui-sdk/pull/194
+- feat(genui-sdk-angular): add default props apply to angular renderer by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/196
+- feat(ng-renderer): add page onMounted/onUnmounted lifecycle support by @yy-wow in https://github.com/opentiny/genui-sdk/pull/197
+- feat: add prompt variants by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/202
+- feat(genui-sdk-vue): add legacy components by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/209
+- feat(genui-sdk-vue): materials support change value by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/214
+- feat(genui-sdk-angular): add legacy component and update docs by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/215
+- feat(core): add ICustomMessageItem type and optimize custom response handler by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/226
 
 **Playground**
-- feat: add new models and support multiple keys by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/128
-- feat(playground): move the current template schema to user messages, add assistant message to conversation context by @rhlin in https://github.com/opentiny/genui-sdk/pull/135
-- feat(playground): agents as tools by @yy-wow in https://github.com/opentiny/genui-sdk/pull/111
-- feat(playground): add history import and export functionality by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/142
-- feat(playground): add skills support by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/150
-- feat(playground): add extraBody and split model into thinking/no-thinking mode by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/155
-- feat(playground): history: add time grouping and batch export for selected records by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/157
-- feat(genui-template): implement conversation import/export by @yy-wow in https://github.com/opentiny/genui-sdk/pull/147
-- feat: update template styles and mobile styles by @yy-wow in https://github.com/opentiny/genui-sdk/pull/127
-- feat: json patch zod by @yy-wow in https://github.com/opentiny/genui-sdk/pull/141
-- feat: add jsonPath streamable patch support by @rhlin in https://github.com/opentiny/genui-sdk/pull/146 - 661655e4fcbb5ebfecc426a3f4d9dd87e32d8bf2
+- feat(playground): support switch framework by @yy-wow in https://github.com/opentiny/genui-sdk/pull/143
+- feat(playground): add OpenAPI-to-AI-SDK tools pipeline with service configuration UI by @gargameljyh in https://github.com/opentiny/genui-sdk/pull/175
+- feat(playground): implement language switcher and add English translations by @lhuans in https://github.com/opentiny/genui-sdk/pull/176
+- feat(playground): enhance chat template by adding extra body options by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/177
+- feat(playground/template): add schema manual editing functionality and version history panel by @yy-wow in https://github.com/opentiny/genui-sdk/pull/185
+- feat(playground): add support for A2A protocol v1.0 by @yy-wow in https://github.com/opentiny/genui-sdk/pull/187
+- feat(playground): improve i18n and persist locale settings by @lhuans in https://github.com/opentiny/genui-sdk/pull/192
+- feat(playground/server): add new MaaS models at dev mode by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/205
+- feat(playground): allow mixin renderer by @rhlin in https://github.com/opentiny/genui-sdk/pull/208
 
 ---
 
 ## 🐛 Bug Fixes
 
 **Components**
-- fix: resolve getCustomSetting not defined error by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/151
-- fix: restore tiny-schema-render error catch feature by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/154
-- fix(genui-sdk-vue): support data lines without space after 'data:' by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/156
-- fix(tiny-schema-renderer): fix error where loop children cannot read scope by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/159
-- fix(core): enforce strict JSON format for schemaJson output by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/158
-- fix(core): fix structuredClone error when using ref JSON and isJsonComplete is false by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/164
-- fix opentiny ng checkbox stream rendering & TiDateRange placeholder description by @rhlin in https://github.com/opentiny/genui-sdk/pull/160
+- fix: replace chart components with huicharts and add apply default props by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/94
+- fix(genui-sdk-vue): set isJsonComplete default value to true by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/180
+- fix: fix grid events dynamic change do not work by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/186
+- fix(genui-sdk-vue): optimize notification event payload and toolcall result by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/190
+- fix: delete useless defaultValue by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/203
+- fix(genui-sdk-vue): move inject token to shared folder and export in ConfigProvider by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/211
+- fix(genui-sdk-angular): apply default properties in attribute parsing by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/218
+- fix(genui-sdk-vue): fix jsonrepair dependency and add export by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/223
+- fix(playground, genui-sdk-angular): fix genui-renderer-ng-element style by @rhlin in https://github.com/opentiny/genui-sdk/pull/227
+- fix(genui-sdk-vue): change image content type to openai by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/228
+- fix(genui-sdk-vue): optimize assistant display for markdown-only scene by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/229
+- fix(genui-sdk-vue): fix ref error when ref is empty object at streaming scene by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/232
+- fix(core,materials): add eventName to prompt and optimize materials by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/233
+- fix(core): add API rule and optimize prompt for params use by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/234
 
 **Playground**
-- fix: tools css by @yy-wow in https://github.com/opentiny/genui-sdk/pull/140
-- fix(playground/server): patch ai-sdk deepseek provider for missing reasoning_content in deepseek-v4-flash/pro by @rhlin in https://github.com/opentiny/genui-sdk/pull/153
-- fix(playground): pin tool call options to tools tab bottom with independent scroll by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/168
-- fix: template PC rendering by @yy-wow in https://github.com/opentiny/genui-sdk/pull/134
-- fix(genui-template): update title by @yy-wow in https://github.com/opentiny/genui-sdk/pull/136
-- fix(genui-template): update styles by @yy-wow in https://github.com/opentiny/genui-sdk/pull/152
-- fix(chat): update customExample by @yy-wow in https://github.com/opentiny/genui-sdk/pull/144
+- fix(playground): only show prompt variants in vue framework by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/217
+- fix(playground): fall back to A2A 0.3 when 1.0 invoke fails by @yy-wow in https://github.com/opentiny/genui-sdk/pull/219
+- fix(playground): harden jsonPatch apply and component id assignment by @yy-wow in https://github.com/opentiny/genui-sdk/pull/222
 
 ---
 
 ## ♻️ Refactor
 
 **Components**
-- refactor: move think wrap from core to chat by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/148
-
-**Playground**
-- refactor(playground-template): unify template list UI with history session using TrHistory by @yy-wow in https://github.com/opentiny/genui-sdk/pull/171
+- refactor(materials): restructure vue materials package and fix playground template preview by @yy-wow in https://github.com/opentiny/genui-sdk/pull/191
+- refactor: add new packages and refactor export by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/206
+- refactor(ng): decouple OpenTiny NG materials from schema renderer by @yy-wow in https://github.com/opentiny/genui-sdk/pull/213
 
 ---
 
 ## 🔧 Other Changes
 
-**Test**
-- add repair json test cases by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/169
+**Components**
+- chore: update submodule to enhance vue renderer apply default props by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/204
+- chore: delete opentiny ng checkbox patch by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/225
 
 **Build**
-- ci: add VITE_CHAT_TEMPLATE_URL environment in GitHub Pages deployment action by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/133
-- build(playground): exclude monaco-editor from dependency optimization to fix file-not-found warning by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/145
-- build(genui-sdk-angular): fix build DTS bundle for genui-sdk-core and its dependencies' DTS by @rhlin in https://github.com/opentiny/genui-sdk/pull/167
+- chore: add multi-AI skill sync script by @gargameljyh in https://github.com/opentiny/genui-sdk/pull/212
+- build: add element-plus and angular external config to workflow builds by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/220
+- ci: fix GitHub Pages check-openapi-tools URL error by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/221
 
 **Docs**
-- docs: update docs for chunk splitting by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/161
-- docs: update playground link in README by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/166
-- docs: add isJsonComplete docs by @rhlin in https://github.com/opentiny/genui-sdk/pull/146 - 946b06b99f225239a6d9f188f89d63e2702f3e50
+- docs: add internationalization by @lhuans in https://github.com/opentiny/genui-sdk/pull/189
+- docs: add logo and DeepWiki badge to README by @chilingling in https://github.com/opentiny/genui-sdk/pull/195
+- docs: add copy page markdown button to VitePress docs by @lhuans in https://github.com/opentiny/genui-sdk/pull/198
+- fix(docs): keep top nav highlight when switching sidebar pages by @lhuans in https://github.com/opentiny/genui-sdk/pull/199
+- fix(docs): use onContentUpdated for copy-page title anchor by @yy-wow in https://github.com/opentiny/genui-sdk/pull/201
 
 **Site**
-- fix(homepage): fix video paths for "Order Milk Tea" and "Search Ticket" by @lhuans in https://github.com/opentiny/genui-sdk/pull/163
-- fix(homepage): add missing logo svg by @gimmyhehe in https://github.com/opentiny/genui-sdk/pull/170
-
-**Benchmarks**
-- feat: benchmarks by @yy-wow in https://github.com/opentiny/genui-sdk/pull/112
+- feat(homepage): implement language switcher and add English translations by @lhuans in https://github.com/opentiny/genui-sdk/pull/172
 
 ---
 
-**Full Changelog**: https://github.com/opentiny/genui-sdk/compare/v1.1.2...v1.2.0
+## 🎉 New Contributors
+
+- @chilingling made their first contribution in https://github.com/opentiny/genui-sdk/pull/195
+
+**Full Changelog**: https://github.com/opentiny/genui-sdk/compare/v1.2.0...v1.3.0
 ```
 
-> 注：v1.2.0 无首次贡献者，`## 🎉 New Contributors` 章节省略。有首次贡献者时，于 `## 🔧 Other Changes` 之后、`**Full Changelog**` 之前插入该章节，每行格式为 `- @{login} made their first contribution in https://github.com/opentiny/genui-sdk/pull/{number}`。
+> 注：有首次贡献者时，于 `## 🔧 Other Changes` 之后、`**Full Changelog**` 之前插入 `## 🎉 New Contributors` 章节，每行格式为 `- @{login} made their first contribution in https://github.com/opentiny/genui-sdk/pull/{number}`。无首次贡献者则省略整个章节。
