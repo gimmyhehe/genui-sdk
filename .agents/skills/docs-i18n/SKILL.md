@@ -9,7 +9,7 @@ description: >-
 
 # GenUI SDK 文档国际化
 
-完整约定见仓库根目录 `docs/I18N.md`。修改中文文档时，**必须同步**英文镜像与导航配置。
+完整约定见仓库根目录 `docs/I18N.md`。修改中文文档时（共享 demo、仅改图片等例外除外），**必须同步**英文镜像与导航配置。
 
 ## 目录映射
 
@@ -126,9 +126,10 @@ sidebar 按路径前缀分组（`/guide/`、`/components/`、`/examples/`、`/sc
 
 完成同步后逐项确认：
 
-```
+```markdown
 - [ ] docs/src/en/ 下存在镜像文件，路径正确
 - [ ] zh-theme.ts 与 en-theme.ts 均有对应 sidebar 条目且 link 正确
+- [ ] zh-theme.ts 与 en-theme.ts 顶层 nav 映射一致，英文 link 带 /en 前缀
 - [ ] 英文 md 中 <demo> 路径多一层 ../，且指向 demos/en/ 下对应文件（如需）
 - [ ] demo 含中文内容时已在 docs/demos/en/ 提供镜像
 - [ ] 删除场景下无残留英文文件、demo、sidebar 条目
@@ -137,7 +138,7 @@ sidebar 按路径前缀分组（`/guide/`、`/components/`、`/examples/`、`/sc
 
 ## 快速定位镜像文件
 
-```
+```text
 中文：docs/src/examples/chat/history.md
 英文：docs/src/en/examples/chat/history.md
 
