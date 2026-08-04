@@ -63,7 +63,7 @@ scripts/fetch-release-data.sh <new_tag> <previous_tag>
 若无 `gh`，备选方案：
 
 ```bash
-git log <previous_tag>..<new_tag> --merges --pretty=format:'%s'
+git log <previous_tag>..<new_tag> --pretty=format:'%s%n%b'
 ```
 
 或请用户从 [新建 Release 页](https://github.com/opentiny/genui-sdk/releases/new) 选择 tag、对比 `previous_tag` 后，将 GitHub 自动生成的 notes 粘贴到对话中。
@@ -208,7 +208,7 @@ gh api repos/opentiny/genui-sdk/releases/generate-notes \
 - 空子区省略；空章节省略
 - 大章节之间用 `---` 分隔
 - **Highlights**：标题后、Features 前放 3–7 条主线变更；每条以 **粗体主题** 起头，简述影响并附主要 PR 编号；仅收录有用户可见影响或架构意义的变更，纯 chore / ci 不进 Highlights
-- **New Contributors**：取自脚本输出的 `new_contributors`（GitHub 首次贡献者），格式为 `- @{login} made their first contribution in https://github.com/opentiny/genui-sdk/pull/{pr}`；无首次贡献者则省略整个章节
+- **New Contributors**：取自脚本输出的 `new_contributors`（字段为 `login`、`number`），格式为 `- @{login} made their first contribution in https://github.com/opentiny/genui-sdk/pull/{number}`；无首次贡献者则省略整个章节
 - **Full Changelog**：固定取脚本输出的 `full_changelog_url`，置于文档最末
 
 完整示例见 [examples.md](examples.md)。
@@ -243,18 +243,12 @@ gh release create <new_tag> \
 
 **网页发布**：用户确认后，引导打开 [releases/new](https://github.com/opentiny/genui-sdk/releases/new)，选择 tag、粘贴 `releaseNote.md` 内容、点击 Publish。
 
-若 tag 尚未推送：
-
-```bash
-git push origin <new_tag>
-```
-
 ## 常见问题
 
 | 情况 | 处理 |
 |------|------|
 | `gh` 未安装 | 询问用户安装，或用手动粘贴 GitHub 生成的 notes；整理结果仍写入 `releaseNote.md` |
-| 无 `.github/release.yml` | 直接用 `fetch-release-data.sh` 或 `git log` 提取 merge PR |
+| 无 `.github/release.yml` | 直接用 `fetch-release-data.sh` 或 `git log` 从提交信息提取 PR 编号 |
 | 同一 PR 跨多个区域 | 按主要改动区域归类；多 commit 可拆成多条 |
 | dependabot 等机器人 PR | 归入 Other Changes > Build，或按用户要求忽略 |
 | `releaseNote.md` 已存在 | 直接覆盖为本次整理结果 |

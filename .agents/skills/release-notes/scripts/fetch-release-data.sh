@@ -20,51 +20,58 @@ if ! gh auth status >/dev/null 2>&1; then
   exit 1
 fi
 
-NOTES=""
-if NOTES=$(gh api "repos/${REPO}/releases/generate-notes" \
+for ref in "$PREV_TAG" "$NEW_TAG"; do
+  if ! git rev-parse --verify --quiet "${ref}^{commit}" >/dev/null; then
+    echo "{\"error\":\"tag not found: ${ref}\"}" >&2
+    exit 1
+  fi
+done
+
+NOTES=$(gh api "repos/${REPO}/releases/generate-notes" \
   -f "tag_name=${NEW_TAG}" \
   -f "previous_tag_name=${PREV_TAG}" \
-  --jq '.body' 2>/dev/null); then
-  :
-else
-  NOTES=""
-fi
+  --jq '.body') || {
+  echo '{"error":"failed to generate release notes via GitHub API"}' >&2
+  exit 1
+}
 
-PR_NUMBERS=$(git log "${PREV_TAG}..${NEW_TAG}" --merges --pretty=format:'%s' \
-  | grep -oE '#[0-9]+' | tr -d '#' | sort -un || true)
+# Include squash/rebase merges: scan all commit subjects/bodies for #N
+PR_NUMBERS=$(git log "${PREV_TAG}..${NEW_TAG}" --pretty=format:'%s%n%b' \
+  | { grep -oE '#[0-9]+' || true; } \
+  | tr -d '#' | sort -un)
 
 PRS='[]'
 if [[ -n "$PR_NUMBERS" ]]; then
   PRS='['
   FIRST=true
   for NUM in $PR_NUMBERS; do
-    PR_JSON=$(gh pr view "$NUM" --repo "$REPO" --json number,title,author,url,commits,files 2>/dev/null) || continue
+    PR_JSON=$(gh pr view "$NUM" --repo "$REPO" --json number,title,author,url,commits,files) || {
+      echo "{\"error\":\"failed to fetch PR #${NUM}\"}" >&2
+      exit 1
+    }
     if $FIRST; then FIRST=false; else PRS+=','; fi
     PRS+="$PR_JSON"
   done
   PRS+=']'
 fi
 
-NEW_TAG="$NEW_TAG" PREV_TAG="$PREV_TAG" REPO="$REPO" NOTES="$NOTES" PRS="$PRS" python3 -c '
-import json, os, re
+printf '%s' "$PRS" | NEW_TAG="$NEW_TAG" PREV_TAG="$PREV_TAG" REPO="$REPO" NOTES="$NOTES" python3 -c '
+import json, os, re, sys
 
 notes = os.environ["NOTES"]
 repo = os.environ["REPO"]
 new_tag = os.environ["NEW_TAG"]
 prev_tag = os.environ["PREV_TAG"]
+prs = json.load(sys.stdin)
 
-# New Contributors: parse from GitHub-generated notes
-#   * @login made their first contribution in #123
-#   * @login made their first contribution in https://github.com/.../pull/123
 new_contributors = []
 for m in re.finditer(
     r"@([A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)\s+made their first contribution in\s+"
     r"(?:#(\d+)|https?://\S+/pull/(\d+))",
     notes,
 ):
-    new_contributors.append({"login": m.group(1), "pr": m.group(2) or m.group(3)})
+    new_contributors.append({"login": m.group(1), "number": m.group(2) or m.group(3)})
 
-# Full Changelog URL: parse from notes, fall back to a compare URL built from tags
 fc = re.search(r"\*\*Full Changelog\*\*:\s*(https?://\S+)", notes)
 full_changelog = fc.group(1) if fc else f"https://github.com/{repo}/compare/{prev_tag}...{new_tag}"
 
@@ -74,6 +81,6 @@ print(json.dumps({
   "full_changelog_url": full_changelog,
   "new_contributors": new_contributors,
   "github_notes": notes,
-  "pull_requests": json.loads(os.environ["PRS"]),
+  "pull_requests": prs,
 }, ensure_ascii=False))
 '
