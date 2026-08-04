@@ -38,12 +38,14 @@ import TinyTree from '@opentiny/vue-tree';
 import TinySelect from '@opentiny/vue-select';
 
 import TinyTabsWrap from './TinyTabsWrap.vue';
+import TinyIcon from './TinyIcon.vue';
 
 export interface IComponents {
   [key: string]: Component;
 }
 
 export const components: IComponents = {
+  TinyIcon,
   TinyCarouselItem: TinyCarouselItem,
   TinyCarousel: TinyCarousel,
   TinyRow: TinyRow,
