@@ -21,12 +21,14 @@ import {
   ElTabs,
   ElTabPane,
 } from 'element-plus';
+import Icon from './Icon.vue';
 
 export interface IComponents {
   [key: string]: Component;
 }
 
 export const components: IComponents = {
+  Icon,
   ElInput,
   ElDatePicker,
   ElButton,

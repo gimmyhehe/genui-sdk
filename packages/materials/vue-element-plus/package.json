@@ -36,6 +36,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
     "@opentiny/genui-sdk-core": "workspace:*"
   },
   "peerDependencies": {

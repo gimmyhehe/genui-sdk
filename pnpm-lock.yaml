@@ -413,6 +413,9 @@ importers:
 
   packages/materials/vue-element-plus:
     dependencies:
+      '@element-plus/icons-vue':
+        specifier: ^2.3.1
+        version: 2.3.2(vue@3.5.26(typescript@5.9.3))
       '@opentiny/genui-sdk-core':
         specifier: workspace:*
         version: link:../../core
