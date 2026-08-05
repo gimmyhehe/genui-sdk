@@ -781,17 +781,25 @@ ${scriptSetup}
 
   protected async formatWithPrettier(source: string, prettierOpts: Record<string, unknown>): Promise<string> {
     try {
-      const [{ format }, { default: htmlPlugin }, { default: babelPlugin }, { default: estreePlugin }] =
-        await Promise.all([
-          import('prettier/standalone'),
-          import('prettier/plugins/html'),
-          import('prettier/plugins/babel'),
-          import('prettier/plugins/estree'),
-        ]);
+      const [
+        { format },
+        { default: htmlPlugin },
+        { default: babelPlugin },
+        { default: estreePlugin },
+        { default: postcssPlugin },
+        { default: typescriptPlugin },
+      ] = await Promise.all([
+        import('prettier/standalone'),
+        import('prettier/plugins/html'),
+        import('prettier/plugins/babel'),
+        import('prettier/plugins/estree'),
+        import('prettier/plugins/postcss'),
+        import('prettier/plugins/typescript'),
+      ]);
 
       return await format(source, {
         ...prettierOpts,
-        plugins: [htmlPlugin, babelPlugin, estreePlugin],
+        plugins: [htmlPlugin, babelPlugin, estreePlugin, postcssPlugin, typescriptPlugin],
       });
     } catch {
       return source;
