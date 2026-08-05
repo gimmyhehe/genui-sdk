@@ -10,7 +10,7 @@ import type {
   IFrameworkCodeGenerator,
   IVueCodeGeneratorOptions,
 } from './types';
-import { capitalize, hyphenate, toEventKey, unwrapExpression } from './utils';
+import { capitalize, escapeDoubleQuotedAttr, hyphenate, toEventKey, unwrapExpression } from './utils';
 import { validateByCompile } from './vue-sfc-validator';
 
 export type ICodeGeneratorResult = ICodePanel & { errors: { message: string }[] };
@@ -38,8 +38,9 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
     this.enableCompileValidation = generatorOptions.enableCompileValidation !== false;
   }
 
-  protected replaceThis(value: string): string {
-    return value.replace(/this\.refs\.(\w+)/g, '$1.value').replace(/this\.(props\.)?/g, '');
+  protected replaceThis(value: string, inTemplate = false): string {
+    const refsReplacement = inTemplate ? '$1' : '$1.value';
+    return value.replace(/this\.refs\.(\w+)/g, refsReplacement).replace(/this\.(props\.)?/g, '');
   }
 
   protected buildScriptSetupStateAccessors(ctx: IScriptSetupBuildContext): string {
@@ -57,7 +58,11 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
     const { componentSet } = ctx.description;
     const refs = (ctx.schema as CardSchema & { refs?: Record<string, unknown> }).refs;
     const hasRefs = !!refs && typeof refs === 'object' && Object.keys(refs).length > 0;
-    const vueImports = ['reactive', 'computed', ...(hasRefs ? ['ref'] : [])];
+    const vueImports = [
+      'reactive',
+      ...(ctx.description.needsComputed ? ['computed'] : []),
+      ...(hasRefs ? ['ref'] : []),
+    ];
     const importLines: string[] = [`import { ${vueImports.join(', ')} } from "vue"`];
     const componentsInSFC = [...componentSet];
     const componentDeps = ctx.componentsMap.filter((item) => componentsInSFC.includes(item.componentName));
@@ -256,6 +261,7 @@ ${scriptSetup}
       internalTypes: new Set(),
       stateAccessors: [],
       needsJsx: false,
+      needsComputed: false,
     };
   }
 
@@ -271,8 +277,11 @@ ${scriptSetup}
     const indexed = trimmed.match(/^(?:this\.)?refs\.(\w+)(\[[\s\S]+\])$/);
     if (indexed) {
       const [, name, indexExpr] = indexed;
-      const assign = `(el) => (${name}.value${this.replaceThis(indexExpr)} = el)`;
-      return asJsx ? `ref={${assign}}` : `:ref="${assign}"`;
+      const inTemplate = !asJsx;
+      const target = inTemplate ? name : `${name}.value`;
+      const index = this.replaceThis(indexExpr, inTemplate);
+      const assign = `(instance) => (${target}${index} = instance)`;
+      return asJsx ? `ref={${assign}}` : `:ref="${escapeDoubleQuotedAttr(assign)}"`;
     }
     return null;
   }
@@ -288,13 +297,13 @@ ${scriptSetup}
     return 'literal';
   }
 
-  protected buildJSFunctionExpression(value: string): string {
+  protected buildJSFunctionExpression(value: string, inTemplate = false): string {
     const info = this.getFunctionInfo(value);
     if (!info) {
-      return this.replaceThis(value);
+      return this.replaceThis(value, inTemplate);
     }
     const asyncPrefix = info.type ? `${info.type} ` : '';
-    return `${asyncPrefix}(${info.params.join(',')}) => { ${this.replaceThis(info.body)} }`;
+    return `${asyncPrefix}(${info.params.join(',')}) => { ${this.replaceThis(info.body, inTemplate)} }`;
   }
 
   protected hoistPropToState(
@@ -330,25 +339,27 @@ ${scriptSetup}
     asJsx = false,
   ): string {
     const eventKey = asJsx ? key : toEventKey(key);
+    const inTemplate = !asJsx;
+    const toTemplateEventAttr = (expr: string) => `@${eventKey}="${escapeDoubleQuotedAttr(expr)}"`;
 
     if (item?.type === JS_FUNCTION) {
-      const handler = this.buildJSFunctionExpression(item.value ?? '');
+      const handler = this.buildJSFunctionExpression(item.value ?? '', inTemplate);
       if (item.params?.length) {
         const expr = `(...eventArgs) => (${handler})(...eventArgs, ${item.params.join(',')})`;
-        return asJsx ? `${eventKey}={${expr}}` : `@${eventKey}="${expr}"`;
+        return asJsx ? `${eventKey}={${expr}}` : toTemplateEventAttr(expr);
       }
-      return asJsx ? `${eventKey}={${handler}}` : `@${eventKey}="${handler}"`;
+      return asJsx ? `${eventKey}={${handler}}` : toTemplateEventAttr(handler);
     }
 
     if (item?.type !== JS_EXPRESSION) {
       return '';
     }
-    const eventHandler = this.replaceThis(item.value ?? '');
+    const eventHandler = this.replaceThis(item.value ?? '', inTemplate);
     if (item.params?.length) {
       const expr = `(...eventArgs) => ${eventHandler}(eventArgs, ${item.params.join(',')})`;
-      return asJsx ? `${eventKey}={${expr}}` : `@${eventKey}="${expr}"`;
+      return asJsx ? `${eventKey}={${expr}}` : toTemplateEventAttr(expr);
     }
-    return asJsx ? `${eventKey}={${eventHandler}}` : `@${eventKey}="${eventHandler}"`;
+    return asJsx ? `${eventKey}={${eventHandler}}` : toTemplateEventAttr(eventHandler);
   }
 
   protected avoidDuplicateString(existings: string[], baseName: string): string {
@@ -450,7 +461,7 @@ ${scriptSetup}
       }
 
       if (propType === JS_EXPRESSION) {
-        const expr = this.replaceThis(item.value ?? '');
+        const expr = this.replaceThis(item.value ?? '', !asJsx);
         if (item.model) {
           const modelArgs = item.model?.prop ? `:${item.model.prop}` : '';
           attrsArr.push(asJsx ? `v-model${modelArgs}={${expr}}` : `v-model${modelArgs}="${expr}"`);
@@ -507,7 +518,7 @@ ${scriptSetup}
 
     if (loop) {
       const loopData = (loop as { type?: string; value?: string }).type
-        ? this.replaceThis((loop as { value?: string }).value ?? '')
+        ? this.replaceThis((loop as { value?: string }).value ?? '', true)
         : JSON.stringify(loop).replace(/"/g, '&quot;');
       attrsArr.push(`v-for="(${loopArgs.join(',')}) in ${loopData}"`);
     }
@@ -517,7 +528,7 @@ ${scriptSetup}
       const conditionObj = condition as { type?: string; value?: string; kind?: string };
       const conditionValue =
         isObjectCondition && conditionObj.type
-          ? this.replaceThis(conditionObj.value ?? '')
+          ? this.replaceThis(conditionObj.value ?? '', true)
           : condition;
       const directive = isObjectCondition ? conditionObj.kind || 'if' : 'if';
       attrsArr.push(directive === 'else' ? 'v-else' : `v-${directive}="${conditionValue}"`);
@@ -620,6 +631,7 @@ ${scriptSetup}
           ? `(${setterInfo.params.join(',')}) => { ${this.replaceThis(setterInfo.body)} }`
           : undefined,
       });
+      description.needsComputed = true;
 
       if (stateEntry.defaultValue !== undefined) {
         current[prop] = stateEntry.defaultValue;
@@ -640,6 +652,9 @@ ${scriptSetup}
 
     if (type === JS_EXPRESSION) {
       const { value = '', computed = false } = current[prop] || {};
+      if (computed) {
+        description.needsComputed = true;
+      }
       current[prop] = computed
         ? `${start}computed(${this.replaceThis(value)})${end}`
         : `${start}${this.replaceThis(value)}${end}`;

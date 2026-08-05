@@ -22,3 +22,5 @@ export const unwrapExpression = (value: string): string =>
     p1.replace(/\\"/g, '"').replace(/\\r\\n|\\r|\\n/g, ''),
   );
 
+export const escapeDoubleQuotedAttr = (value: string): string => value.replace(/"/g, '&quot;');
+
