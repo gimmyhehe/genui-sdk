@@ -354,7 +354,7 @@ onUnmounted(() => {
         :clearable="true"
         :loading="generating"
         :showWordLimit="true"
-        :maxLength="5000"
+        :maxLength="20000"
         @clear="clearInputMessage"
         @submit="handleSendMessage"
         @cancel="() => messageManager?.abortRequest()"
