@@ -8,5 +8,5 @@ export const [JS_EXPRESSION, JS_FUNCTION, JS_I18N, JS_RESOURCE, JS_SLOT] = [
   'JSFunction',
   'i18n',
   'JSResource',
-  'JSSlot'
-]
+  'JSSlot',
+];

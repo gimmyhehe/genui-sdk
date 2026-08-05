@@ -17,6 +17,7 @@ export interface ICodegenDescription {
   iconComponents: { componentNames: string[]; exportNames: string[] };
   internalTypes: Set<string>;
   stateAccessors: IStateAccessorDefinition[];
+  needsJsx: boolean;
 }
 
 export interface ICodePanel {

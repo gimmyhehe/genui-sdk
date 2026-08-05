@@ -39,7 +39,7 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
   }
 
   protected replaceThis(value: string): string {
-    return value.replace(/this\./g, '');
+    return value.replace(/this\.refs\.(\w+)/g, '$1.value').replace(/this\.(props\.)?/g, '');
   }
 
   protected buildScriptSetupStateAccessors(ctx: IScriptSetupBuildContext): string {
@@ -55,7 +55,10 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
 
   protected buildScriptSetupImports(ctx: IScriptSetupBuildContext): string {
     const { componentSet } = ctx.description;
-    const importLines: string[] = ['import { reactive, computed } from "vue"'];
+    const refs = (ctx.schema as CardSchema & { refs?: Record<string, unknown> }).refs;
+    const hasRefs = !!refs && typeof refs === 'object' && Object.keys(refs).length > 0;
+    const vueImports = ['reactive', 'computed', ...(hasRefs ? ['ref'] : [])];
+    const importLines: string[] = [`import { ${vueImports.join(', ')} } from "vue"`];
     const componentsInSFC = [...componentSet];
     const componentDeps = ctx.componentsMap.filter((item) => componentsInSFC.includes(item.componentName));
     const componentPacks: Record<string, IComponentMapItem[]> = {};
@@ -77,6 +80,25 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
     });
 
     return importLines.join('\n');
+  }
+
+  protected buildScriptSetupRefs(ctx: IScriptSetupBuildContext): string {
+    const refs = (ctx.schema as CardSchema & { refs?: Record<string, unknown> }).refs;
+    if (!refs || typeof refs !== 'object') {
+      return '';
+    }
+
+    const entries = Object.entries(refs);
+    if (!entries.length) {
+      return '';
+    }
+
+    return entries
+      .map(([name, initial]) => {
+        const initExpr = initial === undefined ? 'null' : unwrapExpression(JSON.stringify(initial));
+        return `const ${name} = ref(${initExpr})`;
+      })
+      .join('\n');
   }
 
   protected buildScriptSetupDefineProps(ctx: IScriptSetupBuildContext): string {
@@ -125,7 +147,6 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
 
   protected buildScriptSetupReactiveState(ctx: IScriptSetupBuildContext): string {
     const { state = {} } = ctx.schema as CardSchema & { state?: Record<string, unknown> };
-    this.traverseState(state as Record<string, any>, ctx.description);
     return `const state = reactive(${unwrapExpression(JSON.stringify(state, null, 2))})`;
   }
 
@@ -137,7 +158,7 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
         return `const ${key} = ${this.replaceThis(item.value)}`;
       }
       const asyncPrefix = info.type ? `${info.type} ` : '';
-      const body = info.body.replace(/this\.(props\.)?/g, '');
+      const body = this.replaceThis(info.body);
       return `${asyncPrefix}function ${key}(${info.params.join(', ')}) {${body}}`;
     });
     return methodLines.join('\n\n');
@@ -170,8 +191,9 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
 </template>`;
   }
 
-  protected buildSfcScriptSetupSection(scriptSetup: string): string {
-    return `<script setup>
+  protected buildSfcScriptSetupSection(scriptSetup: string, needsJsx = false): string {
+    const langAttr = needsJsx ? ' lang="jsx"' : '';
+    return `<script setup${langAttr}>
 ${scriptSetup}
 </script>`;
   }
@@ -205,6 +227,11 @@ ${scriptSetup}
         build: (ctx) => this.buildScriptSetupIconStatement(ctx),
       },
       {
+        id: 'refs',
+        group: 'refs',
+        build: (ctx) => this.buildScriptSetupRefs(ctx),
+      },
+      {
         id: 'reactive',
         group: 'state',
         build: (ctx) => this.buildScriptSetupReactiveState(ctx),
@@ -228,7 +255,26 @@ ${scriptSetup}
       iconComponents: { componentNames: [], exportNames: [] },
       internalTypes: new Set(),
       stateAccessors: [],
+      needsJsx: false,
     };
+  }
+
+  protected resolveRefAttr(value: string | undefined, asJsx: boolean): string | null {
+    if (!value) {
+      return null;
+    }
+    const trimmed = value.trim();
+    const simple = trimmed.match(/^(?:this\.)?refs\.(\w+)$/);
+    if (simple) {
+      return asJsx ? `ref={${simple[1]}}` : `ref="${simple[1]}"`;
+    }
+    const indexed = trimmed.match(/^(?:this\.)?refs\.(\w+)(\[[\s\S]+\])$/);
+    if (indexed) {
+      const [, name, indexExpr] = indexed;
+      const assign = `(el) => (${name}.value${this.replaceThis(indexExpr)} = el)`;
+      return asJsx ? `ref={${assign}}` : `:ref="${assign}"`;
+    }
+    return null;
   }
 
   protected resolvePropValueType(value: unknown): string {
@@ -248,13 +294,19 @@ ${scriptSetup}
       return this.replaceThis(value);
     }
     const asyncPrefix = info.type ? `${info.type} ` : '';
-    return `${asyncPrefix}(${info.params.join(',')}) => { ${info.body.replace(/this\.(props\.)?/g, '')} }`;
+    return `${asyncPrefix}(${info.params.join(',')}) => { ${this.replaceThis(info.body)} }`;
   }
 
-  protected hoistPropToState(key: string, item: unknown, attrsArr: string[], state: Record<string, unknown>): void {
+  protected hoistPropToState(
+    key: string,
+    item: unknown,
+    attrsArr: string[],
+    state: Record<string, unknown>,
+    asJsx = false,
+  ): void {
     const valueKey = this.avoidDuplicateString(Object.keys(state), key);
     state[valueKey] = item;
-    attrsArr.push(`:${key}="state.${valueKey}"`);
+    attrsArr.push(asJsx ? `${key}={state.${valueKey}}` : `:${key}="state.${valueKey}"`);
   }
 
   protected isOnEventKey(key: string): boolean {
@@ -272,26 +324,31 @@ ${scriptSetup}
     return slot;
   }
 
-  protected handleEventBinding(key: string, item: { type?: string; value?: string; params?: string[] }): string {
-    const eventKey = toEventKey(key);
+  protected handleEventBinding(
+    key: string,
+    item: { type?: string; value?: string; params?: string[] },
+    asJsx = false,
+  ): string {
+    const eventKey = asJsx ? key : toEventKey(key);
 
     if (item?.type === JS_FUNCTION) {
       const handler = this.buildJSFunctionExpression(item.value ?? '');
       if (item.params?.length) {
-        return `@${eventKey}="(...eventArgs) => (${handler})(...eventArgs, ${item.params.join(',')})"`;
+        const expr = `(...eventArgs) => (${handler})(...eventArgs, ${item.params.join(',')})`;
+        return asJsx ? `${eventKey}={${expr}}` : `@${eventKey}="${expr}"`;
       }
-      return `@${eventKey}="${handler}"`;
+      return asJsx ? `${eventKey}={${handler}}` : `@${eventKey}="${handler}"`;
     }
 
     if (item?.type !== JS_EXPRESSION) {
       return '';
     }
-    const eventHandler = (item.value ?? '').replace(/this\.(props\.)?/g, '');
+    const eventHandler = this.replaceThis(item.value ?? '');
     if (item.params?.length) {
-      const extendParams = item.params.join(',');
-      return `@${eventKey}="(...eventArgs) => ${eventHandler}(eventArgs, ${extendParams})"`;
+      const expr = `(...eventArgs) => ${eventHandler}(eventArgs, ${item.params.join(',')})`;
+      return asJsx ? `${eventKey}={${expr}}` : `@${eventKey}="${expr}"`;
     }
-    return `@${eventKey}="${eventHandler}"`;
+    return asJsx ? `${eventKey}={${eventHandler}}` : `@${eventKey}="${eventHandler}"`;
   }
 
   protected avoidDuplicateString(existings: string[], baseName: string): string {
@@ -310,6 +367,7 @@ ${scriptSetup}
     attrsArr: string[],
     description: ICodegenDescription,
     state: Record<string, unknown>,
+    asJsx = false,
   ): void {
     if (typeof item === 'string') {
       attrsArr.push(`${key}="${item.replace(/"/g, '&quot;')}"`);
@@ -322,7 +380,6 @@ ${scriptSetup}
       description.internalTypes = localInternalTypes;
 
       this.traverseState(item as Record<string, unknown>, description);
-      // 嵌套 JSFunction/JSResource/JSSlot 无法 JSON 内联，整包 hoist（同顶层 JSFunction prop，见 hoistPropToState）
       const requiresStateHoist =
         localInternalTypes.has('JSFunction') ||
         localInternalTypes.has('JSResource') ||
@@ -330,18 +387,22 @@ ${scriptSetup}
 
       if (requiresStateHoist) {
         description.internalTypes = prevInternalTypes;
-        this.hoistPropToState(key, item, attrsArr, state);
+        this.hoistPropToState(key, item, attrsArr, state, asJsx);
         return;
       }
 
       description.internalTypes = prevInternalTypes;
       const parsedValue = unwrapExpression(JSON.stringify(item)).replace(/props\./g, '');
+      if (asJsx) {
+        attrsArr.push(`${key}={${parsedValue}}`);
+        return;
+      }
       const safeExpr = parsedValue.replace(/'/g, '&#39;');
       attrsArr.push(`:${key}='${safeExpr}'`);
       return;
     }
 
-    attrsArr.push(`:${key}="${item}"`);
+    attrsArr.push(asJsx ? `${key}={${item}}` : `:${key}="${item}"`);
   }
 
   protected handleBinding(
@@ -349,6 +410,7 @@ ${scriptSetup}
     attrsArr: string[],
     description: ICodegenDescription,
     state: Record<string, unknown>,
+    asJsx = false,
   ): void {
     Object.entries(props).forEach(([rawKey, rawItem]) => {
       let key = rawKey === 'className' ? 'class' : rawKey;
@@ -361,8 +423,16 @@ ${scriptSetup}
       const item = rawItem as { type?: string; value?: string; model?: { prop?: string }; params?: string[] };
       const propType = this.resolvePropValueType(rawItem);
 
+      if (key === 'ref' && propType === JS_EXPRESSION) {
+        const refAttr = this.resolveRefAttr(item.value, asJsx);
+        if (refAttr) {
+          attrsArr.push(refAttr);
+          return;
+        }
+      }
+
       if (this.isOnEventKey(key)) {
-        const eventBinding = this.handleEventBinding(key, item);
+        const eventBinding = this.handleEventBinding(key, item, asJsx);
         if (eventBinding) {
           attrsArr.push(eventBinding);
         }
@@ -370,23 +440,23 @@ ${scriptSetup}
       }
 
       if (propType === 'literal') {
-        this.handleLiteralBinding(key, rawItem, attrsArr, description, state);
+        this.handleLiteralBinding(key, rawItem, attrsArr, description, state, asJsx);
         return;
       }
 
-      if (propType === JS_FUNCTION) {
-        // 普通 prop：不内联函数体，提升到 state 后由 transformStateType 在 reactive 中还原
-        this.hoistPropToState(key, rawItem, attrsArr, state);
+      if (propType === JS_FUNCTION || propType === JS_SLOT) {
+        this.hoistPropToState(key, rawItem, attrsArr, state, asJsx);
         return;
       }
 
       if (propType === JS_EXPRESSION) {
+        const expr = this.replaceThis(item.value ?? '');
         if (item.model) {
           const modelArgs = item.model?.prop ? `:${item.model.prop}` : '';
-          attrsArr.push(`v-model${modelArgs}="${(item.value ?? '').replace(/this\.(props\.)?/g, '')}"`);
+          attrsArr.push(asJsx ? `v-model${modelArgs}={${expr}}` : `v-model${modelArgs}="${expr}"`);
           return;
         }
-        attrsArr.push(`:${key}="${(item.value ?? '').replace(/this\.(props\.)?/g, '')}"`);
+        attrsArr.push(asJsx ? `${key}={${expr}}` : `:${key}="${expr}"`);
       }
     });
   }
@@ -437,7 +507,7 @@ ${scriptSetup}
 
     if (loop) {
       const loopData = (loop as { type?: string; value?: string }).type
-        ? ((loop as { value?: string }).value ?? '').replace(/this\.(props\.)?/g, '')
+        ? this.replaceThis((loop as { value?: string }).value ?? '')
         : JSON.stringify(loop).replace(/"/g, '&quot;');
       attrsArr.push(`v-for="(${loopArgs.join(',')}) in ${loopData}"`);
     }
@@ -447,7 +517,7 @@ ${scriptSetup}
       const conditionObj = condition as { type?: string; value?: string; kind?: string };
       const conditionValue =
         isObjectCondition && conditionObj.type
-          ? (conditionObj.value ?? '').replace(/this\.(props\.)?/g, '')
+          ? this.replaceThis(conditionObj.value ?? '')
           : condition;
       const directive = isObjectCondition ? conditionObj.kind || 'if' : 'if';
       attrsArr.push(directive === 'else' ? 'v-else' : `v-${directive}="${conditionValue}"`);
@@ -480,12 +550,12 @@ ${scriptSetup}
     const attrsArr: string[] = [];
 
     if (condition) {
-      const conditionValue = condition?.type ? condition.value.replace(/this\./g, '') : condition;
+      const conditionValue = condition?.type ? this.replaceThis(condition.value) : condition;
       result.push(`{ ${conditionValue} && `);
     }
 
     result.push(`<${component} `);
-    this.handleBinding(props, attrsArr, description, state);
+    this.handleBinding(props, attrsArr, description, state, true);
     result.push(attrsArr.join(' '));
 
     const VOID_ELEMENTS = ['img', 'input', 'br', 'hr', 'link'];
@@ -496,7 +566,7 @@ ${scriptSetup}
       if (Array.isArray(children)) {
         result.push(children.map((child) => this.generateSlotTemplate(child, description, state)).join(''));
       } else if (children?.type === 'JSExpression') {
-        result.push(`{ ${children.value.replace(/this\./g, '')} }`);
+        result.push(`{ ${this.replaceThis(children.value)} }`);
       } else if (children?.type === 'i18n') {
         result.push(`{t('${children.key}')}`);
       } else {
@@ -544,10 +614,10 @@ ${scriptSetup}
       description.stateAccessors.push({
         name: prop,
         getterExpr: getterInfo
-          ? `() => { ${getterInfo.body.replace(/this\.(props\.)?/g, '')} }`
+          ? `() => { ${this.replaceThis(getterInfo.body)} }`
           : `() => (${this.replaceThis(getterValue)})()`,
         setterExpr: setterInfo
-          ? `(${setterInfo.params.join(',')}) => { ${setterInfo.body.replace(/this\.(props\.)?/g, '')} }`
+          ? `(${setterInfo.params.join(',')}) => { ${this.replaceThis(setterInfo.body)} }`
           : undefined,
       });
 
@@ -571,8 +641,8 @@ ${scriptSetup}
     if (type === JS_EXPRESSION) {
       const { value = '', computed = false } = current[prop] || {};
       current[prop] = computed
-        ? `${start}computed(${value.replace(/this\./g, '')})${end}`
-        : `${start}${value.replace(/this\./g, '')}${end}`;
+        ? `${start}computed(${this.replaceThis(value)})${end}`
+        : `${start}${this.replaceThis(value)}${end}`;
       return;
     }
 
@@ -580,10 +650,10 @@ ${scriptSetup}
       const { value = '' } = current[prop] || {};
       const info = this.getFunctionInfo(value);
       if (!info) {
-        current[prop] = `${start}${typeof value === 'string' ? value.replace(/this\./g, '') : ''}${end}`;
+        current[prop] = `${start}${typeof value === 'string' ? this.replaceThis(value) : ''}${end}`;
         return;
       }
-      const inlineFunc = `${info.type} (${info.params.join(',')}) => { ${info.body.replace(/this\./g, '')} }`;
+      const inlineFunc = `${info.type} (${info.params.join(',')}) => { ${this.replaceThis(info.body)} }`;
       current[prop] = `${start}${inlineFunc}${end}`;
       return;
     }
@@ -596,13 +666,14 @@ ${scriptSetup}
 
     if (type === JS_RESOURCE) {
       const { value = '' } = current[prop] || {};
-      current[prop] = `${start}${value.replace(/this\./g, '')}${end}`;
+      current[prop] = `${start}${this.replaceThis(value)}${end}`;
       return;
     }
 
     const { value = [], params = ['row'] } = current[prop] || {};
+    description.needsJsx = true;
     const slotValues = (value as any[]).map((item) => this.generateSlotTemplate(item, description, rootState)).join('');
-    current[prop] = `${start}({ ${params.join(',')} }, h) => ${slotValues}${end}`;
+    current[prop] = `${start}({ ${params.join(',')} }) => ${slotValues || 'null'}${end}`;
   }
 
   protected traverseState(
@@ -634,14 +705,15 @@ ${scriptSetup}
     componentsMap: IComponentMapItem[];
   }): string {
     const codegenMeta = this.createCodegenMeta();
-    const scriptSetupCtx: IScriptSetupBuildContext = { schema, componentsMap, description: codegenMeta };
-    const rootState = schema.state as Record<string, any>;
+    const rootState = (schema.state ??= {}) as Record<string, any>;
     const template = this.generateTemplate(schema, rootState, codegenMeta);
+    this.traverseState(rootState, codegenMeta);
+    const scriptSetupCtx: IScriptSetupBuildContext = { schema, componentsMap, description: codegenMeta };
     const script = this.buildScriptSetupBody(scriptSetupCtx, this.getScriptSetupSections());
 
     return [
       this.buildSfcTemplateSection(template),
-      this.buildSfcScriptSetupSection(script),
+      this.buildSfcScriptSetupSection(script, codegenMeta.needsJsx),
       this.buildSfcStyleSection(schema.css || ''),
     ]
       .filter(Boolean)
