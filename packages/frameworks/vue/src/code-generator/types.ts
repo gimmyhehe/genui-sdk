@@ -19,6 +19,7 @@ export interface ICodegenDescription {
   stateAccessors: IStateAccessorDefinition[];
   needsJsx: boolean;
   needsComputed: boolean;
+  needsCallAction: boolean;
 }
 
 export interface ICodePanel {

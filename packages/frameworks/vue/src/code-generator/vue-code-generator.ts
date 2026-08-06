@@ -169,6 +169,15 @@ export class VueCodeGenerator implements IFrameworkCodeGenerator<ICodeGeneratorP
     return methodLines.join('\n\n');
   }
 
+  protected buildScriptSetupCallAction(ctx: IScriptSetupBuildContext): string {
+    if (!ctx.description.needsCallAction) {
+      return '';
+    }
+    return `function callAction(name, params) {
+  console.warn(\`[GenUI] callAction("\${name}") is available at runtime via customActions; implement it for exported code.\`, params)
+}`;
+  }
+
   protected buildScriptSetupBody(
     ctx: IScriptSetupBuildContext,
     sections: readonly IScriptSetupSectionDefinition[],
@@ -247,6 +256,11 @@ ${scriptSetup}
         build: (ctx) => this.buildScriptSetupStateAccessors(ctx),
       },
       {
+        id: 'callAction',
+        group: 'actions',
+        build: (ctx) => this.buildScriptSetupCallAction(ctx),
+      },
+      {
         id: 'methods',
         group: 'methods',
         build: (ctx) => this.buildScriptSetupMethods(ctx),
@@ -262,6 +276,7 @@ ${scriptSetup}
       stateAccessors: [],
       needsJsx: false,
       needsComputed: false,
+      needsCallAction: false,
     };
   }
 
@@ -720,6 +735,7 @@ ${scriptSetup}
     componentsMap: IComponentMapItem[];
   }): string {
     const codegenMeta = this.createCodegenMeta();
+    codegenMeta.needsCallAction = /\bthis\.callAction\b/.test(JSON.stringify(schema));
     const rootState = (schema.state ??= {}) as Record<string, any>;
     const template = this.generateTemplate(schema, rootState, codegenMeta);
     this.traverseState(rootState, codegenMeta);
