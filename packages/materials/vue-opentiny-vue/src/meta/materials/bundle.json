@@ -2049,7 +2049,6 @@
           "npm": {
             "package": "@opentiny/vue",
             "exportName": "TinyLayout",
-            "version": "3.20.0",
             "destructuring": true
           },
           "group": "component",
