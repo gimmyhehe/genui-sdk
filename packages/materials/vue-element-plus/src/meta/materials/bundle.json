@@ -1082,7 +1082,7 @@
                       }
                     },
                     "description": {
-                      "zh_CN": "按钮图标，必须使用 JSSlot 包裹 Icon。正确示例：{\"type\":\"JSSlot\",\"value\":[{\"componentName\":\"Icon\",\"props\":{\"name\":\"Search\"}}]}。禁止直接传组件对象或使用 JSExpression。"
+                      "zh_CN": "按钮图标，必须使用 JSSlot 包裹 ElIconSvg。正确示例：{\"type\":\"JSSlot\",\"value\":[{\"componentName\":\"ElIconSvg\",\"props\":{\"name\":\"Search\"}}]}。禁止直接传组件对象或使用 JSExpression。"
                     },
                     "required": false,
                     "readOnly": false,
@@ -1125,11 +1125,11 @@
         },
         {
           "name": {
-            "zh_CN": "Icon"
+            "zh_CN": "ElIconSvg"
           },
-          "component": "Icon",
+          "component": "ElIconSvg",
           "icon": "icon",
-          "description": "图标组件。可作独立节点：{\"componentName\":\"Icon\",\"props\":{\"name\":\"Search\"}}。作为 ElButton 的 icon 属性时必须使用 JSSlot：{\"icon\":{\"type\":\"JSSlot\",\"value\":[{\"componentName\":\"Icon\",\"props\":{\"name\":\"Search\"}}]}}",
+          "description": "图标组件。可作独立节点：{\"componentName\":\"ElIconSvg\",\"props\":{\"name\":\"Search\"}}。作为 ElButton 的 icon 属性时必须使用 JSSlot：{\"icon\":{\"type\":\"JSSlot\",\"value\":[{\"componentName\":\"ElIconSvg\",\"props\":{\"name\":\"Search\"}}]}}",
           "doc_url": "https://element-plus.org/zh-CN/component/icon",
           "screenshot": "",
           "tags": "icon,图标",
@@ -1200,7 +1200,7 @@
                     "labelPosition": "left",
                     "type": "string",
                     "widget": {
-                      "component": "InputConfigurator",
+                      "component": "SelectIconConfigurator",
                       "props": {}
                     }
                   }
