@@ -29,6 +29,8 @@ import useIcon from './use-icon';
 import { getMixedContentHandler } from './ng-renderer/content-response-handler';
 import { getMessageRendererAngular } from './ng-renderer/message-renderer-angular';
 import { locale, t } from './i18n';
+import { useRoute } from 'vue-router';
+import { PlaygroundMode } from './constants';
 
 const { topRenderer, addIcons } = useIcon();
 const TopIconsRenderer = topRenderer();
@@ -267,20 +269,26 @@ const playgroundContext = {
 
 provide('playgroundContext', playgroundContext);
 
-const handleKeydown = (event) => {
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-    event.preventDefault();
-    chat.value?.handleNewConversation();
-  }
-};
-
+const route = useRoute();
 const templateUrl = import.meta.env.VITE_CHAT_TEMPLATE_URL;
-const { templateSchemaList } = ENABLE_TEMPLATE
+const { templateSchemaList, createTemplate } = ENABLE_TEMPLATE
   ? useTemplate({
       url: templateUrl,
       llmConfig,
     })
-  : { templateSchemaList: ref([]) };
+  : { templateSchemaList: ref([]), createTemplate: () => {} };
+
+const handleKeydown = (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    if (ENABLE_TEMPLATE && route.name === PlaygroundMode.Builder) {
+      createTemplate();
+      return;
+    }
+    chat.value?.handleNewConversation();
+  }
+};
+
 const { initInputMessage } = useInputMessage(chat);
 const isSidebarOpen = ref(!isMobile.value);
 

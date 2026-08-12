@@ -28,5 +28,5 @@ export enum LinkKey {
 }
 
 export function openLink(key: keyof typeof linkMap) {
-  window.open(linkMap[key], '_blank');
+  window.open(linkMap[key], '_blank', 'noopener,noreferrer');
 }

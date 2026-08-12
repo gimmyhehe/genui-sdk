@@ -32,7 +32,7 @@ const GenuiTemplateList = ENABLE_TEMPLATE
   : shallowRef(null);
 // 从上层注入共享的 playground 上下文（framework / 会话等）
 const playgroundContext = inject('playgroundContext');
-const { conversation } = playgroundContext;
+const { conversation, framework } = playgroundContext;
 
 const route = useRoute();
 const router = useRouter();
@@ -54,14 +54,23 @@ const sidebarWidth = computed(() => (props.expanded ? 'var(--config-tas-width)' 
 
 const showNewTaskButton = computed(() => currentMode.value === PlaygroundMode.Chat);
 
-watch(currentMode, (mode) => {
-  if (mode === PlaygroundMode.Chat && activeName.value === 'template') {
-    activeName.value = 'model';
-  }
-  if (mode === PlaygroundMode.Builder && activeName.value === 'history') {
-    activeName.value = 'model';
-  }
-});
+const showNewTemplateButton = computed(() => ENABLE_TEMPLATE && currentMode.value === PlaygroundMode.Builder);
+
+watch(
+  currentMode,
+  (mode) => {
+    if (mode === PlaygroundMode.Chat && activeName.value === 'template') {
+      activeName.value = 'model';
+    }
+    if (mode === PlaygroundMode.Builder && activeName.value === 'history') {
+      activeName.value = 'model';
+    }
+    if (mode === PlaygroundMode.Builder && framework.value === 'Angular') {
+      framework.value = 'Vue';
+    }
+  },
+  { immediate: true },
+);
 
 watch(isMobile, (mobile) => {
   if (mobile) emit('update:expanded', false);
@@ -82,6 +91,11 @@ const toggleExpanded = () => {
 
 const handleNewTask = () => {
   emit('new-task');
+  if (isMobile.value) emit('update:expanded', false);
+};
+
+const handleNewTemplate = () => {
+  createTemplate();
   if (isMobile.value) emit('update:expanded', false);
 };
 
@@ -115,11 +129,11 @@ const updateCustomExamples = (list) => {
         {{ currentConversationTitle }}
       </div>
       <button
-        v-if="showNewTaskButton"
+        v-if="showNewTaskButton || showNewTemplateButton"
         type="button"
         class="playground-topbar__icon-btn"
-        :aria-label="t('sidebar.newTask')"
-        @click="handleNewTask"
+        :aria-label="showNewTaskButton ? t('sidebar.newTask') : t('template.new')"
+        @click="showNewTaskButton ? handleNewTask() : handleNewTemplate()"
       >
         <span class="svg-icon" :innerHTML="NewSvg"></span>
       </button>
@@ -199,6 +213,16 @@ const updateCustomExamples = (list) => {
           >
             <span class="svg-icon" :innerHTML="NewSvg" />
           </button>
+          <button
+            v-if="!expanded && !isMobile && showNewTemplateButton"
+            type="button"
+            class="playground-sidebar__icon-btn"
+            :aria-label="t('template.new')"
+            :title="t('template.new')"
+            @click="handleNewTemplate"
+          >
+            <span class="svg-icon" :innerHTML="NewSvg" />
+          </button>
         </div>
       </header>
 
@@ -206,6 +230,14 @@ const updateCustomExamples = (list) => {
         <button v-if="expanded && showNewTaskButton" class="new-task-btn" type="button" @click="handleNewTask">
           <TinyIconPlus :size="16" />
           <span class="new-task-btn__text">{{ t('sidebar.newTask') }}</span>
+          <div class="new-task-btn__shortcut">
+            <span>Ctrl</span>
+            <span>K</span>
+          </div>
+        </button>
+        <button v-if="expanded && showNewTemplateButton" class="new-task-btn" type="button" @click="handleNewTemplate">
+          <TinyIconPlus :size="16" />
+          <span class="new-task-btn__text">{{ t('template.new') }}</span>
           <div class="new-task-btn__shortcut">
             <span>Ctrl</span>
             <span>K</span>
@@ -226,7 +258,7 @@ const updateCustomExamples = (list) => {
           <McpTools />
         </tiny-tab-item>
         <tiny-tab-item :title="t('sidebar.tabMaterials')" name="theme">
-          <MaterialsTab :theme="theme" @update:theme="emit('update:theme', $event)" />
+          <MaterialsTab :theme="theme" :current-mode="currentMode" @update:theme="emit('update:theme', $event)" />
         </tiny-tab-item>
         <tiny-tab-item v-if="currentMode === PlaygroundMode.Chat" :title="t('sidebar.tabHistory')" name="history" class="history-tab">
           <GenuiHistory v-if="conversation" :conversation="conversation" />
