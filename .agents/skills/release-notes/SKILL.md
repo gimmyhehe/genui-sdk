@@ -58,7 +58,7 @@ git tag --merged <new_tag> --sort=-v:refname \
 scripts/fetch-release-data.sh <new_tag> <previous_tag>
 ```
 
-脚本输出 JSON，包含 `new_tag`、`previous_tag`、`full_changelog_url`、`new_contributors`、`github_notes`，以及每个 PR 的 `number`、`title`、`author`、`url`、`files`、`commits`。
+脚本输出 JSON，包含 `new_tag`、`previous_tag`、`full_changelog_url`、`new_contributors`、`github_notes`，以及 `pull_requests` 数组，其中每个 PR 含 `number`、`title`、`author`、`url`、`files`、`commits`。
 
 若无 `gh`，备选方案：
 
@@ -233,7 +233,10 @@ releaseNote.md
 **CLI 发布（推荐）**：
 
 ```bash
+git push origin <new_tag>
+
 gh release create <new_tag> \
+  --verify-tag \
   --title "Genui SDK <new_tag>" \
   --notes-file releaseNote.md \
   --repo opentiny/genui-sdk

@@ -45,9 +45,9 @@ if [[ -n "$PR_NUMBERS" ]]; then
   PRS='['
   FIRST=true
   for NUM in $PR_NUMBERS; do
-    PR_JSON=$(gh pr view "$NUM" --repo "$REPO" --json number,title,author,url,commits,files) || {
-      echo "{\"error\":\"failed to fetch PR #${NUM}\"}" >&2
-      exit 1
+    PR_JSON=$(gh pr view "$NUM" --repo "$REPO" --json number,title,author,url,commits,files 2>/dev/null) || {
+      echo "warning: #${NUM} is not a PR or is inaccessible, skipping" >&2
+      continue
     }
     if $FIRST; then FIRST=false; else PRS+=','; fi
     PRS+="$PR_JSON"
