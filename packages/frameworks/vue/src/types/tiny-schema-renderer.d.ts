@@ -11,5 +11,5 @@ declare module '@opentiny/tiny-schema-renderer' {
 }
 
 declare module '@opentiny/tiny-schema-renderer/transform-jsx' {
-  export function transformJSX(code: string): string;
+  export function transformJSX(code: string, customElements: Record<string, any>): string;
 }
