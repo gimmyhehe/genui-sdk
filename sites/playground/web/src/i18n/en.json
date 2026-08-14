@@ -28,7 +28,8 @@
     "tabHistory": "History",
     "tabTemplate": "Applications",
     "modeChat": "Chat",
-    "modeBuilder": "Builder"
+    "modeBuilder": "Builder",
+    "mode": "Mode"
   },
   "materials": {
     "framework": "Framework",

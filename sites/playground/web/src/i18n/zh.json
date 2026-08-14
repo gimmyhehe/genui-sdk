@@ -28,7 +28,8 @@
     "tabHistory": "历史会话",
     "tabTemplate": "应用",
     "modeChat": "Chat",
-    "modeBuilder": "Builder"
+    "modeBuilder": "Builder",
+    "mode": "模式"
   },
   "materials": {
     "framework": "框架",

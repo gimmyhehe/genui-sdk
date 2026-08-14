@@ -10,6 +10,7 @@ export interface ModeSwitchOption {
 const props = defineProps<{
   modelValue: string;
   options: ModeSwitchOption[];
+  ariaLabel: string;
 }>();
 
 const emit = defineEmits<{
@@ -36,7 +37,8 @@ const handleSelect = (value: string) => {
 <template>
   <div
     class="mode-switch-slider"
-    role="tablist"
+    role="group"
+    :aria-label="ariaLabel"
     :style="{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }"
   >
     <div class="mode-switch-slider__thumb" aria-hidden="true" :style="thumbStyle" />
@@ -44,10 +46,9 @@ const handleSelect = (value: string) => {
       v-for="option in options"
       :key="option.value"
       type="button"
-      role="tab"
       class="mode-switch-slider__option"
       :class="{ 'mode-switch-slider__option--active': modelValue === option.value }"
-      :aria-selected="modelValue === option.value"
+      :aria-pressed="modelValue === option.value"
       @click="handleSelect(option.value)"
     >
       <span v-if="option.icon" class="mode-switch-slider__icon" :innerHTML="option.icon" aria-hidden="true" />
