@@ -6,24 +6,51 @@ export const useInputMessage = (chatInstance: Ref<ComponentPublicInstance<typeof
   const route = useRoute();
 
   const initInputMessage = () => {
-    const inputMessage = route.query['input-message'];
-    if (typeof inputMessage !== 'string' || !inputMessage || !chatInstance.value) {
-      return;
-    }
+    let applied = false;
+    let stopReadyWatch: (() => void) | null = null;
 
-    const conversation = chatInstance.value?.getConversation();
+    const applyInputMessage = (inputMessage: string) => {
+      if (applied) {
+        return;
+      }
+      const inst = chatInstance.value;
+      if (!inst || inst.getConversation().state.loading) {
+        return;
+      }
+      inst.setInputMessage(inputMessage);
+      applied = true;
+      stopReadyWatch?.();
+      stopReadyWatch = null;
+    };
 
-    const unwatch = watch(
-      () => conversation.state.loading,
-      (newValue) => {
-        if (!newValue) {
-          chatInstance.value?.setInputMessage(inputMessage);
-          unwatch();
+    watch(
+      () => route.query['input-message'],
+      (inputMessage) => {
+        if (applied) {
+          return;
         }
+        if (typeof inputMessage !== 'string' || !inputMessage) {
+          return;
+        }
+
+        applyInputMessage(inputMessage);
+        if (applied) {
+          return;
+        }
+
+        stopReadyWatch?.();
+        stopReadyWatch = watch(
+          () => {
+            const inst = chatInstance.value;
+            return inst && !inst.getConversation().state.loading ? inst : null;
+          },
+          () => applyInputMessage(inputMessage),
+        );
       },
       { immediate: true },
     );
   };
+
   return {
     initInputMessage,
   };
