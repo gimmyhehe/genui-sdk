@@ -170,7 +170,6 @@ const updateCustomExamples = (list) => {
             <ModeSwitchSlider
               :model-value="currentMode"
               :options="modeOptions"
-              :aria-label="t('sidebar.mode')"
               @update:model-value="switchMode"
             />
           </div>

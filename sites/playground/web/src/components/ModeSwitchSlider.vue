@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { t } from '../i18n';
 
 export interface ModeSwitchOption {
   value: string;
@@ -10,7 +11,6 @@ export interface ModeSwitchOption {
 const props = defineProps<{
   modelValue: string;
   options: ModeSwitchOption[];
-  ariaLabel: string;
 }>();
 
 const emit = defineEmits<{
@@ -38,7 +38,7 @@ const handleSelect = (value: string) => {
   <div
     class="mode-switch-slider"
     role="group"
-    :aria-label="ariaLabel"
+    :aria-label="t('sidebar.mode')"
     :style="{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }"
   >
     <div class="mode-switch-slider__thumb" aria-hidden="true" :style="thumbStyle" />
