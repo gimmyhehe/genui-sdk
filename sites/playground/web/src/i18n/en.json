@@ -273,6 +273,7 @@
     "model": "Model",
     "finishReason": "Finish reason",
     "time": "Time",
+    "duration": "Duration",
     "promptTokens": "Prompt tokens",
     "completionTokens": "Completion tokens",
     "totalTokens": "Total tokens"

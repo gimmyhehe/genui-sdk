@@ -12,6 +12,8 @@ export interface ChatCompletionFinishChunk {
   object?: string;
   model?: string;
   created?: number;
+  /** 生成消耗时长（毫秒） */
+  durationMs?: number;
   choices?: Array<{
     index?: number;
     delta?: Record<string, unknown>;
@@ -42,6 +44,13 @@ const createdLabel = computed(() => {
   const ms = t < 1e12 ? t * 1000 : t;
   const d = new Date(ms);
   return Number.isNaN(d.getTime()) ? String(t) : d.toLocaleString();
+});
+
+const durationLabel = computed(() => {
+  const ms = finishChunk.value?.durationMs;
+  if (ms == null) return '';
+  const seconds = ms / 1000;
+  return `${Math.round(seconds * 100) / 100}s`;
 });
 
 function formatInt(n: number) {
@@ -80,6 +89,10 @@ const titleContent = computed(() => {
           <div v-if="finishChunk.created != null" class="stat-row">
             <dt>{{ t('finishInfo.time') }}</dt>
             <dd>{{ createdLabel }}</dd>
+          </div>
+          <div v-if="durationLabel" class="stat-row stat-row--emphasis">
+            <dt>{{ t('finishInfo.duration') }}</dt>
+            <dd>{{ durationLabel }}</dd>
           </div>
           <template v-if="usage">
             <div v-if="usage.prompt_tokens != null" class="stat-row">

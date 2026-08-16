@@ -197,9 +197,20 @@ const replaceHandlers = (handlers, nextHandlers, name) => {
 };
 
 const chat = ref(null);
+// 记录最近一次点击「发送」的时刻（毫秒时间戳），用于计算生成 UI 的消耗时长
+let generationSendTime = null;
 const conversation = computed(() => chat.value?.getConversation());
 watch(chat, (instance) => {
   if (instance) {
+    // 在 messageManager 上包装 send，记录「点击发送」的时刻作为生成开始时间
+    const messageManager = conversation.value?.messageManager;
+    if (messageManager?.value && typeof messageManager.value.send === 'function') {
+      const originalSend = messageManager.value.send.bind(messageManager.value);
+      messageManager.value.send = (...args) => {
+        generationSendTime = Date.now();
+        return originalSend(...args);
+      };
+    }
     const defaultResponseHandlers = instance.getResponseHandlers();
     const contentHandler = defaultResponseHandlers.find((handler) => handler.name === 'content');
     const newContentHandler = getMixedContentHandler(contentHandler, framework);
@@ -209,10 +220,43 @@ watch(chat, (instance) => {
       'content',
     );
 
+    // 替换 finish-info handler：在生成完成时，基于开始时间计算消耗时长（毫秒），并随 finishInfo 一起保存
+    const finishInfoHandler = defaultResponseHandlers.find((handler) => handler.name === 'finish-info');
+    if (finishInfoHandler) {
+      replaceHandlers(
+        defaultResponseHandlers,
+        [
+          {
+            ...finishInfoHandler,
+            handler: (data, context) => {
+              const startTime = context.generationStartTime;
+              if (startTime != null) {
+                data.durationMs = Date.now() - startTime;
+              }
+              context.chatMessage.finishInfo = data;
+              return true;
+            },
+          },
+        ],
+        'finish-info',
+      );
+    }
+
     const newResponseHandlers = [
       ...defaultResponseHandlers,
       getContinueGeneratingHandler(conversation.value.messageManager),
       locationPartialSchemaJson(),
+      {
+        // 记录本次生成开始时间（毫秒），用于计算生成 UI 的消耗时长
+        name: 'generationTimer',
+        match: () => false,
+        handler: () => false,
+        start: (context) => {
+          // 优先使用点击「发送」的时刻作为开始时间，否则回退到当前时间
+          context.generationStartTime = generationSendTime ?? Date.now();
+          generationSendTime = null;
+        },
+      },
     ];
 
     insertHandlersAfterName(
