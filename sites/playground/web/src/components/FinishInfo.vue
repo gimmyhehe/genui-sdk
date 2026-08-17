@@ -12,7 +12,6 @@ export interface ChatCompletionFinishChunk {
   object?: string;
   model?: string;
   created?: number;
-  /** 生成消耗时长（毫秒） */
   durationMs?: number;
   choices?: Array<{
     index?: number;
