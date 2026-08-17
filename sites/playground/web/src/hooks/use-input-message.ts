@@ -30,6 +30,8 @@ export const useInputMessage = (chatInstance: Ref<ComponentPublicInstance<typeof
           return;
         }
         if (typeof inputMessage !== 'string' || !inputMessage) {
+          stopReadyWatch?.();
+          stopReadyWatch = null;
           return;
         }
 
