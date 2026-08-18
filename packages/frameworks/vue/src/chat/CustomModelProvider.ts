@@ -90,10 +90,11 @@ export class CustomModelProvider extends BaseModelProvider {
     const context: any = {};
     this.setupStreamContext(context, request);
 
-    this.handlerBeforeRequest(context);
-
     let response: Response;
     try {
+
+      this.handlerBeforeRequest(context);
+
       response = await this.getData(request);
     } catch (error) {
       onDone({ type: 'error', error });
