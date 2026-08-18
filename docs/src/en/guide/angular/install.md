@@ -133,33 +133,7 @@ export class GenuiExample {
 
 When a schema `JSFunction` fails to parse or throws at runtime, pass `notify` on `GenuiConfigProvider` to use your app's notification UI. If omitted, the built-in DOM toast is used.
 
-```ts
-import { Component } from '@angular/core';
-import {
-  GenuiConfigProvider,
-  GenuiRenderer,
-  type NotifyHandler,
-} from '@opentiny/genui-sdk-angular';
-import { materials } from '@opentiny/genui-sdk-materials-angular-opentiny-ng/materials';
-
-@Component({
-  imports: [GenuiConfigProvider, GenuiRenderer],
-  template: `
-    <genui-config-provider [materials]="materials" [notify]="notify">
-      <genui-renderer [content]="schema"></genui-renderer>
-    </genui-config-provider>
-  `,
-})
-export class GenuiExample {
-  materials = materials;
-  schema = '';
-
-  notify: NotifyHandler = (options) => {
-    // Wire your app toast / modal here
-    console.log(options.type, options.title, options.message);
-  };
-}
-```
+See the [GenuiConfigProvider documentation](../../components/angular/config-provider#notify) for details.
 
 ::: tip GenuiLegacyRenderer
 For drop-in compatibility without configuring materials, see [GenuiRenderer Legacy compatibility](../../components/angular/renderer#compatibility-component-genuilegacyrenderer).
