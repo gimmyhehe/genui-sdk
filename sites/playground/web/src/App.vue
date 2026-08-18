@@ -198,19 +198,9 @@ const replaceHandlers = (handlers, nextHandlers, name) => {
 
 const chat = ref(null);
 
-let generationSendTime = null;
 const conversation = computed(() => chat.value?.getConversation());
 watch(chat, (instance) => {
   if (instance) {
-    // 在 messageManager 上包装 send，记录「点击发送」的时刻作为生成开始时间
-    const messageManager = conversation.value?.messageManager;
-    if (messageManager?.value && typeof messageManager.value.send === 'function') {
-      const originalSend = messageManager.value.send.bind(messageManager.value);
-      messageManager.value.send = (...args) => {
-        generationSendTime = Date.now();
-        return originalSend(...args);
-      };
-    }
     const defaultResponseHandlers = instance.getResponseHandlers();
     const contentHandler = defaultResponseHandlers.find((handler) => handler.name === 'content');
     const newContentHandler = getMixedContentHandler(contentHandler, framework);
@@ -220,38 +210,25 @@ watch(chat, (instance) => {
       'content',
     );
 
-    const finishInfoHandler = defaultResponseHandlers.find((handler) => handler.name === 'finish-info');
-    if (finishInfoHandler) {
-      replaceHandlers(
-        defaultResponseHandlers,
-        [
-          {
-            ...finishInfoHandler,
-            handler: (data, context) => {
-              const startTime = context.generationStartTime;
-              if (startTime != null) {
-                data.durationMs = Date.now() - startTime;
-              }
-              context.chatMessage.finishInfo = data;
-              return true;
-            },
-          },
-        ],
-        'finish-info',
-      );
-    }
-
     const newResponseHandlers = [
       ...defaultResponseHandlers,
       getContinueGeneratingHandler(conversation.value.messageManager),
       locationPartialSchemaJson(),
       {
-        name: 'generationTimer',
+        name: 'chatTiming',
         match: () => false,
         handler: () => false,
-        start: (context) => {
-          context.generationStartTime = generationSendTime ?? Date.now();
-          generationSendTime = null;
+        end: (context) => {
+          const response = context.response;
+          const finishInfo = context.chatMessage?.finishInfo;
+          if (!response || !finishInfo) return;
+          const { firstByteAt, ttfb } = response;
+          const renderEndAt = Date.now();
+          context.chatMessage.finishInfo = {
+            ...finishInfo,
+            ttfb,
+            renderDurationMs: firstByteAt != null ? renderEndAt - firstByteAt : undefined,
+          };
         },
       },
     ];

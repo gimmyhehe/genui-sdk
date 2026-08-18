@@ -98,7 +98,7 @@ export class CustomModelProvider extends BaseModelProvider {
     // const chunkStream = createAsyncIterableStream(getChunkStringStream(bodyStream));
     const reader = bodyStream.getReader();
 
-    const context: any = {};
+    const context: any = { response };
     this.setupStreamContext(context, request);
 
     const signal = request.options?.signal;
