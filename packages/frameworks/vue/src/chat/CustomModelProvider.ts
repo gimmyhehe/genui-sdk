@@ -87,6 +87,12 @@ export class CustomModelProvider extends BaseModelProvider {
 
   async chatStream(request: any, handler: { onData: any; onDone: any; onError: any }) {
     const { onDone, onData, onError } = handler;
+    const context: any = {};
+    this.setupStreamContext(context, request);
+
+    const timing: Record<string, any> = { sentAt: Date.now() };
+    context.timing = timing;
+
     let response: Response;
     try {
       response = await this.getData(request);
@@ -94,12 +100,13 @@ export class CustomModelProvider extends BaseModelProvider {
       onDone({ type: 'error', error });
       return;
     }
+
+    timing.firstByteAt = Date.now();
+    timing.ttfb = timing.firstByteAt - timing.sentAt;
+
     const bodyStream = response.body!;
     // const chunkStream = createAsyncIterableStream(getChunkStringStream(bodyStream));
     const reader = bodyStream.getReader();
-
-    const context: any = { response };
-    this.setupStreamContext(context, request);
 
     const signal = request.options?.signal;
     signal?.addEventListener('abort',

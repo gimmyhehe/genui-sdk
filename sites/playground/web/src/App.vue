@@ -219,10 +219,10 @@ watch(chat, (instance) => {
         match: () => false,
         handler: () => false,
         end: (context) => {
-          const response = context.response;
+          const timing = context.timing;
           const finishInfo = context.chatMessage?.finishInfo;
-          if (!response || !finishInfo) return;
-          const { firstByteAt, ttfb } = response;
+          if (!timing || !finishInfo) return;
+          const { firstByteAt, ttfb } = timing;
           const renderEndAt = Date.now();
           context.chatMessage.finishInfo = {
             ...finishInfo,

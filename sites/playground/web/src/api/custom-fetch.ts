@@ -64,7 +64,7 @@ export const modifyBody = (body: any) => {
 
 // 创建 customFetch，将 mcpServers、framework、promptList、model 和 temperature 传递到 metadata
 export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
-  return async (url: string, options) => {
+  return (url: string, options) => {
     const body = JSON.parse(options.body);
     const config = getConfig();
     const {
@@ -91,22 +91,12 @@ export const createCustomFetch = (getConfig: () => IPlaygroundConfig) => {
       openApiTools: openApiTools.filter((tool) => tool.enabled !== false),
     };
 
-    const sentAt = Date.now();
-    const response = await fetch(url, {
+    return fetch(url, {
       ...options,
       body: JSON.stringify({
         ...modifyBody(body),
         metadata: { ...(body.metadata || {}), playground: JSON.stringify(playgroundConfig) },
       }),
     });
-    const firstByteAt = Date.now();
-
-    Object.assign(response, {
-      sentAt,
-      firstByteAt,
-      ttfb: firstByteAt - sentAt,
-    });
-
-    return response;
   };
 };
