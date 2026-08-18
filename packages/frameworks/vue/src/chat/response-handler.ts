@@ -10,6 +10,7 @@ export interface IResponseHandler<T> {
   match: (data: T, context: any) => boolean;
   handler: (data: T, context: any) => boolean;
   notMatchHandler?: (data: T, context: any) => boolean;
+  beforeRequest?: (context: any) => void;
   start?: (
     context: any,
     handlers: { onData: (data: IChatMessage) => void; onDone: () => void; onError: (error: Error) => void },

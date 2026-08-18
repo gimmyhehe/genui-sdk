@@ -90,8 +90,7 @@ export class CustomModelProvider extends BaseModelProvider {
     const context: any = {};
     this.setupStreamContext(context, request);
 
-    const timing: Record<string, any> = { sentAt: Date.now() };
-    context.timing = timing;
+    this.handlerBeforeRequest(context);
 
     let response: Response;
     try {
@@ -100,9 +99,6 @@ export class CustomModelProvider extends BaseModelProvider {
       onDone({ type: 'error', error });
       return;
     }
-
-    timing.firstByteAt = Date.now();
-    timing.ttfb = timing.firstByteAt - timing.sentAt;
 
     const bodyStream = response.body!;
     // const chunkStream = createAsyncIterableStream(getChunkStringStream(bodyStream));
@@ -149,6 +145,14 @@ export class CustomModelProvider extends BaseModelProvider {
     }
   }
 
+
+  handlerBeforeRequest(context: any) {
+    for (const handler of this.responseHandlers) {
+      if (handler.beforeRequest) {
+        handler.beforeRequest(context);
+      }
+    }
+  }
 
   handlerStart(context: any, handlers: { onData: (data: IChatMessage) => void, onDone: () => void, onError: (error: Error) => void }) {
     for (const handler of this.responseHandlers) {

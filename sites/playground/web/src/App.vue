@@ -218,6 +218,16 @@ watch(chat, (instance) => {
         name: 'chatTiming',
         match: () => false,
         handler: () => false,
+        beforeRequest: (context) => {
+          context.timing = { sentAt: Date.now() };
+        },
+        start: (context) => {
+          const timing = context.timing;
+          if (timing) {
+            timing.firstByteAt = Date.now();
+            timing.ttfb = timing.firstByteAt - timing.sentAt;
+          }
+        },
         end: (context) => {
           const timing = context.timing;
           const finishInfo = context.chatMessage?.finishInfo;
