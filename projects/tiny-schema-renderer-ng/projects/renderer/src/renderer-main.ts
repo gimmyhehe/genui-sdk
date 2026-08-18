@@ -16,7 +16,7 @@ import { CommonModule } from '@angular/common';
 import { LoadingComponent } from './loading.component';
 import { RendererTemplateComponent } from './renderer-template.component';
 import { RendererDirective } from './renderer.directive';
-import { RENDERER_SETTINGS, type IRendererSettings } from './renderer-settings';
+import { RENDERER_SETTINGS, type NotifyHandler } from './renderer-settings';
 
 function reset(obj: any) {
   Object.keys(obj).forEach((key) => delete obj[key]);
@@ -71,7 +71,7 @@ export class RendererMain implements OnDestroy {
 
   private applyRendererSettings() {
     this.contextService.setMaterials(this.rendererSettings?.materials ?? {});
-    this.contextService.setNotify(this.rendererSettings ?? {});
+    this.contextService.setNotify(this.rendererSettings?.notify);
   }
 
   ngAfterViewInit() {
@@ -120,8 +120,8 @@ export class RendererMain implements OnDestroy {
     return this.contextService.getContext();
   }
 
-  public setNotify(settings?: IRendererSettings) {
-    this.contextService.setNotify(settings ?? this.rendererSettings ?? {});
+  public setNotify(notify?: NotifyHandler) {
+    this.contextService.setNotify(notify ?? this.rendererSettings?.notify);
   }
 
   private setMethods(data: any, clear: boolean = false) {
