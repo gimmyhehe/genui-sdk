@@ -97,12 +97,10 @@ export class CustomModelProvider extends BaseModelProvider {
 
       response = await this.getData(request);
     } catch (error) {
-      this.handlerAfterRequest(context)
+      this.handlerRequestError(context, error)
       onDone({ type: 'error', error });
       return;
     }
-
-    this.handlerAfterRequest(context)
 
     const bodyStream = response.body!;
     // const chunkStream = createAsyncIterableStream(getChunkStringStream(bodyStream));
@@ -158,13 +156,13 @@ export class CustomModelProvider extends BaseModelProvider {
     }
   }
 
-  handlerAfterRequest(context: any) {
+  handlerRequestError(context: any, error?: unknown) {
     for (const handler of this.responseHandlers) {
-      if (handler.afterRequest) {
+      if (handler.onRequestError) {
         try {
-          handler.afterRequest(context);
+          handler.onRequestError(context, error);
         } catch (error) {
-          console.error(`[afterRequest] handler "${handler.name}" failed:`, error);
+          console.error(`[onRequestError] handler "${handler.name}" failed:`, error);
         }
       }
     }
