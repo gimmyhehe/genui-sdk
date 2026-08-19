@@ -97,9 +97,12 @@ export class CustomModelProvider extends BaseModelProvider {
 
       response = await this.getData(request);
     } catch (error) {
+      this.handlerAfterRequest(context)
       onDone({ type: 'error', error });
       return;
     }
+
+    this.handlerAfterRequest(context)
 
     const bodyStream = response.body!;
     // const chunkStream = createAsyncIterableStream(getChunkStringStream(bodyStream));
@@ -151,6 +154,14 @@ export class CustomModelProvider extends BaseModelProvider {
     for (const handler of this.responseHandlers) {
       if (handler.beforeRequest) {
         handler.beforeRequest(context);
+      }
+    }
+  }
+
+  handlerAfterRequest(context: any) {
+    for (const handler of this.responseHandlers) {
+      if (handler.afterRequest) {
+        handler.afterRequest(context);
       }
     }
   }
