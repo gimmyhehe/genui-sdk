@@ -161,7 +161,11 @@ export class CustomModelProvider extends BaseModelProvider {
   handlerAfterRequest(context: any) {
     for (const handler of this.responseHandlers) {
       if (handler.afterRequest) {
-        handler.afterRequest(context);
+        try {
+          handler.afterRequest(context);
+        } catch (error) {
+          console.error(`[afterRequest] handler "${handler.name}" failed:`, error);
+        }
       }
     }
   }
