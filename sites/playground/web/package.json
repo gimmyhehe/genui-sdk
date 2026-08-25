@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@opentiny/genui-sdk-core": "workspace:*",
-    "@opentiny/genui-sdk-materials-vue-opentiny-vue": "workspace:*",
     "@opentiny/genui-sdk-vue": "workspace:*",
     "@opentiny/tiny-robot": "0.3.3",
     "@opentiny/tiny-robot-kit": "0.3.3",
@@ -22,6 +21,7 @@
     "@opentiny/vue-icon": "~3.28.0",
     "@opentiny/vue-renderless": "~3.28.2",
     "@opentiny/vue-theme": "~3.28.0",
+    "@opentiny/genui-sdk-materials-vue-opentiny-vue": "workspace:*",
     "ai": "6.0.116",
     "clipboard-copy": "^4.0.1",
     "monaco-editor-vue3": "^1.0.4",
