@@ -1,7 +1,6 @@
 <script setup>
 import { IconAi, IconUser } from '@opentiny/tiny-robot-svgs';
 import ThemeTool, { tinyDarkTheme, tinyOldTheme } from '@opentiny/vue-theme/theme-tool';
-import { GenuiConfigProvider, GenuiChat } from '@opentiny/genui-sdk-vue';
 import {
   ref,
   watch,
@@ -10,11 +9,8 @@ import {
   computed,
   onUnmounted,
   provide,
-  defineAsyncComponent,
   h,
-  shallowRef,
 } from 'vue';
-import { materials } from '@opentiny/genui-sdk-materials-vue-opentiny-vue/materials';
 import { getModelFeatures, getModelOptions } from './api';
 import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
@@ -33,6 +29,8 @@ import useIcon from './use-icon';
 import { getMixedContentHandler } from './ng-renderer/content-response-handler';
 import { getMessageRendererAngular } from './ng-renderer/message-renderer-angular';
 import { locale, t } from './i18n';
+import { useRoute } from 'vue-router';
+import { PlaygroundMode } from './constants';
 
 const { topRenderer, addIcons } = useIcon();
 const TopIconsRenderer = topRenderer();
@@ -41,10 +39,6 @@ addIcons(IconAi);
 
 // 通过环境变量控制是否启用模板功能，默认不启用
 const ENABLE_TEMPLATE = import.meta.env.VITE_ENABLE_TEMPLATE === 'true';
-
-const GenuiTemplate = ENABLE_TEMPLATE
-  ? defineAsyncComponent(() => import('./components/genui-template/GenuiTemplate.vue'))
-  : shallowRef(null);
 
 const STORAGE_KEY = 'GENUI_SDK_VUE_PLAYGROUND_CONFIG';
 const {
@@ -89,7 +83,6 @@ const normalizeCustomExamples = (examples) => {
   return Array.from(dedupedExamples.values());
 };
 
-const isOpen = ref(true);
 const llmConfig = reactive(
   cacheLLmConfig || {
   temperature: 0.5,
@@ -194,23 +187,17 @@ const insertHandlersAfterName = (handlers, insertHandlers, name) => {
     handlers.splice(index + 1, 0, ...insertHandlers);
   }
   return handlers;
-}
-const insertHandlersBeforeName = (handlers, insertHandlers, name) => {
-  const index = handlers.findIndex(handler => handler.name === name);
+};
+const replaceHandlers = (handlers, nextHandlers, name) => {
+  const index = handlers.findIndex((handler) => handler.name === name);
   if (index !== -1) {
-    handlers.splice(index, 0, ...insertHandlers);
+    handlers.splice(index, 1, ...nextHandlers);
   }
   return handlers;
-}
-const replaceHandlers = (handlers, replaceHandlers, name) => {
-  const index = handlers.findIndex(handler => handler.name === name);
-  if (index !== -1) {
-    handlers.splice(index, 1, ...replaceHandlers);
-  }
-  return handlers;
-}
+};
 
 const chat = ref(null);
+
 const conversation = computed(() => chat.value?.getConversation());
 
 watch(chat, (instance) => {
@@ -218,14 +205,43 @@ watch(chat, (instance) => {
     const defaultResponseHandlers = instance.getResponseHandlers();
     const contentHandler = defaultResponseHandlers.find((handler) => handler.name === 'content');
     const newContentHandler = getMixedContentHandler(contentHandler, framework);
-    replaceHandlers(defaultResponseHandlers, [
-      newContentHandler,
-    ], 'content');
+    replaceHandlers(
+      defaultResponseHandlers,
+      [newContentHandler],
+      'content',
+    );
 
     const newResponseHandlers = [
       ...defaultResponseHandlers,
       getContinueGeneratingHandler(conversation.value.messageManager),
       locationPartialSchemaJson(),
+      {
+        name: 'chatTiming',
+        match: () => false,
+        handler: () => false,
+        beforeRequest: (context) => {
+          context.timing = { sentAt: Date.now() };
+        },
+        start: (context) => {
+          const timing = context.timing;
+          if (timing) {
+            timing.firstByteAt = Date.now();
+            timing.ttfb = timing.firstByteAt - timing.sentAt;
+          }
+        },
+        end: (context) => {
+          const timing = context.timing;
+          const finishInfo = context.chatMessage?.finishInfo;
+          if (!timing || !finishInfo) return;
+          const { firstByteAt, ttfb } = timing;
+          const renderEndAt = Date.now();
+          context.chatMessage.finishInfo = {
+            ...finishInfo,
+            ttfb,
+            renderDurationMs: firstByteAt != null ? renderEndAt - firstByteAt : undefined,
+          };
+        },
+      },
     ];
 
     insertHandlersAfterName(
@@ -239,35 +255,7 @@ watch(chat, (instance) => {
   }
 });
 
-// 提供给侧边栏及其子组件使用的共享上下文
-const playgroundContext = {
-  llmConfig,
-  chatConfig,
-  modelData,
-  themeData,
-  conversation,
-  customExamples,
-  framework,
-};
-
-provide('playgroundContext', playgroundContext);
-
-const handleKeydown = (event) => {
-  // Windows/Linux (Ctrl+K) 和 macOS (Command+K)
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
-    event.preventDefault();
-    chat.value.handleNewConversation();
-  }
-};
-
-const templateUrl = import.meta.env.VITE_CHAT_TEMPLATE_URL;
-const { isTemplateInit, templateSchemaList, switchTemplate } = useTemplate({
-  url: templateUrl,
-  llmConfig,
-});
-const { initInputMessage } = useInputMessage(chat);
 const { isMobile } = useIsMobile();
-const isSidebarOpen = ref(!isMobile.value);
 
 const roles = computed(() => {
   return {
@@ -291,6 +279,51 @@ const customFetch = createCustomFetch(() => ({
   framework: framework.value,
 }));
 
+const playgroundContext = {
+  llmConfig,
+  chatConfig,
+  modelData,
+  themeData,
+  conversation,
+  customExamples,
+  framework,
+  theme,
+  url,
+  messages,
+  roles,
+  modelFeatures,
+  customFetch,
+  chat,
+};
+
+provide('playgroundContext', playgroundContext);
+
+const route = useRoute();
+const templateUrl = import.meta.env.VITE_CHAT_TEMPLATE_URL;
+const { templateSchemaList, createTemplate } = ENABLE_TEMPLATE
+  ? useTemplate({
+      url: templateUrl,
+      llmConfig,
+    })
+  : { templateSchemaList: ref([]), createTemplate: () => {} };
+
+const handleKeydown = (event) => {
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    if (ENABLE_TEMPLATE && route.name === PlaygroundMode.Builder) {
+      createTemplate();
+      return;
+    }
+    chat.value?.handleNewConversation();
+  }
+};
+
+const { initInputMessage } = useInputMessage(chat);
+const isSidebarOpen = ref(!isMobile.value);
+
+/**
+ * Rehydrates custom examples from cache using normalized data.
+ */
 const initExampleList = () => {
   customExamples.value = normalizeCustomExamples(cacheCustomExamples);
 };
@@ -299,19 +332,17 @@ const updateCustomExamples = (list) => {
   customExamples.value = normalizeCustomExamples(list);
 };
 
-const rendererSlots = {
-  header: SchemaExportHeader,
-};
-
-watch(() => templateSchemaList.value, (newVal) => {
-  if (!newVal) {
-    return;
-  }
-  const templateMap = new Map(newVal.map((item) => [item.id, item]));
-  customExamples.value = customExamples.value
-    .map((example) => templateMap.get(example.id))
-    .filter(Boolean);
-}, { deep: true });
+watch(
+  () => templateSchemaList.value,
+  (newVal) => {
+    if (!newVal) {
+      return;
+    }
+    const templateMap = new Map(newVal.map((item) => [item.id, item]));
+    customExamples.value = customExamples.value.map((example) => templateMap.get(example.id)).filter(Boolean);
+  },
+  { deep: true },
+);
 
 onMounted(() => {
   initInputMessage();
@@ -348,49 +379,12 @@ onUnmounted(() => {
       v-model:theme="theme"
       @new-task="chat?.handleNewConversation()"
       @update-custom-examples="updateCustomExamples"
-      v-slot="{ activeName }"
     >
-      <template v-if="ENABLE_TEMPLATE && isTemplateInit">
-        <div v-if="activeName === 'template'" class="chat-container">
-          <component
-            v-if="GenuiTemplate"
-            :is="GenuiTemplate"
-            ref="genuiTemplateRef"
-            :llm-config="llmConfig"
-            :theme="theme"
-            :chat-config="chatConfig"
-          />
-        </div>
-      </template>
-      <div v-show="!ENABLE_TEMPLATE || activeName !== 'template'" class="chat-container">
-        <GenuiConfigProvider
-          :theme="theme"
-          :locale="locale"
-          :materials="materials"
-          style="height: 100%"
-        >
-          <GenuiChat
-            :url="url"
-            ref="chat"
-            :messages="messages"
-            :chat-config="chatConfig"
-            :roles="roles"
-            :model="llmConfig.model"
-            :temperature="llmConfig.temperature"
-            :features="modelFeatures"
-            :custom-fetch="customFetch"
-            :custom-examples="customExamples"
-            :renderer-slots="rendererSlots"
-          >
-            <template #empty>
-              <div class="empty">
-                <IconAi />
-                <span>{{ t('app.emptyTitle') }}</span>
-              </div>
-            </template>
-          </GenuiChat>
-        </GenuiConfigProvider>
-      </div>
+      <router-view v-slot="{ Component }">
+        <keep-alive>
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </PlaygroundSidebar>
   </div>
 </template>
@@ -406,85 +400,6 @@ onUnmounted(() => {
   }
 }
 
-.chat-container {
-  flex: 1;
-  height: 100%;
-  min-width: 0;
-}
-
-:deep(.renderer-header) {
-  position: relative;
-
-  .schema-export-button {
-    position: absolute;
-    bottom: -48px;
-    right: 12px;
-    z-index: 20;
-    display: inline-flex;
-    align-items: center;
-    gap: 0;
-    padding: 10px;
-    border: 0;
-    border-radius: 38px;
-    background: rgba(25, 25, 25, 0.08);
-    color: var(--tv-color-text, #191919);
-    cursor: pointer;
-    opacity: 0;
-    transform: translateY(-4px);
-    pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-  }
-
-  .schema-export-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  .schema-export-label {
-    font-size: 12px;
-    line-height: 1;
-    white-space: nowrap;
-    opacity: 0;
-    max-width: 0;
-    overflow: hidden;
-    transition: opacity 0.15s ease, max-width 0.2s ease;
-  }
-
-  .schema-export-button:hover {
-    gap: 6px;
-  }
-
-  .schema-export-button:hover .schema-export-label {
-    opacity: 1;
-    max-width: 80px;
-  }
-
-  .schema-export-button:active {
-    transform: translateY(0) scale(0.98);
-  }
-}
-
-:deep(.schema-render-container:hover .schema-export-button) {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  height: 80%;
-  font-size: 32px;
-  font-weight: 600;
-
-  & > svg {
-    width: 56px;
-    height: 56px;
-  }
-}
-
 @media (max-width: 768px) {
   .genui-playground {
     --ti-gen-chat-avatar-and-gap-width: 0px;
@@ -492,15 +407,6 @@ onUnmounted(() => {
   :deep(.action-buttons__button .action-buttons__icon) {
     padding-right: 10px;
     display: none;
-  }
-
-  .empty {
-    font-size: 24px;
-
-    & > svg {
-      width: 48px;
-      height: 48px;
-    }
   }
 }
 </style>
