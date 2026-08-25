@@ -16,8 +16,7 @@ import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
 import UserFooter from './components/UserFooter.vue';
 import PlaygroundSidebar from './components/PlaygroundSidebar.vue';
-import { useInputMessage } from './hooks/use-input-message';
-import { useIsMobile } from './hooks';
+import { useInputMessage, useIsMobile } from './hooks';
 import useTemplate from './components/genui-template/useTemplate';
 import {
   getOverlapEliminatorHandler,
@@ -199,6 +198,7 @@ const replaceHandlers = (handlers, nextHandlers, name) => {
 const chat = ref(null);
 
 const conversation = computed(() => chat.value?.getConversation());
+
 watch(chat, (instance) => {
   if (instance) {
     const defaultResponseHandlers = instance.getResponseHandlers();
@@ -327,10 +327,6 @@ const initExampleList = () => {
   customExamples.value = normalizeCustomExamples(cacheCustomExamples);
 };
 
-/**
- * Updates custom examples and enforces the normalized shape.
- * @param {unknown[]} list Latest examples from UI events.
- */
 const updateCustomExamples = (list) => {
   customExamples.value = normalizeCustomExamples(list);
 };
@@ -352,11 +348,15 @@ onMounted(() => {
   initExampleList();
   getModelOptions()
     .then(async (data) => {
+      let modelChanged = false;
       if (!data.find((item) => item.value === llmConfig.model)) {
         llmConfig.model = data[0]?.value;
+        modelChanged = true;
       }
       modelData.value = data;
-      syncModelFeatures(llmConfig.model);
+      if (!modelChanged) {
+        modelFeatures.value = await getModelFeatures(llmConfig.model);
+      }
     })
     .catch((error) => {
       console.error('Failed to get model options:', error);
