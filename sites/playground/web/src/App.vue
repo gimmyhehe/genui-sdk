@@ -16,7 +16,6 @@ import { createCustomFetch } from './api/custom-fetch';
 import AssistantFooter from './components/AssistantFooter.vue';
 import UserFooter from './components/UserFooter.vue';
 import PlaygroundSidebar from './components/PlaygroundSidebar.vue';
-import SchemaExportHeader from './components/SchemaExportHeader.vue';
 import { useInputMessage, useIsMobile } from './hooks';
 import useTemplate from './components/genui-template/useTemplate';
 import {
