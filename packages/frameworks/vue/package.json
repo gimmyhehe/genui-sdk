@@ -67,7 +67,6 @@
   "dependencies": {
     "@opentiny/genui-sdk-core": "workspace:*",
     "@opentiny/genui-sdk-materials-vue-opentiny-vue": "workspace:*",
-    "@opentiny/tiny-schema-renderer": "workspace:*",
     "@opentiny/tiny-robot": "0.3.3",
     "@opentiny/tiny-robot-kit": "0.3.3",
     "@opentiny/tiny-robot-svgs": "0.3.3",
@@ -83,6 +82,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
+    "@opentiny/tiny-schema-renderer": "workspace:*",
     "rollup-plugin-visualizer": "^6.0.5",
     "vite-plugin-css-injected-by-js": "^3.5.2",
     "vite-plugin-dts": "^4.0.0",
