@@ -53,7 +53,7 @@ npm install -D typescript vite vite-plugin-dts @vitejs/plugin-vue
 - `vue`、`naive-ui`、`@vicons/ionicons5`：组件库本身。
 - 构建相关（`vite`、`vite-plugin-dts`、`@vitejs/plugin-vue`）：作为开发依赖。
 
-另外，`meta.ts` 会用 `with { type: 'json' }` 导入 `bundle.json`（见[第三步](#第三步-编写组件说明书meta)），默认的 TypeScript 配置并不支持 JSON 模块解析，需要补一份 `tsconfig.json`：
+另外，`meta.ts` 会用 `with { type: 'json' }` 导入 `bundle.json`（见[第三步](#第三步-编写组件说明书-meta)），默认的 TypeScript 配置并不支持 JSON 模块解析，需要补一份 `tsconfig.json`：
 
 ```json
 {
@@ -372,7 +372,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import vue from '@vitejs/plugin-vue';
-import packageJson from './package.json';
+import packageJson from './package.json' with { type: 'json' };
 
 const pkgRoot = fileURLToPath(new URL('.', import.meta.url));
 
@@ -532,7 +532,7 @@ interface IComponentSchema {
 }
 ```
 
-不需要把所有这些类型记下来 —— **`bundle.json` 的 JSON 结构本身就和 `IComponent` 一一对应**，照着[第三步的示例](#第三步-编写组件说明书meta) 写 JSON 即可，类型只是对它的形式化描述。完整定义见 [Core API](../../components/core/api)。
+不需要把所有这些类型记下来 —— **`bundle.json` 的 JSON 结构本身就和 `IComponent` 一一对应**，照着[第三步的示例](#第三步-编写组件说明书-meta) 写 JSON 即可，类型只是对它的形式化描述。完整定义见 [Core API](../../components/core/api)。
 
 ## 物料库优化小技巧
 

@@ -376,7 +376,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import vue from '@vitejs/plugin-vue';
-import packageJson from './package.json';
+import packageJson from './package.json' with { type: 'json' };
 
 const pkgRoot = fileURLToPath(new URL('.', import.meta.url));
 
