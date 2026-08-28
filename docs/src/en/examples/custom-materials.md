@@ -53,6 +53,25 @@ npm install -D typescript vite vite-plugin-dts @vitejs/plugin-vue
 - `vue`, `naive-ui`, `@vicons/ionicons5`: the component library itself.
 - Build tooling (`vite`, `vite-plugin-dts`, `@vitejs/plugin-vue`): dev dependencies.
 
+Also, `meta.ts` imports `bundle.json` with `with { type: 'json' }` (see [Step 3](#step-3-write-the-prompt-metadata-meta)), and TypeScript does not enable JSON module resolution by default, so add a `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
+}
+```
+
+- `resolveJsonModule`: allows importing `bundle.json` via `with { type: 'json' }`.
+- `module: "ESNext"` + `moduleResolution: "bundler"`: matches the ESM/Vite resolution used by the build; `vite-plugin-dts` also relies on it when generating declarations.
+- `include: ["src/**/*"]`: makes type-checking and declaration generation cover the whole `src`.
+
 ::: tip Dependencies or peer dependencies?
 If you want the materials package and the host app to share the same component library instance (avoiding duplicate bundling and style conflicts), put `vue` and `naive-ui` in `peerDependencies`, following the official materials packages. Putting them in `dependencies` also works, just heavier.
 :::
@@ -116,10 +135,9 @@ export * from './materials';
 
 `meta` is the core part - it determines what the LLM can generate. The heart of it is `bundle.json`, a spec describing each component: "what it is called, what it is for, and what props it has". `genPrompt` describes this information to the LLM.
 
-Using `NInput` as an example, its protocol description looks like this:
+Using `NInput` as an example, the protocol description in `src/meta/bundle.json` looks like this:
 
 ```json
-// src/meta/bundle.json
 {
   "data": {
     "framework": "Vue",
@@ -349,24 +367,27 @@ Export conventions for each entry:
 
 ### Step 6: Configure the Vite Build
 
-Use Vite library mode to build `index`, `materials`, and `meta` as separate entries, keeping dependencies (`vue`, `naive-ui`, etc.) external:
+Use Vite library mode to build `index`, `materials`, and `meta` as separate entries, keeping dependencies and peer dependencies (`vue`, `naive-ui`, etc.) external:
 
 ```ts
 // vite.config.ts
-import path from 'node:path';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import vue from '@vitejs/plugin-vue';
 import packageJson from './package.json';
 
+const pkgRoot = fileURLToPath(new URL('.', import.meta.url));
+
 export default defineConfig({
-  plugins: [vue(), dts()],
+  plugins: [vue(), dts({ rollupTypes: true })],
   build: {
     lib: {
       entry: {
-        index: path.resolve(__dirname, './src/index.ts'),
-        materials: path.resolve(__dirname, './src/materials/index.ts'),
-        meta: path.resolve(__dirname, './src/meta/index.ts'),
+        index: join(pkgRoot, 'src/index.ts'),
+        materials: join(pkgRoot, 'src/materials/index.ts'),
+        meta: join(pkgRoot, 'src/meta/index.ts'),
       },
       formats: ['es'],
       fileName: (_, entryName) => `${entryName}.js`,
@@ -375,11 +396,18 @@ export default defineConfig({
     rollupOptions: {
       external: [
         ...Object.keys(packageJson.dependencies || {}),
+        ...Object.keys(packageJson.peerDependencies || {}),
       ],
     },
   },
 });
 ```
+
+A few notes:
+
+- `dts({ rollupTypes: true })`: merges each entry's declarations into a single flat file (`dist/index.d.ts`, `dist/materials.d.ts`, `dist/meta.d.ts`), matching the `types` paths declared in the `exports` of [Step 5](#step-5-expose-npm-subpaths). Without it, `vite-plugin-dts` preserves the `src` directory structure and emits `dist/materials/index.d.ts`-style nested paths, which would not match `exports`.
+- `pkgRoot = fileURLToPath(new URL('.', import.meta.url))`: the package declares `"type": "module"`, so `vite.config.ts` runs with ESM semantics where `__dirname` does not exist; this one line equivalently captures the current directory (the ESM equivalent of `__dirname`), and the entry paths are joined from it with `join(pkgRoot, ...)`.
+- `external` reads both `dependencies` and `peerDependencies`: since `vue` and `naive-ui` live in `peerDependencies` (provided by the host app), leaving them out of `external` would bundle them, so host and package end up with separate component instances.
 
 ### Step 7: Publish to npm
 

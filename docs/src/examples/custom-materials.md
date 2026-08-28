@@ -53,6 +53,25 @@ npm install -D typescript vite vite-plugin-dts @vitejs/plugin-vue
 - `vue`、`naive-ui`、`@vicons/ionicons5`：组件库本身。
 - 构建相关（`vite`、`vite-plugin-dts`、`@vitejs/plugin-vue`）：作为开发依赖。
 
+另外，`meta.ts` 会用 `with { type: 'json' }` 导入 `bundle.json`（见[第三步](#第三步-编写组件说明书meta)），默认的 TypeScript 配置并不支持 JSON 模块解析，需要补一份 `tsconfig.json`：
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*"]
+}
+```
+
+- `resolveJsonModule`：允许以 `with { type: 'json' }` 导入 `bundle.json`。
+- `module: "ESNext"` + `moduleResolution: "bundler"`：与 Vite/ESM 的模块解析方式一致，`vite-plugin-dts` 生成声明文件时也依赖它。
+- `include: ["src/**/*"]`：让类型检查与声明生成覆盖整个 `src`。
+
 ### 第二步：编写组件清单（materials）
 
 组件清单是一份 `componentName → 组件` 的映射。渲染器拿到 Schema 里的 `componentName` 后，正是通过这张清单找到对应的真实组件：
@@ -112,10 +131,9 @@ export * from './materials';
 
 `meta` 是最关键的部分 —— 它决定了大模型能生成什么。核心是 `bundle.json`，一份描述每个组件"叫什么、有什么用、有哪些属性"的说明书，`genPrompt` 会把这里的信息讲给 LLM 听。
 
-以 `NInput` 为例，它的协议描述长这样：
+以 `NInput` 为例，`src/meta/bundle.json` 的协议描述长这样：
 
 ```json
-// src/meta/bundle.json
 {
   "data": {
     "framework": "Vue",
@@ -345,24 +363,27 @@ export const whiteList = [
 
 ### 第六步：配置 Vite 构建
 
-用 Vite 库模式，把 `index`、`materials`、`meta` 打成独立入口，并把依赖（`vue`、`naive-ui` 等）声明为 external：
+用 Vite 库模式，把 `index`、`materials`、`meta` 打成独立入口，并把依赖与 peer 依赖（`vue`、`naive-ui` 等）声明为 external：
 
 ```ts
 // vite.config.ts
-import path from 'node:path';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import vue from '@vitejs/plugin-vue';
 import packageJson from './package.json';
 
+const pkgRoot = fileURLToPath(new URL('.', import.meta.url));
+
 export default defineConfig({
-  plugins: [vue(), dts()],
+  plugins: [vue(), dts({ rollupTypes: true })],
   build: {
     lib: {
       entry: {
-        index: path.resolve(__dirname, './src/index.ts'),
-        materials: path.resolve(__dirname, './src/materials/index.ts'),
-        meta: path.resolve(__dirname, './src/meta/index.ts'),
+        index: join(pkgRoot, 'src/index.ts'),
+        materials: join(pkgRoot, 'src/materials/index.ts'),
+        meta: join(pkgRoot, 'src/meta/index.ts'),
       },
       formats: ['es'],
       fileName: (_, entryName) => `${entryName}.js`,
@@ -371,11 +392,18 @@ export default defineConfig({
     rollupOptions: {
       external: [
         ...Object.keys(packageJson.dependencies || {}),
+        ...Object.keys(packageJson.peerDependencies || {}),
       ],
     },
   },
 });
 ```
+
+几点说明：
+
+- `dts({ rollupTypes: true })`：把每个入口的声明文件合并成单个扁平文件（`dist/index.d.ts`、`dist/materials.d.ts`、`dist/meta.d.ts`），与[第五步](#第五步-暴露-npm-子路径) `exports` 里声明的 `types` 路径一一对应；否则 `vite-plugin-dts` 会按 `src` 目录结构输出 `dist/materials/index.d.ts` 这类嵌套路径，与 `exports` 对不上。
+- `pkgRoot = fileURLToPath(new URL('.', import.meta.url))`：本包声明了 `"type": "module"`，`vite.config.ts` 按 ESM 语义执行，`__dirname` 在 ESM 下并不存在，用这一行即可等价地取到当前目录（等价于 `__dirname`），入口路径再用 `join(pkgRoot, ...)` 拼接。
+- `external` 同时取 `dependencies` 与 `peerDependencies`：`vue`、`naive-ui` 被放在 `peerDependencies`（宿主应用提供），若不 external 会被打进包，导致宿主与物料包各自持有一份组件实例。
 
 ### 第七步：发布到 npm
 
