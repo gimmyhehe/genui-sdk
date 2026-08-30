@@ -13,7 +13,7 @@
 - 表单组件：`NInput` 输入框、`NSelect` 选择器、`NButton` 按钮
 - 表单容器：`NForm` 表单、`NFormItem` 表单项
 - 卡片容器：`NCard`（同时也是默认的包裹组件）
-- 图标：自封装的 `NIconSvg`（见[第四步：添加图标物料](#第四步-添加图标物料)），搭配 `SearchOutline`、`CheckmarkOutline`（来自 `@vicons/ionicons5`）
+- 图标：自封装的 `NIconSvg`（见[第四步：添加图标物料](#step-4-icon-materials)），搭配 `SearchOutline`、`CheckmarkOutline`（来自 `@vicons/ionicons5`）
 
 最终，一个能发布的最小物料库核心只有 **5 个源文件**（外加几个一行代码的入口文件）：
 
@@ -53,7 +53,7 @@ npm install -D typescript vite vite-plugin-dts @vitejs/plugin-vue
 - `vue`、`naive-ui`、`@vicons/ionicons5`：组件库本身。
 - 构建相关（`vite`、`vite-plugin-dts`、`@vitejs/plugin-vue`）：作为开发依赖。
 
-另外，`meta.ts` 会用 `with { type: 'json' }` 导入 `bundle.json`（见[第三步](#第三步-编写组件说明书-meta)），默认的 TypeScript 配置并不支持 JSON 模块解析，需要补一份 `tsconfig.json`：
+另外，`meta.ts` 会用 `with { type: 'json' }` 导入 `bundle.json`（见[第三步](#step-3-meta)），默认的 TypeScript 配置并不支持 JSON 模块解析，需要补一份 `tsconfig.json`：
 
 ```json
 {
@@ -127,7 +127,7 @@ export const materials: IMaterials = {
 export * from './materials';
 ```
 
-### 第三步：编写组件说明书（meta）
+### 第三步：编写组件说明书（meta） {#step-3-meta}
 
 `meta` 是最关键的部分 —— 它决定了大模型能生成什么。核心是 `bundle.json`，一份描述每个组件"叫什么、有什么用、有哪些属性"的说明书，`genPrompt` 会把这里的信息讲给 LLM 听。
 
@@ -238,7 +238,7 @@ export const materialsMeta: IMaterialsMeta = {
 export * from './meta';
 ```
 
-### 第四步：添加图标物料
+### 第四步：添加图标物料 {#step-4-icon-materials}
 
 图标物料和普通组件完全一样，只多一步：**封装一个图标组件**，把 `name` 属性映射到具体图标。这样图标能在配置面板里按名称选择，大模型也能随手生成带图标的按钮。
 
@@ -330,7 +330,7 @@ export const whiteList = [
 
 这样大模型就能随手生成带图标的按钮了，比如在 `NButton` 的 `icon` 插槽里放一个 `NIconSvg`。
 
-### 第五步：暴露 npm 子路径
+### 第五步：暴露 npm 子路径 {#step-5-npm-subpaths}
 
 `materials` 与 `meta` 是给不同消费方（前端渲染器 / 服务端 `genPrompt`）用的，应当通过 `package.json` 的 `exports` 声明为独立子路径。这样既能按需引入、避免把用不到的那份产物打进包，也让类型定义（`.d.ts`）跟随各自入口，类型更精确。
 
@@ -401,7 +401,7 @@ export default defineConfig({
 
 几点说明：
 
-- `dts({ rollupTypes: true })`：把每个入口的声明文件合并成单个扁平文件（`dist/index.d.ts`、`dist/materials.d.ts`、`dist/meta.d.ts`），与[第五步](#第五步-暴露-npm-子路径) `exports` 里声明的 `types` 路径一一对应；否则 `vite-plugin-dts` 会按 `src` 目录结构输出 `dist/materials/index.d.ts` 这类嵌套路径，与 `exports` 对不上。
+- `dts({ rollupTypes: true })`：把每个入口的声明文件合并成单个扁平文件（`dist/index.d.ts`、`dist/materials.d.ts`、`dist/meta.d.ts`），与[第五步](#step-5-npm-subpaths) `exports` 里声明的 `types` 路径一一对应；否则 `vite-plugin-dts` 会按 `src` 目录结构输出 `dist/materials/index.d.ts` 这类嵌套路径，与 `exports` 对不上。
 - `pkgRoot = fileURLToPath(new URL('.', import.meta.url))`：本包声明了 `"type": "module"`，`vite.config.ts` 按 ESM 语义执行，`__dirname` 在 ESM 下并不存在，用这一行即可等价地取到当前目录（等价于 `__dirname`），入口路径再用 `join(pkgRoot, ...)` 拼接。
 - `external` 同时取 `dependencies` 与 `peerDependencies`：`vue`、`naive-ui` 被放在 `peerDependencies`（宿主应用提供），若不 external 会被打进包，导致宿主与物料包各自持有一份组件实例。
 
@@ -464,7 +464,7 @@ const systemPrompt = genPrompt('Vue', materialsMeta);
 
 **官方对目录结构没有任何强制要求。** 实战示例中的结构只是一种推荐的划分方式。真正决定"是不是一个合法物料包"的只有两点：
 
-1. `package.json` 的 `exports` 正确暴露了 `materials`、`meta` 两个子路径（见[第五步：暴露 npm 子路径](#第五步-暴露-npm-子路径)）；
+1. `package.json` 的 `exports` 正确暴露了 `materials`、`meta` 两个子路径（见[第五步：暴露 npm 子路径](#step-5-npm-subpaths)）；
 2. `materials`、`meta` 两个入口导出的对象，符合渲染器与 `genPrompt` 预期的类型契约。
 
 ### 两个核心类型
@@ -532,7 +532,7 @@ interface IComponentSchema {
 }
 ```
 
-不需要把所有这些类型记下来 —— **`bundle.json` 的 JSON 结构本身就和 `IComponent` 一一对应**，照着[第三步的示例](#第三步-编写组件说明书-meta) 写 JSON 即可，类型只是对它的形式化描述。完整定义见 [Core API](../../components/core/api)。
+不需要把所有这些类型记下来 —— **`bundle.json` 的 JSON 结构本身就和 `IComponent` 一一对应**，照着[第三步的示例](#step-3-meta) 写 JSON 即可，类型只是对它的形式化描述。完整定义见 [Core API](../../components/core/api)。
 
 ## 物料库优化小技巧
 
