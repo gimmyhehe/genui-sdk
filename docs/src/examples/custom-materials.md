@@ -359,7 +359,7 @@ export const whiteList = [
 | `包名/materials` | `materials` 对象（含 `components`、`requiredCompleteFieldSelectors`、`defaultPropsMap`） | `IMaterials` |
 | `包名/meta` | `materialsMeta` 对象 | `IMaterialsMeta` |
 
-> 为了摇树优化，官方物料包建议把 `materials` 与 `meta` 作为独立入口打包，这样宿主应用引入 `materials` 时不会把 `meta`（内含整份 `bundle.json`）一起打进包。
+> `materials` 与 `meta` 面向不同消费方，作为独立入口打包后，宿主应用与服务端可以各按所需引入对应子路径。
 
 ### 第六步：配置 Vite 构建
 

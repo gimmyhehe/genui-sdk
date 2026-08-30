@@ -363,7 +363,7 @@ Export conventions for each entry:
 | `package-name/materials` | the `materials` object (with `components`, `requiredCompleteFieldSelectors`, `defaultPropsMap`) | `IMaterials` |
 | `package-name/meta` | the `materialsMeta` object | `IMaterialsMeta` |
 
-> For tree-shaking, the official materials packages build `materials` and `meta` as separate entries, so that a host app importing `materials` does not bundle `meta` (which contains the whole `bundle.json`).
+> `materials` and `meta` serve different consumers. Building them as separate entries lets the host app and the server import whichever subpath they need.
 
 ### Step 6: Configure the Vite Build
 
